@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Test Results</h1>
+    </header>
+    <main>
+        <!-- 결과 표시 영역 -->
+        <div id="allResults" style="display: flex; overflow-x: auto; white-space: nowrap;"></div>
+        <!-- 초기화 버튼 -->
+        <button id="resetResults">초기화</button>
+    </main>
+    <footer>
+        <p>Thank you for using our service!</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const testCount = parseInt(localStorage.getItem('testCount') || '0');
+            let allResultsHtml = '';
+            for (let i = 1; i <= testCount; i++) {
+                const results = localStorage.getItem(`testResults-${i}`) || 'No results found';
+                allResultsHtml += `<div style="min-width: 300px; margin-right: 20px; padding: 10px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                    <h3>테스트 ${i}번째 결과</h3>
+                                    <div>${results}</div>
+                                  </div>`;
+            }
+            document.getElementById('allResults').innerHTML = allResultsHtml;
+        });
+    
+        // 초기화 버튼 이벤트 리스너
+        document.getElementById('resetResults').addEventListener('click', function() {
+            const testCount = parseInt(localStorage.getItem('testCount') || '0');
+            for (let i = 1; i <= testCount; i++) {
+                localStorage.removeItem(`testResults-${i}`);
+            }
+            localStorage.removeItem('testCount');
+            alert('모든 테스트 결과가 초기화되었습니다.');
+            document.getElementById('allResults').innerHTML = '';  // 화면에서 결과를 바로 지움
+        });
+    </script>
+    
+</body>
+</html>

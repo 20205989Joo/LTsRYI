@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>단어 테스트</h1>
+    </header>
+    <main>
+        <label for="startDay">Start Day:</label>
+        <select id="startDay">
+            <!-- JS로 채워질 옵션들 -->
+        </select>
+
+        <label for="endDay">End Day:</label>
+        <select id="endDay">
+            <!-- JS로 채워질 옵션들 -->
+        </select>
+        <button onclick="startTest()">Start Test</button>
+        <div class="center-container">
+            <div id="question"></div>
+            <input type="text" id="answer" placeholder="정답을 입력하세요">
+            <button id="submit" onclick="checkAnswer()">Submit</button>
+            <div id="scoreboard">정답률: 0 / Total : 0</div>
+            <div id="feedback"></div>
+        </div>
+        <!-- 우측 목록을 위한 컨테이너 -->
+        <div id="resultList" style="position: fixed; right: 10px; top: 50px;">
+            <ul id="results"></ul>
+        </div>
+
+        <!-- 스톱워치 -->
+        <div id="stopwatch" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);">
+            <span id="timer">00:00</span>
+        </div>
+    </main>
+    <footer>
+        <p> </p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
