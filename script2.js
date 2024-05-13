@@ -11,12 +11,4 @@ document.getElementById('userRooT').addEventListener('click', function() {
     }
 });
 
-document.getElementById('resetResults').addEventListener('click', function() {
-    // 모든 테스트 결과 삭제
-    const testCount = parseInt(localStorage.getItem('testCount') || '0');
-    for (let i = 1; i <= testCount; i++) {
-        localStorage.removeItem(`testResults-${i}`);
-    }
-    localStorage.removeItem('testCount');
-    alert('모든 테스트 결과가 초기화되었습니다.');
-});
+

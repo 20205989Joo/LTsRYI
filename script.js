@@ -212,7 +212,7 @@ function fadeOutEffect() {
     const timer = setInterval(function() {
         if (opacity <= 0) {
             clearInterval(timer);
-            feedback.style.opacity = o;
+            feedback.style.opacity = 0;
         } else {
             opacity -= 0.05;
             feedback.style.opacity = opacity;

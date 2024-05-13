@@ -1,15 +1,25 @@
-const express = require('express');
-const app = express();
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
+const cookieParser = require("cookie-parser");
 
-app.use(express.json()); // JSON 형식의 입력을 처리할 수 있게 설정
+const server = express();
 
-// POST 엔드포인트 '/saveResults' 정의
-app.post('/saveResults', (req, res) => {
-    console.log(req.body);  // 콘솔에 요청 내용 출력
-    res.status(200).send({ message: 'Data received successfully' });  // 응답 메시지 전송
-});
+server
+  .use(cors({ origin: true, credentials: true }))
+  .use(express.json())
+  .use(cookieParser());
 
-const PORT = process.env.PORT || 3000;  // 포트 설정
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+const requestRefresh = async () => {
+    const response = await axios.get(
+      "https://web-ltryi-1ru12mlw3glz2u.sel5.cloudtype.app/saveResults",
+      {
+      	withCredentials: true
+      }
+    );
+    console.log(response);
+};
+
+server.listen(3000, () => {
+    console.log('Server running on port 3000');
 });
