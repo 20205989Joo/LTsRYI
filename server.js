@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const axios = require("axios");
 const cookieParser = require("cookie-parser");
 
 const server = express();
@@ -12,12 +11,15 @@ server
   .use(cookieParser());
 
 server.post('/api/saveResults', (req, res) => {
-    console.log(req.body);
+    console.log("POST /api/saveResults called");
+    console.log("Request headers:", req.headers);
+    console.log("Request body:", req.body);
     res.status(200).json({ message: 'Results saved successfully' });
 });
 
 server.get('/api/saveResults', (req, res) => {
-  res.status(200).json({ message: 'GET request to saveResults endpoint successful' });
+    console.log("GET /api/saveResults called");
+    res.status(200).json({ message: 'GET request to saveResults endpoint successful' });
 });
 
 server.listen(PORT, () => {

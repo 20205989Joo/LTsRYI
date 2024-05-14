@@ -19,5 +19,36 @@
         <p>Test page</p>
     </footer>
     <script src="script2.js"></script>
+    <script>
+        // Test fetch request
+        function testSaveResults() {
+            fetch('https://web-ltryi-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveResults', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ results: '테스트 데이터' })
+            })
+            .then(response => {
+                if (!response.ok) { // 응답 상태 확인
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                alert('Results saved successfully!');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Failed to save results.');
+            });
+        }
+
+        // 페이지가 로드될 때 테스트 함수 호출
+        window.onload = function() {
+            testSaveResults();  // fetch 요청 테스트
+        };
+    </script>
 </body>
 </html>
