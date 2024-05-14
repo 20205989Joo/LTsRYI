@@ -1,14 +1,12 @@
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
 
 const server = express();
 const PORT = process.env.PORT || 3000;
 
 server
   .use(cors({ origin: true, credentials: true }))
-  .use(express.json())
-  .use(cookieParser());
+  .use(express.json());
 
 let savedResults = []; // 데이터를 저장할 배열
 
@@ -17,8 +15,8 @@ server.post('/api/saveResults', (req, res) => {
     console.log("Request headers:", req.headers);
     console.log("Request body:", req.body);
 
-    const data = req.body.data;
-    savedResults.push(data);
+    const { resultsHtml, testCount } = req.body;
+    savedResults.push({ resultsHtml, testCount });
 
     res.status(200).json({ message: 'Results saved successfully' });
 });
