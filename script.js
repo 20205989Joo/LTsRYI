@@ -6,6 +6,7 @@ let correctAnswers = 0; // 정답 수
 let totalQuestions = 0; // 전체 문제 수
 let startTime, endTime;
 let testCount = 0;  // 전역 변수로 테스트 카운트를 추가
+let isResultsSaved = false; // 결과 저장 여부
 
 // JSON 데이터 로드
 function loadJsonData() {
@@ -94,16 +95,15 @@ function saveResults() {
     let resultsHtml = document.getElementById('results').innerHTML;
     localStorage.setItem(`testResults-${testCount}`, resultsHtml);  // 각 테스트 결과를 개별적으로 저장
 
-
     // 사용자에게 데이터 전송 전에 확인 받기
     if (confirm("테스트 결과를 저장하시겠습니까?")) {
         // JSON 형태로 서버에 데이터 전송
-        fetch('https://web-ltryi-1ru12mlw3glz2u.sel5.cloudtype.app/saveResults', {
+        fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/', { // 여기를 배포된 백엔드 URL로 수정
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ results: resultsHtml })
+            body: JSON.stringify({ results: resultsHtml, testCount })
         })
         .then(response => {
             if (!response.ok) { // 응답 상태 확인
@@ -126,7 +126,6 @@ function saveResults() {
         isResultsSaved = false;  // 사용자가 취소한 경우 false 유지
     }
 }
-
 
 function startTimer() {
     startTime = new Date();
