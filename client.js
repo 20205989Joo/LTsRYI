@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-axios.post('https://https://web-ltryi-1ru12mlw3glz2u.sel5.cloudtype.app//api/saveResults', {
+axios.post('https://web-ltryi-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveResults', {
     resultsHtml: document.getElementById('results').innerHTML,
     testCount: localStorage.getItem('testCount')
 }, {
