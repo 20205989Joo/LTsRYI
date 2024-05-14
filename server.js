@@ -1,31 +1,23 @@
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
 
-const server = express();
-const PORT = process.env.PORT || 3000;
+const app = express();
 
-server
-  .use(cors({ origin: true, credentials: true }))
-  .use(express.json());
+// CORS를 모든 요청에 대해 허용
+app.use(cors());
 
-let savedResults = []; // 데이터를 저장할 배열
+// JSON 형식의 본문을 처리할 수 있게 설정
+app.use(express.json());
 
-server.post('/api/saveResults', (req, res) => {
-    console.log("POST /api/saveResults called");
-    console.log("Request headers:", req.headers);
+// POST 요청 처리
+app.post('/api/saveResults', function (req, res) {
+    console.log("Received POST /api/saveResults");
     console.log("Request body:", req.body);
-
-    const { resultsHtml, testCount } = req.body;
-    savedResults.push({ resultsHtml, testCount });
-
-    res.status(200).json({ message: 'Results saved successfully' });
+    // 성공적인 데이터 처리 응답
+    res.status(200).json({ message: 'Results saved successfully', data: req.body });
 });
 
-server.get('/api/saveResults', (req, res) => {
-    console.log("GET /api/saveResults called");
-    res.status(200).json(savedResults);
-});
-
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// 서버 시작
+app.listen(3000, function () {
+    console.log('CORS-enabled web server listening on port 3000');
 });
