@@ -2,16 +2,16 @@ body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4; /* 옅은 회색 배경 */
+    background-color: #f4f4f4;
     color: #333;
 }
 
 header, footer {
-    background-color: #000; /* 고급스러운 검은색 배경 */
+    background-color: #000;
     color: #fff;
     padding: 20px;
     text-align: center;
-    border-bottom: 5px solid rgb(242, 189, 13); /* 골드 색상의 테두리를 추가하여 고급스러움 강조 */
+    border-bottom: 5px solid rgb(242, 189, 13);
 }
 
 main {
@@ -29,14 +29,13 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh;
+    min-height: 20vh;
 }
 
 #question {
-    font-weight: bold; /* 텍스트를 두껍게 만듭니다 */
+    font-weight: bold;
     margin: 20px 0;
-} 
-
+}
 
 #feedback, #scoreboard {
     margin: 20px 0;
@@ -44,26 +43,26 @@ footer {
 
 #answer {
     padding: 10px;
-    width: 300px; /* 너비를 조금 더 넓게 설정 */
+    width: 300px;
     margin-bottom: 20px;
-    border: 2px solid #000; /* 테두리 추가 */
-    border-radius: 5px; /* 모서리 둥글게 처리 */
-    font-size: 16px; /* 글자 크기 조정 */
+    border: 2px solid #000;
+    border-radius: 5px;
+    font-size: 16px;
 }
 
 button {
     padding: 10px 20px;
     cursor: pointer;
-    background-color: #855e09; /* 버튼 색상 */
+    background-color: #855e09;
     color: white;
     border: none;
     border-radius: 5px;
-    font-weight: bold; /* 글자 두껍게 */
-    transition: background-color 0.3s; /* 버튼 효과 추가 */
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #367C39; /* 호버 시 색상 변경 */
+    background-color: #367C39;
 }
 
 #feedback {
@@ -89,24 +88,27 @@ button:hover {
     border-radius: 5px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     max-height: 300px; /* 최대 높이 설정 */
-    overflow-y: auto; /* 세로 스크롤바 자동 설정 */
+    overflow-y: auto;
+    position: fixed;
+    right: 10px;
+    top: 50px;
 }
 
 #results {
-    list-style-type: none; /* 기본 목록 기호 제거 */
+    list-style-type: none;
 }
 
 #stopwatch {
     position: fixed;
-    right: 20px; /* 오른쪽에서 20px 떨어진 곳에 위치 */
-    bottom: 20px; /* 하단에서 20px 떨어진 곳에 위치 */
+    right: 20px;
+    bottom: 20px;
     padding: 10px 20px;
-    background-color: #333; /* 어두운 배경 */
-    color: #fff; /* 흰색 텍스트 */
+    background-color: #333;
+    color: #fff;
     border-radius: 5px;
-    font-size: 18px; /* 큰 폰트 사이즈 */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* 그림자 효과 */
-    z-index: 1000; /* 다른 요소들 위에 보이도록 z-index 설정 */
+    font-size: 18px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 1000;
 }
 
 #resultsDisplay {
@@ -125,11 +127,82 @@ button:hover {
 }
 
 .instructions {
-    border: 2px solid #333; /* 짙은 회색 테두리 추가 */
-    padding: 20px; /* 내용과 테두리 사이의 여백 */
-    margin-bottom: 20px; /* 이 div 아래의 다른 요소와의 간격 */
-    background-color: #fff; /* 배경색 흰색으로 설정 */
-    border-radius: 5px; /* 테두리 모서리를 둥글게 */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 약간의 그림자 효과 추가 */
+    border: 2px solid #333;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding-bottom: 10px;
 }
 
+@media (max-width: 600px) {
+    #resultList {
+        width: 100px;
+        max-height: 80px;
+        right: 10px;
+        top: 50px; /* 상단에 고정 */
+        bottom: auto; /* 하단 위치를 무효화 */
+        padding: 5px;
+        box-shadow: none;
+        font-size: 12px;
+        position: fixed; /* 고정 위치 */
+        z-index: 1000; /* 다른 요소보다 위에 표시 */
+    }
+
+    #results {
+        font-size: 12px;
+        padding-left: 5px;
+
+    }
+
+    #answer {
+        width: 90%;
+    }
+
+    #stopwatch {
+        right: 20px;
+        bottom: 20px;
+        transform: translateX(0);
+    }
+
+    .instructions {
+        padding: 10px;
+        font-size: 12px;
+        padding-bottom: 0; /* 모바일에서 하단 패딩 제거 */
+    }
+
+    .keyboard-visible #header,
+    .keyboard-visible #settings,
+    .keyboard-visible #instructions {
+        display: none;
+    }
+
+    .keyboard-visible #footer,
+    .keyboard-visible #stopwatch,
+    .keyboard-visible #answer,
+    .keyboard-visible #submit,
+    .keyboard-visible #resultList
+    .keyboard-visible #feedback  {
+        position: fixed;
+        bottom: 10px;
+        width: 100%;
+        left: 0;
+        right: 0;
+        text-align: center;
+    }
+
+    .keyboard-visible #resultList {
+        top: 10px;
+        right: 10px;
+        left: auto;
+    }
+
+    .keyboard-visible #footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        left: 0;
+        right: 0;
+    }
+}

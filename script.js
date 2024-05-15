@@ -93,38 +93,37 @@ function displayNextWord() {
 function saveResults() {
     // 결과 데이터를 HTML 요소에서 추출
     let resultsHtml = document.getElementById('results').innerHTML;
-    localStorage.setItem(`testResults-${testCount}`, resultsHtml);  // 각 테스트 결과를 개별적으로 저장
+    let timestamp = new Date().toLocaleString(); // 현재 시간 추가
+    // 데이터를 로컬 스토리지에 저장
+    localStorage.setItem(`testResults-${testCount}`, JSON.stringify({ resultsHtml, timestamp }));
 
-    // 사용자에게 데이터 전송 전에 확인 받기
-    if (confirm("테스트 결과를 저장하시겠습니까?")) {
-        // JSON 형태로 서버에 데이터 전송
-        fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveResults', { // 여기를 배포된 백엔드 URL로 수정
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ resultsHtml, testCount })
-        })
-        .then(response => {
-            if (!response.ok) { // 응답 상태 확인
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Success:', data);
-            alert('Results saved successfully!');
-            isResultsSaved = true;  // 성공적으로 데이터를 저장했음을 표시
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            alert('Failed to save results.');
-            isResultsSaved = false;  // 실패했을 경우 상태를 false로 설정
-        });
-    } else {
-        alert("결과 전송이 취소되었습니다.");
-        isResultsSaved = false;  // 사용자가 취소한 경우 false 유지
-    }
+    // JSON 형태로 서버에 데이터 전송
+    fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveResults', { // 여기를 배포된 백엔드 URL로 수정
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ resultsHtml, testCount, timestamp }) // 타임스탬프 추가
+    })
+    .then(response => {
+        if (!response.ok) { // 응답 상태 확인
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        alert('성적 등록이 완료되었습니다!');
+        isResultsSaved = true;  // 성공적으로 데이터를 저장했음을 표시
+
+        // 서버로 전송이 성공하면 로컬 스토리지에서 데이터 삭제
+        localStorage.removeItem(`testResults-${testCount}`);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('Failed to save results.');
+        isResultsSaved = false;  // 실패했을 경우 상태를 false로 설정
+    });
 }
 
 function startTimer() {
@@ -202,6 +201,9 @@ function checkAnswer() {
     updateScoreboard();
     fadeOutEffect();
     startTimer();
+
+    // 키보드 내려가는 문제 해결
+    setTimeout(() => userInputElement.focus(), 50);
 }
 
 function fadeOutEffect() {
@@ -225,11 +227,12 @@ document.getElementById('answer').addEventListener('keyup', function(event) {
     }
 });
 
+document.getElementById('submit').addEventListener('click', function(event) {
+    // submit 버튼 클릭 시 기본 동작을 막고 키보드 포커스를 유지
+    event.preventDefault();
+    checkAnswer();
+});
+
 window.onload = function() {
     loadJsonData();
-    const form = document.getElementById('resultForm');
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();  // 기본 제출 방지
-        saveResults();  // 사용자 정의 결과 저장 및 제출 함수 호출
-    });
 };
