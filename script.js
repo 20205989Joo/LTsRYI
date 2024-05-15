@@ -91,9 +91,15 @@ function displayNextWord() {
 }
 
 function saveResults() {
+    const currentUserId = localStorage.getItem('currentUserId');
+    if (!currentUserId) {
+        alert('사용자 ID가 설정되지 않았습니다.');
+        return;
+    }
+
     // 결과 데이터를 HTML 요소에서 추출
     let resultsHtml = document.getElementById('results').innerHTML;
-    let timestamp = new Date().toLocaleString(); // 현재 시간 추가
+    let timestamp = formatTimestamp(new Date()); // 현재 시간 추가
     // 데이터를 로컬 스토리지에 저장
     localStorage.setItem(`testResults-${testCount}`, JSON.stringify({ resultsHtml, timestamp }));
 
@@ -103,7 +109,7 @@ function saveResults() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ resultsHtml, testCount, timestamp }) // 타임스탬프 추가
+        body: JSON.stringify({ userId: currentUserId, resultsHtml, testCount, timestamp }) // 사용자 ID 추가
     })
     .then(response => {
         if (!response.ok) { // 응답 상태 확인
