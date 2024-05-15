@@ -98,12 +98,12 @@ function saveResults() {
     // 사용자에게 데이터 전송 전에 확인 받기
     if (confirm("테스트 결과를 저장하시겠습니까?")) {
         // JSON 형태로 서버에 데이터 전송
-        fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/', { // 여기를 배포된 백엔드 URL로 수정
+        fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveResults', { // 여기를 배포된 백엔드 URL로 수정
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ results: resultsHtml, testCount })
+            body: JSON.stringify({ resultsHtml, testCount })
         })
         .then(response => {
             if (!response.ok) { // 응답 상태 확인

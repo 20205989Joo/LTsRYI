@@ -14,11 +14,12 @@
         <!-- 사용자 버튼 추가 -->
         <button id="userJeongA">오정아</button>
         <button id="userRooT">루T</button>
+        <!-- Test 버튼 추가 -->
+        <button id="testButton">Test</button>
     </main>
     <footer>
         <p>Test page</p>
     </footer>
-    <script src="script2.js"></script>
     <script>
         // Test fetch request
         function testSaveResults() {
@@ -27,7 +28,10 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ results: '테스트 데이터' })
+                body: JSON.stringify({
+                    resultsHtml: '<p>Test Result</p>',
+                    testCount: 1
+                })
             })
             .then(response => {
                 if (!response.ok) { // 응답 상태 확인
@@ -45,10 +49,8 @@
             });
         }
 
-        // 페이지가 로드될 때 테스트 함수 호출
-        window.onload = function() {
-            testSaveResults();  // fetch 요청 테스트
-        };
+        // Test 버튼 클릭 시 테스트 함수 호출
+        document.getElementById('testButton').addEventListener('click', testSaveResults);
     </script>
 </body>
 </html>
