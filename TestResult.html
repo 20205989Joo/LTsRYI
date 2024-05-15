@@ -21,29 +21,50 @@
     </footer>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const testCount = parseInt(localStorage.getItem('testCount') || '0');
-            let allResultsHtml = '';
-            for (let i = 1; i <= testCount; i++) {
-                const results = localStorage.getItem(`testResults-${i}`) || 'No results found';
-                allResultsHtml += `<div style="min-width: 300px; margin-right: 20px; padding: 10px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                    <h3>테스트 ${i}번째 결과</h3>
-                                    <div>${results}</div>
-                                  </div>`;
-            }
-            document.getElementById('allResults').innerHTML = allResultsHtml;
+            // API를 호출하여 결과를 가져옴
+            fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getResults')
+                .then(response => {
+                    if (!response.ok) { // 응답 상태 확인
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let allResultsHtml = '';
+                    data.forEach(result => {
+                        allResultsHtml += `<div style="min-width: 300px; margin-right: 20px; padding: 10px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                            <h3>테스트 ${result.testCount}번째 결과</h3>
+                                            <div>${result.resultsHtml}</div>
+                                          </div>`;
+                    });
+                    document.getElementById('allResults').innerHTML = allResultsHtml;
+                })
+                .catch(error => console.error('Error fetching the results:', error));
         });
-    
+
         // 초기화 버튼 이벤트 리스너
         document.getElementById('resetResults').addEventListener('click', function() {
-            const testCount = parseInt(localStorage.getItem('testCount') || '0');
-            for (let i = 1; i <= testCount; i++) {
-                localStorage.removeItem(`testResults-${i}`);
-            }
-            localStorage.removeItem('testCount');
-            alert('모든 테스트 결과가 초기화되었습니다.');
-            document.getElementById('allResults').innerHTML = '';  // 화면에서 결과를 바로 지움
+            fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/resetResults', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) { // 응답 상태 확인
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('모든 테스트 결과가 초기화되었습니다.');
+                document.getElementById('allResults').innerHTML = '';  // 화면에서 결과를 바로 지움
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Failed to reset results.');
+            });
         });
     </script>
-    
 </body>
 </html>
