@@ -99,7 +99,7 @@ function saveResults() {
 
     // 결과 데이터를 HTML 요소에서 추출
     let resultsHtml = document.getElementById('results').innerHTML;
-    let timestamp = formatTimestamp(new Date()); // 현재 시간 추가
+    let timestamp = new Date(); // 현재 시간 추가
     // 데이터를 로컬 스토리지에 저장
     localStorage.setItem(`testResults-${testCount}`, JSON.stringify({ resultsHtml, timestamp }));
 
