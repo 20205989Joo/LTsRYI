@@ -11,7 +11,7 @@ const userButtons = [
 userButtons.forEach(button => {
     document.getElementById(button.id).addEventListener('click', function() {
         localStorage.setItem('currentUserId', button.userId);
-        window.location.href = `room.html?id=${button.userId}`;
+        window.location.href = `Room.html?id=${button.userId}`;
     });
 });
 
