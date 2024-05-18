@@ -24,7 +24,7 @@ function openVocabulary(vocabulary) {
         return;
     }
     if (vocabulary === '단어') {
-        window.location.href = `wordtest.html?id=${userId}`; // 사용자 ID를 URL에 포함하여 이동
+        window.location.href = `wordTest.html?id=${userId}`; // 사용자 ID를 URL에 포함하여 이동
     } else {
         alert(`${vocabulary} 페이지로 이동합니다.`);
     }

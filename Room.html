@@ -16,23 +16,33 @@
         <svg width="800" height="720" viewBox="0 0 800 720">
             <polygon points="685,360 543,607 257,607 115,360 257,113 543,113"
                      style="fill:none;stroke:rgba(0, 0, 0, 0.667);stroke-width:5" />
+            <g>
+                <foreignObject x="203" y="68" width="80" height="50">
+                    <button id="Intuition" onclick="openSubject('직관')">직관</button>
+                </foreignObject>
+                <foreignObject x="517" y="68" width="80" height="50">
+                    <button id="Vocabulary" onclick="openSubject('어휘')">어휘</button>
+                </foreignObject>
+                    <foreignObject x="684" y="340" width="80" height="50">
+                    <button id="Speaking" onclick="openSubject('말하기')">말하기</button>
+                </foreignObject>
+                <foreignObject x="517" y="612" width="80" height="50">
+                    <button id="LC" onclick="openSubject('듣기')">듣기</button>
+                </foreignObject>
+                <foreignObject x="203" y="612" width="80" height="50">
+                    <button id="RC" onclick="openSubject('독해')">독해</button>
+                </foreignObject>
+                <foreignObject x="46" y="340" width="80" height="50">
+                    <button id="Writing" onclick="openSubject('쓰기')">쓰기</button>
+                </foreignObject>
+            </g>
         </svg>
-        <!-- 버튼 위치를 SVG 바깥으로 조정 -->
-        <div class="button-container">
-            <button id="Intuition" class="svg-button" style="top: 68px; left: 203px;" onclick="openSubject('직관')">직관</button>
-        <button id="Vocabulary" class="svg-button" style="top: 68px; left: 517px;" onclick="openSubject('어휘')">어휘</button>
-            <button id="Speaking" class="svg-button" style="top: 340px; left: 684px;" onclick="openSubject('말하기')">말하기</button>
-            <button id="LC" class="svg-button" style="top: 620px; left: 517px;" onclick="openSubject('듣기')">듣기</button>
-            <button id="RC" class="svg-button" style="top: 620px; left: 203px;" onclick="openSubject('독해')">독해</button>
-            <button id="Writing" class="svg-button" style="top: 340px; left: 46px;" onclick="openSubject('쓰기')">쓰기</button>
-        </div>
         <div id="vocabularyOptions" style="display: none;">
             <button onclick="openVocabulary('단어')">단어</button>
             <button onclick="openVocabulary('숙어')">숙어</button>
             <button id="Grades" style="display: block;">Grades</button>
         </div>
     </main>
-    
     <footer>
         <p>Test page</p>
     </footer>

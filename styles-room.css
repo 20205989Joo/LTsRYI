@@ -70,3 +70,11 @@ button:hover {
 #vocabularyOptions button {
     margin-bottom: 10px;
 }
+
+.button-container {
+    position: relative;
+    width: 800px; /* SVG와 동일한 너비 */
+    height: 720px; /* SVG와 동일한 높이 */
+    top: -720px; /* SVG 높이만큼 위로 이동 */
+    pointer-events: none; /* SVG 아래의 클릭 이벤트를 방지하지 않도록 설정 */
+}

@@ -329,7 +329,7 @@ function fadeOutEffect() {
 document.getElementById('next').addEventListener('click', function() {
     const currentUserId = localStorage.getItem('currentUserId'); // 로컬 저장소에서 현재 사용자 ID를 가져옴
     if (currentUserId) { // 사용자 ID가 설정되어 있으면
-        window.location.href = `wordtest3.html?id=${currentUserId}`; // 새로운 테스트 페이지로 이동
+        window.location.href = `wordTest3.html?id=${currentUserId}`; // 새로운 테스트 페이지로 이동
     } else { // 사용자 ID가 설정되어 있지 않으면
         alert("User ID is not set. Please check and try again."); // '사용자 ID가 설정되어 있지 않습니다. 확인 후 다시 시도하세요.'라는 알림창을 표시
     }
