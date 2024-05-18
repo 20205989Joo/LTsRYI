@@ -11,7 +11,7 @@ const userButtons = [
 userButtons.forEach(button => {
     document.getElementById(button.id).addEventListener('click', function() {
         localStorage.setItem('currentUserId', button.userId);
-        window.location.href = `wordTest.html?id=${button.userId}`;
+        window.location.href = `room.html?id=${button.userId}`;
     });
 });
 
@@ -25,3 +25,4 @@ document.getElementById('adminLT').addEventListener('click', function() {
         alert("잘못된 비밀번호입니다.");
     }
 });
+

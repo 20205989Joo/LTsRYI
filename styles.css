@@ -53,7 +53,7 @@ footer {
 button {
     padding: 10px 20px;
     cursor: pointer;
-    background-color: #855e09;
+    background-color:#64541b;
     color: white;
     border: none;
     border-radius: 5px;
@@ -65,11 +65,34 @@ button:hover {
     background-color: #367C39;
 }
 
-#feedback {
-    min-height: 20px;
-    font-weight: bold;
-    font-size: 24px;
-    padding: 10px;
+#choices {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 400px;
+}
+
+#choices button {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid #ddd;
+    margin: 5px 0;
+    padding: 15px;
+    font-size: 1em;
+    transition: background-color 0.3s, transform 0.2s;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    color: black; /* 글씨를 검정색으로 설정 */
+}
+
+#choices button:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: scale(1.02);
+}
+
+#choices button:active {
+    background: rgba(255, 182, 193, 0.8); /* 분홍빛 */
+    transform: scale(1);
 }
 
 .correct {
@@ -182,7 +205,7 @@ button:hover {
     .keyboard-visible #stopwatch,
     .keyboard-visible #answer,
     .keyboard-visible #submit,
-    .keyboard-visible #resultList
+    .keyboard-visible #resultList,
     .keyboard-visible #feedback  {
         position: fixed;
         bottom: 10px;

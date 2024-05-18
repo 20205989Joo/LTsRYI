@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room</title>
+    <link rel="stylesheet" href="styles-room.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+</head>
+<body>
+    <header>
+        <h1 id="roomTitle">사용자 방</h1>
+    </header>
+    <main>
+        <svg width="800" height="720" viewBox="0 0 800 720">
+            <polygon points="685,360 543,607 257,607 115,360 257,113 543,113"
+                     style="fill:none;stroke:rgba(0, 0, 0, 0.667);stroke-width:5" />
+                    
+            <g>
+                <foreignObject x="203" y="68" width="80" height="50">
+                    <button id="Intuition" onclick="openSubject('직관')">직관</button>
+                </foreignObject>
+                <foreignObject x="517" y="68" width="80" height="50">
+                    <button id="Vocabulary" onclick="openSubject('어휘')">어휘</button>
+                </foreignObject>
+                    <foreignObject x="684" y="340" width="80" height="50">
+                    <button id="Speaking" onclick="openSubject('말하기')">말하기</button>
+                </foreignObject>
+                <foreignObject x="517" y="612" width="80" height="50">
+                    <button id="LC" onclick="openSubject('듣기')">듣기</button>
+                </foreignObject>
+                <foreignObject x="203" y="612" width="80" height="50">
+                    <button id="RC" onclick="openSubject('독해')">독해</button>
+                </foreignObject>
+                <foreignObject x="46" y="340" width="80" height="50">
+                    <button id="Writing" onclick="openSubject('쓰기')">쓰기</button>
+                </foreignObject>
+            </g>
+        </svg>
+        <div id="vocabularyOptions" style="display: none;">
+            <button onclick="openVocabulary('단어')">단어</button>
+            <button onclick="openVocabulary('숙어')">숙어</button>
+            <button id="Grades" style="display: block;">Grades</button>
+        </div>
+    </main>
+    <footer>
+        <p>Test page</p>
+    </footer>
+    <script src="script-room.js"></script>
+</body>
+</html>

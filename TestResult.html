@@ -4,7 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Results</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header, footer {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        main {
+            flex-grow: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+        #allResults {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .result-container {
+            min-width: 300px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -12,89 +58,80 @@
     </header>
     <main>
         <!-- 결과 표시 영역 -->
-        <div id="allResults" style="display: flex; overflow-x: auto; white-space: nowrap;"></div>
+        <div id="allResults"></div>
         <!-- 모든 결과 초기화 버튼 -->
         <button id="resetAllResults">모든 결과 초기화</button>
+        <button id="clearLocalStorage">로컬 스토리지 초기화</button>
     </main>
     <footer>
         <p>Thank you for using our service!</p>
     </footer>
     <script>
-        function formatTimestamp(dateString) {
-            const date = new Date(dateString);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+    fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getAllResults')
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched data:", data); // 서버에서 받은 데이터를 로깅
+        const resultsByCount = data.reduce((acc, result) => {
+            const key = `${result.UserId}, ${result.SubjectName} - ${result.SubcategoryName} - Quiz ${result.QuizNo}, Count: ${result.TestCount}`;
+            acc[key] = acc[key] || [];
+            acc[key].push(result);
+            return acc;
+        }, {});
 
-        function clearLocalStorage() {
-            // 로컬 스토리지에서 테스트 결과와 관련된 모든 항목을 제거
-            for (let i = localStorage.length - 1; i >= 0; i--) {
-                let key = localStorage.key(i);
-                if (key.startsWith('testResults-')) {
-                    localStorage.removeItem(key);
-                }
-            }
-            localStorage.removeItem('testCount');
-        }
+        Object.keys(resultsByCount).forEach(key => {
+            let groupHtml = `<div class="result-container">
+                <h2>${key}</h2>`;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // API를 호출하여 모든 결과를 가져옴
-            fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getAllResults')
-                .then(response => {
-                    if (!response.ok) { // 응답 상태 확인
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    let allResultsHtml = '';
-                    data.forEach(result => {
-                        const formattedTimestamp = formatTimestamp(result.timestamp);
-                        allResultsHtml += `<div style="min-width: 300px; margin-right: 20px; padding: 10px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                            <h3>${result.userId} 호</h3>
-                                            <h3>테스트 ${result.testCount}번째 결과</h3>
-                                            <h4>전송 시간: ${formattedTimestamp}</h4>
-                                            <div>${result.resultsHtml}</div>
-                                          </div>`;
-                    });
-                    document.getElementById('allResults').innerHTML = allResultsHtml;
-                })
-                .catch(error => console.error('Error fetching the results:', error));
+            resultsByCount[key].forEach(result => {
+                // Timestamp에서 'T'와 '.000Z' 제거
+                const timestamp = result.Timestamp.replace('T', ' ').replace('.000Z', '');
+                
+                groupHtml += `<div>
+                    <h4>#${result.ResultId} Response : ( ${result.UserResponse} ) , Answer : ( ${result.CorrectAnswer} ) - [ ${result.Correctness ? '✔️' : '❌'} ] </h4>
+                    <p> Time: ${timestamp}</p>
+                    </div>`;
+            });
+
+            groupHtml += `</div>`;
+            document.getElementById('allResults').innerHTML += groupHtml;
         });
+    })
+    .catch(error => {
+        console.error('Error fetching the results:', error);
+    });
+});
 
-        // 모든 결과 초기화 버튼 이벤트 리스너
+
+
         document.getElementById('resetAllResults').addEventListener('click', function() {
             if (!confirm('모든 사용자의 테스트 결과를 초기화하시겠습니까?')) {
                 return;
             }
-
             fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/resetAllResults', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => {
-                if (!response.ok) { // 응답 상태 확인
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 alert('모든 사용자의 테스트 결과가 초기화되었습니다.');
-                document.getElementById('allResults').innerHTML = '';  // 화면에서 결과를 바로 지움
-                clearLocalStorage();  // 로컬 저장소 비우기
-                location.reload(); // 페이지를 새로고침하여 결과 갱신
+                document.getElementById('allResults').innerHTML = '';
+                location.reload();
             })
-            .catch((error) => {
+            .catch(error => {
                 console.error('Error:', error);
                 alert('Failed to reset all results.');
             });
+        });
+
+        document.getElementById('clearLocalStorage').addEventListener('click', function() {
+            if (confirm('로컬 스토리지의 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                localStorage.clear();
+                alert('로컬 스토리지가 초기화되었습니다.');
+                window.location.reload(); // 페이지를 새로 고침하여 변경 사항을 적용
+            }
         });
     </script>
 </body>
