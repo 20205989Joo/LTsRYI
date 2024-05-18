@@ -70,19 +70,3 @@ button:hover {
 #vocabularyOptions button {
     margin-bottom: 10px;
 }
-
-.button-container {
-    position: relative;
-    width: 800px; /* SVG와 동일한 너비 */
-    height: 720px; /* SVG와 동일한 높이 */
-    top: -720px; /* SVG 높이만큼 위로 이동 */
-    pointer-events: none; /* SVG 아래의 클릭 이벤트를 방지하지 않도록 설정 */
-}
-
-.svg-button {
-    position: absolute;
-    pointer-events: auto; /* 버튼 위에서 클릭 이벤트 활성화 */
-    cursor: pointer; /* 버튼 위에 마우스를 올렸을 때 커서 변경 */
-    width: 80px; /* 버튼 너비 */
-    height: 50px; /* 버튼 높이 */
-}
