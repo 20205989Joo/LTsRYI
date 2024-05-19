@@ -1,7 +1,7 @@
-let wordList = []; // 전역 변수로 단어 목록을 저장할 배열 선언
-let currentWordIndex = 0; // 현재 진행 중인 단어의 인덱스를 저장할 변수 선언
+let idiomList = []; // 전역 변수로 숙어 목록을 저장할 배열 선언
+let currentIdiomIndex = 0; // 현재 진행 중인 숙어의 인덱스를 저장할 변수 선언
 let uniqueDays = []; // 고유한 날짜를 저장할 배열 선언
-let filteredWords = []; // 선택된 날짜에 해당하는 단어들을 저장할 배열 선언
+let filteredIdioms = []; // 선택된 날짜에 해당하는 숙어들을 저장할 배열 선언
 let correctAnswers = 0; // 사용자의 정답 수를 저장할 변수 선언
 let totalQuestions = 0; // 전체 문제 수를 저장할 변수 선언
 let startTime, endTime; // 테스트의 시작 시간과 종료 시간을 저장할 변수 선언
@@ -10,20 +10,20 @@ let isResultsSaved = false; // 테스트 결과가 저장되었는지 여부를 
 
 // 웹 페이지가 로드될 때 JSON 데이터를 비동기적으로 불러오는 함수
 function loadJsonData() {
-    fetch('MID-A_jsonarray.json') // 주어진 URL에서 JSON 데이터를 요청
+    fetch('KSAT-Idioms-900.json') // 주어진 URL에서 JSON 데이터를 요청
         .then(response => response.json()) // 응답을 JSON으로 변환
         .then(data => {
-            wordList = data.data; // 변환된 JSON 데이터 중 data 필드를 wordList 배열에 저장
+            idiomList = data; // 변환된 JSON 데이터를 idiomList 배열에 저장
             extractUniqueDays(); // 고유한 날짜를 추출하는 함수 호출
             populateDayOptions(); // 드롭다운 메뉴를 생성하는 함수 호출
         })
         .catch(error => console.error('Error loading the JSON data: ', error)); // 데이터 로드 중 에러 발생 시 콘솔에 에러 로깅
 }
 
-// wordList 배열에서 고유한 날짜 값을 추출하여 uniqueDays 배열에 저장하는 함수
+// idiomList 배열에서 고유한 날짜 값을 추출하여 uniqueDays 배열에 저장하는 함수
 function extractUniqueDays() {
     const daysSet = new Set(); // 중복을 허용하지 않는 Set 객체 생성
-    wordList.forEach(item => daysSet.add(item[0])); // wordList의 각 항목에서 날짜 부분(첫 번째 요소)을 추출하여 Set에 추가
+    idiomList.forEach(item => daysSet.add(item.Day)); // idiomList의 각 항목에서 Day 부분을 추출하여 Set에 추가
     uniqueDays = Array.from(daysSet); // Set 객체를 배열로 변환하여 uniqueDays에 저장
     uniqueDays.sort(); // uniqueDays 배열을 정렬
 }
@@ -49,25 +49,32 @@ function startTest() {
     localStorage.setItem('testCount', testCount.toString()); // 새로운 testCount 값을 문자열로 변환하여 로컬 스토리지에 저장
     const startDay = document.getElementById('startDay').value; // 사용자가 선택한 시작 날짜를 가져옴
     const endDay = document.getElementById('endDay').value; // 사용자가 선택한 종료 날짜를 가져옴
-    filteredWords = wordList.filter(word => { // wordList 배열을 필터링
-        const day = parseInt(word[0].replace(/DAY /, '')); // 각 단어의 날짜 부분에서 'DAY ' 문자를 제거하고 정수로 변환
-        return day >= parseInt(startDay.replace(/DAY /, '')) && day <= parseInt(endDay.replace(/DAY /, '')); // 사용자가 선택한 시작과 종료 날짜 사이에 있는지 판단
+    filteredIdioms = idiomList.filter(idiom => { // idiomList 배열을 필터링
+        const day = parseInt(idiom.Day.replace(/Day /, '')); // 각 숙어의 날짜 부분에서 'Day ' 문자를 제거하고 정수로 변환
+        return day >= parseInt(startDay.replace(/Day /, '')) && day <= parseInt(endDay.replace(/Day /, '')); // 사용자가 선택한 시작과 종료 날짜 사이에 있는지 판단
     });
-    shuffle(filteredWords); // 필터링된 단어 목록을 무작위로 섞음
-    currentWordIndex = 0; // 현재 단어 인덱스를 0으로 초기화
+    shuffle(filteredIdioms); // 필터링된 숙어 목록을 무작위로 섞음
+    currentIdiomIndex = 0; // 현재 숙어 인덱스를 0으로 초기화
     correctAnswers = 0; // 정답 수를 0으로 초기화
-    totalQuestions = filteredWords.length; // 전체 문제 수를 필터링된 단어 목록의 길이로 설정
+    totalQuestions = filteredIdioms.length; // 전체 문제 수를 필터링된 숙어 목록의 길이로 설정
     isResultsSaved = false; // 결과 저장 여부를 거짓으로 초기화
     updateScoreboard(); // 점수판을 업데이트하는 함수 호출
-    displayNextWord(); // 다음 단어를 표시하는 함수 호출
+    displayNextIdiom(); // 다음 숙어를 표시하는 함수 호출
     startTimer(); // 타이머를 시작하는 함수 호출
     updateTimerDisplay(); // 타이머 디스플레이를 업데이트하는 함수 호출
 }
 
 // 점수판을 업데이트하는 함수
 function updateScoreboard() {
-    const scoreboard = document.getElementById('scoreboard'); // 점수판 요소를 가져옴
-    scoreboard.textContent = `정답률 : ${correctAnswers} / Total : ${totalQuestions}`; // 점수판의 텍스트를 현재 정답률과 전체 문제 수로 설정
+    const scoreboard = document.getElementById('scoreboard');
+    scoreboard.textContent = `정답률 : ${correctAnswers} / Total : ${totalQuestions}`; // 화면에 표시되는 텍스트 유지
+
+    if (totalQuestions > 0) {
+        const accuracyRate = ((correctAnswers / totalQuestions) * 100).toFixed(2); // 백분율로 계산하고 소수점 두 자리로 제한
+        localStorage.setItem('currentTestScore', accuracyRate); // 로컬 저장소에 정답률 저장
+    } else {
+        localStorage.setItem('currentTestScore', '0.00'); // 문제가 없을 경우 정답률을 0.00%로 저장
+    }
 }
 
 // 주어진 배열을 무작위로 섞는 함수
@@ -78,17 +85,17 @@ function shuffle(array) {
     }
 }
 
-// 다음 단어를 화면에 표시하고 관련 설정을 하는 함수
-function displayNextWord() {
-    if (currentWordIndex < filteredWords.length) { // 현재 인덱스가 필터링된 단어 목록의 길이보다 작은 경우 (다음 단어가 존재하는 경우)
-        const word = filteredWords[currentWordIndex]; // 현재 단어를 가져옴
-        const initial = word[1].split(' ').map(w => w.charAt(0).toLowerCase()).join('___'); // 단어의 각 부분을 공백으로 분할하고, 각 부분의 첫 글자를 소문자로 변환한 후 '___'로 연결
-        document.getElementById('question').textContent = `Q. "${word[2]}"를 영어로 하면? ( ${initial}_________ )`; // 문제 텍스트를 설정
+// 다음 숙어를 화면에 표시하고 관련 설정을 하는 함수
+function displayNextIdiom() {
+    if (currentIdiomIndex < filteredIdioms.length) { // 현재 인덱스가 필터링된 숙어 목록의 길이보다 작은 경우 (다음 숙어가 존재하는 경우)
+        const idiom = filteredIdioms[currentIdiomIndex]; // 현재 숙어를 가져옴
+        const initial = idiom.BlankAnswer.split(' ').map(w => w.charAt(0).toLowerCase()).join('___'); // 예제 문장의 각 부분을 공백으로 분할하고, 각 부분의 첫 글자를 소문자로 변환한 후 '___'로 연결
+        document.getElementById('question').textContent = `Q. "${idiom.ExWithBlank}" (${initial}_________)`; // 문제 텍스트를 설정
+        document.getElementById('translation').textContent = `=> "${idiom.ExTranslation}"`; // 번역 텍스트를 설정
         document.getElementById('answer').style.visibility = 'visible'; // 답변 입력 필드를 보이도록 설정
-    } else { // 모든 단어를 다 표시했을 경우
-        document.getElementById('question').textContent = '다음 Test로 넘어갑니다.'; // 질문 영역에 '끝! 고생하셨습니다!' 표시
+    } else { // 모든 숙어를 다 표시했을 경우
+        document.getElementById('question').textContent = '마지막 Test로 넘어갑니다.'; // 질문 영역에 '끝! 고생하셨습니다!' 표시
         document.getElementById('answer').style.visibility = 'hidden'; // 답변 입력 필드를 숨김
-        document.getElementById('submit').style.display = 'none'; // 제출 버튼을 숨김
         document.getElementById('next').style.display = 'block'; // 다음 버튼을 표시
         stopTimerAndReset(); // 타이머를 멈추고 리셋하는 함수 호출
         if (!isResultsSaved) { // 결과가 아직 저장되지 않았다면
@@ -109,7 +116,6 @@ function getMySqlDateTime(dateInput) {
     return date.toLocaleString("sv-SE").replace(' ', 'T');
 }
 
-
 function saveResults() {
     const currentUserId = localStorage.getItem('currentUserId');
     if (!currentUserId) {
@@ -122,34 +128,29 @@ function saveResults() {
         alert('No results to submit.');
         return;
     }
-
+    
+    let whichDay = localStorage.getItem('currentTestWhichDay'); // 로컬 스토리지에서 저장된 최신 날짜를 가져옵니다.
     let resultsArray = JSON.parse(storedResults);
-    // 이미 로컬 저장소에 저장된 timestamp를 그대로 사용합니다.
     let formattedResults = resultsArray.map(result => {
-        // 유효성 검사를 통해 timestamp가 유효한지 확인합니다.
-        if (!result.Timestamp) {
-            console.error("Skipping result due to missing timestamp:", result);
-            return null;
-        }
         return {
             subjectName: 'Vocabulary',
-            subcategoryName: 'Words',
+            subcategoryName: 'Idioms',
             quizNo: result.QuizNo,
             userResponse: result.UserResponse,
             correctAnswer: result.CorrectAnswer,
             correctness: result.Correctness,
-            timestamp: result.Timestamp, // 로컬 저장된 timestamp를 그대로 사용
+            timestamp: result.Timestamp,
             testCount: result.TestCount
         };
-    }).filter(result => result !== null);
+    }).filter(result => result != null);
 
+    // Prepare the request body for saving results
     const requestBody = JSON.stringify({
         userId: currentUserId,
         results: formattedResults
     });
 
-    console.log("Request Body:", requestBody); // 서버로 보내는 요청 데이터 확인
-
+    // Save Results
     fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveResults', {
         method: 'POST',
         headers: {
@@ -159,19 +160,42 @@ function saveResults() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Success:', data);
+        console.log('Results saved successfully:', data);
+        // Prepare grades data
+        let testScore = localStorage.getItem('currentTestScore'); // 현재 테스트 점수를 로컬 스토리지에서 가져옵니다.
+        let testCount = resultsArray[0].TestCount; // 첫 번째 결과 항목의 TestCount를 사용합니다.
+        let gradesData = {
+            userId: currentUserId,
+            grades: [{
+                subcategoryName: 'Idioms',
+                quizNo: resultsArray[0].QuizNo, // 결과 배열의 첫 번째 항목의 QuizNo를 사용합니다.
+                testScore: testScore,
+                testCount: testCount,
+                whichDay: whichDay // 로컬 스토리지에서 가져온 최신 날짜를 사용합니다.
+            }]
+        };
+        // Now save grades
+        return fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveGrades', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gradesData)
+        });
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Grades saved successfully:', data);
+        localStorage.removeItem('testResults'); // 결과 데이터를 로컬 스토리지에서 삭제합니다.
+        localStorage.removeItem('currentTestScore'); // 현재 테스트 점수를 로컬 스토리지에서 삭제합니다.
+        localStorage.removeItem('currentTestWhichDay'); // 저장된 날짜 정보를 로컬 스토리지에서 삭제합니다.
         alert('성적 등록이 완료되었습니다!');
-        localStorage.removeItem('testResults');
-        isResultsSaved = true;
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to save results.');
-        isResultsSaved = false;
+        console.error('Error saving results and grades:', error);
+        alert('Failed to save results and grades.');
     });
 }
-
-
 
 // 타이머를 시작하는 함수
 function startTimer() {
@@ -215,20 +239,17 @@ function updateResultsList() {
     storedResults.filter(result => result.TestCount === testCount).forEach((result, index) => {
         const listItem = document.createElement('li');
         const correctnessIcon = result.Correctness ? '✔️' : '❌';
-        const section = result.QuizNo === 1 ? 'A' : 'B';
+        const section = result.QuizNo === 2 ? 'A' : 'B';
 
         listItem.textContent = `#${index + 1}.  ${result.UserResponse} - (${result.CorrectAnswer}) ${correctnessIcon} - ${result.Seconds}초 `;
         resultsList.appendChild(listItem);
     });
 }
 
-
-
-
 function checkAnswer() {
     const userInputElement = document.getElementById('answer');
     const userInputValue = userInputElement.value.trim().toLowerCase();
-    const correctAnswer = filteredWords[currentWordIndex][1].toLowerCase(); // 올바른 답안 가져오기
+    const correctAnswer = filteredIdioms[currentIdiomIndex].BlankAnswer.toLowerCase(); // 올바른 답안 가져오기
     const feedbackElement = document.getElementById('feedback');
 
     const isCorrect = userInputValue === correctAnswer;
@@ -250,7 +271,9 @@ function checkAnswer() {
     let seconds = stopTimer(); // 걸린 시간을 stopTimer 함수에서 가져옵니다.
     startTimer(); // 타이머를 재시작합니다.
 
-    const quizNo = 1; // 문제 번호를 1로 고정
+    const quizNo = 2; // 문제 번호를 1로 고정
+    let timestamp = getMySqlDateTime(new Date());
+    let whichDay = timestamp.split('T')[0]; // 'T'를 기준으로 날짜 부분만 추출
 
     let results = localStorage.getItem('testResults');
     results = results ? JSON.parse(results) : [];
@@ -267,17 +290,16 @@ function checkAnswer() {
     });
 
     localStorage.setItem('testResults', JSON.stringify(results));
+    localStorage.setItem('currentTestWhichDay', whichDay); // 최신 날짜 정보 저장
+
     updateResultsList();
 
     userInputElement.value = '';
-    currentWordIndex++;
-    displayNextWord();
+    currentIdiomIndex++;
+    displayNextIdiom();
     updateScoreboard();
     fadeOutEffect();
 }
-
-
-
 
 // 피드백 표시 효과를 서서히 사라지게 하는 함수
 function fadeOutEffect() {
@@ -302,17 +324,11 @@ document.getElementById('answer').addEventListener('keyup', function(event) {
     }
 });
 
-// 제출 버튼 클릭 시 기본 동작을 막고 답변을 확인하는 이벤트 리스너
-document.getElementById('submit').addEventListener('click', function(event) {
-    event.preventDefault(); // 이벤트의 기본 동작을 막음
-    checkAnswer(); // 답변을 확인하는 함수 호출
-});
-
 // 다음 버튼 클릭 시 새로운 테스트 페이지로 이동하는 이벤트 리스너
 document.getElementById('next').addEventListener('click', function() {
     const currentUserId = localStorage.getItem('currentUserId'); // 로컬 저장소에서 현재 사용자 ID를 가져옴
     if (currentUserId) { // 사용자 ID가 설정되어 있으면
-        window.location.href = `wordTest2.html?id=${currentUserId}`; // 새로운 테스트 페이지로 이동
+        window.location.href = `idiomTest3.html?id=${currentUserId}`; // 새로운 테스트 페이지로 이동
     } else { // 사용자 ID가 설정되어 있지 않으면
         alert("User ID is not set. Please check and try again."); // '사용자 ID가 설정되어 있지 않습니다. 확인 후 다시 시도하세요.'라는 알림창을 표시
     }

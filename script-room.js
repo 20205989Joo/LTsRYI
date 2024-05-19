@@ -24,7 +24,9 @@ function openVocabulary(vocabulary) {
         return;
     }
     if (vocabulary === '단어') {
-        window.location.href = `wordTest.html?id=${userId}`; // 사용자 ID를 URL에 포함하여 이동
+        window.location.href = `wordTest1.html?id=${userId}`; // 사용자 ID를 URL에 포함하여 이동
+    } else if (vocabulary === '숙어') {
+        window.location.href = `idiomTest1.html?id=${userId}`; // 사용자 ID를 URL에 포함하여 idiomTest.html로 이동
     } else {
         alert(`${vocabulary} 페이지로 이동합니다.`);
     }
@@ -38,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('Grades').addEventListener('click', function() {
         const currentUserId = localStorage.getItem('currentUserId'); // 로컬 저장소에서 현재 사용자 ID를 가져옴
         if (currentUserId) { // 사용자 ID가 설정되어 있으면
-            window.location.href = `grades.html?id=${currentUserId}`; // grades 페이지로 이동
+            window.location.href = `grades-Vocabulary.html?id=${currentUserId}`; // grades 페이지로 이동
         } else { // 사용자 ID가 설정되어 있지 않으면
             alert("User ID is not set. Please check and try again."); // '사용자 ID가 설정되어 있지 않습니다. 확인 후 다시 시도하세요.'라는 알림창을 표시
         }
@@ -47,65 +49,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function fetchChartBValueAndDrawHexagonChart() {
     try {
-        const response = await fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getResults`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ userId: userId })
-        });
+        const response = await fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getGrades?userId=${userId}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        const data = await response.json();
-        const dateScores = {};
-        const overallQuizScores = [];
+        const grades = await response.json();
 
-        data.forEach(result => {
-            const timestamp = result.Timestamp.replace('T', ' ').replace('.000Z', '');
-            const date = new Date(timestamp).toISOString().split('T')[0];
-            if (!dateScores[date]) {
-                dateScores[date] = { total: 0, correct: 0 };
-            }
-            dateScores[date].total++;
-            if (result.Correctness === 1) {
-                dateScores[date].correct++;
-            }
+        const today = new Date();
+        const formattedToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const todayGrades = grades.filter(grade => grade.WhichDay.split('T')[0] === formattedToday);
+
+        const quizLabels = ['quiz 1', 'quiz 2', 'quiz 3'];
+        const categories = ['Words', 'Idioms'];
+
+        // 카테고리별로 퀴즈 점수 계산
+        const scoresByCategory = categories.map(category => {
+            const categoryGrades = todayGrades.filter(grade => grade.SubcategoryName === category);
+            const quizScores = quizLabels.map(label => {
+                const quizNumber = parseInt(label.split(' ')[1]);
+                const quizGrades = categoryGrades.filter(grade => grade.QuizNo === quizNumber);
+
+                if (quizGrades.length === 0) return 0;
+
+                const highestTestCountGrade = quizGrades.reduce((max, grade) => (max.TestCount > grade.TestCount ? max : grade), quizGrades[0]);
+                return parseFloat(highestTestCountGrade.TestScore || 0);
+            });
+            return quizScores.reduce((a, b) => a + b, 0); // 카테고리별 모든 퀴즈 점수의 합
         });
 
-        Object.keys(dateScores).forEach(date => {
-            const quiz1Results = data.filter(result => result.QuizNo === 1 && new Date(result.Timestamp).toISOString().split('T')[0] === date);
-            const quiz2Results = data.filter(result => result.QuizNo === 2 && new Date(result.Timestamp).toISOString().split('T')[0] === date);
-            const quiz3Results = data.filter(result => result.QuizNo === 3 && new Date(result.Timestamp).toISOString().split('T')[0] === date);
+        // 각 카테고리별 점수 합계의 총합을 6으로 나눔
+        const totalScore = scoresByCategory.reduce((a, b) => a + b, 0);
+        const averageScore = totalScore / 6;
 
-            const getScore = (quizResults) => {
-                if (quizResults.length) {
-                    const latestTestCount = Math.max(...quizResults.map(result => result.TestCount));
-                    const latestQuizResults = quizResults.filter(result => result.TestCount === latestTestCount);
-                    const correctAnswers = latestQuizResults.filter(result => result.Correctness === 1).length;
-                    const totalAnswers = latestQuizResults.length;
-                    if (totalAnswers > 0) {
-                        return (correctAnswers / totalAnswers) * 100;
-                    }
-                }
-                return 0;
-            };
-
-            const score1 = getScore(quiz1Results);
-            const score2 = getScore(quiz2Results);
-            const score3 = getScore(quiz3Results);
-
-            const overallScore = (score1 + score2 + score3) / 3;
-            overallQuizScores.push({ date, overallScore });
-        });
-
-        const dateLabels = overallQuizScores.map(item => item.date);
-        const dateData = overallQuizScores.map(item => item.overallScore);
-
-        const lastDateScore = dateData.length > 0 ? dateData[dateData.length - 1] : 0;
-
-        // 각 꼭지점의 데이터 값 (기본값을 0으로 설정)
-        const hexagonData = [0, 0, 0, 0, 0, lastDateScore];
+        const hexagonData = [0, 0, 0, 0, 0, averageScore];
 
         drawHexagonChart(hexagonData);
     } catch (error) {
@@ -113,6 +89,7 @@ async function fetchChartBValueAndDrawHexagonChart() {
         alert('Error fetching data. Please check your network and try again.');
     }
 }
+
 
 function drawHexagonChart(data) {
     const svg = d3.select('svg').attr('viewBox', '0 0 800 720');

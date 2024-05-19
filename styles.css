@@ -37,6 +37,12 @@ footer {
     margin: 20px 0;
 }
 
+#translation {
+    margin: 10px 0; /* margin 설정 */
+    font-style: italic; /* 글자 스타일 설정 */
+    color: #555; /* 글자 색상 설정 */
+}
+
 #feedback, #scoreboard {
     margin: 20px 0;
 }
@@ -204,7 +210,6 @@ button:hover {
     .keyboard-visible #footer,
     .keyboard-visible #stopwatch,
     .keyboard-visible #answer,
-    .keyboard-visible #submit,
     .keyboard-visible #resultList,
     .keyboard-visible #feedback  {
         position: fixed;

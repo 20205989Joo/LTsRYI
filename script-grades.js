@@ -7,84 +7,56 @@ document.addEventListener('DOMContentLoaded', async function () {
         return;
     }
 
-    async function fetchData(userId) {
+    async function fetchGrades(userId) {
         try {
-            const response = await fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getResults`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId: userId })
-            });
+            const response = await fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getGrades?userId=${userId}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return await response.json();
         } catch (error) {
-            console.error('Error fetching data:', error);
-            alert('Error fetching data. Please check your network and try again.');
+            console.error('Error fetching grades:', error);
+            alert('Error fetching grades. Please check your network and try again.');
             return [];
         }
     }
 
-    fetchData(currentUserId).then(data => {
-        if (!data.length) {
-            console.log('No data available for this user.');
-            alert('No results found for this user.');
+    fetchGrades(currentUserId).then(grades => {
+        if (!grades.length) {
+            console.log('No grades available for this user.');
+            alert('No grades found for this user.');
             return;
         }
 
+        // 현지 시간대의 오늘 날짜 가져오기
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1 필요
+        const day = String(today.getDate()).padStart(2, '0'); // 일자를 두 자리로 표시
+        const formattedToday = `${year}-${month}-${day}`;
+        console.log('formattedToday:', formattedToday);
+
+        // Chart A 생성
         const quizLabels = ['quiz 1', 'quiz 2', 'quiz 3'];
-        const quizScores = [0, 0, 0];
+        const quizScores = quizLabels.map(label => {
+            const quizNumber = parseInt(label.split(' ')[1]);
+            const todayQuizGrades = grades.filter(grade => {
+                const gradeDate = grade.WhichDay.split('T')[0];
+                console.log(`Comparing ${gradeDate} with ${formattedToday} for ${label}`);
+                return gradeDate === formattedToday && grade.SubcategoryName === 'Words' && grade.QuizNo === quizNumber;
+            });
 
-        // 오늘 날짜 가져오기, 시간대를 'Asia/Seoul'로 명시
-        const options = { timeZone: 'Asia/Seoul', hour12: false };
-        const today = new Date().toLocaleDateString('en-CA', options);
+            console.log(`todayQuizGrades for ${label}:`, todayQuizGrades);
 
-        const todayResults = data.filter(result => {
-            const timestamp = result.Timestamp.replace('T', ' ').replace('.000Z', '');
-            const resultDate = new Date(timestamp).toLocaleDateString('en-CA', options);
-            return resultDate === today;
+            if (todayQuizGrades.length === 0) return 0; // 오늘 해당 퀴즈 점수가 없다면 0을 반환
+
+            // testcount가 가장 높은 요소를 찾아 testscore를 반환
+            const highestTestCountGrade = todayQuizGrades.reduce((max, grade) => (max.TestCount > grade.TestCount ? max : grade), todayQuizGrades[0]);
+            console.log(`highestTestCountGrade for ${label}:`, highestTestCountGrade);
+            return parseFloat(highestTestCountGrade.TestScore || 0);
         });
 
-        // Quiz 1
-        const quiz1Results = todayResults.filter(result => result.QuizNo === 1);
-        if (quiz1Results.length) {
-            const latestTestCount1 = Math.max(...quiz1Results.map(result => result.TestCount));
-            const latestQuiz1Results = quiz1Results.filter(result => result.TestCount === latestTestCount1);
-            const correctAnswers1 = latestQuiz1Results.filter(result => result.Correctness === 1).length;
-            const totalAnswers1 = latestQuiz1Results.length;
-            if (totalAnswers1 > 0) {
-                const scorePercentage1 = (correctAnswers1 / totalAnswers1) * 100;
-                quizScores[0] = scorePercentage1;
-            }
-        }
-
-        // Quiz 2
-        const quiz2Results = todayResults.filter(result => result.QuizNo === 2);
-        if (quiz2Results.length) {
-            const latestTestCount2 = Math.max(...quiz2Results.map(result => result.TestCount));
-            const latestQuiz2Results = quiz2Results.filter(result => result.TestCount === latestTestCount2);
-            const correctAnswers2 = latestQuiz2Results.filter(result => result.Correctness === 1).length;
-            const totalAnswers2 = latestQuiz2Results.length;
-            if (totalAnswers2 > 0) {
-                const scorePercentage2 = (correctAnswers2 / totalAnswers2) * 100;
-                quizScores[1] = scorePercentage2;
-            }
-        }
-
-        // Quiz 3
-        const quiz3Results = todayResults.filter(result => result.QuizNo === 3);
-        if (quiz3Results.length) {
-            const latestTestCount3 = Math.max(...quiz3Results.map(result => result.TestCount));
-            const latestQuiz3Results = quiz3Results.filter(result => result.TestCount === latestTestCount3);
-            const correctAnswers3 = latestQuiz3Results.filter(result => result.Correctness === 1).length;
-            const totalAnswers3 = latestQuiz3Results.length;
-            if (totalAnswers3 > 0) {
-                const scorePercentage3 = (correctAnswers3 / totalAnswers3) * 100;
-                quizScores[2] = scorePercentage3;
-            }
-        }
+        console.log('quizScores:', quizScores);
 
         const ctxA = document.getElementById('chartA').getContext('2d');
         new Chart(ctxA, {
@@ -92,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             data: {
                 labels: quizLabels,
                 datasets: [{
-                    label: 'Quiz Scores',
+                    label: `Words - 최종 점수`,
                     data: quizScores,
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(0,0,0,0.5)',
@@ -112,51 +84,75 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         });
 
-        // Chart B 설정 및 데이터 처리
-        const dateScores = {};
-        const overallQuizScores = [];
+        // Chart C 생성
+        const idiomsGrades = grades.filter(grade => grade.SubcategoryName === 'Idioms');
+        const idiomsQuizScores = quizLabels.map(label => {
+            const quizNumber = parseInt(label.split(' ')[1]);
+            const todayQuizGrades = idiomsGrades.filter(grade => {
+                const gradeDate = grade.WhichDay.split('T')[0];
+                console.log(`Comparing ${gradeDate} with ${formattedToday} for ${label}`);
+                return gradeDate === formattedToday && grade.QuizNo === quizNumber;
+            });
 
-        data.forEach(result => {
-            const timestamp = result.Timestamp.replace('T', ' ').replace('.000Z', '');
-            const date = new Date(timestamp).toISOString().split('T')[0];
-            if (!dateScores[date]) {
-                dateScores[date] = { total: 0, correct: 0 };
-            }
-            dateScores[date].total++;
-            if (result.Correctness === 1) {
-                dateScores[date].correct++;
-            }
+            console.log(`todayQuizGrades for ${label}:`, todayQuizGrades);
+
+            if (todayQuizGrades.length === 0) return 0; // 오늘 해당 퀴즈 점수가 없다면 0을 반환
+
+            // testcount가 가장 높은 요소를 찾아 testscore를 반환
+            const highestTestCountGrade = todayQuizGrades.reduce((max, grade) => (max.TestCount > grade.TestCount ? max : grade), todayQuizGrades[0]);
+            console.log(`highestTestCountGrade for ${label}:`, highestTestCountGrade);
+            return parseFloat(highestTestCountGrade.TestScore || 0);
         });
 
-        // 날짜별로 전체 퀴즈 점수의 평균을 계산
-        Object.keys(dateScores).forEach(date => {
-            const quiz1Results = data.filter(result => result.QuizNo === 1 && new Date(result.Timestamp).toISOString().split('T')[0] === date);
-            const quiz2Results = data.filter(result => result.QuizNo === 2 && new Date(result.Timestamp).toISOString().split('T')[0] === date);
-            const quiz3Results = data.filter(result => result.QuizNo === 3 && new Date(result.Timestamp).toISOString().split('T')[0] === date);
+        console.log('idiomsQuizScores:', idiomsQuizScores);
 
-            const getScore = (quizResults) => {
-                if (quizResults.length) {
-                    const latestTestCount = Math.max(...quizResults.map(result => result.TestCount));
-                    const latestQuizResults = quizResults.filter(result => result.TestCount === latestTestCount);
-                    const correctAnswers = latestQuizResults.filter(result => result.Correctness === 1).length;
-                    const totalAnswers = latestQuizResults.length;
-                    if (totalAnswers > 0) {
-                        return (correctAnswers / totalAnswers) * 100;
+        const ctxC = document.getElementById('chartC').getContext('2d');
+        new Chart(ctxC, {
+            type: 'bar',
+            data: {
+                labels: quizLabels,
+                datasets: [{
+                    label: 'Idioms - 최종 점수',
+                    data: idiomsQuizScores,
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 10
+                        }
                     }
                 }
-                return 0;
-            };
-
-            const score1 = getScore(quiz1Results);
-            const score2 = getScore(quiz2Results);
-            const score3 = getScore(quiz3Results);
-
-            const overallScore = (score1 + score2 + score3) / 3;
-            overallQuizScores.push({ date, overallScore });
+            }
         });
 
-        const dateLabels = overallQuizScores.map(item => item.date);
-        const dateData = overallQuizScores.map(item => item.overallScore);
+        // Chart B 설정 및 데이터 처리
+        const allScores = []; // 모든 점수를 저장할 배열
+        grades.forEach(grade => {
+            const date = grade.WhichDay.split('T')[0];
+            allScores.push({ date: date, score: parseFloat(grade.TestScore), category: grade.SubcategoryName });
+        });
+
+        const scoresByDate = {}; // 날짜별 점수 집계
+        allScores.forEach(item => {
+            if (!scoresByDate[item.date]) {
+                scoresByDate[item.date] = [];
+            }
+            scoresByDate[item.date].push(item.score);
+        });
+
+        const dateLabels = Object.keys(scoresByDate).sort(); // 날짜 순서대로 정렬
+        const dateScores = dateLabels.map(date => {
+            const scores = scoresByDate[date];
+            const total = scores.reduce((a, b) => a + b, 0);
+            return total / 6; // 각 날짜의 점수 합계를 6으로 나눔
+        });
 
         const ctxB = document.getElementById('chartB').getContext('2d');
         new Chart(ctxB, {
@@ -164,8 +160,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             data: {
                 labels: dateLabels,
                 datasets: [{
-                    label: 'Overall Accuracy Over Time',
-                    data: dateData,
+                    label: 'Vocabulary - 오늘의 평균',
+                    data: dateScores,
                     fill: false,
                     borderColor: 'rgba(153, 102, 255, 1)',
                     tension: 0.1
@@ -175,9 +171,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 scales: {
                     x: {
                         type: 'category',
-                        offset: true, // 이 옵션을 추가하여 x축의 시작 지점을 떨어뜨립니다.
+                        offset: true,
                         grid: {
-                            offset: true // x축의 그리드도 동일하게 조정합니다.
+                            offset: true
                         }
                     },
                     y: {

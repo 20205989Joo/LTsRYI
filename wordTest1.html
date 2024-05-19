@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Test</title>
+    <title>Word Test 2</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>단어 테스트</h1>
+        <h1>단어 테스트 - 선지형</h1>
     </header>
     <main>
         <div class="settings">
@@ -40,10 +40,12 @@
         <div class="center-container">
             <div id="feedback"></div>
             <div id="question"></div>
-            <input type="text" id="answer" placeholder="정답을 입력하시고, enter!">
-            <button id="submit" onclick="checkAnswer()">Submit</button>
-            <button id="next" style="display: none;">Next</button>
+            <div id="choices">
+                <!-- 선택지 버튼들이 JS로 채워질 예정 -->
+            </div>
             <div id="scoreboard">정답률: 0 / Total : 0</div>
+            <!-- grades 버튼 추가 -->
+            <button id="next" style="display: none;">Next</button>
         </div>
         
         <!-- 우측 목록을 위한 컨테이너 -->
@@ -59,6 +61,6 @@
     <footer>
         <p> </p>
     </footer>
-    <script src="script.js"></script>
+    <script src="script-wordtest1.js"></script>
 </body>
 </html>

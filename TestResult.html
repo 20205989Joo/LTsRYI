@@ -20,23 +20,31 @@
         }
         main {
             flex-grow: 1;
-            overflow: auto;
+            overflow: hidden;
             padding: 20px;
-        }
-        #allResults {
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+        #allResults {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
             overflow-x: auto;
             white-space: nowrap;
+            max-width: 100%;
+            margin-bottom: 20px;
         }
         .result-container {
             min-width: 300px;
-            margin-bottom: 20px;
+            max-width: 100%;
+            margin-right: 20px;
             padding: 10px;
             border: 1px solid #ccc;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             text-align: left;
+            white-space: normal; /* Allow text to wrap */
+            word-wrap: break-word; /* Ensure long words break */
         }
         button {
             margin: 10px;
@@ -64,46 +72,53 @@
         <button id="clearLocalStorage">로컬 스토리지 초기화</button>
     </main>
     <footer>
-        <p>Thank you for using our service!</p>
+        <p>Imma rulling everything</p>
     </footer>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getAllResults')
-    .then(response => response.json())
-    .then(data => {
-        console.log("Fetched data:", data); // 서버에서 받은 데이터를 로깅
-        const resultsByCount = data.reduce((acc, result) => {
-            const key = `${result.UserId}, ${result.SubjectName} - ${result.SubcategoryName} - Quiz ${result.QuizNo}, Count: ${result.TestCount}`;
-            acc[key] = acc[key] || [];
-            acc[key].push(result);
-            return acc;
-        }, {});
-
-        Object.keys(resultsByCount).forEach(key => {
-            let groupHtml = `<div class="result-container">
-                <h2>${key}</h2>`;
-
-            resultsByCount[key].forEach(result => {
-                // Timestamp에서 'T'와 '.000Z' 제거
-                const timestamp = result.Timestamp.replace('T', ' ').replace('.000Z', '');
-                
-                groupHtml += `<div>
-                    <h4>#${result.ResultId} Response : ( ${result.UserResponse} ) , Answer : ( ${result.CorrectAnswer} ) - [ ${result.Correctness ? '✔️' : '❌'} ] </h4>
-                    <p> Time: ${timestamp}</p>
-                    </div>`;
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getAllResults')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched data:", data); // 서버에서 받은 데이터를 로깅
+                const resultsByCount = data.reduce((acc, result) => {
+                    const key = `${result.UserId}, ${result.SubjectName} - ${result.SubcategoryName} - Quiz ${result.QuizNo}, Count: ${result.TestCount}`;
+                    acc[key] = acc[key] || [];
+                    acc[key].push(result);
+                    return acc;
+                }, {});
+    
+                // 키를 Timestamp 내림차순으로 정렬하기 위해 Object.entries를 사용하여 key-value 쌍을 배열로 변환
+                const sortedKeys = Object.entries(resultsByCount).sort((a, b) => {
+                    // 가장 최신 Timestamp를 찾아서 비교
+                    const lastTimestampA = a[1].reduce((max, item) => item.Timestamp > max ? item.Timestamp : max, a[1][0].Timestamp);
+                    const lastTimestampB = b[1].reduce((max, item) => item.Timestamp > max ? item.Timestamp : max, b[1][0].Timestamp);
+                    return lastTimestampB.localeCompare(lastTimestampA);
+                });
+    
+                // 정렬된 키를 사용하여 결과 표시
+                sortedKeys.forEach(([key, group]) => {
+                    let groupHtml = `<div class="result-container">
+                        <h2>${key}</h2>`;
+    
+                    group.forEach(result => {
+                        // Timestamp에서 'T'와 '.000Z' 제거
+                        const timestamp = result.Timestamp.replace('T', ' ').replace('.000Z', '');
+                        
+                        groupHtml += `<div>
+                            <h4>#${result.ResultId} Response : ( ${result.UserResponse} ) , Answer : ( ${result.CorrectAnswer} ) - [ ${result.Correctness ? '✔️' : '❌'} ] </h4>
+                            <p> Time: ${timestamp}</p>
+                            </div>`;
+                    });
+    
+                    groupHtml += `</div>`;
+                    document.getElementById('allResults').innerHTML += groupHtml;
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching the results:', error);
             });
-
-            groupHtml += `</div>`;
-            document.getElementById('allResults').innerHTML += groupHtml;
         });
-    })
-    .catch(error => {
-        console.error('Error fetching the results:', error);
-    });
-});
-
-
-
+    
         document.getElementById('resetAllResults').addEventListener('click', function() {
             if (!confirm('모든 사용자의 테스트 결과를 초기화하시겠습니까?')) {
                 return;
@@ -125,7 +140,7 @@
                 alert('Failed to reset all results.');
             });
         });
-
+    
         document.getElementById('clearLocalStorage').addEventListener('click', function() {
             if (confirm('로컬 스토리지의 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
                 localStorage.clear();
@@ -133,6 +148,6 @@
                 window.location.reload(); // 페이지를 새로 고침하여 변경 사항을 적용
             }
         });
-    </script>
+    </script>    
 </body>
 </html>
