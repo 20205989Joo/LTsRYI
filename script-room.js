@@ -57,7 +57,13 @@ async function fetchChartBValueAndDrawHexagonChart() {
 
         const today = new Date();
         const formattedToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        const todayGrades = grades.filter(grade => grade.WhichDay.split('T')[0] === formattedToday);
+        const todayGrades = grades.filter(grade => grade.WhichDay && grade.WhichDay.split('T')[0] === formattedToday);
+
+        if (!todayGrades || todayGrades.length === 0) {
+            console.log('No grades found for today.');
+            drawHexagonChart([0, 0, 0, 0, 0, 0]); // 오늘 날짜에 해당하는 성적이 없으면 기본 차트 그리기
+            return;
+        }
 
         const quizLabels = ['quiz 1', 'quiz 2', 'quiz 3'];
         const categories = ['Words', 'Idioms'];
@@ -65,31 +71,30 @@ async function fetchChartBValueAndDrawHexagonChart() {
         // 카테고리별로 퀴즈 점수 계산
         const scoresByCategory = categories.map(category => {
             const categoryGrades = todayGrades.filter(grade => grade.SubcategoryName === category);
-            const quizScores = quizLabels.map(label => {
+            return quizLabels.map(label => {
                 const quizNumber = parseInt(label.split(' ')[1]);
-                const quizGrades = categoryGrades.filter(grade => grade.QuizNo === quizNumber);
+                const quizGrades = categoryGrades.filter(grade => grade.QuizNo === quizNumber && grade.TestScore);
 
-                if (quizGrades.length === 0) return 0;
+                if (quizGrades.length === 0) return 0; // 퀴즈 데이터가 없으면 0점으로 처리
 
                 const highestTestCountGrade = quizGrades.reduce((max, grade) => (max.TestCount > grade.TestCount ? max : grade), quizGrades[0]);
-                return parseFloat(highestTestCountGrade.TestScore || 0);
-            });
-            return quizScores.reduce((a, b) => a + b, 0); // 카테고리별 모든 퀴즈 점수의 합
+                return parseFloat(highestTestCountGrade.TestScore || 0); // 최고 점수 반영
+            }).reduce((a, b) => a + b, 0); // 각 카테고리의 퀴즈 점수 합
         });
 
-        // 각 카테고리별 점수 합계의 총합을 6으로 나눔
+        // 카테고리별 점수 합계의 총합을 6으로 나눔
         const totalScore = scoresByCategory.reduce((a, b) => a + b, 0);
-        const averageScore = totalScore / 6;
+        const averageScore = totalScore / 6; // 고정된 숫자 6으로 나누기
 
         const hexagonData = [0, 0, 0, 0, 0, averageScore];
 
         drawHexagonChart(hexagonData);
     } catch (error) {
         console.error('Error fetching data:', error);
-        alert('Error fetching data. Please check your network and try again.');
+        console.log('Error fetching data. Please check your network and try again.');
+        drawHexagonChart([0, 0, 0, 0, 0, 0]); // 에러 발생 시 기본 차트 그리기
     }
 }
-
 
 function drawHexagonChart(data) {
     const svg = d3.select('svg').attr('viewBox', '0 0 800 720');

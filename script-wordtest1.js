@@ -92,7 +92,14 @@ function startTest() {
 
 function updateScoreboard() {
     const scoreboard = document.getElementById('scoreboard');
-    scoreboard.textContent = `정답률 : ${correctAnswers} / Total : ${totalQuestions}`;
+    scoreboard.textContent = `정답률 : ${correctAnswers} / Total : ${totalQuestions}`; // 화면에 표시되는 텍스트 유지
+
+    if (totalQuestions > 0) {
+        const accuracyRate = ((correctAnswers / totalQuestions) * 100).toFixed(2); // 백분율로 계산하고 소수점 두 자리로 제한
+        localStorage.setItem('currentTestScore', accuracyRate); // 로컬 저장소에 정답률 저장
+    } else {
+        localStorage.setItem('currentTestScore', '0.00'); // 문제가 없을 경우 정답률을 0.00%로 저장
+    }
 }
 
 function shuffle(array) {
@@ -104,12 +111,14 @@ function shuffle(array) {
 }
 
 function displayNextWord() {
+    const choicesContainer = document.getElementById('choices');
+    const nextButton = document.getElementById('next');
+
     if (currentWordIndex < filteredWords.length) {
         const word = filteredWords[currentWordIndex];
         document.getElementById('question').textContent = `Q. "${word[1]}"의 뜻은 무엇인가요?`;
 
         choices = generateChoices(word[2], filteredWords);
-        const choicesContainer = document.getElementById('choices');
         choicesContainer.innerHTML = '';
         choices.forEach((choice, index) => {
             const button = document.createElement('button');
@@ -118,11 +127,12 @@ function displayNextWord() {
             choicesContainer.appendChild(button);
         });
 
-        document.getElementById('choices').style.visibility = 'visible';
+        choicesContainer.style.visibility = 'visible';
+        nextButton.style.display = 'none'; // next 버튼 숨기기
     } else {
         document.getElementById('question').textContent = '다음 Test로 넘어갑니다.';
-        document.getElementById('choices').style.visibility = 'hidden';
-        document.getElementById('next').style.display = 'block'; // 다음 버튼을 표시
+        choicesContainer.style.visibility = 'hidden';
+        nextButton.style.display = 'block'; // 다음 버튼을 표시
         stopTimerAndReset();
         if (!isResultsSaved) {
             saveResults();
@@ -155,21 +165,21 @@ function saveResults() {
         alert('No results to submit.');
         return;
     }
-
+    
+    let whichDay = localStorage.getItem('currentTestWhichDay'); // 로컬 스토리지에서 저장된 최신 날짜를 가져옵니다.
     let resultsArray = JSON.parse(storedResults);
-    // 이미 변환된 timestamp를 사용하여 추가 변환을 수행하지 않습니다.
-    const formattedResults = resultsArray.map(result => {
+    let formattedResults = resultsArray.map(result => {
         return {
             subjectName: 'Vocabulary',
             subcategoryName: 'Words',
-            quizNo: result.QuizNo,
+            quizNo: 1,  // QuizNo는 1로 설정합니다.
             userResponse: result.UserResponse,
             correctAnswer: result.CorrectAnswer,
             correctness: result.Correctness,
-            timestamp: result.Timestamp,  // 저장된 timestamp를 그대로 사용
+            timestamp: result.Timestamp,
             testCount: result.TestCount
         };
-    });
+    }).filter(result => result != null);
 
     const requestBody = JSON.stringify({
         userId: currentUserId,
@@ -185,15 +195,39 @@ function saveResults() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Success:', data);
+        console.log('Results saved successfully:', data);
+        let testScore = localStorage.getItem('currentTestScore'); // 현재 테스트 점수를 로컬 스토리지에서 가져옵니다.
+        let testCount = resultsArray[0].TestCount; // 첫 번째 결과 항목의 TestCount를 사용합니다.
+        let gradesData = {
+            userId: currentUserId,
+            grades: [{
+                subcategoryName: 'Words',
+                quizNo: 1, // 결과 배열의 첫 번째 항목의 QuizNo를 사용합니다.
+                testScore: testScore,
+                testCount: testCount,
+                whichDay: whichDay // 로컬 스토리지에서 가져온 최신 날짜를 사용합니다.
+            }]
+        };
+
+        return fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveGrades', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gradesData)
+        });
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Grades saved successfully:', data);
+        localStorage.removeItem('testResults'); // 결과 데이터를 로컬 스토리지에서 삭제합니다.
+        localStorage.removeItem('currentTestScore'); // 현재 테스트 점수를 로컬 스토리지에서 삭제합니다.
+        localStorage.removeItem('currentTestWhichDay'); // 저장된 날짜 정보를 로컬 스토리지에서 삭제합니다.
         alert('성적 등록이 완료되었습니다!');
-        localStorage.removeItem('testResults');
-        isResultsSaved = true;
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to save results.');
-        isResultsSaved = false;
+        console.error('Error saving results and grades:', error);
+        alert('Failed to save results and grades.');
     });
 }
 
@@ -206,7 +240,6 @@ function getMySqlDateTime(dateInput) {
     }
     return date.toLocaleString("sv-SE").replace(' ', 'T');
 }
-
 
 // 타이머를 시작하는 함수
 function startTimer() {
@@ -221,7 +254,6 @@ function stopTimer() {
 
     return seconds; // 걸린 시간 반환
 }
-
 
 function updateTimerDisplay() {
     let currentTime = new Date();
@@ -258,7 +290,7 @@ function updateResultsList() {
         const correctnessIcon = result.Correctness ? '✔️' : '❌';
         const section = result.QuizNo === 1 ? 'A' : 'B';
 
-         listItem.textContent = `#${index + 1}. - (${result.CorrectAnswer}) ${correctnessIcon} - ${result.Seconds}초 `;
+        listItem.textContent = `#${index + 1}. - (${result.CorrectAnswer}) ${correctnessIcon} - ${result.Seconds}초 `;
         resultsList.appendChild(listItem);
     });
 }
@@ -285,6 +317,8 @@ function checkAnswer(selectedIndex) {
     }
 
     const quizNo = 1; // 문제 번호를 2로 고정
+    let timestamp = getMySqlDateTime(new Date());
+    let whichDay = timestamp.split('T')[0]; // 'T'를 기준으로 날짜 부분만 추출
 
     let results = localStorage.getItem('testResults');
     results = results ? JSON.parse(results) : [];
@@ -301,6 +335,7 @@ function checkAnswer(selectedIndex) {
     });
 
     localStorage.setItem('testResults', JSON.stringify(results));
+    localStorage.setItem('currentTestWhichDay', whichDay); // 최신 날짜 정보 저장
     updateResultsList();
 
     currentWordIndex++;
@@ -334,7 +369,6 @@ document.getElementById('next').addEventListener('click', function() {
         alert("User ID is not set. Please check and try again."); // '사용자 ID가 설정되어 있지 않습니다. 확인 후 다시 시도하세요.'라는 알림창을 표시
     }
 });
-
 
 window.onload = function() {
     loadJsonData();

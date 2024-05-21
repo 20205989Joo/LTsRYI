@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const quizScores = quizLabels.map(label => {
             const quizNumber = parseInt(label.split(' ')[1]);
             const todayQuizGrades = grades.filter(grade => {
+                if (!grade.WhichDay || !grade.TestScore) return false; // null 값 검사 추가
                 const gradeDate = grade.WhichDay.split('T')[0];
                 console.log(`Comparing ${gradeDate} with ${formattedToday} for ${label}`);
                 return gradeDate === formattedToday && grade.SubcategoryName === 'Words' && grade.QuizNo === quizNumber;
@@ -89,6 +90,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const idiomsQuizScores = quizLabels.map(label => {
             const quizNumber = parseInt(label.split(' ')[1]);
             const todayQuizGrades = idiomsGrades.filter(grade => {
+                if (!grade.WhichDay || !grade.TestScore) return false; // null 값 검사 추가
                 const gradeDate = grade.WhichDay.split('T')[0];
                 console.log(`Comparing ${gradeDate} with ${formattedToday} for ${label}`);
                 return gradeDate === formattedToday && grade.QuizNo === quizNumber;
@@ -135,6 +137,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Chart B 설정 및 데이터 처리
         const allScores = []; // 모든 점수를 저장할 배열
         grades.forEach(grade => {
+            if (!grade.WhichDay || !grade.TestScore) return; // null 값 검사 추가
             const date = grade.WhichDay.split('T')[0];
             allScores.push({ date: date, score: parseFloat(grade.TestScore), category: grade.SubcategoryName });
         });

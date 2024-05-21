@@ -72,7 +72,7 @@
         <button id="clearLocalStorage">로컬 스토리지 초기화</button>
     </main>
     <footer>
-        <p>Imma rulling everything</p>
+        <p>Imma ruling everything</p>
     </footer>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -100,12 +100,12 @@
                     let groupHtml = `<div class="result-container">
                         <h2>${key}</h2>`;
     
-                    group.forEach(result => {
+                    group.forEach((result, index) => {
                         // Timestamp에서 'T'와 '.000Z' 제거
                         const timestamp = result.Timestamp.replace('T', ' ').replace('.000Z', '');
                         
                         groupHtml += `<div>
-                            <h4>#${result.ResultId} Response : ( ${result.UserResponse} ) , Answer : ( ${result.CorrectAnswer} ) - [ ${result.Correctness ? '✔️' : '❌'} ] </h4>
+                            <h4>#${index + 1} Response : ( ${result.UserResponse} ) , Answer : ( ${result.CorrectAnswer} ) - [ ${result.Correctness ? '✔️' : '❌'} ] </h4>
                             <p> Time: ${timestamp}</p>
                             </div>`;
                     });
