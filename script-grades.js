@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const urlParams = new URLSearchParams(window.location.search);
     const currentUserId = urlParams.get('id');  // URL에서 사용자 ID를 가져옵니다.
+    const subjectName = urlParams.get('subject'); // URL에서 subjectName을 가져옵니다.
 
     if (!currentUserId) {
         alert('사용자 ID가 설정되지 않았습니다.');
         return;
     }
+
+    document.getElementById('pageTitle').textContent = `Exam Results : ${subjectName}`; // 제목 업데이트
 
     async function fetchGrades(userId) {
         try {

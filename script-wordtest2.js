@@ -47,8 +47,15 @@ function populateDayOptions() {
 function startTest() {
     testCount = parseInt(localStorage.getItem('testCount') || '0') + 1; // 로컬 스토리지에서 testCount를 가져와 1을 더함 (없으면 0으로 시작)
     localStorage.setItem('testCount', testCount.toString()); // 새로운 testCount 값을 문자열로 변환하여 로컬 스토리지에 저장
-    const startDay = document.getElementById('startDay').value; // 사용자가 선택한 시작 날짜를 가져옴
-    const endDay = document.getElementById('endDay').value; // 사용자가 선택한 종료 날짜를 가져옴
+    const startDay = document.getElementById('startDay').value;
+    const endDay = document.getElementById('endDay').value;
+
+    const startDayNumber = startDay.replace(/DAY /, '');
+    const endDayNumber = endDay.replace(/DAY /, '');
+    const testRange = startDayNumber + endDayNumber; // 예: '03'과 '07'이 결합되어 '0307'이 됨
+    
+    localStorage.setItem('testRange', testRange);
+    
     filteredWords = wordList.filter(word => { // wordList 배열을 필터링
         const day = parseInt(word[0].replace(/DAY /, '')); // 각 단어의 날짜 부분에서 'DAY ' 문자를 제거하고 정수로 변환
         return day >= parseInt(startDay.replace(/DAY /, '')) && day <= parseInt(endDay.replace(/DAY /, '')); // 사용자가 선택한 시작과 종료 날짜 사이에 있는지 판단
@@ -130,6 +137,7 @@ function saveResults() {
     
     let whichDay = localStorage.getItem('currentTestWhichDay'); // 로컬 스토리지에서 저장된 최신 날짜를 가져옵니다.
     let resultsArray = JSON.parse(storedResults);
+    let testRange = localStorage.getItem('testRange');
     let formattedResults = resultsArray.map(result => {
         return {
             subjectName: 'Vocabulary',
@@ -139,7 +147,8 @@ function saveResults() {
             correctAnswer: result.CorrectAnswer,
             correctness: result.Correctness,
             timestamp: result.Timestamp,
-            testCount: result.TestCount
+            testCount: result.TestCount,
+            testRange: testRange
         };
     }).filter(result => result != null);
 
@@ -188,6 +197,7 @@ function saveResults() {
         localStorage.removeItem('testResults'); // 결과 데이터를 로컬 스토리지에서 삭제합니다.
         localStorage.removeItem('currentTestScore'); // 현재 테스트 점수를 로컬 스토리지에서 삭제합니다.
         localStorage.removeItem('currentTestWhichDay'); // 저장된 날짜 정보를 로컬 스토리지에서 삭제합니다.
+        localStorage.removeItem('testRange');
         alert('성적 등록이 완료되었습니다!');
     })
     .catch(error => {
@@ -195,8 +205,6 @@ function saveResults() {
         alert('Failed to save results and grades.');
     });
 }
-
-
 
 
 

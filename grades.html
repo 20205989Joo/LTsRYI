@@ -31,7 +31,7 @@
     </style>
 </head>
 <body>
-    <h1>Exam Results : Vocabulary</h1>
+    <h1 id="pageTitle">Exam Results : Vocabulary</h1>
     <div class="charts-container">
         <div class="chart-wrapper">
             <h2>영역별 점수 - Words</h2>
@@ -46,5 +46,12 @@
         <h2>성적 상승 그래프</h2>
         <canvas id="chartB"></canvas>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const subjectName = params.get('subject');
+            document.getElementById('pageTitle').textContent = `Exam Results : ${subjectName}`;
+        });
+    </script>
 </body>
 </html>

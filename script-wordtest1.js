@@ -73,8 +73,17 @@ function initializeChoices() {
 function startTest() {
     testCount = parseInt(localStorage.getItem('testCount') || '0') + 1;
     localStorage.setItem('testCount', testCount.toString());
+
     const startDay = document.getElementById('startDay').value;
     const endDay = document.getElementById('endDay').value;
+
+    const startDayNumber = startDay.replace(/DAY /, '');
+    const endDayNumber = endDay.replace(/DAY /, '');
+    const testRange = startDayNumber + endDayNumber; // 예: '03'과 '07'이 결합되어 '0307'이 됨
+    
+    localStorage.setItem('testRange', testRange);
+
+
     filteredWords = wordList.filter(word => {
         const day = parseInt(word[0].replace(/DAY /, ''));
         return day >= parseInt(startDay.replace(/DAY /, '')) && day <= parseInt(endDay.replace(/DAY /, ''));
@@ -167,6 +176,7 @@ function saveResults() {
     }
     
     let whichDay = localStorage.getItem('currentTestWhichDay'); // 로컬 스토리지에서 저장된 최신 날짜를 가져옵니다.
+    let testRange = localStorage.getItem('testRange');
     let resultsArray = JSON.parse(storedResults);
     let formattedResults = resultsArray.map(result => {
         return {
@@ -177,7 +187,8 @@ function saveResults() {
             correctAnswer: result.CorrectAnswer,
             correctness: result.Correctness,
             timestamp: result.Timestamp,
-            testCount: result.TestCount
+            testCount: result.TestCount,
+            testRange: testRange
         };
     }).filter(result => result != null);
 
@@ -223,6 +234,7 @@ function saveResults() {
         localStorage.removeItem('testResults'); // 결과 데이터를 로컬 스토리지에서 삭제합니다.
         localStorage.removeItem('currentTestScore'); // 현재 테스트 점수를 로컬 스토리지에서 삭제합니다.
         localStorage.removeItem('currentTestWhichDay'); // 저장된 날짜 정보를 로컬 스토리지에서 삭제합니다.
+        localStorage.removeItem('testRange');
         alert('성적 등록이 완료되었습니다!');
     })
     .catch(error => {

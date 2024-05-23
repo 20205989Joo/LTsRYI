@@ -1,0 +1,108 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header, footer {
+    background-color: #000;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 5px solid rgb(242, 189, 13);
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+#canvasContainer {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    margin: 20px auto;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+.node {
+    position: absolute;
+    min-width: 80px;
+    min-height: 40px;
+    background-color: #2fad83;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    z-index: 10;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    box-sizing: border-box;
+    text-align: center;
+    flex-direction: column;
+    transition: opacity 0.3s;
+}
+
+.node.editing {
+    opacity: 0.5;
+}
+
+.node .node-text {
+    width: 100%;
+    padding: 5px;
+    outline: none;
+    background-color: transparent;
+    color: white;
+    border: none;
+    text-align: center;
+    pointer-events: none;
+}
+
+.node.editing .node-text {
+    color: black;
+    pointer-events: auto;
+}
+
+.node .node-controls {
+    display: none;
+    justify-content: center;
+    margin-top: 5px;
+}
+
+.node.editing .node-controls {
+    display: flex;
+}
+
+.button {
+    padding: 3px 6px;
+    margin: 0 2px;
+    background-color: #2fad83;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.button.add {
+    background-color: #45a049;
+}
+
+.button.add:hover {
+    background-color: #45a049;
+}
+
+.button.delete {
+    background-color: #f44336;
+}
+
+.button.delete:hover {
+    background-color: #d32f2f;
+}
