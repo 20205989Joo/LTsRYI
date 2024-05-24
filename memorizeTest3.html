@@ -3,32 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memorize Test 3</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Memorize Test</title>
+    <link rel="stylesheet" href="style-1try.css">
 </head>
 <body>
     <header>
-        <h1>기억 테스트 - 결과</h1>
+        <div class="header-container">
+            <h1>Memorize Test</h1>
+            <button class="next-button" onclick="location.href='nextpage.html'">Next</button>
+        </div>
     </header>
     <main>
-        <div class="button-container">
-            <button onclick="showInstructions()">Instructions</button>
-            <button onclick="showGrades()">Grades</button>
+        <div class="container">
+            <div class="left-panel">
+                <div id="countdownContainer">
+                    <h2 id="countdown">3</h2>
+                </div>
+                <div id="paragraphContainer" style="display: none;">
+                    <div id="dropdownContainer" style="display: flex;">
+                        <select id="gradeDropdown" style="margin-right: 10px;">
+                            <option value="" disabled selected>학년 선택</option>
+                        </select>
+                        <select id="yearDropdown" disabled style="margin-right: 10px;">
+                            <option value="" disabled selected>연도 선택</option>
+                        </select>
+                        <select id="monthDropdown" disabled style="margin-right: 10px;">
+                            <option value="" disabled selected>월 선택</option>
+                        </select>
+                        <select id="numberDropdown" disabled>
+                            <option value="" disabled selected>번호 선택</option>
+                        </select>
+                    </div>
+                    <div id="promptsContainer">
+                        <!-- 제시문 컨테이너들이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+            <div class="right-panel">
+                <div id="questionsContainer">
+                    <!-- 질문 컨테이너가 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
         </div>
     </main>
     <footer>
-        <p> </p>
+        <p>© Test page</p>
     </footer>
-    <script>
-        function showInstructions() {
-            window.location.href = 'instructions.html';
-        }
-        
-        function showGrades() {
-            const params = new URLSearchParams(window.location.search);
-            const userId = params.get('id');
-            window.location.href = `grades.html?id=${userId}&subject=Intuition`; // Intuition은 직관의 영어 이름입니다.
-        }
-    </script>
+    <script type="module" src="script-paragraphlet.js"></script>
+    <script type="module" src="script-memorize.js"></script>
 </body>
 </html>

@@ -20,7 +20,65 @@ footer {
     width: 100%;
 }
 
+main {
+    display: flex; /* flexbox 레이아웃 적용 */
+    justify-content: center; /* 내용 중앙 정렬 */
+    align-items: start; /* 내용 상단 정렬 */
+    height: calc(100vh - 120px); /* 높이 설정, header와 footer 높이 고려 */
+    padding: 0; /* 패딩 제거 */
+}
+
+#paragraphContainer {
+    width: 50%; /* 화면의 50% 차지 */
+    overflow-y: auto; /* 내용이 많을 경우 스크롤 가능 */
+    padding: 20px; /* 내용과 테두리 사이의 간격 */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 그림자 효과 */
+    height: 100%; /* 부모 컨테이너의 높이에 맞춤 */
+}
+
+#paragraphContainer select {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    font-size: 16px;
+}
+
+#paragraphContainer #promptsContainer {
+    margin-top: 20px;
+}
+
+.prompt {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.prompt p {
+    margin: 0 0 10px 0;
+}
+
+.prompt input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+#dropdownContainer select {
+    width: auto; /* 드롭다운의 너비를 콘텐츠에 맞추어 조절 */
+    padding: 5px; /* 패딩을 줄여서 드롭다운을 작게 만듦 */
+    margin-right: 10px; /* 드롭다운 사이의 간격 */
+    border-radius: 3px; /* 모서리 둥글기 */
+    border: 1px solid #ccc; /* 테두리 설정 */
+    background-color: #fff; /* 배경색 설정 */
+}
+
 #canvasContainer {
+    flex: 2; /* 우측 컨테이너 크기 조정 */
+    height: 100%; /* 높이 설정 */
     position: relative;
     width: 800px;
     height: 600px;
@@ -29,9 +87,15 @@ footer {
     background-color: #fff;
 }
 
+.container {
+    display: flex;
+    width: 100%; /* 전체 너비 사용 */
+    height: 100%; /* 전체 높이 사용 */
+}
+
 .node {
     position: absolute;
-    min-width: 80px;
+    min-width: 100px;
     min-height: 40px;
     background-color: #2fad83;
     border-radius: 15px;
@@ -63,6 +127,7 @@ footer {
     border: none;
     text-align: center;
     pointer-events: none;
+    position: relative;
 }
 
 .node.editing .node-text {
@@ -105,4 +170,49 @@ footer {
 
 .button.delete:hover {
     background-color: #d32f2f;
+}
+
+/* 단계별 색상 및 텍스트 크기 */
+.node.level-0 {
+    background-color: #1380b3;
+    font-size: 23px;
+}
+
+.node.level-1 {
+    background-color: #21a795;
+    font-size: 15px;
+}
+
+.node.level-2 {
+    background-color: #34c08a;
+    font-size: 12px;
+}
+
+.node.level-3 {
+    background-color: #b7d5bbc0;
+    font-size: 16px;
+}
+
+.node.hint {
+    background-color: rgb(204, 162, 45); /* 배경색을 노란색으로 설정 */
+    color: purple; /* 글씨색을 보라색으로 설정 */
+}
+
+
+/* 힌트 노드 스타일 */
+.node.hint .node-text::before {
+    content: "(눌러서 나의 경험도 써보자)"; /* 힌트 텍스트 */
+    color: #000000; /* 힌트 텍스트 색상 */
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    display:none;
+}
+
+.node.hint .node-text:empty::before {
+    display: block; /* 텍스트가 비어있을 때 힌트 텍스트 표시 */
+}
+
+.node.editing .node-text::before {
+    display: none; /* 편집 모드에서는 힌트 텍스트 숨김 */
 }
