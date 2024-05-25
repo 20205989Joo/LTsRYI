@@ -9,39 +9,61 @@
 <body>
     <header>
         <div class="header-container">
-            <h1>Memorize Test</h1>
-            <button class="next-button" onclick="location.href='nextpage.html'">Next</button>
+            <h1>2. 1st Try : 30초 캐치 훈련</h1>
+            <button class="next-button" onclick="location.href='analysisTest3.html'">Next</button>
         </div>
     </header>
     <main>
         <div class="container">
             <div class="left-panel">
-                <div id="countdownContainer">
-                    <h2 id="countdown">3</h2>
-                </div>
-                <div id="paragraphContainer" style="display: none;">
-                    <div id="dropdownContainer" style="display: flex;">
-                        <select id="gradeDropdown" style="margin-right: 10px;">
-                            <option value="" disabled selected>학년 선택</option>
-                        </select>
-                        <select id="yearDropdown" disabled style="margin-right: 10px;">
-                            <option value="" disabled selected>연도 선택</option>
-                        </select>
-                        <select id="monthDropdown" disabled style="margin-right: 10px;">
-                            <option value="" disabled selected>월 선택</option>
-                        </select>
-                        <select id="numberDropdown" disabled>
-                            <option value="" disabled selected>번호 선택</option>
-                        </select>
+                <div id="dropdownContainer" class="dropdown-container">
+                    <select id="gradeDropdown" class="dropdown">
+                        <option value="" disabled selected>학년 선택</option>
+                    </select>
+                    <select id="yearDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>연도 선택</option>
+                    </select>
+                    <select id="monthDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>월 선택</option>
+                    </select>
+                    <select id="numberDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>번호 선택</option>
+                    </select>
+                    <button id="hideButton" class="hide-button">HIDE!</button>
+                    <div id="timerContainer" class="timer-container">
+                        <svg id="timer" viewBox="0 0 36 36" class="circular-chart teal">
+                            <path class="circle-bg"
+                                d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle"
+                                stroke-dasharray="100, 100"
+                                d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <text x="18" y="20.35" class="timer-text">30</text>
+                        </svg>
                     </div>
-                    <div id="promptsContainer">
-                        <!-- 제시문 컨테이너들이 여기에 동적으로 추가됩니다 -->
+                </div>
+                <div id="contentContainer" class="content-container">
+                    <div id="paragraphContainer" class="field">
+                        <div id="paragraphField">
+                            <!-- 문제 번호와 질문, 제시문 필드 -->
+                        </div>
+                        <svg id="coverRectangle" class="cover-rectangle">
+                            <!-- SVG 내용이 여기에 동적으로 추가될 것입니다 -->
+                        </svg>
+                    </div>
+                    <div id="choicesContainer" class="field">
+                        <div id="choicesField">
+                            <!-- 선택지 필드 -->
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="right-panel">
-                <div id="questionsContainer">
-                    <!-- 질문 컨테이너가 여기에 동적으로 추가됩니다 -->
+                <div id="questionsContainer" class="questions-container">
+                    <!-- 질문과 답변 필드 -->
                 </div>
             </div>
         </div>
@@ -49,7 +71,6 @@
     <footer>
         <p>© Test page</p>
     </footer>
-    <script type="module" src="script-paragraphlet.js"></script>
-    <script type="module" src="script-memorize.js"></script>
+    <script src="script-1try.js"></script>
 </body>
 </html>

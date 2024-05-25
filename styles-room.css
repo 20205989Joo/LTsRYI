@@ -87,3 +87,7 @@ button:hover {
     top: -720px; /* SVG 높이만큼 위로 이동 */
     pointer-events: none; /* SVG 아래의 클릭 이벤트를 방지하지 않도록 설정 */
 }
+
+.interactiveHexagon:hover polygon {
+    fill: rgba(0,0,0,0.8);
+}

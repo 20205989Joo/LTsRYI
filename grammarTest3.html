@@ -3,32 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grammar Test 3</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Grammar Test</title>
+    <link rel="stylesheet" href="style-3try.css">
 </head>
 <body>
     <header>
-        <h1>기초문법 테스트 - 결과</h1>
+        <div class="header-container">
+            <h1>4. 3rd Try : 번역을 하고 풀어보자</h1>
+            <button class="next-button" onclick="location.href='synthesisTest3.html'">Next</button>
+        </div>
     </header>
     <main>
-        <div class="button-container">
-            <button onclick="showInstructions()">Instructions</button>
-            <button onclick="showGrades()">Grades</button>
+        <div class="container">
+            <div class="left-panel">
+                <div id="dropdownContainer" class="dropdown-container">
+                    <select id="gradeDropdown" class="dropdown">
+                        <option value="" disabled selected>학년 선택</option>
+                    </select>
+                    <select id="yearDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>연도 선택</option>
+                    </select>
+                    <select id="monthDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>월 선택</option>
+                    </select>
+                    <select id="numberDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>번호 선택</option>
+                    </select>
+                </div>
+                <div id="contentContainer" class="content-container">
+                    <div id="nonqField" class="nonq-field">
+                        <!-- 질문번호와 질문내용 -->
+                    </div>
+                    <div id="paragraphContainer" class="field">
+                        <div id="paragraphField">
+                            <!-- 제시문 필드 -->
+                        </div>
+                    </div>
+                    <div id="choicesContainer" class="field">
+                        <div id="choicesField">
+                            <!-- 선택지 필드 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="right-panel">
+                <div class="top-container">
+                    <button id="switchButton" class="switch-button">Switch</button>
+                    <div id="field1">
+                        <button id="prevButton">◀</button>
+                        <h2 id="explanationTitle">#Explanation Idiom</h2>
+                        <button id="nextButton">▶</button>
+                        <p id="idiomContent">Content will appear here</p>
+                    </div>
+                    <div id="field2" style="display:none;">
+                        <!-- 다른 필드 내용 -->
+                    </div>
+                </div>
+                <div id="sentenceContainer">
+                    <!-- 문장별로 나눠진 제시문과 입력 필드 -->
+                </div>
+            </div>
         </div>
     </main>
     <footer>
-        <p> </p>
+        <p>© Test page</p>
     </footer>
-    <script>
-        function showInstructions() {
-            window.location.href = 'instructions.html';
-        }
-        
-        function showGrades() {
-            const params = new URLSearchParams(window.location.search);
-            const userId = params.get('id');
-            window.location.href = `grades.html?id=${userId}&subject=Writing`; // Writing은 쓰기의 영어 이름입니다.
-        }
-    </script>
+    <script src="script-idiombreakdown.js"></script>
 </body>
 </html>

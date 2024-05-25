@@ -3,32 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis Test 3</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Analysis Test</title>
+    <link rel="stylesheet" href="style-2try.css">
 </head>
 <body>
     <header>
-        <h1>분해 테스트 - 결과</h1>
+        <div class="header-container">
+            <h1>3. 2nd Try : '단어'를 다 알았다면..?</h1>
+            <button class="next-button" onclick="location.href='grammarTest3.html'">Next</button>
+        </div>
     </header>
     <main>
-        <div class="button-container">
-            <button onclick="showInstructions()">Instructions</button>
-            <button onclick="showGrades()">Grades</button>
+        <div class="container">
+            <div class="left-panel">
+                <div id="dropdownContainer" class="dropdown-container">
+                    <select id="gradeDropdown" class="dropdown">
+                        <option value="" disabled selected>학년 선택</option>
+                    </select>
+                    <select id="yearDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>연도 선택</option>
+                    </select>
+                    <select id="monthDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>월 선택</option>
+                    </select>
+                    <select id="numberDropdown" class="dropdown" disabled>
+                        <option value="" disabled selected>번호 선택</option>
+                    </select>
+                </div>
+                <div id="contentContainer" class="content-container">
+                    <div id="nonqField" class="nonq-field">
+                        <!-- 질문번호와 질문내용 -->
+                    </div>
+                    <div id="paragraphContainer" class="field">
+                        <div id="paragraphField">
+                            <!-- 제시문 필드 -->
+                        </div>
+                    </div>
+                    <div id="choicesContainer" class="field">
+                        <div id="choicesField">
+                            <!-- 선택지 필드 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="right-panel">
+                <div class="top-half">
+                    <iframe src="https://en.dict.naver.com/#/main" class="iframe-content"></iframe>
+                </div>
+                <div class="bottom-half" id="customWordList">
+                    <!-- Custom Word List -->
+                </div>
+                <button id="saveButton" class="save-button">저장</button>
+            </div>
         </div>
     </main>
     <footer>
-        <p> </p>
+        <p>© Test page</p>
     </footer>
-    <script>
-        function showInstructions() {
-            window.location.href = 'instructions.html';
-        }
-        
-        function showGrades() {
-            const params = new URLSearchParams(window.location.search);
-            const userId = params.get('id');
-            window.location.href = `grades.html?id=${userId}&subject=RC`; // RC는 독해의 영어 이름입니다.
-        }
-    </script>
+    <script src="script-wordlookup.js"></script>
 </body>
 </html>

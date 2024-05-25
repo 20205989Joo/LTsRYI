@@ -104,8 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchChartDataAndDrawHexagonChart();
 });
 
-
-
 async function fetchChartDataAndDrawHexagonChart() {
     try {
         const grades = await fetchGrades(userId);
@@ -116,6 +114,10 @@ async function fetchChartDataAndDrawHexagonChart() {
         console.log('Error fetching data. Please check your network and try again.');
         drawHexagonChart([0, 0, 0, 0, 0, 0]); // 에러 발생 시 기본 차트 그리기
     }
+
+    // 작은 육각형을 가장 위에 그리기 위해 호출
+    const svg = d3.select('svg');
+    drawSmallHexagons(svg);
 }
 
 async function fetchGrades(userId) {
@@ -242,3 +244,60 @@ function drawHexagonChart(data) {
             .text(data[i] === 5 ? 0 : data[i]); // 실제 값을 표시 (0은 5로 대체되어 그려졌으므로 다시 0으로 표시)
     });
 }
+
+document.addEventListener('click', function(event) {
+    // 모든 subcategory 창을 선택
+    const subcategoryOptions = document.querySelectorAll('.subcategoryOptions');
+
+    // 클릭된 요소가 subcategory 창 내부의 요소가 아니고 subcategory 창이 열려 있을 때만 창을 닫음
+    if (!event.target.closest('.subcategoryOptions') && !event.target.matches('button')) {
+        subcategoryOptions.forEach(function(div) {
+            div.style.display = 'none'; // 창을 닫음
+        });
+    }
+});
+
+function drawSmallHexagons(svg) {
+    const center = { x: 400, y: 360 }; // 대형 육각형의 중심점
+    const size = 50; // 작은 육각형의 반경
+    const angles = [0, 60, 120, 180, 240, 300].map(deg => (deg * Math.PI) / 180); // 각도를 라디안으로 변환
+
+    // 각도에 따라 육각형의 꼭짓점 계산
+    const points = angles.map(angle => ({
+        x: center.x + size * Math.cos(angle),
+        y: center.y + size * Math.sin(angle)
+    }));
+
+    // 포인트를 문자열로 변환
+    const pointsAttr = points.map(p => `${p.x},${p.y}`).join(' ');
+
+    // SVG에 육각형 추가
+    svg.append('polygon')
+        .attr('points', pointsAttr)
+        .attr('fill', 'rgba(137,109,173,0.5)')
+        .attr('stroke', 'black')
+        .attr('stroke-width', 1)
+        .attr('cursor', 'pointer')
+        .on('click', function() {
+            window.location.href = 'imagifyTest3.html'; // 클릭 시 이동할 페이지 URL
+        }) 
+        .on('mouseover', function() {
+            d3.select(this).attr('fill', 'rgba(137,109,173,1.0)'); // 호버 시 색상 변경
+        })
+        .on('mouseout', function() {
+            d3.select(this).attr('fill', 'rgba(137,109,173,0.5)'); // 호버 아웃 시 원래 색상 복구
+        });
+    // 텍스트 추가
+    svg.append('text')
+        .attr('x', center.x)
+        .attr('y', center.y + 5) // 중심에서 약간 아래로 조정
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '24px')
+        .text('L-try!');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const svg = d3.select('svg');
+    fetchChartDataAndDrawHexagonChart();
+});

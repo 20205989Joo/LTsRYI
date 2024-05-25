@@ -100,7 +100,7 @@ function displayNextWord() {
         document.getElementById('question').textContent = `Q. "${word[2]}"를 영어로 하면? ( ${initial}_________ )`; // 문제 텍스트를 설정
         document.getElementById('answer').style.visibility = 'visible'; // 답변 입력 필드를 보이도록 설정
     } else { // 모든 단어를 다 표시했을 경우
-        document.getElementById('question').textContent = '마지막 Test로 넘어갑니다.'; // 질문 영역에 '끝! 고생하셨습니다!' 표시
+        document.getElementById('question').textContent = '아래 버튼을 누르시면, 성적 창으로 넘어갑니다.'; // 질문 영역에 '끝! 고생하셨습니다!' 표시
         document.getElementById('answer').style.visibility = 'hidden'; // 답변 입력 필드를 숨김
         document.getElementById('next').style.display = 'block'; // 다음 버튼을 표시
         stopTimerAndReset(); // 타이머를 멈추고 리셋하는 함수 호출
