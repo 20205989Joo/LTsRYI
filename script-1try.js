@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('paragraphes_mk1.json')
+    fetch('Paragraphes_mk1.json')
         .then(response => response.json())
         .then(data => {
             initializeDropdowns(data);
