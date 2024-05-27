@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let wasDragging = false;
     let dragNodeIndex = null;
     let offsetX, offsetY;
+    let touchTimeout;
 
     class Node {
         constructor(x, y, text = '', parent = null, isCentral = false, isHint = false) {
@@ -67,11 +68,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             nodeElement.querySelector('.add').addEventListener('click', (e) => {
                 e.stopPropagation();
+                closeAllEditModes(); // Close all edit modes
                 const angle = Math.random() * 2 * Math.PI;
                 const distance = 100;
                 const newX = Math.min(Math.max(this.x + distance * Math.cos(angle), 0), canvas.width - nodeElement.offsetWidth);
                 const newY = Math.min(Math.max(this.y + distance * Math.sin(angle), 0), canvas.height - nodeElement.offsetHeight - footer.offsetHeight);
-                const newNode = new Node(newX, newY, 'IDEA +', this);
+                const newNode = new Node(newX, newY, 'Idea +', this);
                 nodes.push(newNode);
                 edges.push({ from: this, to: newNode });
                 drawAll();
@@ -86,17 +88,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     drawAll();
                 });
 
-                nodeElement.addEventListener('mousedown', (e) => {
-                    if (!e.target.matches('.node-text, button')) {
+                const startDragging = (e) => {
+                    if (e.target.matches('.node-text, button')) {
+                        return; // 버튼이나 텍스트 영역 클릭 시 드래그 시작 방지
+                    }
+                    e.preventDefault(); // Prevent default behavior to avoid scroll
+                    touchTimeout = setTimeout(() => {
                         isDragging = true;
                         wasDragging = false;
                         dragNodeIndex = nodes.indexOf(this);
-                        offsetX = e.clientX - nodeElement.offsetLeft;
-                        offsetY = e.clientY - nodeElement.offsetTop;
+                        const touch = e.touches ? e.touches[0] : e;
+                        offsetX = touch.clientX - nodeElement.offsetLeft;
+                        offsetY = touch.clientY - nodeElement.offsetTop;
                         document.addEventListener('mousemove', moveNode);
                         document.addEventListener('mouseup', stopDragging);
+                        document.addEventListener('touchmove', moveNode);
+                        document.addEventListener('touchend', stopDragging);
+                    }, 200); // Adjust delay as needed
+                };
+
+                const startEditing = (e) => {
+                    clearTimeout(touchTimeout);
+                    if (!wasDragging) {
+                        this.toggleEditMode(nodeElement, true);
                     }
-                });
+                };
+
+                nodeElement.addEventListener('mousedown', startDragging);
+                nodeElement.addEventListener('touchstart', startDragging);
+                nodeElement.addEventListener('click', startEditing);
+                nodeElement.addEventListener('touchend', startEditing);
             }
 
             nodeElement.addEventListener('click', (e) => {
@@ -108,9 +129,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const moveNode = (e) => {
                 if (isDragging) {
+                    e.preventDefault(); // Prevent default behavior to avoid scroll
                     wasDragging = true;
-                    this.x = Math.min(Math.max(e.clientX - offsetX, 0), canvas.width - nodeElement.offsetWidth);
-                    this.y = Math.min(Math.max(e.clientY - offsetY, 0), canvas.height - nodeElement.offsetHeight - footer.offsetHeight);
+                    const touch = e.touches ? e.touches[0] : e;
+                    this.x = Math.min(Math.max(touch.clientX - offsetX, 0), canvas.width - nodeElement.offsetWidth);
+                    this.y = Math.min(Math.max(touch.clientY - offsetY, 0), canvas.height - nodeElement.offsetHeight - footer.offsetHeight);
                     nodeElement.style.left = `${this.x}px`;
                     nodeElement.style.top = `${this.y}px`;
                     drawAll();
@@ -120,6 +143,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const stopDragging = () => {
                 document.removeEventListener('mousemove', moveNode);
                 document.removeEventListener('mouseup', stopDragging);
+                document.removeEventListener('touchmove', moveNode);
+                document.removeEventListener('touchend', stopDragging);
                 isDragging = false;
                 setTimeout(() => {
                     wasDragging = false;
@@ -183,6 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
         drawAll();
     }
 
+    function closeAllEditModes() {
+        nodes.forEach(node => node.toggleEditMode(node.element, false));
+    }
+
     function adjustNodePositions() {
         const scaleX = container.clientWidth / canvas.width;
         const scaleY = container.clientHeight / canvas.height;
@@ -207,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     window.addEventListener('click', () => {
-        nodes.forEach(node => node.toggleEditMode(node.element, false));
+        closeAllEditModes();
     });
 
     window.initializeMindmap = function(keywords) {
