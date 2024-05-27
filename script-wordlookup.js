@@ -1,9 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('id');
+    const grade = params.get('grade');
+    const year = params.get('year');
+    const month = params.get('month');
+    const number = params.get('number');
+
     fetch('Paragraphes_mk1.json')
         .then(response => response.json())
         .then(data => {
             initializeDropdowns(data);
             initializeFields(); // 필드 초기화 함수 호출
+            setDropdownValues(grade, year, month, number); // 드롭다운 값을 설정
         })
         .catch(error => console.error('Failed to load data:', error));
 
@@ -61,6 +69,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedData = data.filter(item => item.학년 === selectedGrade && item.연도 === selectedYear && item.월 === selectedMonth && item.문제번호 === selectedNumber)[0];
             displayContent(selectedData);
         });
+    }
+
+    function setDropdownValues(grade, year, month, number) {
+        if (grade) {
+            document.getElementById('gradeDropdown').value = grade;
+            document.getElementById('gradeDropdown').dispatchEvent(new Event('change'));
+        }
+        if (year) {
+            document.getElementById('yearDropdown').value = year;
+            document.getElementById('yearDropdown').dispatchEvent(new Event('change'));
+        }
+        if (month) {
+            document.getElementById('monthDropdown').value = month;
+            document.getElementById('monthDropdown').dispatchEvent(new Event('change'));
+        }
+        if (number) {
+            document.getElementById('numberDropdown').value = number;
+            document.getElementById('numberDropdown').dispatchEvent(new Event('change'));
+        }
     }
 
     function initializeFields() {
@@ -173,4 +200,56 @@ document.addEventListener('DOMContentLoaded', function() {
         selectElement.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
         selectElement.disabled = true;
     }
+
+    async function saveCustomWordsList() {
+        const customWordList = document.getElementById('customWordList');
+        const items = Array.from(customWordList.getElementsByClassName('word-list-item'));
+    
+        // 각 단어 항목을 개별적으로 서버에 전송
+        for (const item of items) {
+            const wordData = {
+                UserId: userId,
+                QLevel: grade,
+                QYear: year,
+                QMonth: month,
+                QNo: number,
+                CustomWord: item.dataset.word,
+                CustomMeaning: item.querySelector('input').value
+            };
+    
+            try {
+                const response = await fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveCustomWordsList', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(wordData)  // 단일 객체 전송
+                });
+    
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Failed to save custom word:', errorText);
+                    alert('Failed to save custom word: ' + errorText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while saving the custom word.');
+            }
+        }
+    
+        alert('All custom words saved successfully.');
+    }
+
+    window.saveCustomWordsList = saveCustomWordsList;
+
+    function goToNextPage() {
+        const nextPageUrl = `grammarTest3.html?id=${userId}&grade=${grade}&year=${year}&month=${month}&number=${number}`;
+        location.href = nextPageUrl;
+    }
+
+    window.goToNextPage = goToNextPage;
+
+    // Save button event listener
+    const saveButton = document.getElementById('saveButton');
+    saveButton.addEventListener('click', saveCustomWordsList);
 });

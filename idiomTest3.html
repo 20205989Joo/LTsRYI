@@ -11,7 +11,7 @@
         <div class="header-container">
             <h1>7. 마무리 : 제시문 숙어 암기</h1>
             <div class="button-group">
-                <button class="header-button" onclick="location.href='room.html'">Room</button>
+                <button class="header-button" onclick="goToRoom()">Room</button>
                 <button class="header-button" onclick="location.href='grades.html'">Grades</button>
                 <button class="header-button" onclick="saveButton()">Save</button>
             </div>
@@ -19,16 +19,11 @@
     </header>
     <main>
         <div class="settings">
-            <label for="startDay">Start Day:</label>
-            <select id="startDay">
-                <!-- JS로 채워질 옵션들 -->
-            </select>
-
-            <label for="endDay">End Day:</label>
-            <select id="endDay">
-                <!-- JS로 채워질 옵션들 -->
-            </select>
-            <button onclick="startTest()">Start Test</button>
+            <select id="QLevel"></select>
+            <select id="QYear"></select>
+            <select id="QMonth"></select>
+            <select id="QNo"></select>
+            <button id="startTestButton" onclick="startTest()">Start Test</button>
         </div>
 
         <div class="instructions">
@@ -45,7 +40,7 @@
             </div>
             <div id="scoreboard">정답률: 0 / Total : 0</div>
             <!-- grades 버튼 추가 -->
-            <button id="Grades" style="display: block;">Grades</button>
+            <button id="Grades" style="display: none;" onclick="goToNextPage()">Grades</button>
         </div>
         
         <!-- 우측 목록을 위한 컨테이너 -->
@@ -61,19 +56,6 @@
     <footer>
         <p> </p>
     </footer>
-    <script>
-        document.getElementById('Grades').addEventListener('click', function() {
-            const currentUserId = localStorage.getItem('currentUserId'); // 로컬 저장소에서 현재 사용자 ID를 가져옴
-            if (currentUserId) { // 사용자 ID가 설정되어 있으면
-                window.location.href = `grades-Vocabulary.html?id=${currentUserId}`; // grades 페이지로 이동
-            } else { // 사용자 ID가 설정되어 있지 않으면
-                alert("User ID is not set. Please check and try again."); // '사용자 ID가 설정되어 있지 않습니다. 확인 후 다시 시도하세요.'라는 알림창을 표시
-            }
-        });
-
-        function saveButton() {
-            alert('Save button coming up!');
-        }
-    </script>
+    <script src="script-idiomtest3.js"></script>
 </body>
 </html>

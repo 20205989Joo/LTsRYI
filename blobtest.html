@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HWImage Blob Test</title>
+    <style>
+        img {
+            width: 100%; /* 이미지 크기 조절 */
+            max-width: 600px; /* 최대 너비 설정 */
+            height: auto; /* 비율 유지 */
+        }
+        .container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>HWImage Blob Test Page</h1>
+    <button onclick="checkHWImage()">Check</button>
+    <div class="container">
+        <img id="displayImage" src="" alt="No image loaded">
+    </div>
+    <script>
+        function checkHWImage() {
+            const userId = prompt("Enter user ID to fetch image:", "Tester"); // 사용자 ID 입력 요청
+            if (!userId) {
+                alert('User ID is required to fetch the image.');
+                return;
+            }
+
+            fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getHWImages?userId=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // 최신 HWImage를 찾음
+                        const latestImage = data.reduce((latest, current) => {
+                            return latest.HWIId > current.HWIId ? latest : current;
+                        });
+
+                        if (latestImage && latestImage.HWImage) {
+                            const imageBlob = new Blob([new Uint8Array(latestImage.HWImage.data)], { type: 'image/jpeg' });
+                            const imageUrl = URL.createObjectURL(imageBlob);
+                            document.getElementById('displayImage').src = imageUrl;
+                            document.getElementById('displayImage').alt = 'Loaded HWImage';
+                        } else {
+                            alert('No valid image found for this user.');
+                            document.getElementById('displayImage').alt = 'No image loaded';
+                        }
+                    } else {
+                        alert('No images found for this user.');
+                        document.getElementById('displayImage').alt = 'No image loaded';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching image:', error);
+                    alert('Failed to fetch image.');
+                });
+        }
+    </script>
+</body>
+</html>

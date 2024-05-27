@@ -3,69 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imagify Test 1</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>마인드맵 테스트</title>
+    <link rel="stylesheet" href="style-mindmap.css">
+    <style>
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .next-button, .save-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>이미지화 테스트 - 선지형</h1>
+        <div class="header-container">
+            <h1>1. 배경지식 + Mindmap</h1>
+            <div>
+                <button class="save-button" onclick="saveMindmap()">Save</button>
+                <button class="next-button" onclick="goToNextPage()">Next</button>
+            </div>
+        </div>
     </header>
     <main>
-        <div class="settings">
-            <label for="startDay">Start Day:</label>
-            <select id="startDay">
-                <!-- JS로 채워질 옵션들 -->
-            </select>
-
-            <label for="endDay">End Day:</label>
-            <select id="endDay">
-                <!-- JS로 채워질 옵션들 -->
-            </select>
-            <button onclick="startTest()">Start Test</button>
-        </div>
-
-        <div class="instructions">
-            <br>  <strong>Instructions :</strong><br><br>
-            1. 시작과 끝 Day를 선택합니다. [ Day 하나 = 20개 ] <br>
-            2. 'Start test' 버튼을 누릅니다. <br>
-            3. 문제에 맞는 답을 입력해주시면 됩니다.<br>
-            4. 마지막 Enter(또는 Submit)을 누르면, 시험이 끝나고 자동으로 결과가 저장됩니다.<br>
-            <br><br>
-            <strong>Cautions:</strong><br><br>
-            1. 각 문제는 푸는 데 걸리는 시간이 기록됩니다.<br>
-            2. 시험을 시작하시면, 끝까지 봐주세요.
-            <br><br><br><br>
-        </div>
-
-        <div class="center-container">
-            <div id="feedback"></div>
-            <div id="question"></div>
-            <div id="choices">
-                <!-- 선택지 버튼들이 JS로 채워질 예정 -->
+        <div class="container">
+            <div id="paragraphContainer">
+                <div id="dropdownContainer" style="display: flex;">
+                    <select id="gradeDropdown" style="margin-right: 10px;">
+                        <option value="" disabled selected>학년 선택</option>
+                    </select>
+                    <select id="yearDropdown" disabled style="margin-right: 10px;">
+                        <option value="" disabled selected>연도 선택</option>
+                    </select>
+                    <select id="monthDropdown" disabled style="margin-right: 10px;">
+                        <option value="" disabled selected>월 선택</option>
+                    </select>
+                    <select id="numberDropdown" disabled>
+                        <option value="" disabled selected>번호 선택</option>
+                    </select>
+                </div>
+                <div id="promptsContainer">
+                    <!-- 제시문 컨테이너들이 여기에 동적으로 추가됩니다 -->
+                </div>
             </div>
-            <button id="next" onclick="nextPage()">Next</button> <!-- next 버튼을 선택지 컨테이너 내부로 이동 -->
-            <div id="scoreboard">정답률: 0 / Total : 0</div>
-        </div>
-        
-        <!-- 우측 목록을 위한 컨테이너 -->
-        <div id="resultList" style="position: fixed; right: 10px; bottom: 20px;">
-            <ul id="results"></ul>
-        </div>
-
-        <!-- 스톱워치 -->
-        <div id="stopwatch" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);">
-            <span id="timer">00:00</span>
+            <div id="canvasContainer">
+                <canvas id="mindmap" width="800" height="600"></canvas>
+            </div>
         </div>
     </main>
     <footer>
-        <p> </p>
+        <p>© Test page</p>
     </footer>
-    <script src="script-imagifytest1.js"></script>
+    <script type="module" src="script-paragraphlet.js"></script>
+    <script type="module" src="script-mindmap.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
     <script>
-        function nextPage() {
+        function goToNextPage() {
             const params = new URLSearchParams(window.location.search);
             const userId = params.get('id');
-            window.location.href = `imagifyTest3.html?id=${userId}`;
+            const grade = params.get('grade');
+            const year = params.get('year');
+            const month = params.get('month');
+            const number = params.get('number');
+            const nextPageUrl = `memorizeTest3.html?id=${userId}&grade=${grade}&year=${year}&month=${month}&number=${number}`;
+            window.location.href = nextPageUrl;
         }
     </script>
 </body>

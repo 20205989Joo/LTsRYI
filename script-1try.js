@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             initializeDropdowns(data);
             initializeFields(); // 필드 초기화 함수 호출
+            setDropdownFromURL(data); // URL에서 값 설정
         })
         .catch(error => console.error('Failed to load data:', error));
 
@@ -171,6 +172,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p>6. 그 외, 알 수 있던 내용은?</p>
                 <textarea name="quiz6" rows="4" cols="50"></textarea>
             </div>
+            <div class="question">
+            <p>7. 정답은 몇 번일까요?</p>
+            <textarea name="quiz7" rows="1" cols="50"></textarea>
+        </div>
         `;
 
         // Hint guide 기능 추가
@@ -246,4 +251,52 @@ document.addEventListener('DOMContentLoaded', function() {
         selectElement.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
         selectElement.disabled = true;
     }
+
+    function setDropdownFromURL(data) {
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('id');
+        const QLevel = params.get('grade');
+        const QYear = params.get('year');
+        const QMonth = params.get('month');
+        const QNo = params.get('number');
+
+        if (QLevel) {
+            const gradeDropdown = document.getElementById('gradeDropdown');
+            gradeDropdown.value = QLevel;
+            gradeDropdown.dispatchEvent(new Event('change'));
+
+            if (QYear) {
+                const yearDropdown = document.getElementById('yearDropdown');
+                yearDropdown.value = QYear;
+                yearDropdown.dispatchEvent(new Event('change'));
+
+                if (QMonth) {
+                    const monthDropdown = document.getElementById('monthDropdown');
+                    monthDropdown.value = QMonth;
+                    monthDropdown.dispatchEvent(new Event('change'));
+
+                    if (QNo) {
+                        const numberDropdown = document.getElementById('numberDropdown');
+                        numberDropdown.value = QNo;
+                        numberDropdown.dispatchEvent(new Event('change'));
+                    }
+                }
+            }
+        }
+    }
+    
+    window.startTest = function() {
+        document.getElementById('overlayContainer').style.display = 'none';
+    };
+
+    window.navigateToNextPage = function() {
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('id');
+        const QLevel = params.get('grade');
+        const QYear = params.get('year');
+        const QMonth = params.get('month');
+        const QNo = params.get('number');
+        const url = `analysisTest3.html?id=${userId}&grade=${QLevel}&year=${QYear}&month=${QMonth}&number=${QNo}`;
+        window.location.href = url;
+    };
 });

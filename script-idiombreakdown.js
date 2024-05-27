@@ -238,4 +238,18 @@ document.addEventListener('DOMContentLoaded', function() {
         selectElement.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
         selectElement.disabled = true;
     }
+
+    function goToNextPage() {
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('id');
+        const grade = params.get('grade');
+        const year = params.get('year');
+        const month = params.get('month');
+        const number = params.get('number');
+
+        const nextPageUrl = `wordTest3.html?id=${userId}&grade=${grade}&year=${year}&month=${month}&number=${number}`;
+        location.href = nextPageUrl;
+    }
+
+    window.goToNextPage = goToNextPage;
 });

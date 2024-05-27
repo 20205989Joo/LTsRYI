@@ -1,13 +1,11 @@
-let wordList = [];
 let currentWordIndex = 0;
-let uniqueDays = [];
 let filteredWords = [];
-let correctAnswers = 0; // 정답 수
+let choices = [];
+let correctAnswers = 0;
 let totalQuestions = 0; // 전체 문제 수
 let startTime, endTime;
-let testCount = 0;  // 전역 변수로 테스트 카운트를 추가
-let isResultsSaved = false; // 결과 저장 여부
-let choices = []; // 선택지 배열
+let testCount = 0;
+let isResultsSaved = false;
 let timerUpdate; // 타이머 업데이트 핸들러
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,50 +13,96 @@ document.addEventListener('DOMContentLoaded', function() {
     const userId = urlParams.get('id');
 
     if (!userId) {
-        alert("No user ID provided.");
+        alert("User ID가 설정되지 않았습니다.");
         return;
     }
 
-    localStorage.setItem('currentUserId', userId);
-    document.getElementById('currentUserId').textContent = userId;
+    const apiURL = `https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getCustomWordsList?userId=${userId}`;
 
-    // 데이터 로드 및 테스트 시작
-    loadJsonData();
+    fetch(apiURL)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            localStorage.setItem('wordList', JSON.stringify(data)); // 데이터를 문자열로 변환하여 저장
+            wordList = data;
+            populateAllDropdowns();
+        })
+        .catch(error => {
+            console.error('데이터를 불러오지 못했습니다:', error);
+        });
 });
 
-// JSON 데이터 로드
-function loadJsonData() {
-    fetch('MID-A_jsonarray.json')
-        .then(response => response.json())
-        .then(data => {
-            wordList = data.data;
-            extractUniqueDays();
-            populateDayOptions();
-            initializeChoices();
-        })
-        .catch(error => console.error('Error loading the JSON data: ', error));
+function loadData(){
+    initializeChoices();
 }
 
-function extractUniqueDays() {
-    const daysSet = new Set();
-    wordList.forEach(item => daysSet.add(item[0]));
-    uniqueDays = Array.from(daysSet);
-    uniqueDays.sort();
+window.onload = function(){
+    loadData( )
 }
 
-function populateDayOptions() {
-    const startDaySelect = document.getElementById('startDay');
-    const endDaySelect = document.getElementById('endDay');
-    startDaySelect.innerHTML = '';
-    endDaySelect.innerHTML = '';
 
-    uniqueDays.forEach(day => {
-        const option = document.createElement('option');
-        option.value = option.textContent = day;
-        startDaySelect.appendChild(option.cloneNode(true));
-        endDaySelect.appendChild(option);
+
+function populateAllDropdowns() {
+    const data = JSON.parse(localStorage.getItem('wordList')); // localStorage에서 데이터 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedLevel = urlParams.get('grade');
+    const selectedYear = urlParams.get('year');
+    const selectedMonth = urlParams.get('month');
+    const selectedNumber = urlParams.get('number');
+
+    
+    if (data) {
+        populateDropdown('QLevel', data.map(item => item.QLevel.toString()));
+        populateDropdown('QYear', data.map(item => item.QYear.toString()));
+        populateDropdown('QMonth', data.map(item => item.QMonth.toString()));
+        populateDropdown('QNo', data.map(item => item.QNo.toString()));
+
+        setDropdownValue('QLevel', selectedLevel);
+        setDropdownValue('QYear', selectedYear);
+        setDropdownValue('QMonth', selectedMonth);
+        setDropdownValue('QNo', selectedNumber);
+
+        document.getElementById('startTestButton').disabled = false;
+    }
+}
+
+// 드롭다운을 특정 값으로 설정하는 함수
+function setDropdownValue(dropdownId, value) {
+    const dropdown = document.getElementById(dropdownId);
+    if (dropdown) {
+        dropdown.value = value;
+    }
+}
+
+// 특정 드롭다운을 채우는 함수
+function populateDropdown(level, values) {
+    const dropdown = document.getElementById(level);
+    const uniqueValues = [...new Set(values)]; // 중복 없는 값만 추출
+    resetDropdown(dropdown, `Select ${level}`);
+    addOptionsToSelect(dropdown, uniqueValues);
+    dropdown.disabled = false;
+}
+
+// 드롭다운에 옵션을 추가하는 함수
+function addOptionsToSelect(selectElement, options) {
+    options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        selectElement.appendChild(optionElement);
     });
 }
+
+// 드롭다운을 초기화하는 함수
+function resetDropdown(selectElement, placeholder) {
+    selectElement.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+    selectElement.disabled = true;
+}
+
 
 function initializeChoices() {
     const choicesContainer = document.getElementById('choices');
@@ -70,25 +114,43 @@ function initializeChoices() {
     }
 }
 
+
 function startTest() {
     testCount = parseInt(localStorage.getItem('testCount') || '0') + 1;
     localStorage.setItem('testCount', testCount.toString());
 
-    const startDay = document.getElementById('startDay').value;
-    const endDay = document.getElementById('endDay').value;
+    const selectedLevel = document.getElementById('QLevel').value;
+    const selectedYear = document.getElementById('QYear').value;
+    const selectedMonth = document.getElementById('QMonth').value;
+    const selectedNumber = document.getElementById('QNo').value;
 
-    const startDayNumber = startDay.replace(/DAY /, '');
-    const endDayNumber = endDay.replace(/DAY /, '');
-    const testRange = startDayNumber + endDayNumber; // 예: '03'과 '07'이 결합되어 '0307'이 됨
-    
+    const testRange = selectedLevel + selectedYear + selectedMonth + selectedNumber;
+
     localStorage.setItem('testRange', testRange);
 
+    const storedWords = JSON.parse(localStorage.getItem('wordList'));
+    console.log('Stored Words:', storedWords);
 
-    filteredWords = wordList.filter(word => {
-        const day = parseInt(word[0].replace(/DAY /, ''));
-        return day >= parseInt(startDay.replace(/DAY /, '')) && day <= parseInt(endDay.replace(/DAY /, ''));
+    if (!storedWords || storedWords.length === 0) {
+        console.error('No words loaded from storage.');
+        return;
+    }
+
+    filteredWords = storedWords.filter(item => {
+        return item.QLevel.toString() === selectedLevel &&
+               item.QYear.toString() === selectedYear &&
+               item.QMonth.toString() === selectedMonth &&
+               item.QNo.toString() === selectedNumber;
     });
+
+
+    if (filteredWords.length === 0) {
+        alert("No data available for the selected criteria.");
+        return;
+    }
+
     shuffle(filteredWords);
+    // 문제 출제 시작
     currentWordIndex = 0;
     correctAnswers = 0;
     totalQuestions = filteredWords.length;
@@ -99,10 +161,11 @@ function startTest() {
     updateTimerDisplay();
 }
 
+
 function updateScoreboard() {
     const scoreboard = document.getElementById('scoreboard');
     scoreboard.textContent = `정답률 : ${correctAnswers} / Total : ${totalQuestions}`; // 화면에 표시되는 텍스트 유지
-
+    
     if (totalQuestions > 0) {
         const accuracyRate = ((correctAnswers / totalQuestions) * 100).toFixed(2); // 백분율로 계산하고 소수점 두 자리로 제한
         localStorage.setItem('currentTestScore', accuracyRate); // 로컬 저장소에 정답률 저장
@@ -125,9 +188,9 @@ function displayNextWord() {
 
     if (currentWordIndex < filteredWords.length) {
         const word = filteredWords[currentWordIndex];
-        document.getElementById('question').textContent = `Q. "${word[1]}"의 뜻은 무엇인가요?`;
+        document.getElementById('question').textContent = `Q. "${word.CustomWord}"의 뜻은 무엇인가요?`;
 
-        choices = generateChoices(word[2], filteredWords);
+        choices = generateChoices(word.CustomMeaning, filteredWords);
         choicesContainer.innerHTML = '';
         choices.forEach((choice, index) => {
             const button = document.createElement('button');
@@ -150,13 +213,13 @@ function displayNextWord() {
     }
 }
 
-function generateChoices(correctAnswer, filteredWords) {
-    const choices = [correctAnswer];
-    while (choices.length < 5) {
-        const randomIndex = Math.floor(Math.random() * filteredWords.length);
-        const choice = filteredWords[randomIndex][2];
-        if (!choices.includes(choice)) {
-            choices.push(choice);
+function generateChoices(correctMeaning, wordsList) {
+    const choices = [correctMeaning];
+    while (choices.length < 4) {
+        const randomIndex = Math.floor(Math.random() * wordsList.length);
+        const randomChoice = wordsList[randomIndex].CustomMeaning;
+        if (!choices.includes(randomChoice)) {
+            choices.push(randomChoice);
         }
     }
     return shuffle(choices);
@@ -182,7 +245,7 @@ function saveResults() {
         return {
             subjectName: 'Vocabulary',
             subcategoryName: 'Words',
-            quizNo: 1,  // QuizNo는 1로 설정합니다.
+            quizNo: 3,  // QuizNo는 3으로 설정합니다.
             userResponse: result.UserResponse,
             correctAnswer: result.CorrectAnswer,
             correctness: result.Correctness,
@@ -196,6 +259,8 @@ function saveResults() {
         userId: currentUserId,
         results: formattedResults
     });
+
+    console.log('Request Body for saveResults:', requestBody); // 로그 출력
 
     fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveResults', {
         method: 'POST',
@@ -213,19 +278,23 @@ function saveResults() {
             userId: currentUserId,
             grades: [{
                 subcategoryName: 'Words',
-                quizNo: 1, // 결과 배열의 첫 번째 항목의 QuizNo를 사용합니다.
+                quizNo: 3, // 결과 배열의 첫 번째 항목의 QuizNo를 사용합니다.
                 testScore: testScore,
                 testCount: testCount,
                 whichDay: whichDay // 로컬 스토리지에서 가져온 최신 날짜를 사용합니다.
             }]
         };
 
+        const gradesRequestBody = JSON.stringify(gradesData);
+
+        console.log('Request Body for saveGrades:', gradesRequestBody); // 로그 출력
+
         return fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveGrades', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(gradesData)
+            body: gradesRequestBody
         });
     })
     .then(response => response.json())
@@ -242,6 +311,7 @@ function saveResults() {
         alert('Failed to save results and grades.');
     });
 }
+
 
 function getMySqlDateTime(dateInput) {
     // 로컬 시간대 기반으로 날짜 및 시간 설정
@@ -296,7 +366,7 @@ function updateResultsList() {
     storedResults.filter(result => result.TestCount === testCount).forEach((result, index) => {
         const listItem = document.createElement('li');
         const correctnessIcon = result.Correctness ? '✔️' : '❌';
-        const section = result.QuizNo === 1 ? 'A' : 'B';
+        const section = result.QuizNo === 3 ? 'A' : 'B';
 
         listItem.textContent = `#${index + 1}. - (${result.CorrectAnswer}) ${correctnessIcon} - ${result.Seconds}초 `;
         resultsList.appendChild(listItem);
@@ -304,10 +374,10 @@ function updateResultsList() {
 }
 
 function checkAnswer(selectedIndex) {
-    const isCorrect = choices[selectedIndex] === filteredWords[currentWordIndex][2];
+    const isCorrect = choices[selectedIndex] === filteredWords[currentWordIndex].CustomMeaning;
     const feedbackElement = document.getElementById('feedback');
     const seconds = stopTimer(); // 걸린 시간을 stopTimer 함수에서 가져옴
-    const correctAnswer = filteredWords[currentWordIndex][2]; // 올바른 답안 가져오기
+    const correctAnswer = filteredWords[currentWordIndex].CustomMeaning; // 올바른 답안 가져오기
     const userResponse = choices[selectedIndex];
     const correctness = isCorrect ? 1 : 0;
 
@@ -324,7 +394,7 @@ function checkAnswer(selectedIndex) {
         feedbackElement.classList.add('wrong');
     }
 
-    const quizNo = 1; // 문제 번호를 2로 고정
+    const quizNo = 3; // 문제 번호를 2로 고정
     let timestamp = getMySqlDateTime(new Date());
     let whichDay = timestamp.split('T')[0]; // 'T'를 기준으로 날짜 부분만 추출
 
@@ -368,16 +438,14 @@ function fadeOutEffect() {
     }, 100);
 }
 
-// 다음 버튼 클릭 시 새로운 테스트 페이지로 이동하는 이벤트 리스너
-document.getElementById('next').addEventListener('click', function() {
-    const currentUserId = localStorage.getItem('currentUserId'); // 로컬 저장소에서 현재 사용자 ID를 가져옴
-    if (currentUserId) { // 사용자 ID가 설정되어 있으면
-        window.location.href = `wordTest2.html?id=${currentUserId}`; // 새로운 테스트 페이지로 이동
-    } else { // 사용자 ID가 설정되어 있지 않으면
-        alert("User ID is not set. Please check and try again."); // '사용자 ID가 설정되어 있지 않습니다. 확인 후 다시 시도하세요.'라는 알림창을 표시
-    }
-});
+function goToNextPage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+    const grade = urlParams.get('grade');
+    const year = urlParams.get('year');
+    const month = urlParams.get('month');
+    const number = urlParams.get('number');
 
-window.onload = function() {
-    loadJsonData();
-};
+    const newUrl = `idiomTest3.html?id=${userId}&grade=${grade}&year=${year}&month=${month}&number=${number}`;
+    window.location.href = newUrl;
+}

@@ -66,6 +66,14 @@ document.addEventListener('DOMContentLoaded', function() {
             initializePrompts([selectedData]);
             extractedKeywords = extractKeywords(selectedData);
             window.initializeMindmap(extractedKeywords);
+
+            // URL에 현재 드롭다운 값을 추가
+            const params = new URLSearchParams(window.location.search);
+            params.set('grade', selectedGrade);
+            params.set('year', selectedYear);
+            params.set('month', selectedMonth);
+            params.set('number', selectedNumber);
+            history.replaceState({}, '', `${location.pathname}?${params}`);
         });
     }
 

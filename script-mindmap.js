@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('mindmap');
     const ctx = canvas.getContext('2d');
     const container = document.getElementById('canvasContainer');
+    const footer = document.querySelector('footer');
     let nodes = [];
     let edges = [];
     let isDragging = false;
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.id = this.generateId();
             this.element = this.createElement();
             container.appendChild(this.element);
+            this.updateSize(this.element);
         }
 
         calculateLevel() {
@@ -67,9 +69,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopPropagation();
                 const angle = Math.random() * 2 * Math.PI;
                 const distance = 100;
-                const newX = this.x + distance * Math.cos(angle);
-                const newY = this.y + distance * Math.sin(angle);
-                const newNode = new Node(newX, newY, '새 노드', this);
+                const newX = Math.min(Math.max(this.x + distance * Math.cos(angle), 0), canvas.width - nodeElement.offsetWidth);
+                const newY = Math.min(Math.max(this.y + distance * Math.sin(angle), 0), canvas.height - nodeElement.offsetHeight - footer.offsetHeight);
+                const newNode = new Node(newX, newY, 'IDEA +', this);
                 nodes.push(newNode);
                 edges.push({ from: this, to: newNode });
                 drawAll();
@@ -107,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const moveNode = (e) => {
                 if (isDragging) {
                     wasDragging = true;
-                    this.x = e.clientX - offsetX;
-                    this.y = e.clientY - offsetY;
+                    this.x = Math.min(Math.max(e.clientX - offsetX, 0), canvas.width - nodeElement.offsetWidth);
+                    this.y = Math.min(Math.max(e.clientY - offsetY, 0), canvas.height - nodeElement.offsetHeight - footer.offsetHeight);
                     nodeElement.style.left = `${this.x}px`;
                     nodeElement.style.top = `${this.y}px`;
                     drawAll();
@@ -181,7 +183,28 @@ document.addEventListener('DOMContentLoaded', function() {
         drawAll();
     }
 
+    function adjustNodePositions() {
+        const scaleX = container.clientWidth / canvas.width;
+        const scaleY = container.clientHeight / canvas.height;
+
+        nodes.forEach(node => {
+            node.x *= scaleX;
+            node.y *= scaleY;
+            node.element.style.left = `${node.x}px`;
+            node.element.style.top = `${node.y}px`;
+        });
+
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        drawAll();
+    }
+
     initialize();
+    adjustNodePositions();
+
+    window.addEventListener('resize', () => {
+        adjustNodePositions();
+    });
 
     window.addEventListener('click', () => {
         nodes.forEach(node => node.toggleEditMode(node.element, false));
@@ -198,8 +221,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         keywords.forEach((keyword, index) => {
             const angle = index * angleStep;
-            const x = centerX + radius * Math.cos(angle);
-            const y = centerY + radius * Math.sin(angle);
+            const x = Math.min(Math.max(centerX + radius * Math.cos(angle), 0), canvas.width - 100);
+            const y = Math.min(Math.max(centerY + radius * Math.sin(angle), 0), canvas.height - 40 - footer.offsetHeight);
             const newNode = new Node(x, y, keyword, centralNode);
             newNode.level = 1; // 레벨 1로 설정
             nodes.push(newNode);
@@ -228,8 +251,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     do {
                         collision = false;
                         const offsetAngle = (Math.random() - 0.5) * Math.PI / 6; // 무작위 각도 오프셋
-                        newX = parentNode.x + distance * Math.cos(angleToParent + offsetAngle);
-                        newY = parentNode.y + distance * Math.sin(angleToParent + offsetAngle);
+                        newX = Math.min(Math.max(parentNode.x + distance * Math.cos(angleToParent + offsetAngle), 0), canvas.width - 100);
+                        newY = Math.min(Math.max(parentNode.y + distance * Math.sin(angleToParent + offsetAngle), 0), canvas.height - 40 - footer.offsetHeight);
 
                         // 충돌 검사
                         for (const node of nodes) {
@@ -254,8 +277,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 힌트 노드 추가 (자식 노드가 없을 때만)
                     if (childNodes.length === 0) {
                         const hintOffsetAngle = Math.PI / 6; // 힌트 노드에 대한 각도 오프셋
-                        const hintX = parentNode.x + distance * Math.cos(angleToParent + hintOffsetAngle);
-                        const hintY = parentNode.y + distance * Math.sin(angleToParent + hintOffsetAngle);
+                        const hintX = Math.min(Math.max(parentNode.x + distance * Math.cos(angleToParent + hintOffsetAngle), 0), canvas.width - 100);
+                        const hintY = Math.min(Math.max(parentNode.y + distance * Math.sin(angleToParent + hintOffsetAngle), 0), canvas.height - 40 - footer.offsetHeight);
                         const hintNode = new Node(hintX, hintY, '(눌러서 나의 경험도 써보자)', parentNode, false, true);
                         hintNode.level = 2; // 레벨 2로 설정
                         nodes.push(hintNode);
@@ -266,4 +289,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         drawAll();
     };
+
+    async function saveMindmap() {
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('id');
+        const QLevel = params.get('grade');
+        const QYear = params.get('year');
+        const QMonth = params.get('month');
+        const QNo = params.get('number');
+        const whichHW = 'mindmap';
+    
+        if (!userId || !QLevel || !QYear || !QMonth || !QNo) {
+            alert('필요한 정보가 모두 제공되지 않았습니다.');
+            return;
+        }
+    
+        html2canvas(document.getElementById('canvasContainer')).then(function(canvas) {
+            canvas.toBlob(function(blob) {
+                const formData = new FormData();
+                formData.append('UserId', userId);
+                formData.append('QLevel', QLevel);
+                formData.append('QYear', QYear);
+                formData.append('QMonth', QMonth);
+                formData.append('QNo', QNo);
+                formData.append('whichHW', whichHW);
+                formData.append('HWImage', blob);
+    
+                fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWImages', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Mindmap saved successfully!');
+                    } else {
+                        response.text().then(text => {
+                            alert('Failed to save mindmap: ' + text);
+                        });
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while saving the mindmap.');
+                });
+            }, 'image/png');
+        });
+    }
+
+    window.saveMindmap = saveMindmap;
 });

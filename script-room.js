@@ -279,10 +279,10 @@ function drawSmallHexagons(svg) {
         .attr('stroke-width', 1)
         .attr('cursor', 'pointer')
         .on('click', function() {
-            window.location.href = 'imagifyTest3.html'; // 클릭 시 이동할 페이지 URL
+            window.location.href = `imagifyTest3.html?id=${userId}`; // 클릭 시 이동할 페이지 URL
         }) 
         .on('mouseover', function() {
-            d3.select(this).attr('fill', 'rgba(137,109,173,1.0)'); // 호버 시 색상 변경
+            d3.select(this).attr('fill', 'rgba(45,149,175,0.6)'); // 호버 시 색상 변경
         })
         .on('mouseout', function() {
             d3.select(this).attr('fill', 'rgba(137,109,173,0.5)'); // 호버 아웃 시 원래 색상 복구
