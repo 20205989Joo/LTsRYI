@@ -1,7 +1,9 @@
+// Updated script-mainpage.js to reflect HTML changes
+
 // 각 버튼 클릭 시 추가될 모듈들
 const modules = {
     "rcbutton": { className: "rcmodule", label: "독해 연습" }, // 독해 연습 모듈
-    "wordtestbutton": { className: "wtmodule", label: "Word Test" }, // Word Test 모듈
+    "wordtestbutton": { className: "wordtestmodule", label: "Word Test" }, // Word Test 모듈
     "lcbutton": { className: "lcmodule", label: "LC" }, // LC 모듈
     "handbutton": { className: "handmodule", label: "Hand" } // Hand 모듈
 };
@@ -20,7 +22,7 @@ const userId = getUrlParameter('id');
 // mp_window에 모듈을 추가하거나 제거하는 함수
 function toggleModuleInWindow(buttonId) {
     const moduleInfo = modules[buttonId];
-    const windowContainer = document.querySelector('.mp_window');
+    const windowContainer = document.querySelector('#mp_window');
     const existingModule = document.querySelector(`.${moduleInfo.className}`);
 
     // 모듈이 이미 존재하면 제거, 그렇지 않으면 추가
@@ -31,13 +33,14 @@ function toggleModuleInWindow(buttonId) {
         const moduleContainer = document.createElement('div');
         moduleContainer.className = 'module-container';
 
-        // 모듈 자체 생성
-        const moduleElement = document.createElement('div');
-        moduleElement.className = moduleInfo.className;
+         // 모듈 자체 생성
+         const moduleElement = document.createElement('div');
+         moduleElement.className = 'subjectmodule';
+         moduleElement.id = buttonId.replace('button', 'module');
 
         // 레이블 생성 (모듈 내부에 추가)
         const labelElement = document.createElement('div');
-        labelElement.className = 'label';
+        labelElement.className = 'module-label';
         labelElement.innerText = moduleInfo.label;
 
         // 레이블을 모듈 내부에 추가
@@ -60,5 +63,5 @@ function toggleModuleInWindow(buttonId) {
 
 // 각 버튼에 클릭 이벤트 추가
 Object.keys(modules).forEach(buttonId => {
-    document.querySelector(`.${buttonId}`).addEventListener('click', () => toggleModuleInWindow(buttonId));
+    document.querySelector(`#${buttonId}`).addEventListener('click', () => toggleModuleInWindow(buttonId));
 });
