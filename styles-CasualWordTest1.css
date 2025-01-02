@@ -1,0 +1,377 @@
+/* Casual Word Test 1 Page Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4; /* 원하는 배경색 */
+}
+
+/* main-page 중앙에 위치 */
+.main-page {
+    position: relative;
+    width: 375px;
+    height: 667px;
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과로 강조 */
+    overflow: hidden; /* 부모 요소가 자식 요소를 넘지 않도록 */
+    display: flex;
+    justify-content: space-between; 
+}
+
+/* correct-rate-container는 mp_window 안에 배치 */
+.correct-rate-container {
+    position: absolute;
+    top: 10px; /* mp_window 상단에서 10px */
+    right: 20px; /* mp_window 우측에서 10px */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 10; /* 다른 요소보다 위로 */
+}
+
+/* 정답률 라벨 */
+.correct-rate-label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* 정답률 값 */
+.correct-rate-value {
+    font-size: 14px;
+    color: #333;
+}
+
+/* mp_treeframe */
+.mp_treeframe {
+    position: absolute;
+    width: 336px;
+    height: 546px;
+    left: 20px;
+    top: 80px;
+    background: #7E3106;
+}
+
+/* mp_window */
+.mp_window {
+    position: relative;
+    width: 315px;
+    height: 280px;
+    left: 30px;
+    top: 90px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 40px;
+    overflow-y: auto;
+    padding-top: 60px;
+}
+
+/* 레이블 스타일 */
+.label {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+/* mptitle */
+.mptitle {
+    position: absolute;
+    width: 79px;
+    height: 31px;
+    left: 46px;
+    top: 70px;
+    background: #BC8546;
+    border-radius: 10px;
+}
+
+/* To-do 텍스트 */
+.to-do {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 15px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+/* mp_corkframe */
+.mp_corkframe {
+    position: absolute;
+    width: 315px;
+    height: 180px;
+    left: 30px;
+    top: 430px;
+    background: rgba(213, 166, 95, 0.72);
+    border: 2px solid #7E3106;
+}
+
+/* Date 스타일 */
+.date {
+    position: absolute;
+    width: 163px;
+    height: 29px;
+    left: 77px;
+    top: 31px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 29px;
+    text-align: center;
+    color: #000000;
+}
+
+/* Ellipses 스타일 */
+.ellipse2 {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    background: #D9D9D9;
+    border-radius: 50%;
+    left: 307px;
+    top: 26px;
+    border: 1px solid #000000;
+}
+
+.ellipse3 {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    background: #000000;
+    border-radius: 50%;
+    left: 321px;
+    top: 40px;
+    border: 1px solid #000000;
+}
+
+/* mp_decoline1 */
+.mp_decoline1 {
+    position: absolute;
+    width: 243px;
+    height: 0px;
+    left: 40px;
+    top: 370px;
+    border: 1px solid #7E3106;
+}
+
+/* Submit 버튼 스타일 */
+.submitbutton {
+    position: absolute;
+    width: 70px;
+    height: 29px;
+    left: 215px;
+    top: 375px;
+    background: rgba(213, 166, 95, 0.72);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 9px;
+}
+
+.submit {
+    position: absolute;
+    width: 50px;
+    height: 18px;
+    left: 225px;
+    top: 380px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+    text-align: center;
+    color: #000000;
+}
+
+/* mp_postitcorner - 직각삼각형 처리 */
+.mp_postitcorner {
+    position: absolute;
+    width: 43px;
+    height: 45px;
+    left: 300px;
+    top: 367px;
+    background: #7E3106;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    border: 1px solid rgba(191, 106, 106, 0.68);
+}
+
+/* 선택지 스타일 - Option 1 to 5 */
+.option {
+    position: absolute;
+    width: 294px;
+    height: 28px;
+    left: 40px;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0px 4px 8.6px rgba(0, 0, 0, 0.25), inset -4px -3px 3.1px #C46863;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#option1 {
+    top: 440px;
+}
+
+#option2 {
+    top: 473px;
+}
+
+#option3 {
+    top: 506px;
+    height: 29px;
+}
+
+#option4 {
+    top: 540px;
+}
+
+#option5 {
+    top: 573px;
+}
+
+/* 선택지 레이블 스타일 */
+.option-label {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 16px;
+    color: #000000;
+    padding: 5px 10px;
+}
+
+/* 드롭다운 스타일 */
+#wordbookSelect, #startDaySelect, #endDaySelect {
+    position: absolute;
+    width: 150px;
+    height: 28px;
+    left: 40px;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0px 4px 8.6px rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+    border: 1px solid #C46863;
+    font-family: 'Inter';
+    font-size: 14px;
+    color: #000;
+    padding-left: 10px;
+}
+
+#wordbookSelect {
+    top: 100px;
+}
+
+#startDaySelect {
+    top: 140px;
+}
+
+#endDaySelect {
+    top: 180px;
+}
+
+/* Start Test 버튼 스타일 */
+#startTestButton {
+    position: absolute;
+    width: 150px;
+    height: 40px;
+    left: 40px;
+    top: 220px;
+    background: #7E3106;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0px 4px 8.6px rgba(0, 0, 0, 0.25);
+    cursor: not-allowed;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+#startTestButton:enabled {
+    cursor: pointer;
+    opacity: 1;
+}
+
+/* 선택된 텍스트를 표시할 컨테이너 스타일 */
+#selectionContainer {
+    position: absolute;
+    top: 10px; /* mp_window 내에서 적당히 위치 지정 */
+    left: 10px;
+    font-family: 'Inter';
+    font-size: 16px;
+    color: #000;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 5; /* correct-rate-container 보다 뒤로 */
+}
+
+/* 문제 영역 스타일 */
+.question-container {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 100px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.question-container p {
+    font-family: 'Inter', sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    text-align: center;
+}
+
+/* 정답/오답 메시지 컨테이너 스타일 */
+#messageContainer {
+    position: absolute;
+    top: 37%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Arial', sans-serif;
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    padding: 40px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+.correct-message {
+    background-color: green;
+}
+
+.wrong-message {
+    background-color: red;
+}

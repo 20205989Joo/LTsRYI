@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casual Word Test 1</title>
+    <link rel="stylesheet" href="styles-CasualWordTest1.css">
+    <script src="script-CasualWordTest1.js" defer></script>
+</head>
+<body>
+    <!-- Main Page Container -->
+    <div class="main-page">
+        <!-- mp_treeframe -->
+        <div class="mp_treeframe"></div>
+
+        <!-- mp_window: 처음엔 비어있음 -->
+        <div class="mp_window">
+            <!-- Selection Container -->
+            <div id="selectionContainer" class="selection-container"></div>
+
+            <!-- Correct Rate Container -->
+            <div class="correct-rate-container">
+                <div class="correct-rate-label">정답률</div>
+                <div class="correct-rate-value" id="correctRate">0 / 0</div>
+            </div>
+
+            <!-- Question Container -->
+            <div class="question-container">
+                <p>문제가 출제됩니다!</p>
+            </div>
+
+            <!-- Message Container -->
+            <div id="messageContainer" class="message-container"></div>
+        </div>
+
+        <!-- mptitle -->
+        <div class="mptitle">
+            <div class="to-do">To do</div>
+        </div>
+
+        <!-- mp_corkframe -->
+        <div class="mp_corkframe"></div>
+
+        <!-- Wordbook, Start Day, End Day Dropdowns -->
+        <div class="dropdowns">
+            <!-- Wordbook Dropdown -->
+            <select id="wordbookSelect">
+                <option>Select Wordbook</option>
+                <option>MID-A</option>
+                <option>MID-B</option>
+                <option>MID-C</option>
+            </select>
+
+            <!-- Start Day Dropdown -->
+            <select id="startDaySelect">
+                <option>Select Start Day</option>
+            </select>
+
+            <!-- End Day Dropdown -->
+            <select id="endDaySelect">
+                <option>Select End Day</option>
+            </select>
+        </div>
+
+        <!-- Option 1 -->
+        <div class="option" id="option1">
+            <div class="option-label">선택지 1</div>
+        </div>
+
+        <!-- Option 2 -->
+        <div class="option" id="option2">
+            <div class="option-label">선택지 2</div>
+        </div>
+
+        <!-- Option 3 -->
+        <div class="option" id="option3">
+            <div class="option-label">선택지 3</div>
+        </div>
+
+        <!-- Option 4 -->
+        <div class="option" id="option4">
+            <div class="option-label">선택지 4</div>
+        </div>
+
+        <!-- Option 5 -->
+        <div class="option" id="option5">
+            <div class="option-label">선택지 5</div>
+        </div>
+
+        <!-- Date -->
+        <div class="date">2024. MM. DD</div>
+
+        <!-- Ellipse 2 and 3 -->
+        <div class="ellipse2"></div>
+        <div class="ellipse3"></div>
+
+        <!-- mp_decoline1 -->
+        <div class="mp_decoline1"></div>
+
+        <!-- Submit Button -->
+        <div class="submitbutton"></div>
+        <div class="submit">Submit</div>
+
+        <!-- mp_postitcorner -->
+        <div class="mp_postitcorner"></div>
+
+        <!-- Start Test Button -->
+        <button id="startTestButton" disabled>Start Test!</button>
+
+    </div>
+</body>
+</html>

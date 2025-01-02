@@ -1,0 +1,304 @@
+/* Main Page (Flexbox 중앙 정렬) */
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4; /* 원하는 배경색 */
+}
+
+/* main-page 중앙에 위치 */
+.main-page {
+    position: relative;
+    width: 375px;
+    height: 667px;
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과로 강조 */
+    overflow: hidden; /* 부모 요소가 자식 요소를 넘지 않도록 */
+}
+
+/* mp_treeframe */
+.mp_treeframe {
+    position: absolute;
+    width: 336px;
+    height: 546px;
+    left: 20px;
+    top: 80px;
+    background: #7E3106;
+}
+
+/* mp_window (rectangle1) */
+.mp_window {
+    position: relative; /* 부모 요소는 상대적으로 설정 */
+    width: 315px;
+    height: 280px;
+    left: 30px;
+    top: 90px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 40px;
+    overflow-y: auto; /* 부모 요소 내에서 자식 요소가 넘칠 경우 스크롤 */
+    padding-top: 60px; /* 첫 번째 모듈이 시작할 위치 설정 (figma에서 주어진 좌표) */
+}
+
+/* module-container는 부모 요소 내에서 쌓이도록 */
+.module-container {
+    position: relative;
+    width: 100%; /* 부모 요소의 너비를 가득 채움 */
+    margin-bottom: 10px; /* 모듈 간의 간격 설정 */
+    padding-left: 10px;
+}
+
+/* 모듈 내부 레이블 스타일 */
+.label {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+/* handmodule, wtmodule, rcmodule - 모듈들의 스타일 */
+.handmodule, .wtmodule, .rcmodule, .lcmodule {
+    width: 180px;
+    height: 30px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.handmodule {
+    background: #D9D9D9;
+}
+
+.wtmodule {
+    background: rgba(191, 106, 106, 0.68);
+    border-radius: 6px;
+}
+
+.rcmodule {
+    background: rgba(48, 175, 183, 0.68);
+    border-radius: 6px;
+}
+
+.lcmodule {
+    background: rgba(122, 49, 167, 0.66);
+    border-radius: 6px
+}
+
+/* mptitle */
+.mptitle {
+    position: absolute;
+    width: 79px;
+    height: 31px;
+    left: 46px;
+    top: 70px;
+    background: #BC8546;
+    border-radius: 10px;
+}
+
+/* To-do 텍스트 조정 */
+.to-do {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0; /* 중앙에 위치시키기 */
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 15px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+/* mp_corkframe */
+.mp_corkframe {
+    box-sizing: border-box;
+    position: absolute;
+    width: 315px;
+    height: 180px;
+    left: 30px;
+    top: 430px;
+    background: rgba(213, 166, 95, 0.72);
+    border: 2px solid #7E3106;
+}
+
+/* 버튼들 - 원형으로 변경 */
+.wordtestbutton, .rcbutton, .lcbutton, .handbutton, .button5, .button6, .button7, .button8 {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%; /* 원형으로 만듦 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: #D9D9D9;
+}
+
+.wordtestbutton {
+    background: rgba(191, 106, 106, 0.68);
+    left: 37px;
+    top: 440px;
+    border: 1px solid #FFFFFF;
+}
+
+.rcbutton {
+    background: rgba(48, 175, 183, 0.68);
+    left: 113px;
+    top: 440px;
+    border: 1px solid #FFFFFF;
+}
+
+.lcbutton {
+    background: rgba(122, 49, 167, 0.66);
+    left: 190px;
+    top: 440px;
+}
+
+.handbutton {
+    background: #D9D9D9;
+    left: 267px;
+    top: 440px;
+}
+
+/* Other Buttons */
+.button5, .button6, .button7, .button8 {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #D9D9D9;
+}
+
+.button5 {
+    left: 37px;
+    top: 530px;
+}
+
+.button6 {
+    left: 113px;
+    top: 530px;
+}
+
+.button7 {
+    left: 190px;
+    top: 530px;
+}
+
+.button8 {
+    left: 267px;
+    top: 530px;
+}
+
+/* handmodule_upload */
+.handmodule_upload {
+    position: absolute;
+    width: 56px;
+    height: 30px;
+    left: 240px;
+    top: 130px;
+    background: #D9D9D9;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Date - 2024.MM.DD */
+.date {
+    position: absolute;
+    width: 163px;
+    height: 29px;
+    left: 77px;
+    top: 31px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 29px;
+    text-align: center;
+    color: #000000;
+}
+
+/* Ellipses */
+.ellipse2 {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    background: #D9D9D9;
+    border-radius: 50%;
+    left: 307px;
+    top: 26px;
+    border: 1px solid #000000;
+}
+
+.ellipse3 {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    background: #000000;
+    border-radius: 50%;
+    left: 321px;
+    top: 40px;
+    border: 1px solid #000000;
+}
+
+/* mp_decoline1 */
+.mp_decoline1 {
+    position: absolute;
+    width: 243px;
+    height: 0px;
+    left: 40px;
+    top: 370px;
+    border: 1px solid #7E3106;
+}
+
+/* Submit Button */
+.submitbutton {
+    position: absolute;
+    width: 70px;
+    height: 29px;
+    left: 215px;
+    top: 375px;
+    background: rgba(213, 166, 95, 0.72);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 9px;
+}
+
+.submit {
+    position: absolute;
+    width: 50px;
+    height: 18px;
+    left: 225px;
+    top: 380px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+    text-align: center;
+    color: #000000;
+}
+
+/* mp_postitcorner - 직각삼각형 처리 */
+.mp_postitcorner {
+    position: absolute;
+    width: 43px;
+    height: 45px;
+    left: 300px;
+    top: 367px;
+    background: #7E3106;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    border: 1px solid rgba(191, 106, 106, 0.68);
+}
