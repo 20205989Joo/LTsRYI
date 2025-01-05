@@ -70,8 +70,6 @@ function getUserIdFromURL() {
 
 // 드롭다운 메뉴 생성 및 이벤트 처리
 window.addEventListener('DOMContentLoaded', (event) => {
-    const mainPage = document.querySelector('.main-page');
-    const mpWindow = document.querySelector('.mp_window');
 
     // Wordbook 드롭다운 가져오기
     const wordbookSelect = document.getElementById('wordbookSelect');
@@ -123,7 +121,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     endDaySelect.addEventListener('change', checkStartTestButton);
 
     // 선택된 텍스트를 표시할 새로운 컨테이너 가져오기
-    const selectionContainer = document.getElementById('selectionContainer');
+    const selectedContainer = document.getElementById('selectedContainer');
 
     // 문제 출제 영역 가져오기
     const questionContainer = document.querySelector('.question-container');
@@ -225,10 +223,12 @@ function displayQuestion() {
     // 모든 문제를 다 출제한 경우
     if (currentQuestionIndex >= quizData.length) {
         // 선택지 텍스트를 모두 없애고 opacity를 흐리게 설정
-        const optionElements = document.querySelectorAll('.option');  // 모든 옵션 div들 선택
-        optionElements.forEach(option => {
-            option.querySelector('.option-label').textContent = '';  // 선택지 텍스트를 비우기
-            option.style.opacity = '0.3';  // 선택지의 불투명도를 낮춰 흐리게 설정
+        const optionElements = document.querySelectorAll('.wt_a_option');  // 모든 옵션 div들 선택
+        optionElements.forEach(optionButton => {
+            optionButton.textContent = '';  // 선택지 텍스트를 비우기
+            optionButton.style.opacity = '0.3';  // 선택지의 불투명도를 낮춰 흐리게 설정
+            optionButton.diabled = true;
+            optionButton.onclick = null;
         });
 
         // 문제 영역에 "테스트 끝!" 메시지 표시하고 opacity를 낮추기
@@ -249,30 +249,18 @@ function displayQuestion() {
     const options = generateOptions(currentQuestion);  // 셔플된 선택지 배열을 받아옴
 
     // 선택지 버튼을 적절한 위치에 배치
-    const optionElements = document.querySelectorAll('.option');  // 모든 옵션 div들 선택
+    const optionElements = document.querySelectorAll('.wt_a_option');  // 모든 옵션 div들 선택
 
     // 선택지 클릭 이벤트 리스너 추가 (매번 갱신)
     options.forEach((option, index) => {
-        const optionLabel = optionElements[index].querySelector('.option-label');
-        optionLabel.textContent = option.meaning;  // 의미를 옵션 라벨에 삽입
-        optionElements[index].style.display = 'block';  // 선택지 영역을 보이게 설정
-
-        // 기존 리스너가 있다면 제거하고 새 리스너 등록
-        const optionDiv = optionElements[index];
-        
-        // 기존 리스너 제거
-        const oldListener = optionDiv.listener;
-        if (oldListener) {
-            optionDiv.removeEventListener('click', oldListener); // 기존 리스너 제거
-        }
-
-        // 새로운 리스너 생성하여 등록
-        const newListener = function() {
-            optionClickListener(option, currentQuestion);  // 선택지 클릭 시 정답 확인
+        const optionButton = optionElements[index]; // 버튼 요소 선택
+        optionButton.textContent = option.meaning; // 텍스트 설정
+        optionButton.style.display = 'block'; // 선택지 버튼 표시
+    
+        // 클릭 이벤트 설정
+        optionButton.onclick = () => {
+            optionClickListener(option, currentQuestion); // 클릭 시 정답 확인
         };
-
-        optionDiv.addEventListener('click', newListener);  // 새로운 리스너 등록
-        optionDiv.listener = newListener;  // 리스너를 div에 저장 (중복 방지)
     });
 
     // 나머지 선택지 숨기기 (미사용 옵션은 숨기기)
@@ -310,7 +298,7 @@ function checkAnswer(selectedOption, correctAnswer) {
     const testCount = localStorage.getItem('testCount'); // 로컬 저장소에서 testCount 가져오기
 
     // 선택된 텍스트 (testRange)를 축약
-    const testRange = abbreviateTestRange(selectionContainer.textContent);
+    const testRange = abbreviateTestRange(selectedContainer.textContent);
 
     // timestamp는 현재 시간
     const timestamp = new Date().toISOString();  // 현재 시간 (ISO 8601 형식)
@@ -331,13 +319,7 @@ function checkAnswer(selectedOption, correctAnswer) {
 
     // 정답률 업데이트
     correctRateUpdater();
-
-    // 1. 모든 리스너 제거
-    const optionElements = document.querySelectorAll('.option');  // 모든 옵션 div들 선택
-    optionElements.forEach(option => {
-        option.removeEventListener('click', option.clickHandler);  // 기존 리스너 제거
-    });
-
+    
     // 2. 일정 시간 후에 메시지 숨기기
     setTimeout(() => {
         messageContainer.style.display = 'none';  // 메시지 숨기기
@@ -447,7 +429,7 @@ function sendToServer() {
 
 
 // Submit 버튼 클릭 시 서버로 결과 전송
-document.querySelector('.submit').addEventListener('click', function() {
+document.querySelector('.submitbutton').addEventListener('click', function() {
     sendToServer();  // 서버로 결과 전송
 });
 
@@ -463,7 +445,7 @@ startTestButton.addEventListener('click', () => {
     localStorage.setItem('results', JSON.stringify([])); // 빈 배열로 초기화
 
     // 선택된 텍스트를 선택된 컨테이너에 표시
-    selectionContainer.textContent = `${selectedWordbook} ${selectedStartDay} ${selectedEndDay}`;
+    selectedContainer.textContent = `${selectedWordbook} ${selectedStartDay} ${selectedEndDay}`;
 
     // 드롭다운 메뉴와 Start Test 버튼 숨기기 
     wordbookSelect.style.display = 'none';
