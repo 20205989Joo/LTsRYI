@@ -10,22 +10,27 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(5, 10, 7.5);
 scene.add(light);
 
-// 애니메이션 믹서 변수 선언
-let mixer; 
+// GLTF 모델 관련 변수
+let mixer;
+let animations = [];
+let currentActionIndex = 0;
 
-// GLTF 모델 로드
+// GLTF 파일 로드
 const loader = new THREE.GLTFLoader();
 loader.load(
-  'byuri_flame_texture_comp.gltf',
+  'byuri_multi_actions_test.gltf',
   (gltf) => {
     const model = gltf.scene;
     scene.add(model);
 
-    // 애니메이션이 포함된 경우 처리
+    // 애니메이션 데이터 로드
     if (gltf.animations && gltf.animations.length > 0) {
       mixer = new THREE.AnimationMixer(model);
-      const action = mixer.clipAction(gltf.animations[0]); // 첫 번째 애니메이션 실행
-      action.play();
+      animations = gltf.animations;
+
+      // 첫 번째 애니메이션 실행
+      const initialAction = mixer.clipAction(animations[0]);
+      initialAction.play();
     }
 
     console.log('Model and animations loaded:', gltf);
@@ -45,6 +50,7 @@ camera.up.set(0, 1, 0);       // Y축을 위쪽으로 설정 (기본값)
 camera.lookAt(0, 0, 0);       // 원점을 바라보도록 설정
 
 // 애니메이션 루프
+const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
 
@@ -56,6 +62,21 @@ function animate() {
 
   renderer.render(scene, camera);
 }
-
-const clock = new THREE.Clock(); // 시간 계산용 시계
 animate();
+
+// 버튼 클릭 이벤트로 애니메이션 전환
+const switchActionButton = document.getElementById('switchAction');
+switchActionButton.addEventListener('click', () => {
+  if (!mixer || animations.length === 0) return;
+
+  // 현재 실행 중인 액션을 중지
+  const currentAction = mixer.clipAction(animations[currentActionIndex]);
+  currentAction.stop();
+
+  // 다음 액션으로 전환
+  currentActionIndex = (currentActionIndex + 1) % animations.length;
+  const nextAction = mixer.clipAction(animations[currentActionIndex]);
+  nextAction.reset().play();
+
+  console.log(`Switched to animation: ${animations[currentActionIndex].name}`);
+});

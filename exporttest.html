@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Three.js Test</title>
+  <title>Three.js Test - Switch Actions</title>
   <style>
     body {
       margin: 0;
@@ -12,9 +12,19 @@
     canvas {
       display: block;
     }
+    #switchAction {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <button id="switchAction">Switch Action</button>
   <script src="https://unpkg.com/three@0.152.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
   <script src="script-exporttest.js"></script>
