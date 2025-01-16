@@ -3,29 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Three.js Test - Switch Actions</title>
+  <title>3x4 Grid with Three.js</title>
   <style>
     body {
       margin: 0;
-      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
     }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 200px); /* 3열 */
+      grid-template-rows: repeat(4, 150px);   /* 4행 */
+      gap: 10px; /* 셀 간격 */
+    }
+
+    .cell {
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      position: relative;
+    }
+
     canvas {
-      display: block;
-    }
-    #switchAction {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 100;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body>
-  <button id="switchAction">Switch Action</button>
-  <script src="https://unpkg.com/three@0.152.0/build/three.min.js"></script>
+  <div class="grid">
+    <!-- 3x4 그리드의 셀 -->
+    <div class="cell" id="cell1"></div>
+    <div class="cell" id="cell2"></div>
+    <div class="cell" id="cell3"></div>
+    <div class="cell" id="cell4"></div>
+    <div class="cell" id="cell5"></div>
+    <div class="cell" id="cell6"></div>
+    <div class="cell" id="cell7"></div>
+    <div class="cell" id="cell8"></div>
+    <div class="cell" id="cell9"></div>
+    <div class="cell" id="cell10"></div>
+    <div class="cell" id="cell11"></div>
+    <div class="cell" id="cell12"></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
   <script src="script-exporttest.js"></script>
 </body>

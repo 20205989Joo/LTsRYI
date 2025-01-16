@@ -1,82 +1,56 @@
-// 기본 Three.js 설정
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-// 조명 설정
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(5, 10, 7.5);
-scene.add(light);
-
-// GLTF 모델 관련 변수
-let mixer;
-let animations = [];
-let currentActionIndex = 0;
-
-// GLTF 파일 로드
-const loader = new THREE.GLTFLoader();
-loader.load(
-  'byuri_multi_actions_test.gltf',
-  (gltf) => {
-    const model = gltf.scene;
-    scene.add(model);
-
-    // 애니메이션 데이터 로드
-    if (gltf.animations && gltf.animations.length > 0) {
-      mixer = new THREE.AnimationMixer(model);
-      animations = gltf.animations;
-
-      // 첫 번째 애니메이션 실행
-      const initialAction = mixer.clipAction(animations[0]);
-      initialAction.play();
-    }
-
-    console.log('Model and animations loaded:', gltf);
-  },
-  (xhr) => {
-    console.log(`Loading model: ${(xhr.loaded / xhr.total) * 100}%`);
-  },
-  (error) => {
-    console.error('Error loading model:', error);
+function createSceneInCell(containerId, modelPath) {
+    const container = document.getElementById(containerId);
+  
+    // Scene, Camera, Renderer 생성
+    const scene = new THREE.Scene();
+    const aspect = container.clientWidth / container.clientHeight;
+    const d = 2; // 직교 카메라 뷰 크기
+    const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 0.1, 1000);
+    camera.position.set(0, 0, 20);
+    camera.lookAt(0, 0, 0);
+  
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+  
+    // 조명
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 10, 7.5);
+    scene.add(light);
+  
+    // GLTF 모델 로드
+    const loader = new THREE.GLTFLoader();
+    loader.load(modelPath, (gltf) => {
+      const model = gltf.scene;
+      model.scale.set(1, 1, 1); // 크기 설정
+      model.rotation.set(0, 4.7, 0); // 정면 보기
+      scene.add(model);
+  
+      // 애니메이션
+      const mixer = new THREE.AnimationMixer(model);
+      mixer.clipAction(gltf.animations[0]).play();
+  
+      // 애니메이션 및 렌더링
+      const clock = new THREE.Clock();
+      const animate = () => {
+        requestAnimationFrame(animate);
+        const delta = clock.getDelta();
+        mixer.update(delta);
+        renderer.render(scene, camera);
+      };
+      animate();
+    });
   }
-);
-
-// 카메라 위치 설정
-// 카메라 위치를 X축 기준으로 설정
-camera.position.set(5, 0, 0); // X축 양의 방향으로 이동
-camera.up.set(0, 1, 0);       // Y축을 위쪽으로 설정 (기본값)
-camera.lookAt(0, 0, 0);       // 원점을 바라보도록 설정
-
-// 애니메이션 루프
-const clock = new THREE.Clock();
-function animate() {
-  requestAnimationFrame(animate);
-
-  // 애니메이션 업데이트
-  if (mixer) {
-    const delta = clock.getDelta();
-    mixer.update(delta);
+  
+  // 3x4 셀에 각 Scene 추가
+  const modelPath = 'byuri_multi_actions_test.gltf';
+  for (let i = 1; i <= 12; i++) {
+    createSceneInCell(`cell${i}`, modelPath);
   }
-
-  renderer.render(scene, camera);
-}
-animate();
-
-// 버튼 클릭 이벤트로 애니메이션 전환
-const switchActionButton = document.getElementById('switchAction');
-switchActionButton.addEventListener('click', () => {
-  if (!mixer || animations.length === 0) return;
-
-  // 현재 실행 중인 액션을 중지
-  const currentAction = mixer.clipAction(animations[currentActionIndex]);
-  currentAction.stop();
-
-  // 다음 액션으로 전환
-  currentActionIndex = (currentActionIndex + 1) % animations.length;
-  const nextAction = mixer.clipAction(animations[currentActionIndex]);
-  nextAction.reset().play();
-
-  console.log(`Switched to animation: ${animations[currentActionIndex].name}`);
+  
+  const loader = new THREE.FileLoader();
+loader.load('byuri_multi_actions_test.gltf', (data) => {
+  const sizeInBytes = new Blob([data]).size;
+  const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+  console.log(`GLTF 파일 크기: ${sizeInKB} KB`);
 });
