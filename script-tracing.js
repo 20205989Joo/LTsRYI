@@ -2,12 +2,15 @@ const canvas = document.getElementById("learningCanvas");
 const ctx = canvas.getContext("2d");
 
 // 기준 단어와 글자 박스 정의
-const targetWord = "booster";
+const targetWord = "exhausted";
 const letterBoxes = [];
 const letterWidth = 60;
 const letterHeight = 80;
 const startX = 50;
 const startY = 150;
+
+// 중력 설정
+const gravity = 0.05; // 약간의 중력 효과
 
 // 기준 글자 박스 생성
 ctx.font = "48px Arial";
@@ -84,7 +87,6 @@ function createParticle(x, y) {
         dx: (Math.random() - 0.5) * 2, // X축 이동 방향
         dy: (Math.random() - 0.5) * 2, // Y축 이동 방향
         life: 60, // 수명 (프레임)
-        gravityApplied: false, // 중력 적용 여부
     };
     particles.push(particle);
 }
@@ -103,9 +105,8 @@ function drawParticles() {
         particle.y += particle.dy;
 
         // 끝에 약간 떨어지는 효과 추가
-        if (particle.life < 25) {
-            particle.dy += 0.2; // 중력 효과 (작게 설정)
-            particle.gravityApplied = true; // 중력이 적용된 상태 표시
+        if (particle.life < 20) {
+            particle.dy += gravity; // 중력 효과 (작게 설정)
         }
 
         particle.alpha -= 0.02; // 서서히 사라짐
@@ -118,16 +119,30 @@ function drawParticles() {
     });
 }
 
-// 사용자가 그린 점 기록
+// 이벤트 좌표 계산 (마우스/터치 공통)
+function getEventPosition(e) {
+    if (e.touches) {
+        const touch = e.touches[0];
+        return { x: touch.clientX - canvas.offsetLeft, y: touch.clientY - canvas.offsetTop };
+    }
+    return { x: e.offsetX, y: e.offsetY };
+}
+
+// 마우스/터치 이벤트 처리
 canvas.addEventListener("mousedown", () => {
     isDrawing = true;
     userStrokes.push([]); // 새로운 Stroke 추가
+});
+canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    isDrawing = true;
+    userStrokes.push([]);
 });
 
 canvas.addEventListener("mousemove", (e) => {
     if (!isDrawing) return;
 
-    const { offsetX: x, offsetY: y } = e;
+    const { x, y } = getEventPosition(e);
     userStrokes[userStrokes.length - 1].push({ x, y }); // 현재 Stroke에 점 추가
 
     // 불꽃 효과 생성
@@ -144,8 +159,23 @@ canvas.addEventListener("mousemove", (e) => {
     // 불꽃 효과 그리기
     drawParticles();
 });
+canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    const { x, y } = getEventPosition(e);
+    userStrokes[userStrokes.length - 1].push({ x, y });
+
+    createParticle(x, y);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBoxes();
+    drawStrokes();
+    drawParticles();
+});
 
 canvas.addEventListener("mouseup", () => {
+    isDrawing = false;
+});
+canvas.addEventListener("touchend", () => {
     isDrawing = false;
 });
 
