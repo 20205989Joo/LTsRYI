@@ -34,5 +34,5 @@ document.getElementById('loginButton').addEventListener('click', function() {
 // Tester 버튼 클릭 이벤트 리스너 (room_alt.html로 이동)
 document.getElementById('testerButton').addEventListener('click', function() {
     const userId = 'Tester';
-    window.location.href = `MainPage.html?id=${userId}`; // id 파라미터와 함께 room_alt.html로 이동
+    window.location.href = `main-nav.html?id=${userId}`; // id 파라미터와 함께 room_alt.html로 이동
 });

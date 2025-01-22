@@ -218,50 +218,55 @@ function optionClickListener(option, currentQuestion) {
 
 // 문제 출제 함수
 function displayQuestion() {
-    console.log('displayQuestion 호출됨');
+    console.log('displayQuestion 호출됨');  // displayQuestion 호출 시 로그
 
+    // 모든 문제를 다 출제한 경우
     if (currentQuestionIndex >= quizData.length) {
-        const optionElements = document.querySelectorAll('.wt_a_option');
+        // 선택지 텍스트를 모두 없애고 opacity를 흐리게 설정
+        const optionElements = document.querySelectorAll('.wt_a_option');  // 모든 옵션 div들 선택
         optionElements.forEach(optionButton => {
-            optionButton.textContent = '';
-            optionButton.style.opacity = '0.3';
-            optionButton.disabled = true;
+            optionButton.textContent = '';  // 선택지 텍스트를 비우기
+            optionButton.style.opacity = '0.3';  // 선택지의 불투명도를 낮춰 흐리게 설정
+            optionButton.diabled = true;
             optionButton.onclick = null;
         });
 
+        // 문제 영역에 "테스트 끝!" 메시지 표시하고 opacity를 낮추기
+        const questionText = document.querySelector('.question-container p');
         questionText.textContent = "테스트 끝!";
-        questionContainer.style.opacity = '0.3';
-        return;
+        document.querySelector('.question-container').style.opacity = '0.3';  // 문제 영역도 흐리게 설정
+
+        return;  // 더 이상 문제를 출제하지 않음
     }
 
     const currentQuestion = quizData[currentQuestionIndex];
     console.log('출제 문제:', currentQuestion);
 
+    // 문제 영역에 단어 표시
     questionText.textContent = currentQuestion.word;
-    const options = generateOptions(currentQuestion);
 
-    const optionElements = document.querySelectorAll('.wt_a_option');
-    const labelElements = document.querySelectorAll('.label_wt_a_option');
+    // 선택지 섹션에 선택지 텍스트를 설정
+    const options = generateOptions(currentQuestion);  // 셔플된 선택지 배열을 받아옴
 
+    // 선택지 버튼을 적절한 위치에 배치
+    const optionElements = document.querySelectorAll('.wt_a_option');  // 모든 옵션 div들 선택
+
+    // 선택지 클릭 이벤트 리스너 추가 (매번 갱신)
     options.forEach((option, index) => {
-        const optionButton = optionElements[index];
-        const labelElement = labelElements[index];
-
-        labelElement.textContent = option.meaning;
-        labelElement.style.display = 'block';
-
+        const optionButton = optionElements[index]; // 버튼 요소 선택
+        optionButton.textContent = option.meaning; // 텍스트 설정
+        optionButton.style.display = 'block'; // 선택지 버튼 표시
+    
+        // 클릭 이벤트 설정
         optionButton.onclick = () => {
-            optionClickListener(option, currentQuestion);
+            optionClickListener(option, currentQuestion); // 클릭 시 정답 확인
         };
     });
 
+    // 나머지 선택지 숨기기 (미사용 옵션은 숨기기)
     const remainingOptions = Array.from(optionElements).slice(options.length);
-    const remainingLabels = Array.from(labelElements).slice(options.length);
-
     remainingOptions.forEach(optionDiv => optionDiv.style.display = 'none');
-    remainingLabels.forEach(labelDiv => labelDiv.style.display = 'none');
 }
-
 
 
 
@@ -274,12 +279,12 @@ function checkAnswer(selectedOption, correctAnswer) {
     let correctness = 0;  // 기본적으로 오답
     if (selectedOption.meaning === correctAnswer.meaning) {
         messageContainer.textContent = 'Correct!';
-        messageContainer.style.color = 'green';
+        messageContainer.style.backgroundColor = 'green';
         correctness = 1;  // 정답
         correctCount++;  // 정답 개수 증가
     } else {
         messageContainer.textContent = 'Wrong!';
-        messageContainer.style.color = 'red';
+        messageContainer.style.backgroundColor = 'red';
     }
 
     // 메시지 즉시 보이게 설정

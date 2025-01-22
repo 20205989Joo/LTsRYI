@@ -1,0 +1,163 @@
+/* 공통 스타일 정의 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #FFFFFF;
+}
+
+.container {
+    position: relative;
+    width: 375px;
+    height: 667px;
+    margin: 20px auto;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+}
+
+.mainbutton_expand, .mainbutton {
+    position: absolute;
+    background: #D9D9D9;
+    border-radius: 50%;
+}
+
+.mainbutton_expand {
+    width: 260px;
+    height: 260px;
+    left: 57px;
+    top: 445px;
+}
+
+.mainbutton {
+    width: 122px;
+    height: 122px;
+    left: 126px;
+    top: 514px;
+    background: #F17B2A;
+    border: 10px solid #7E3106;
+}
+
+.button_to {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: #D9D9D9;
+    border-radius: 50%;
+    border: 1px solid #7E3106;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#mine_to {
+    left: 101px;
+    top: 440px;
+}
+
+#inven_to {
+    left: 223px;
+    top: 440px;
+}
+
+#crevasse_to {
+    left: 290px;
+    top: 520px;
+}
+
+#raid_to {
+    left: 34px;
+    top: 520px;
+}
+
+.mainnav_treeframe {
+    position: absolute;
+    width: 336px;
+    height: 330px;
+    left: 20px;
+    top: 80px;
+    background: #7E3106;
+}
+
+.imsi-title {
+    position: absolute;
+    width: 143px;
+    height: 29px;
+    left: 116px;
+    top: 30px;
+    text-align: center;
+    font-size: 24px;
+    line-height: 29px;
+    color: #000000;
+}
+
+.mainnav_window {
+    position: absolute;
+    width: 306px;
+    height: 306px;
+    left: 34px;
+    top: 90px;
+    background: #F2E7DA;
+    border-radius: 30px;
+}
+
+.title_todayscore {
+    position: absolute;
+    width: 169px;
+    height: 29px;
+    left: 103px;
+    top: 111px;
+    text-align: center;
+    font-size: 24px;
+    line-height: 29px;
+    color: #000000;
+}
+
+.label_todayscore {
+    position: absolute;
+    width: 306px;
+    height: 184px;
+    left: 34px;
+    top: 150px;
+    font-size: 128px;
+    line-height: 155px;
+    text-align: center;
+    color: #C46863;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.label {
+    font-size: 24px;
+    line-height: 29px;
+    text-align: center;
+    color: #000000;
+}
+
+.today_right_button {
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 352px;
+    top: 221px;
+    border-left: 21px solid transparent;
+    border-right: 21px solid transparent;
+    border-bottom: 42px solid #D9D9D9;
+    transform: rotate(90deg);
+}
+
+.today_left_button {
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 10px;
+    top: 221px;
+    border-left: 21px solid transparent;
+    border-right: 21px solid transparent;
+    border-bottom: 42px solid #D9D9D9;
+    transform: rotate(-90deg);
+}

@@ -43,8 +43,8 @@ let isDrawing = false;
 let userStrokes = [];
 let particles = []; // 불꽃 효과 저장
 
-// 필기 곡선과 스타일 설정
 function drawStrokes() {
+    const currentTime = Date.now(); // 현재 시각
     userStrokes.forEach((stroke) => {
         // 1. 주황색 라인 (아래쪽)
         ctx.beginPath();
@@ -54,27 +54,52 @@ function drawStrokes() {
         ctx.shadowBlur = 3.2; // 그림자 블러
         ctx.shadowOffsetY = 0; // 그림자 Y축 오프셋
 
-        for (let i = 1; i < stroke.length; i++) {
-            ctx.moveTo(stroke[i - 1].x, stroke[i - 1].y);
-            ctx.lineTo(stroke[i].x, stroke[i].y);
+        for (let i = 1; i < stroke.points.length; i++) {
+            ctx.moveTo(stroke.points[i - 1].x, stroke.points[i - 1].y);
+            ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
         }
         ctx.stroke();
         ctx.closePath();
 
-        // 2. 흰색 라인 (위쪽)
+        // 2. 색상 변화 (위쪽)
+        const elapsedTime = currentTime - stroke.timestamp; // 경과 시간
+        const duration = 4000; // 3초 동안 변화
+        const startColor = "rgba(252, 230, 157,1)"; // Yellow
+        const endColor = "rgba(252, 159, 159, 0.87)"; // White
+        const strokeColor = interpolateColor(startColor, endColor, elapsedTime, duration);
+
         ctx.beginPath();
         ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgb(236, 236, 212)"; // 흰색
+        ctx.strokeStyle = strokeColor; // 계산된 색상 적용
         ctx.shadowColor = "transparent"; // 그림자 없음
 
-        for (let i = 1; i < stroke.length; i++) {
-            ctx.moveTo(stroke[i - 1].x, stroke[i - 1].y);
-            ctx.lineTo(stroke[i].x, stroke[i].y);
+        for (let i = 1; i < stroke.points.length; i++) {
+            ctx.moveTo(stroke.points[i - 1].x, stroke.points[i - 1].y);
+            ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
         }
         ctx.stroke();
         ctx.closePath();
     });
 }
+
+// 색상 변화 함수
+function interpolateColor(startColor, endColor, elapsedTime, duration) {
+    const factor = Math.min(1, elapsedTime / duration); // 0 ~ 1 사이 비율
+
+    // 시작 색상과 끝 색상에서 각 채널 추출
+    const [r1, g1, b1, a1] = startColor.match(/\d+(\.\d+)?/g).map(Number);
+    const [r2, g2, b2, a2] = endColor.match(/\d+(\.\d+)?/g).map(Number);
+
+    // 각 채널 계산
+    const red = Math.round(r1 + (r2 - r1) * factor);
+    const green = Math.round(g1 + (g2 - g1) * factor);
+    const blue = Math.round(b1 + (b2 - b1) * factor);
+    const alpha = a1 + (a2 - a1) * factor;
+
+    // 색상 문자열 생성
+    return `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(2)})`;
+}
+
 
 // 불꽃 효과 생성
 function createParticle(x, y) {
@@ -128,41 +153,44 @@ function getEventPosition(e) {
     return { x: e.offsetX, y: e.offsetY };
 }
 
+// 이벤트 좌표 계산 (마우스/터치 공통)
+function getEventPosition(e) {
+    if (e.touches) {
+        const touch = e.touches[0];
+        return { x: touch.clientX - canvas.offsetLeft, y: touch.clientY - canvas.offsetTop };
+    }
+    return { x: e.offsetX, y: e.offsetY };
+}
+
 // 마우스/터치 이벤트 처리
 canvas.addEventListener("mousedown", () => {
     isDrawing = true;
-    userStrokes.push([]); // 새로운 Stroke 추가
+    userStrokes.push({ points: [], timestamp: Date.now() }); // 새로운 Stroke 추가
 });
 canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
     isDrawing = true;
-    userStrokes.push([]);
+    userStrokes.push({ points: [], timestamp: Date.now() });
 });
 
 canvas.addEventListener("mousemove", (e) => {
     if (!isDrawing) return;
 
     const { x, y } = getEventPosition(e);
-    userStrokes[userStrokes.length - 1].push({ x, y }); // 현재 Stroke에 점 추가
+    userStrokes[userStrokes.length - 1].points.push({ x, y }); // 현재 Stroke에 점 추가
 
-    // 불꽃 효과 생성
-    createParticle(x, y);
+    createParticle(x, y); // 불꽃 효과 생성
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 글자 박스와 기준 단어 다시 그리기
-    drawBoxes();
-
-    // 기존 Stroke 다시 그리기
-    drawStrokes();
-
-    // 불꽃 효과 그리기
-    drawParticles();
+    drawBoxes(); // 글자 박스 다시 그리기
+    drawStrokes(); // Stroke 다시 그리기
+    drawParticles(); // 불꽃 효과 그리기
 });
 canvas.addEventListener("touchmove", (e) => {
     e.preventDefault();
     const { x, y } = getEventPosition(e);
-    userStrokes[userStrokes.length - 1].push({ x, y });
+    userStrokes[userStrokes.length - 1].points.push({ x, y });
 
     createParticle(x, y);
 
