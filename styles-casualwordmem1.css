@@ -1,0 +1,62 @@
+/* Main Page Styling */
+.main-page {
+    background: url('imsi_background_crevasse.png') no-repeat center center fixed;
+}
+
+#wm_treeframe {
+    background : rgba(191, 106, 106, 0.68);
+    border: 6px solid rgba(200, 67, 44, 1);
+}
+
+#wm_corkframe {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+
+/* 문제 영역 스타일 */
+.question-container {
+    position: absolute;
+    top: 39px;
+    left: 10px;
+    width: 295px;
+    height: 165px;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 4;
+}
+
+/* Rectangle 48 */
+.wordroll{
+    position: absolute;
+    width: 281px;
+    height: 47px;
+    left: 46px;
+    top: 187px;
+    background: #F5F5F5;
+    box-shadow: inset 0px 0px 5.5px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+
+}
+
+
+
+.question-container p {
+    font-family: 'Inter', sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    text-align: center;
+}
+
+.blackboard {
+    position:absolute;
+    left: 10px;
+    top: 34px;
+    width: 292px;
+    height: 112px;
+    background: rgba(0,0,0,0.8);
+}

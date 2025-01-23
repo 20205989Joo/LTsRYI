@@ -1,0 +1,166 @@
+/* Main Page Styling */
+.main-page {
+    background: url('imsi_background_crevasse.png') no-repeat center center fixed;
+}
+
+/* Dialogue Box */
+.dialoguebox_main {
+    box-sizing: border-box;
+    position: absolute;
+    width: 345px;
+    height: 120px;
+    left: 14px;
+    top: 532px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 7px solid rgba(188, 77, 70, 0.66);
+}
+
+.text_dialogue {
+    position: absolute;
+    width: 258px;
+    height: 24px;
+    left: 14px; /* Relative to dialoguebox_main */
+    top: 16px; /* Relative to dialoguebox_main */
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+/* Name Box */
+.dialoguebox_name {
+    position: absolute;
+    width: 75px;
+    height: 33px;
+    left: 18px;
+    top: 499px;
+    background: rgba(126, 49, 6, 1);
+    border-radius: 6px;
+}
+
+.name {
+    position: absolute;
+    left: 12px; /* Relative to dialoguebox_name */
+    top: 6px;  /* Relative to dialoguebox_name */
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 21px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+/* Memorize Button */
+.enterbutton_memorize {
+    box-sizing: border-box;
+    position: absolute;
+    width: 318px;
+    height: 113px;
+    left: 26px;
+    top: 36px;
+    background: #D9D9D9;
+    border: 7px solid #C46863;
+    border-radius: 20px;
+}
+
+.label_enter_memorize {
+    position: absolute;
+    width: auto;
+    height: 44px;
+    left: 11px; /* Relative to enterbutton_memorize */
+    top: 15px; /* Relative to enterbutton_memorize */
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 44px;
+    text-align: center;
+    color: #F17B2A;
+}
+
+.sublabel_enter_memorize {
+    position: absolute;
+    width: auto;
+    height: 24px;
+    left: 102px; /* Relative to enterbutton_memorize */
+    top: 67px; /* Relative to enterbutton_memorize */
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/* Alchemy Button */
+.enterbutton_alchemy {
+    box-sizing: border-box;
+    position: absolute;
+    width: 318px;
+    height: 113px;
+    left: 26px;
+    top: 185px;
+    background: #D9D9D9;
+    border: 7px solid rgba(183, 153, 48, 0.68);
+    border-radius: 20px;
+}
+
+.label_enter_alchemy {
+    position: absolute;
+    width: auto;
+    height: 44px;
+    left: 11px; /* Relative to enterbutton_alchemy */
+    top: 15px; /* Relative to enterbutton_alchemy */
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 44px;
+    text-align: center;
+    color: #F17B2A;
+}
+
+.sublabel_enter_alchemy {
+    position: absolute;
+    width: 146px;
+    height: 24px;
+    left: 143px; /* Relative to enterbutton_alchemy */
+    top: 67px; /* Relative to enterbutton_alchemy */
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/* Polygon Decoration */
+.polygon_5 {
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: calc(50% - 16px);
+    top: 331px;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 32px solid #FBAC3D;
+}
+
+/* Proceed Button */
+.button_proceed {
+    box-sizing: border-box;
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    left: 26px;
+    top: 331px;
+    background: #F5F5F5;
+    border: 7px solid #D9D9D9;
+    border-radius: 15px;
+}

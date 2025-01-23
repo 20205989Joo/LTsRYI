@@ -25,20 +25,23 @@ body, html {
 
 /* treeframe */
 .treeframe {
-    position: relative; /* 기준점을 설정 */
+    box-sizing: border-box;
+    position: absolute; /* 기준점을 설정 */
     width: 336px;
-    height: 546px;
+    height: 299px;
     left: 20px;
-    top: 80px;
+    top: 70px;
     background: #7E3106;
+    border: 6px solid #7e3106;
+    border-radius: 25px;
 }
 
 .window {
     position: absolute;
     width: 315px;
-    height: 323px;
-    left: 10px; /* treeframe 기준 */
-    top: 10px;  /* treeframe 기준 */
+    height: 248px;
+    left: 4px;
+    top: 14px;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 40px;
     overflow-x: hidden; /* 자식이 스크롤 되도록 설정 */
@@ -51,8 +54,8 @@ body, html {
     position: absolute;
     width: 315px;
     height: 180px;
-    left: 10px; /* treeframe 기준 */
-    top: 350px; /* treeframe 기준 */
+    left: 30px; /* treeframe 기준 */
+    top: 430px; /* treeframe 기준 */
     background: rgba(213, 166, 95, 0.72);
     border: 2px solid #7E3106;
 }
