@@ -169,12 +169,22 @@ function drawParticles() {
 }
 
 function getEventPosition(e) {
+    const rect = canvas.getBoundingClientRect(); // 캔버스의 위치와 크기
+
     if (e.touches) {
-        const touch = e.touches[0];
-        return { x: touch.clientX - canvas.offsetLeft, y: touch.clientY - canvas.offsetTop };
+        const touch = e.touches[0]; // 첫 번째 터치 포인트 사용
+        return {
+            x: touch.clientX - rect.left, // 캔버스 내부 X 좌표
+            y: touch.clientY - rect.top,  // 캔버스 내부 Y 좌표
+        };
     }
-    return { x: e.offsetX, y: e.offsetY };
+
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+    };
 }
+
 
 canvas.addEventListener("mousedown", () => {
     isDrawing = true;
