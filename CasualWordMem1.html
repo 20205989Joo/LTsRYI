@@ -11,16 +11,33 @@
     <div class="main-page">
         <!-- Word Display Section -->
         <div class="treeframe" id="wm_treeframe">
-            <div class = "window" id="wm_window">
-                    <div class = "question-container">
-                        <div class = wordroll>
-                            <div class = label_wordroll></div>
+            <div class="window" id="wm_window">
+                <div class="arrow arrow-up" onclick="upButtonPressed()"></div>
+                <div class="question-container">
+                    <div class="container" id="container">
+                        <div class="highlight-box"></div>
+                        <div id="roller" class="roller">
+                            <div class="spacer" id="top-spacer"> -</div>
+                            <div class="item">Expelliarmus</div>
+                            <div class="item">Lumos</div>
+                            <div class="item">Alohomora</div>
+                            <div class="item">Expecto Patronum</div>
+                            <div class="item">Wingardium Leviosa</div>
+                            <div class="item">Obliviate</div>
+                            <div class="item">Petrificus Totalus</div>
+                            <div class="item">Accio</div>
+                            <div class="item">Stupefy</div>
+                            <div class="item">Sectumsempra</div>
+                            <div class="item">Protego</div>
+                            <div class="spacer" id="bottom-spacer"> -</div>
                         </div>
                     </div>
+                    <div class="arrow arrow-down" onclick="downButtonPressed()"></div>
+                </div>
             </div>
         </div>
-        <div class = "corkframe" id="wm_corkframe">
-            <div class = "blackboard"></div>
+        <div class="corkframe" id="wm_corkframe">
+            <div class="blackboard"></div>
         </div>
 
     </div>

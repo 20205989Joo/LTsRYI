@@ -28,29 +28,100 @@
     z-index: 4;
 }
 
-/* Rectangle 48 */
-.wordroll{
-    position: absolute;
-    width: 281px;
-    height: 47px;
-    left: 6px;
-    top: 58px;
-    background: #F5F5F5;
-    box-shadow: inset 0px 0px 5.5px rgba(0, 0, 0, 0.25);
+
+
+.container {
+    position: relative;
+    width: 240px;
+    height: 150px;
+    left:10px;
+    top:10px;
+    overflow: hidden;
     border-radius: 10px;
 
 }
 
-
-
-.question-container p {
-    font-family: 'Inter', sans-serif;
-    font-size: 30px;
-    font-weight: bold;
-    color: #333;
-    margin: 0;
-    text-align: center;
+.roller {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s ease;
 }
+
+.item {
+    width: 100%;
+    text-align: left;
+    height: 50px;
+    line-height: 50px;
+    font-size: 1rem;
+    color: #aaa;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    user-select: none;
+    padding-left: 10px;
+}
+
+.highlight-box {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 98%;
+    height: 50px;
+    background-color: rgba(230, 242, 255, 0.2);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    border-radius: 10px;
+}
+
+.spacer {
+    height: 50px;
+    visibility: visible;
+    font-size: 1rem;
+    color: #aaa;
+    text-align: center;
+    line-height: 50px;
+    user-select: none;
+}
+
+.arrow {
+    position: relative;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    cursor: pointer;
+    margin: 16px auto;
+    right: 50px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.arrow-up {
+    border-width: 0 15px 20px 15px;
+    border-color: transparent transparent rgba(241, 123, 42, 0.8) transparent;
+    bottom:4px;
+    z-index: 6;
+}
+
+.arrow-down {
+    border-width: 20px 15px 0 15px;
+    border-color: rgba(241, 123, 42, 0.8) transparent transparent transparent;
+    top: 4px;
+    z-index: 6;
+}
+
+.arrow:active {
+    transform: scale(1.1);
+    border-left-color: transparent; /* 왼쪽 테두리는 여전히 투명 */
+    border-right-color: transparent; /* 오른쪽 테두리도 투명 */
+    border-bottom-color: rgba(188, 77, 70, 0.66); /* 삼각형 부분의 색상만 변경 */
+    border-top-color: rgba(188, 77, 70, 0.66);
+}
+
+
+
 
 .blackboard {
     position:absolute;

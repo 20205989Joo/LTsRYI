@@ -25,6 +25,16 @@ body {
     border-radius: 50%;
 }
 
+.mainbutton:hover {
+    background : rgba(0, 80, 228, 0.1);
+    cursor :pointer;
+}
+
+.mainbutton:active {
+
+    background: rgb(255, 0, 0);
+}
+
 .mainbutton_expand {
     width: 260px;
     height: 260px;
