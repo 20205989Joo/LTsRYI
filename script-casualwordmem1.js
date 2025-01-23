@@ -99,8 +99,8 @@ function drawStrokes() {
 
         const elapsedTime = currentTime - stroke.timestamp;
         const duration = 4000;
-        const startColor = "rgba(252, 230, 157,1)";
-        const endColor = "rgba(252, 159, 159, 0.87)";
+        const startColor = "rgba(250, 235, 188,1)";
+        const endColor = "rgba(255, 133, 133, 0.95)";
         const strokeColor = interpolateColor(startColor, endColor, elapsedTime, duration);
 
         ctx.beginPath();
