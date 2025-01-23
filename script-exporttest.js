@@ -1,18 +1,35 @@
 // 병렬적으로 3개씩 셀에 Scene 추가
 async function batchLoadScene(modelPath, batchSize = 3) {
-    const totalCells = 12;
+    const totalCells = 6; // 화면을 6개로 제한
+    const cellMixers = {}; // 셀별로 mixer를 저장
+
     for (let i = 0; i < totalCells; i += batchSize) {
         const batch = [];
         for (let j = 0; j < batchSize && i + j < totalCells; j++) {
             batch.push(new Promise((resolve) => {
-                createSceneInCell(`cell${i + j + 1}`, modelPath, resolve);
+                createSceneInCell(`cell${i + j + 1}`, modelPath, resolve, cellMixers);
             }));
         }
         await Promise.all(batch); // 한 번에 batchSize 개의 셀을 로드
     }
+
+    // 클릭 이벤트 등록 (액션 전환)
+    Object.keys(cellMixers).forEach((cellId) => {
+        const container = document.getElementById(cellId);
+        container.addEventListener('click', () => {
+            const { mixer, actions } = cellMixers[cellId];
+            if (actions && actions.length > 1) {
+                // 현재 재생 중인 액션을 멈추고 다음 액션 재생
+                const currentAction = actions.find((action) => action.isRunning());
+                currentAction.stop();
+                const nextActionIndex = (actions.indexOf(currentAction) + 1) % actions.length;
+                actions[nextActionIndex].play();
+            }
+        });
+    });
 }
 
-function createSceneInCell(containerId, modelPath, onComplete) {
+function createSceneInCell(containerId, modelPath, onComplete, cellMixers) {
     const container = document.getElementById(containerId);
 
     // Scene, Camera, Renderer 생성
@@ -40,9 +57,13 @@ function createSceneInCell(containerId, modelPath, onComplete) {
         model.rotation.set(0, 4.7, 0); // 정면 보기
         scene.add(model);
 
-        // 애니메이션
+        // 애니메이션 설정
         const mixer = new THREE.AnimationMixer(model);
-        mixer.clipAction(gltf.animations[0]).play();
+        const actions = gltf.animations.map((clip) => mixer.clipAction(clip));
+        if (actions.length > 0) actions[0].play(); // 첫 번째 액션 재생
+
+        // 각 셀에 mixer와 actions 저장
+        cellMixers[containerId] = { mixer, actions };
 
         // 애니메이션 및 렌더링
         const clock = new THREE.Clock();
