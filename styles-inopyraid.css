@@ -1,0 +1,73 @@
+/* Main Page Styling */
+.main-page {
+    background: url('imsi_background_inopy.png') no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Boss Raid Button */
+.enterbutton_boss_raid {
+    box-sizing: border-box;
+    position: absolute;
+    width: 318px;
+    height: 113px;
+    left: 26px;
+    top: 36px; /* 위치 변경됨 */
+    background: #D9D9D9;
+    border: 7px solid rgba(0, 0, 0, 0.66);
+    border-radius: 20px;
+}
+
+.label_enter_boss_raid {
+    position: absolute;
+    width: auto;
+    height: 44px;
+    left: 11px; /* Relative to enterbutton_boss_raid */
+    top: 15px; /* Relative to enterbutton_boss_raid */
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 44px;
+    text-align: center;
+    color: rgba(85, 165, 194, 1);
+}
+
+.sublabel_enter_boss_raid {
+    position: absolute;
+    width: auto;
+    height: 24px;
+    left: 112px; /* Relative to enterbutton_boss_raid */
+    top: 67px; /* Relative to enterbutton_boss_raid */
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/* Polygon Decoration */
+.polygon_5 {
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: calc(50% - 16px);
+    top: 331px;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 32px solid #FBAC3D;
+}
+
+/* Proceed Button */
+.button_proceed {
+    box-sizing: border-box;
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    left: 26px;
+    top: 331px;
+    background: #F5F5F5;
+    border: 7px solid #D9D9D9;
+    border-radius: 15px;
+}

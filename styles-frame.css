@@ -159,3 +159,19 @@ body, html {
     top: 40px;
     border: 1px solid #000000;
 }
+
+/* Date 스타일 */
+.date {
+    position: absolute;
+    width: 163px;
+    height: 29px;
+    left: 77px;
+    top: 31px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 29px;
+    text-align: center;
+    color: #000000;
+}

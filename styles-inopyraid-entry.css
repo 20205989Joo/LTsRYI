@@ -1,0 +1,124 @@
+/* Main Page Styling */
+.main-page {
+    background: url('imsi_background_inopy.png') ;
+    background-size: cover;
+}
+
+#inp_window {
+    height:262px;
+    border-radius: 27px;
+}
+
+.inopy-thumbnail{
+    position: absolute;
+    width: 295px;
+    height: 165px;
+    left: 10px;
+    top: 14px;
+    background: url('imsi_thumbnail_inopy_aegra.png') ;
+    background-size: cover;
+
+}
+
+.label_inopy-title {
+    position: absolute;
+    width: 90px;
+    height: 39px;
+    left: 194px;
+    top: 205px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 39px;
+    -webkit-text-stroke: 1px rgba(85, 165, 194, 1);
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25) ;
+
+    text-align: center;
+}
+
+.sublabel_inopy-hp {
+    /* 350000 */
+
+    position: absolute;
+    width: 75px;
+    height: 24px;
+    left: 10px;
+    top: 189px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    -webkit-text-stroke: 1.5px rgba(122, 49, 167, 0.66);
+
+    color: #FFFFFF;
+
+}
+
+#inp_treeframe {
+    background : rgba(166, 120, 201, 0.68);
+    border: 6px solid rgba(0, 0, 0, 0.5);
+}
+
+#inp_corkframe {
+    background: rgba(0,0,0,.70);
+    border: 2px solid rgba(48, 175, 183, 0.68)
+}
+
+
+.inventory_slot {
+    position: absolute;
+    width: 68px;
+    height: 68px;
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 4px 4px rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+}
+
+#slot_1st {
+    left: 8px;
+    top: 13px;
+  }
+
+  #slot_2nd {
+    left: 85px;
+    top: 13px;
+  }
+
+  #slot_3rd {
+    left: 162px;
+    top: 13px;
+  }
+
+  #slot_4th {
+    left: 239px;
+    top: 13px;
+  }
+
+  #slot_5th {
+    left: 8px;
+    top: 100px;
+    height: 67px;
+  }
+
+  #slot_6th {
+    left: 85px;
+    top: 100px;
+    height: 67px;
+  }
+
+  #slot_7th {
+    left: 162px;
+    top: 100px;
+    height: 67px;
+  }
+
+  #slot_8th {
+    left: 239px;
+    top: 100px;
+    height: 67px;
+  }

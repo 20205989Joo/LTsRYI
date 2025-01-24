@@ -3,6 +3,7 @@
 
 .main-page {
     background: url('imsi_background_minefield.png') no-repeat center center fixed;
+    background-size: cover;
 }
 
 
