@@ -83,8 +83,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
     wordbookSelect.addEventListener('change', function() {
         const selectedWordbook = wordbookSelect.value;
 
-        if (selectedWordbook === 'MID-A') {
-            fetch('MID-A_jsonarray.json')
+        if (['MID-A', 'DEM-S'].includes(selectedWordbook)) {
+            const fileName = `${selectedWordbook}_jsonarray.json`; // 선택된 워드북에 따라 파일명 동적 설정
+
+            fetch(fileName)
                 .then(response => response.json())
                 .then(data => {
                     // DAY 값 추출하여 Start Day와 End Day에 추가
@@ -139,34 +141,36 @@ window.addEventListener('DOMContentLoaded', (event) => {
             const selectedWordbook = wordbookSelect.value; // 선택된 단어집을 가져옴
             const selectedStartDay = startDaySelect.value;  // 선택된 Start Day
             const selectedEndDay = endDaySelect.value;      // 선택된 End Day
-    
-            if (selectedWordbook === 'MID-A') {  // 'MID-A'가 선택된 경우
-                fetch('MID-A_jsonarray.json')  // 'MID-A_jsonarray.json' 파일을 불러옴
-                    .then(response => response.json())  // 응답을 JSON으로 파싱
+
+            if (['MID-A', 'DEM-S'].includes(selectedWordbook)) {  // MID-A와 DEM-S 둘 다 처리
+                const fileName = `${selectedWordbook}_jsonarray.json`;
+
+                fetch(fileName)
+                    .then(response => response.json())
                     .then(data => {
                         // Day 범위에 맞는 데이터만 필터링
                         quizData = data.data.filter(item => {
                             const day = item[0]; // item[0]이 Day 값
                             return day >= selectedStartDay && day <= selectedEndDay;
                         });
-    
+
                         // 필터링된 데이터만 퀴즈 데이터로 설정
                         quizData = quizData.map(item => ({
                             word: item[1],  // 단어
                             meaning: item[2],  // 뜻
                         }));
-    
+
                         quizData = shuffleArray(quizData);  // 퀴즈 데이터 순서를 셔플
-    
-                         // 전체 문제 수 설정
-                    totalQuestions = quizData.length;
+
+                        // 전체 문제 수 설정
+                        totalQuestions = quizData.length;
 
                         // 전체 퀴즈 데이터 로그 출력
                         console.log("필터링된 퀴즈 데이터:", quizData);
 
                         // 정답률 초기화
-                    correctRateUpdater();
-    
+                        correctRateUpdater();
+
                         resolve();  // 데이터가 정상적으로 로드되었으면 resolve 호출
                     })
                     .catch(error => {

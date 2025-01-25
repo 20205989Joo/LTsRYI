@@ -1,109 +1,109 @@
 {
-  "fields": [
-    "FIELD1",
-    "FIELD2",
-    "FIELD3"
-  ],
-  "data": [
-    [
-      "DAY 01",
-      "obfuscate",
-      "혼란스럽게 하다, 애매하게 만들다"
+    "fields": [
+        "FIELD1",
+        "FIELD2",
+        "FIELD3"
     ],
-    [
-      "DAY 01",
-      "recalcitrant",
-      "저항하는, 반항적인"
-    ],
-    [
-      "DAY 01",
-      "equivocate",
-      "모호하게 말하다, 얼버무리다"
-    ],
-    [
-      "DAY 01",
-      "esoteric",
-      "소수만 이해하는, 난해한"
-    ],
-    [
-      "DAY 01",
-      "pernicious",
-      "치명적인, 해로운"
-    ],
-    [
-      "DAY 01",
-      "exacerbate",
-      "악화시키다, 격화시키다"
-    ],
-    [
-      "DAY 01",
-      "quintessential",
-      "본질적인, 전형적인"
-    ],
-    [
-      "DAY 01",
-      "lachrymose",
-      "눈물이 많은, 감상적인"
-    ],
-    [
-      "DAY 01",
-      "obsequious",
-      "아부하는, 아첨하는"
-    ],
-    [
-      "DAY 01",
-      "deleterious",
-      "해로운, 유독한"
-    ],
-    [
-      "DAY 01",
-      "ephemeral",
-      "단명하는, 덧없는"
-    ],
-    [
-      "DAY 01",
-      "acquiesce",
-      "묵인하다, (마지못해) 받아들이다"
-    ],
-    [
-      "DAY 01",
-      "magnanimous",
-      "도량이 넓은, 관대한"
-    ],
-    [
-      "DAY 01",
-      "intransigent",
-      "비타협적인, 고집스러운"
-    ],
-    [
-      "DAY 01",
-      "pusillanimous",
-      "겁 많은, 소심한"
-    ],
-    [
-      "DAY 01",
-      "verisimilitude",
-      "그럴듯함, 신빙성"
-    ],
-    [
-      "DAY 01",
-      "trenchant",
-      "신랄한, 날카로운"
-    ],
-    [
-      "DAY 01",
-      "anachronistic",
-      "시대착오적인, 시대에 뒤진"
-    ],
-    [
-      "DAY 01",
-      "profligate",
-      "탕진하는, 낭비하는"
-    ],
-    [
-      "DAY 01",
-      "perspicacious",
-      "통찰력 있는, 명민한"
+    "data": [
+        [
+            "DAY 01",
+            "혼란스럽게 하다, 애매하게 만들다",
+            "obfuscate"
+        ],
+        [
+            "DAY 01",
+            "저항하는, 반항적인",
+            "recalcitrant"
+        ],
+        [
+            "DAY 01",
+            "모호하게 말하다, 얼버무리다",
+            "equivocate"
+        ],
+        [
+            "DAY 01",
+            "소수만 이해하는, 난해한",
+            "esoteric"
+        ],
+        [
+            "DAY 01",
+            "치명적인, 해로운",
+            "pernicious"
+        ],
+        [
+            "DAY 01",
+            "악화시키다, 격화시키다",
+            "exacerbate"
+        ],
+        [
+            "DAY 01",
+            "본질적인, 전형적인",
+            "quintessential"
+        ],
+        [
+            "DAY 01",
+            "눈물이 많은, 감상적인",
+            "lachrymose"
+        ],
+        [
+            "DAY 01",
+            "아부하는, 아첨하는",
+            "obsequious"
+        ],
+        [
+            "DAY 01",
+            "해로운, 유독한",
+            "deleterious"
+        ],
+        [
+            "DAY 01",
+            "단명하는, 덧없는",
+            "ephemeral"
+        ],
+        [
+            "DAY 01",
+            "묵인하다, (마지못해) 받아들이다",
+            "acquiesce"
+        ],
+        [
+            "DAY 01",
+            "도량이 넓은, 관대한",
+            "magnanimous"
+        ],
+        [
+            "DAY 01",
+            "비타협적인, 고집스러운",
+            "intransigent"
+        ],
+        [
+            "DAY 01",
+            "겁 많은, 소심한",
+            "pusillanimous"
+        ],
+        [
+            "DAY 01",
+            "그럴듯함, 신빙성",
+            "verisimilitude"
+        ],
+        [
+            "DAY 01",
+            "신랄한, 날카로운",
+            "trenchant"
+        ],
+        [
+            "DAY 01",
+            "시대착오적인, 시대에 뒤진",
+            "anachronistic"
+        ],
+        [
+            "DAY 01",
+            "탕진하는, 낭비하는",
+            "profligate"
+        ],
+        [
+            "DAY 01",
+            "통찰력 있는, 명민한",
+            "perspicacious"
+        ]
     ]
-  ]
 }

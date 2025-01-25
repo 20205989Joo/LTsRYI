@@ -131,3 +131,154 @@
     height: 112px;
     background: rgba(0,0,0,0.8);
 }
+
+
+
+
+.lucin {
+
+    position: absolute;
+    width: 104px;
+    height: 104px;
+    left: 95px;
+    top: 7px;
+    background: url('lucin.png'); /* 루트 폴더의 lucin.png */
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.2;
+}
+
+.runeholder {
+    width: 34px;
+    height: 34px;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.1);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); /* 육각형 */
+}
+
+.rune {
+    width: 34px;
+    height: 34px;
+    position: absolute;
+    background: url('runes.png') no-repeat center center;
+    background-size: contain;
+    display: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    opacity:0.9;
+    
+}
+
+.rune.active {
+    opacity: 1.0;
+    transform: scale(1.2);
+    z-index:1;
+}
+
+#rune1 {
+    left: 75px;
+    top: 91px;
+}
+#rune2 {
+    left: 58px;
+    top: 38px;
+}
+#rune3 {
+    left: 132px;
+    top: 125px;
+}
+#rune4 {
+    left: 187px;
+    top: 91px;
+}
+#rune5 {
+    left: 202px;
+    top: 38px;
+}
+
+#runeholder1 {
+    left: 75px;
+    top: 91px;
+}
+#runeholder2 {
+    left: 58px;
+    top: 38px;
+}
+#runeholder3 {
+    left: 132px;
+    top: 125px;
+}
+#runeholder4 {
+    left: 187px;
+    top: 91px;
+}
+#runeholder5 {
+    left: 202px;
+    top: 38px;
+}
+/* runeslot */
+.runeslot {
+    position: absolute;
+    width: 55px;
+    height: 176px;
+    left: 0px; /* 30 - 30 */
+    top: 0px; /* 432 - 430 */
+    background: #D9D9D9;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* runeprep */
+.runeprep {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    left: 9px; /* 39 - 30 */
+    top: 12px; /* 442 - 430 */
+    background: url(runes.png) no-repeat center center;
+    background-size: contain;
+}
+
+/* runeprep_detail */
+.runeprep_detail {
+    position: absolute;
+    width: 241px;
+    height: 38px;
+    left: 61px; /* 91 - 30 */
+    top: 10px; /* 440 - 430 */
+    background: rgba(0, 0, 0, 0.5);
+    
+}
+
+.label_runeprep_detail {
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+
+}
+
+
+.rune_options_container {
+    position:absolute;
+    left:40px;
+    top:-20px;
+    height:84px;
+    z-index: 7;
+    background: rgba(213, 166, 95, 0.21);
+}
+
+.rune_option {
+    background: rgba(42, 80, 31,0.66);
+    width: 100px;
+    height: 12px;
+    border: 1px solid rgba(213, 166, 95, 0.72);
+
+}
+
+.label_rune_option {
+    font-size: 6pt;
+    text-align: left; /* 텍스트 중앙 정렬 */
+    color: #ffffff; /* 기본 텍스트 색상 */
+    margin-top: 2px;
+    user-select: none;
+}

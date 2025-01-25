@@ -9,6 +9,8 @@ let currentOffset_for_roller = 0; // Changed to avoid conflicts with other offse
 let boundaryResistance = 15; // Resistance when at boundaries
 let restrictBoundary = true; // Toggle for applying boundary logic
 
+
+
 function restrictOffset(offset) {
     // Restrict offset for normal scrolling behavior (first item only)
     const minOffset = restrictBoundary ? 0 : -itemHeight;
@@ -192,8 +194,9 @@ function resizeCanvas() {
     canvas.width = blackboard.clientWidth; // 부모 요소의 실제 너비로 설정
     canvas.height = blackboard.clientHeight; // 부모 요소의 실제 높이로 설정
     ctx.clearRect(0, 0, canvas.width, canvas.height); // 기존 내용 초기화
-    drawBoxes(); // 캔버스를 초기화한 후 다시 박스를 그리기
+    
     updateLetterBoxes(); // 캔버스 크기에 맞게 letterBox 재조정
+    drawBoxes(); // 캔버스를 초기화한 후 다시 박스를 그리기
 }
 
 // 윈도우 리사이즈 이벤트에 대응
@@ -368,3 +371,16 @@ function animate() {
 resizeCanvas();
 animate();
 
+document.querySelector('.submitbutton').addEventListener('click', function() {
+    // 현재 highlight된 item 가져오기
+    const roller = document.getElementById('roller');
+    const items = Array.from(roller.children).filter(item => item.classList.contains('item')); // item만 필터링
+    const highlightedItem = items.find(item => item.style.fontSize === '1.5rem'); // highlight된 item 찾기
+
+    // highlight된 값이 없으면 기본값 설정
+    const highlightedValue = highlightedItem ? highlightedItem.textContent.trim() : 'default';
+
+    // URL에 파라미터 추가하여 이동
+    const targetUrl = `CasualWordMem2.html?highlight=${encodeURIComponent(highlightedValue)}`;
+    window.location.href = targetUrl;
+});
