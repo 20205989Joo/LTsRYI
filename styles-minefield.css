@@ -69,7 +69,13 @@
     border: 7px solid rgba(48, 175, 183, 0.68);
     border-radius: 20px;
     padding: 0;
+    cursor: pointer;
 }
+
+.enterbutton_wordtest:hover {
+    scale:0.95;
+}
+
 
 .label_enter_wordtest {
     position: absolute;
@@ -84,7 +90,6 @@
     line-height: 44px;
     text-align: center;
     color: rgba(122, 49, 167, 0.66);
-    border: 1px dashed red;
 }
 
 .sublabel_enter_wordtest {
@@ -114,6 +119,9 @@
     border-radius: 20px;
 }
 
+.enterbutton_shop:hover {
+    scale:0.95;
+}
 .label_enter_shop {
     position: absolute;
     width: 100px;

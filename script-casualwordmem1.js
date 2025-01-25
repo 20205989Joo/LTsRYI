@@ -145,7 +145,7 @@ blackboard.appendChild(canvas);
 const ctx = canvas.getContext("2d");
 
 // 기준 단어와 글자 박스 정의
-const targetWord = "testin";
+const targetWord = "RUPIT";
 const letterBoxes = [];
 const letterWidth = 40;
 const letterHeight = 50;

@@ -153,7 +153,6 @@ document.addEventListener('DOMContentLoaded', placeRunefromURL);
 
 
 
-// 기준 글자 박스 재설정 (캔버스 크기에 맞게)
 function setLetterBoxes() {
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
@@ -164,7 +163,9 @@ function setLetterBoxes() {
     const textWidth = ctx.measureText(targetWord).width;
     const dynamicLetterWidth = Math.max(fontSize * 0.8, textWidth / targetWord.length);
 
-    letterBoxes.length = 0;
+    // 기존 letterBoxes 배열 초기화
+    letterBoxes.length = 0; // 데이터 초기화
+
     const startX = (canvasWidth - (dynamicLetterWidth * targetWord.length)) / 2;
     const startY = canvasHeight / 2 + fontSize / 3;
 
@@ -174,15 +175,14 @@ function setLetterBoxes() {
     for (let i = 0; i < targetWord.length; i++) {
         const x = startX + i * dynamicLetterWidth;
 
-        // 글자 렌더링
-        ctx.fillStyle = "white"; // 배경 흰색
+        // 배경과 글자 그리기
+        ctx.fillStyle = "white";
         ctx.fillRect(x, startY - fontSize, dynamicLetterWidth, fontSize);
 
-        ctx.fillStyle = "black"; // 글자 검정색
-        ctx.font = `${fontSize}px Arial`;
+        ctx.fillStyle = "black";
         ctx.fillText(targetWord[i], x, startY);
 
-        // 메인 캔버스에서 픽셀 데이터 가져오기
+        // 글자 픽셀 데이터 가져오기
         const pixelData = ctx.getImageData(
             x,
             startY - fontSize,
@@ -190,45 +190,45 @@ function setLetterBoxes() {
             Math.ceil(fontSize)
         ).data;
 
-        // 글자 픽셀 개수 계산
-        let textPixelCount = 0;
-        const totalPixelCount = Math.ceil(dynamicLetterWidth) * Math.ceil(fontSize);
-
-        for (let j = 0; j < pixelData.length; j += 4) {
-            const r = pixelData[j];
-            const g = pixelData[j + 1];
-            const b = pixelData[j + 2];
-            // 글자 픽셀인지 확인 (흰색 배경 제외)
-            if (!(r === 255 && g === 255 && b === 255)) {
-                textPixelCount++;
+        // 픽셀 데이터를 2차원 배열로 변환
+        const pixelGrid = [];
+        for (let y = 0; y < Math.ceil(fontSize); y++) {
+            const row = [];
+            for (let x = 0; x < Math.ceil(dynamicLetterWidth); x++) {
+                const index = (y * Math.ceil(dynamicLetterWidth) + x) * 4;
+                const r = pixelData[index];
+                const g = pixelData[index + 1];
+                const b = pixelData[index + 2];
+                row.push(!(r === 255 && g === 255 && b === 255) ? 1 : 0); // 글자 픽셀: 1, 배경: 0
             }
+            pixelGrid.push(row);
         }
 
-        // 디버깅 로그: 텍스트 픽셀 비율 출력
-        console.log(
-            `Letter: ${targetWord[i]} - Text Pixel Count: ${textPixelCount}, Total Pixels: ${totalPixelCount}, Ratio: ${(textPixelCount / totalPixelCount * 100).toFixed(2)}%`
-        );
-
+        // letterBoxes 배열에 데이터 추가
         letterBoxes.push({
-            letter: targetWord[i],
+            letter: targetWord[i], // 글자
+            index: i, // 글자의 고유 인덱스
             x,
             y: startY,
             width: dynamicLetterWidth,
             height: fontSize,
-            accuracy: 0,
-            pixelData // 메인 캔버스 픽셀 데이터 저장
+            accuracy: 0, // 정확도 초기화
+            pixelGrid, // 2차원 배열 저장
         });
     }
 }
 
 
 
-function checkIf80Percent(userStrokes) {
-    letterBoxes.forEach((box, index) => {
-        const { pixelData, width, height, x: boxX, y: boxY } = box;
 
-        let matchingPixels = 0;
-        let totalPixels = 0;
+
+
+function checkIf40Percent(userStrokes) {
+    const relevantBoxes = []; // 관련된 박스를 저장
+
+    // 1. 입력된 strokes와 관련된 박스 필터링
+    letterBoxes.forEach((box) => {
+        const { x: boxX, y: boxY, width, height } = box;
 
         // 현재 박스 내부 stroke 필터링
         const relevantStrokes = userStrokes
@@ -243,58 +243,116 @@ function checkIf80Percent(userStrokes) {
             .filter((stroke) => stroke.points.length > 0);
 
         if (relevantStrokes.length > 0) {
-            console.log(
-                `LetterBox ${index + 1} (Letter: '${box.letter}'): Relevant strokes found: ${relevantStrokes.length}`
-            );
+            relevantBoxes.push({ box, relevantStrokes });
         }
+    });
 
+    // 2. 관련된 박스만 정확도 업데이트
+    relevantBoxes.forEach(({ box, relevantStrokes }) => {
+        const { pixelGrid, x: boxX, y: boxY, width, height, index } = box;
+
+        let matchingPixels = 0; // 사용자의 입력이 글자 픽셀 위의 점 개수
+        let totalLetterPixels = 0; // 글자 픽셀의 총 개수
+
+        // 글자 픽셀의 총 개수 계산
+        pixelGrid.forEach((row) => {
+            totalLetterPixels += row.filter((value) => value === 1).length;
+        });
+
+        // 사용자의 입력과 글자 픽셀 비교
         relevantStrokes.forEach((stroke) => {
             stroke.points.forEach(({ x, y }) => {
-                const relativeX = Math.floor(x - boxX);
-                const relativeY = Math.floor(y - (boxY - height));
+                const relativeX = Math.floor(x - boxX); // 박스 내 상대 X 좌표
+                const relativeY = Math.floor(y - (boxY - height)); // 박스 내 상대 Y 좌표
 
                 // Out-of-bounds 체크
-                if (relativeX < 0 || relativeX >= width || relativeY < 0 || relativeY >= height) {
-                    console.warn(
-                        `Out of bounds: relativeX=${relativeX}, relativeY=${relativeY}, width=${width}, height=${height}`
-                    );
-                    return;
+                if (
+                    relativeX < 0 ||
+                    relativeX >= pixelGrid[0].length ||
+                    relativeY < 0 ||
+                    relativeY >= pixelGrid.length
+                ) {
+                    return; // 범위를 벗어난 점은 무시
                 }
 
-                const pixelIndex = Math.floor((relativeY * width + relativeX) * 4);
-
-                // pixelIndex 유효성 검사
-                if (pixelIndex < 0 || pixelIndex + 3 >= pixelData.length) {
-                    console.error(
-                        `Invalid PixelIndex: ${pixelIndex}, PixelData Length: ${pixelData.length}`
-                    );
-                    return;
-                }
-
-                // RGB 값 확인 및 매칭 (글자 색이 검정이고 배경이 흰색인 경우 기준값 설정)
-                const r = pixelData[pixelIndex];
-                const g = pixelData[pixelIndex + 1];
-                const b = pixelData[pixelIndex + 2];
-
-                // 검정색 (텍스트)인지 확인
-                const isTextPixel = r < 50 && g < 50 && b < 50;
-
-                if (isTextPixel) {
+                // 글자 픽셀 매칭 여부 확인
+                if (pixelGrid[relativeY][relativeX] === 1) {
                     matchingPixels++;
                 }
-                totalPixels++;
             });
         });
 
-        box.accuracy = totalPixels > 0 ? matchingPixels / totalPixels : 0;
-
-        if (totalPixels > 0) {
+        // 정확도 계산 및 Pass 여부 판단
+        if (matchingPixels >= totalLetterPixels * 0.4) {
+            box.accuracy = 1; // Pass
             console.log(
-                `LetterBox ${index + 1} (Letter: '${box.letter}'): Matching Pixels: ${matchingPixels}, Total Pixels: ${totalPixels}, Accuracy: ${(box.accuracy * 100).toFixed(2)}%`
+                `LetterBox '${box.letter}' (Index: ${index}): Passed! Matching: ${matchingPixels}, Total: ${totalLetterPixels}`
+            );
+        } else {
+            box.accuracy = matchingPixels / (totalLetterPixels * 0.4); // 정확도 비율
+            console.log(
+                `LetterBox '${box.letter}' (Index: ${index}): Failed. Matching: ${matchingPixels}, Total: ${totalLetterPixels}, Accuracy: ${(box.accuracy * 100).toFixed(2)}%`
             );
         }
     });
+
+    // 3. 관련된 박스가 없을 경우 경고
+    if (relevantBoxes.length === 0) {
+        console.warn("No relevant LetterBoxes found for user strokes.");
+    }
 }
+
+
+
+
+
+function resetCanvasAndProgress() {
+    // 1. 모든 letterBox가 pass되었는지 확인
+    const allPassed = letterBoxes.every((box) => box.accuracy >= 0.8);
+
+    if (allPassed) {
+        console.log("All letterBoxes have passed!");
+
+        // 2. 유저의 strokes만 지우기 위해, 초기 상태를 다시 그리기
+        userStrokes.length = 0; // strokes 배열 초기화
+
+        // 캔버스 초기 상태(글자와 배경) 다시 그리기
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 전체 초기화
+        letterBoxes.forEach(({ letter, x, y, width, height }) => {
+            // 글자 배경
+            ctx.fillStyle = "white";
+            ctx.fillRect(x, y - height, width, height);
+
+            // 글자
+            ctx.fillStyle = "black";
+            ctx.font = `${fontSize}px Arial`;
+            ctx.fillText(letter, x, y);
+        });
+
+        // 3. 모든 letterBox의 pass 상태를 리셋
+        letterBoxes.forEach((box) => {
+            box.accuracy = 0;
+        });
+
+        // 4. 'lucin' 클래스의 opacity를 0.2씩 증가
+        const lucinElements = document.querySelectorAll(".lucin");
+        lucinElements.forEach((element) => {
+            const currentOpacity = parseFloat(
+                window.getComputedStyle(element).opacity
+            );
+
+            // 현재 opacity에 0.2를 추가 (최대값: 1)
+            const newOpacity = Math.min(currentOpacity + 0.2, 1);
+            element.style.opacity = newOpacity;
+
+            console.log(
+                `'lucin' opacity updated: ${currentOpacity} → ${newOpacity}`
+            );
+        });
+    }
+}
+
+
 
 
 
@@ -310,9 +368,9 @@ function displayScoredBoxes() {
     ctx.font = `${fontSize}px Arial`;
     letterBoxes.forEach(({ letter, x, y, width, height, accuracy }) => {
         // 정확도에 따라 테두리 색상 변경
-        ctx.strokeStyle = accuracy >= 0.8 ? "blue" : "red";
+        ctx.strokeStyle = accuracy >= 0.8 ? "rgba(29, 172, 190, 0.99)" : "rgba(221, 79, 23, 0.58)";
         ctx.lineWidth = 1;
-        ctx.shadowColor = accuracy >= 0.8 ? "rgba(0, 0, 255, 0.4)" : "rgba(255, 0, 0, 0.4)";
+        ctx.shadowColor = accuracy >= 0.8 ? "rgb(150, 205, 219)" : "rgba(255, 0, 0, 0.4)";
         ctx.shadowBlur = 10;
 
         // 테두리와 글자 그리기
@@ -332,7 +390,7 @@ canvas.addEventListener("mousemove", (e) => {
     createParticle(x, y);
 
     // 정확도 계산 및 LetterBox 스타일 업데이트
-    checkIf80Percent(userStrokes);
+    checkIf40Percent(userStrokes);
 
     // LetterBox와 stroke를 새로 그리기
     displayScoredBoxes();
@@ -346,8 +404,10 @@ function resizeCanvas() {
     canvas.height = blackboard.clientHeight; // 부모 요소의 실제 높이로 설정
     ctx.clearRect(0, 0, canvas.width, canvas.height); // 기존 내용 초기화
     
+    
     setLetterBoxes(); // 캔버스 크기에 맞게 letterBox 재조정
     displayScoredBoxes(); // 캔버스를 초기화한 후 다시 박스를 그리기
+    
 }
 
 // 윈도우 리사이즈 이벤트에 대응
@@ -532,4 +592,3 @@ function animate() {
 
 resizeCanvas();
 animate();
-
