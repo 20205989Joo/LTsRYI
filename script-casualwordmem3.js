@@ -157,7 +157,7 @@ function setLetterBoxes() {
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
-    fontSize = Math.min(canvasWidth / (targetWord.length + 1), canvasHeight / 4) * 1.2;
+    fontSize = Math.min(canvasWidth / (targetWord.length + 1), canvasHeight / 4) * 1.3;
 
     ctx.font = `${fontSize}px Arial`;
     const textWidth = ctx.measureText(targetWord).width;
@@ -221,112 +221,99 @@ function setLetterBoxes() {
 
 
 
+function checkIfRightBox(initialPoint) {
+    const relevantBoxes = []; // 매번 초기화된 새 배열
 
-
-function checkIf40Percent(userStrokes) {
-    const relevantBoxes = []; // 관련된 박스를 저장
-
-    // 1. 입력된 strokes와 관련된 박스 필터링
     letterBoxes.forEach((box) => {
         const { x: boxX, y: boxY, width, height } = box;
 
-        // 현재 박스 내부 stroke 필터링
-        const relevantStrokes = userStrokes
-            .map((stroke) => ({
-                points: stroke.points.filter(({ x, y }) =>
-                    x >= boxX &&
-                    x < boxX + width &&
-                    y >= boxY - height &&
-                    y < boxY
-                )
-            }))
-            .filter((stroke) => stroke.points.length > 0);
-
-        if (relevantStrokes.length > 0) {
-            relevantBoxes.push({ box, relevantStrokes });
+        // 초기 좌표가 박스 내부에 있는지 확인
+        if (
+            initialPoint.x >= boxX &&
+            initialPoint.x < boxX + width &&
+            initialPoint.y >= boxY - height &&
+            initialPoint.y < boxY
+        ) {
+            relevantBoxes.push({ box });
         }
     });
 
-    // 2. 관련된 박스만 정확도 업데이트
-    relevantBoxes.forEach(({ box, relevantStrokes }) => {
-        const { pixelGrid, x: boxX, y: boxY, width, height, index } = box;
+    // 관련된 박스 중 첫 번째 박스를 선택
+    window.currentRelevantBox = relevantBoxes[0] || null;
 
-        let matchingPixels = 0; // 사용자의 입력이 글자 픽셀 위의 점 개수
-        let totalLetterPixels = 0; // 글자 픽셀의 총 개수
-
-        // 글자 픽셀의 총 개수 계산
-        pixelGrid.forEach((row) => {
-            totalLetterPixels += row.filter((value) => value === 1).length;
-        });
-
-        // 사용자의 입력과 글자 픽셀 비교
-        relevantStrokes.forEach((stroke) => {
-            stroke.points.forEach(({ x, y }) => {
-                const relativeX = Math.floor(x - boxX); // 박스 내 상대 X 좌표
-                const relativeY = Math.floor(y - (boxY - height)); // 박스 내 상대 Y 좌표
-
-                // Out-of-bounds 체크
-                if (
-                    relativeX < 0 ||
-                    relativeX >= pixelGrid[0].length ||
-                    relativeY < 0 ||
-                    relativeY >= pixelGrid.length
-                ) {
-                    return; // 범위를 벗어난 점은 무시
-                }
-
-                // 글자 픽셀 매칭 여부 확인
-                if (pixelGrid[relativeY][relativeX] === 1) {
-                    matchingPixels++;
-                }
-            });
-        });
-
-        // 정확도 계산 및 Pass 여부 판단
-        if (matchingPixels >= totalLetterPixels * 0.4) {
-            box.accuracy = 1; // Pass
-            console.log(
-                `LetterBox '${box.letter}' (Index: ${index}): Passed! Matching: ${matchingPixels}, Total: ${totalLetterPixels}`
-            );
-        } else {
-            box.accuracy = matchingPixels / (totalLetterPixels * 0.4); // 정확도 비율
-            console.log(
-                `LetterBox '${box.letter}' (Index: ${index}): Failed. Matching: ${matchingPixels}, Total: ${totalLetterPixels}, Accuracy: ${(box.accuracy * 100).toFixed(2)}%`
-            );
-        }
-    });
-
-    // 3. 모든 박스가 Pass되었는지 확인
-    const allPassed = letterBoxes.every((box) => box.accuracy >= 1);
-
-    if (allPassed) {
-        console.log("All letterBoxes have passed!");
-
-        // Lucin의 opacity를 0.2씩 증가
-        const lucinElements = document.querySelectorAll(".lucin");
-        lucinElements.forEach((element) => {
-            const currentOpacity = parseFloat(
-                window.getComputedStyle(element).opacity
-            );
-
-            // 현재 opacity에 0.2를 추가 (최대값: 1)
-            const newOpacity = Math.min(currentOpacity + 0.2, 1);
-            element.style.opacity = newOpacity;
-
-            console.log(
-                `'lucin' opacity updated: ${currentOpacity} → ${newOpacity}`
-            );
-        });
-
-        // 애니메이션 호출
-        animate();
-    }
-
-    // 4. 관련된 박스가 없을 경우 경고
-    if (relevantBoxes.length === 0) {
-        console.warn("No relevant LetterBoxes found for user strokes.");
+    // 전역 변수 로그 출력
+    if (window.currentRelevantBox) {
+        console.log(
+            `checkIfRightBox: Relevant Box Set - Letter: '${window.currentRelevantBox.box.letter}', Index: ${window.currentRelevantBox.box.index}`
+        );
+    } else {
+        console.warn("checkIfRightBox: No relevant box found.");
     }
 }
+
+
+
+function checkIf40Percent() { 
+    if (!window.currentRelevantBox) {
+        console.warn("No relevant box set. Skipping accuracy check.");
+        return;
+    }
+
+    const { box } = window.currentRelevantBox; // 현재 박스 가져오기
+    const { pixelGrid, x: boxX, y: boxY, width, height, index } = box;
+
+    // 이미 합격한 경우 중단
+    if (box.accuracy >=0.1) {
+        console.log(
+            `LetterBox '${box.letter}' (Index: ${index}) is already passed. Skipping.`
+        );
+        return;
+    }
+
+    let matchingPixels = 0; // 입력된 점이 글자 픽셀 위의 점 개수
+    let totalLetterPixels = 0; // 글자 픽셀의 총 개수
+
+    
+    // 글자 픽셀의 총 개수 계산
+    pixelGrid.forEach((row) => {
+        totalLetterPixels += row.filter((value) => value === 1).length;
+    });
+
+    // 입력된 stroke의 점과 글자 픽셀 비교
+    userStrokes[userStrokes.length - 1]?.points.forEach(({ x, y }) => {
+        const relativeX = Math.floor(x - boxX);
+        const relativeY = Math.floor(y - (boxY - height));
+
+        // Out-of-bounds 체크
+        if (
+            relativeX < 0 ||
+            relativeX >= pixelGrid[0].length ||
+            relativeY < 0 ||
+            relativeY >= pixelGrid.length
+        ) {
+            return;
+        }
+
+        // 글자 픽셀 매칭 여부 확인
+        if (pixelGrid[relativeY][relativeX] === 1) {
+            matchingPixels++;
+        }
+    });
+
+    // 정확도 계산 및 업데이트
+    if (matchingPixels >= totalLetterPixels * 0.4) {
+        box.accuracy = 1; // Pass
+        console.log(
+            `LetterBox '${box.letter}' (Index: ${index}): Passed! Matching: ${matchingPixels}, Total: ${totalLetterPixels}`
+        );
+    } else {
+        box.accuracy = matchingPixels / (totalLetterPixels * 0.4);
+        console.log(
+            `LetterBox '${box.letter}' (Index: ${index}): Failed. Matching: ${matchingPixels}, Total: ${totalLetterPixels}, Accuracy: ${(box.accuracy * 100).toFixed(2)}%`
+        );
+    }
+}
+
 
 
 
@@ -336,9 +323,9 @@ function displayScoredBoxes() {
     ctx.font = `${fontSize}px Arial`;
     letterBoxes.forEach(({ letter, x, y, width, height, accuracy }) => {
         // 정확도에 따라 테두리 색상 변경
-        ctx.strokeStyle = accuracy >= 0.3 ? "rgba(29, 172, 190, 0.99)" : "rgba(221, 79, 23, 0.58)";
+        ctx.strokeStyle = accuracy >= 0.1 ? "rgba(29, 172, 190, 0.99)" : "rgba(221, 79, 23, 0.58)";
         ctx.lineWidth = 1;
-        ctx.shadowColor = accuracy >= 0.3 ? "rgb(150, 205, 219)" : "rgba(255, 0, 0, 0.4)";
+        ctx.shadowColor = accuracy >= 0.1 ? "rgb(150, 205, 219)" : "rgba(255, 0, 0, 0.4)";
         ctx.shadowBlur = 10;
 
         // 테두리와 글자 그리기
@@ -347,6 +334,128 @@ function displayScoredBoxes() {
         ctx.fillText(letter, x + width * 0.1, y);
     });
 }
+
+
+let clipPathProgress = 100; // 초기 clip-path 값 (100% 숨김 상태)
+
+function rupittolucin() {
+    const allPassed = letterBoxes.every((box) => box.accuracy >= 0.1);
+
+    if (allPassed) {
+        console.log("All letterBoxes have passed!");
+
+        const startTime = performance.now();
+        const duration = 2000; // 2초 동안 애니메이션 진행
+
+        const lucinElements = document.querySelectorAll(".lucin");
+        const lucinEffectBalls = document.querySelectorAll(".lucin_effect_ball");
+
+        // clipPathProgress를 20% 감소
+        const newClipPath = Math.max(clipPathProgress - 20, 0); // 최소 0까지 감소
+        const previousClipPath = clipPathProgress; // 이전 상태 저장
+        clipPathProgress = newClipPath;
+
+        // 애니메이션 동안 Lucin_effect_ball 보이게 설정
+        lucinEffectBalls.forEach((ball) => {
+            ball.style.display = "block"; // 보이게 설정
+        });
+
+        function fadeEffect(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1); // 0 ~ 1 사이 값
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
+
+            // 모든 LetterBox를 순회하며 페이드 효과 적용
+            letterBoxes.forEach((box) => {
+                const { x, y, width, height, letter } = box;
+
+                const strokeStart = [255, 255, 255, 1]; // white
+                const strokeEnd = [221, 79, 23, 0.58]; // target color
+                const shadowStart = [255, 0, 0, 1]; // red
+                const shadowEnd = [0, 0, 0, 0]; // transparent black
+
+                const interpolatedStroke = strokeStart.map((start, i) =>
+                    start + (strokeEnd[i] - start) * progress
+                );
+                const interpolatedShadow = shadowStart.map((start, i) =>
+                    start + (shadowEnd[i] - start) * progress
+                );
+
+                const strokeColor = `rgba(${interpolatedStroke[0]}, ${interpolatedStroke[1]}, ${interpolatedStroke[2]}, ${interpolatedStroke[3]})`;
+                const shadowColor = `rgba(${interpolatedShadow[0]}, ${interpolatedShadow[1]}, ${interpolatedShadow[2]}, ${interpolatedShadow[3]})`;
+
+                const maxLineWidth = 5;
+                const minLineWidth = 1;
+                const currentLineWidth = maxLineWidth - (maxLineWidth - minLineWidth) * progress;
+
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = currentLineWidth;
+                ctx.shadowColor = shadowColor;
+                ctx.shadowBlur = 10;
+
+                ctx.strokeRect(x, y - height, width, height);
+
+                ctx.fillStyle = "gray";
+                ctx.font = `${fontSize}px Arial`;
+                ctx.fillText(letter, x + width * 0.1, y);
+            });
+
+            // Lucin의 clip-path를 점진적으로 업데이트
+            lucinElements.forEach((element) => {
+                // 이전 상태에서 점진적으로 진행
+                const interpolatedClipPath = previousClipPath - (previousClipPath - newClipPath) * progress;
+                element.style.clipPath = `inset(${interpolatedClipPath}% 0 0 0)`; // 위에서 아래로 드러남
+            });
+
+            // Lucin_effect_ball의 shadow를 애니메이션과 함께 적용
+            lucinEffectBalls.forEach((ball) => {
+                ball.style.boxShadow = `0px 0px 30px rgba(255, 0, 0, ${1 - progress})`; // shadow 페이드 아웃
+            });
+
+            // 애니메이션이 끝나지 않았으면 다시 호출
+            if (progress < 1) {
+                requestAnimationFrame(fadeEffect);
+            } else {
+                console.log("Animation complete.");
+
+                // 모든 stroke 초기화
+                userStrokes.length = 0; // stroke 배열 비우기
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 초기화
+
+                // LetterBox 초기화
+                letterBoxes.forEach((box) => {
+                    box.accuracy = 0; // accuracy 리셋
+                });
+
+                // Lucin_effect_ball 숨기기
+                lucinEffectBalls.forEach((ball) => {
+                    ball.style.display = "none"; // 다시 숨김
+                });
+
+                // 화면 다시 그리기
+                displayScoredBoxes();
+            }
+        }
+
+        // 애니메이션 시작
+        requestAnimationFrame(fadeEffect);
+    } else {
+        console.log("Not all letterBoxes have passed yet.");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // 캔버스 크기를 부모 요소에 맞게 동적으로 설정
@@ -489,16 +598,39 @@ function drawParticles() {
 }
 
 
-canvas.addEventListener("mousedown", () => {
+canvas.addEventListener("mousedown", (e) => {
     isDrawing = true;
+
+    // 새 stroke 객체 추가
     userStrokes.push({ points: [], timestamp: Date.now() });
+
+    // 첫 좌표 추가
+    const { x, y } = getEventPosition(e);
+    userStrokes[userStrokes.length - 1].points.push({ x, y });
+
+    // 현재 관련된 박스 찾기 (첫 좌표만 전달)
+    checkIfRightBox({ x, y });
 });
+
+
+
 canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
     isDrawing = true;
+
+    // 새 stroke 객체 추가
     userStrokes.push({ points: [], timestamp: Date.now() });
+
+    // 첫 좌표 추가
+    const { x, y } = getEventPosition(e);
+    userStrokes[userStrokes.length - 1].points.push({ x, y });
+
+    // 현재 관련된 박스 찾기 (첫 좌표만 전달)
+    checkIfRightBox({ x, y });
 });
 
+
+// mousemove 이벤트에서 정확도 계산 및 업데이트
 canvas.addEventListener("mousemove", (e) => {
     if (!isDrawing) return;
 
@@ -507,20 +639,28 @@ canvas.addEventListener("mousemove", (e) => {
 
     createParticle(x, y);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 정확도 계산 및 LetterBox 스타일 업데이트
+    checkIf40Percent(userStrokes);
 
+    // LetterBox와 stroke를 새로 그리기
     displayScoredBoxes();
     drawStrokes();
     drawParticles();
 });
+
+// mousemove 이벤트에서 정확도 계산 및 업데이트
 canvas.addEventListener("touchmove", (e) => {
-    e.preventDefault();
+    if (!isDrawing) return;
+
     const { x, y } = getEventPosition(e);
     userStrokes[userStrokes.length - 1].points.push({ x, y });
 
     createParticle(x, y);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 정확도 계산 및 LetterBox 스타일 업데이트
+    checkIf40Percent(userStrokes);
+
+    // LetterBox와 stroke를 새로 그리기
     displayScoredBoxes();
     drawStrokes();
     drawParticles();
@@ -528,10 +668,41 @@ canvas.addEventListener("touchmove", (e) => {
 
 canvas.addEventListener("mouseup", () => {
     isDrawing = false;
+
+    if (window.currentRelevantBox === null) {
+        console.log("mouseup: No relevant box set (null).");
+    } else {
+        console.log(
+            `mouseup: Current Relevant Box before reset: Letter = '${window.currentRelevantBox.box.letter}', Index = ${window.currentRelevantBox.box.index}`
+        );
+    }
+
+    // 전역 변수 초기화
+    window.currentRelevantBox = null;
+    console.log("mouseup: Relevant box has been reset to null.");
+    rupittolucin();
 });
+
+
 canvas.addEventListener("touchend", () => {
     isDrawing = false;
+
+    if (window.currentRelevantBox === null) {
+        console.log("mouseup: No relevant box set (null).");
+    } else {
+        console.log(
+            `mouseup: Current Relevant Box before reset: Letter = '${window.currentRelevantBox.box.letter}', Index = ${window.currentRelevantBox.box.index}`
+        );
+    }
+
+    // 전역 변수 초기화
+    window.currentRelevantBox = null;
+    console.log("mouseup: Relevant box has been reset to null.");
+    rupittolucin();
 });
+
+
+
 
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -541,41 +712,9 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// mousemove 이벤트에서 정확도 계산 및 업데이트
-canvas.addEventListener("mousemove", (e) => {
-    if (!isDrawing) return;
 
-    const { x, y } = getEventPosition(e);
-    userStrokes[userStrokes.length - 1].points.push({ x, y });
 
-    createParticle(x, y);
 
-    // 정확도 계산 및 LetterBox 스타일 업데이트
-    checkIf40Percent(userStrokes);
-
-    // LetterBox와 stroke를 새로 그리기
-    displayScoredBoxes();
-    drawStrokes();
-    drawParticles();
-});
-
-// mousemove 이벤트에서 정확도 계산 및 업데이트
-canvas.addEventListener("touchmove", (e) => {
-    if (!isDrawing) return;
-
-    const { x, y } = getEventPosition(e);
-    userStrokes[userStrokes.length - 1].points.push({ x, y });
-
-    createParticle(x, y);
-
-    // 정확도 계산 및 LetterBox 스타일 업데이트
-    checkIf40Percent(userStrokes);
-
-    // LetterBox와 stroke를 새로 그리기
-    displayScoredBoxes();
-    drawStrokes();
-    drawParticles();
-});
 
 resizeCanvas();
 animate();
