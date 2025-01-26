@@ -1,71 +1,53 @@
-/* 전체 페이지 레이아웃 */
-body {
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #FFFFFF;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    justify-content: center;
-    align-items: center;
+
+#main-page-header {
+    width: 200px;
 }
 
-header {
-    background-color: #FFFFFF;
-    text-align: center;
-    padding: 20px;
-}
-
-main {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    width: 100%;
-}
-
-/* 중앙 배치: 모든 콘텐츠가 중앙에 오도록 함 */
 .treeframe {
-    width: 100%;
-    max-width: 375px;  /* 최대 너비를 고정해 중앙 배치 */
-    background-color: #7E3106;
-    position: relative;
-    height: auto; /* 높이는 콘텐츠에 따라 */
-    margin: 0 auto;
-    box-sizing: border-box;
+    position: absolute;
+    width: 315px;
+    height: 353px;
+    left: 30px;
+    top: 150px;
+    border-radius: 0px;
 }
 
 /* index_corkframe */
 .corkframe {
-    position: relative;
-    width: 90%;
-    height: auto;
+    position: absolute;
+    width: 282px;
+    height: 323px;
     background: rgba(213, 166, 95, 0.72);
-    border: 2px solid #7E3106;
-    margin: 20px auto; /* 중앙 정렬 */
-    box-sizing: border-box;
-    padding: 20px;
-}
-
-/* Lucius T’s Remap Your Intuition */
-header h1 {
-    font-size: 24px;
-    text-align: center;
-    margin-top: 0;
+    left:12px;
+    top:12px;
 }
 
 /* index_decoline1 */
 .decoline {
-    width: 90%;
-    margin: 0 auto;
-    border: 1px solid #7E3106;
-    height: 0;  /* 선으로 유지 */
+    position: absolute;
+    width: 120px;
+    top: 100px;
+
 }
+
+
+.label_ID, .label_PW {
+    position: absolute;
+    left: 10px;
+} 
+
+.label_ID {
+    top: 40px;
+}
+
+.label_PW {
+    top: 100px;
+}
+
 
 /* Log in button */
 button {
+    position: absolute;
     width: 70px;
     height: 29px;
     background: rgba(213, 166, 95, 0.72);
@@ -79,36 +61,44 @@ button {
     display: block;
 }
 
+
+
 /* index_postitcorner */
 .postitcorner {
     position: absolute;
-    width: 43px;
-    height: 45px;
-    background: #7E3106;
-    border: 1px solid rgba(191, 106, 106, 0.68);
-    transform: rotate(90deg);
-    right: 10px;
-    bottom: 10px;
+    left: 240px
 }
+
 
 /* IDPWwindow */
 .IDPWwindow {
-    width: 90%;
-    max-width: 265px;
+    position: absolute;
+    width: 265px;
+    height: 170px;
+    left: 8px;
+    top: 8px;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 40px;
-    margin: 0 auto;
-    padding: 20px;
 }
 
 /* IDinput과 PWinput */
 .IDinput, .PWinput {
-    width: 100%;
+    position:absolute;
+    width: 181px;
     height: 34px;
     background: rgba(255, 255, 255, 0.8);
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-bottom: 15px;
+    left: 75px;
+}
+
+.IDinput {
+    top:40px;
+}
+
+.PWinput {
+    top : 100px;
 }
 
 /* ID, PW 텍스트 */
@@ -123,23 +113,15 @@ label {
     margin-bottom: 5px;
 }
 
-/* 미디어 쿼리: 가로 화면을 위한 설정 */
-@media (min-width: 600px) {
-    .treeframe {
-        max-width: 600px;  /* 가로 화면에서 더 넓은 화면을 활용 */
-    }
+.tester-btn {
+    position: absolute;
+    left:135px;
+    top:569px;
 
-    button {
-        width: 90px;  /* 버튼도 크기를 키움 */
-        height: 40px;
-        font-size: 16px;
-    }
+}
 
-    .IDPWwindow {
-        max-width: 400px;  /* 입력 창도 가로 화면에서 더 넓게 */
-    }
-
-    header h1 {
-        font-size: 32px;  /* 가로 화면에서 제목 크기 키움 */
-    }
+#loginButton {
+    position: absolute;
+    top:200px;
+    left:100px;
 }

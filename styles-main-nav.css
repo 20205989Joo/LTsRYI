@@ -26,14 +26,20 @@ body {
     height: 122px;
     left: 126px;
     top: 514px;
-    background: #4b260d80;
+    background-image: url(compass.png);
+    background-size: contain;
     border: 10px solid #7E3106;
     border-radius: 50%;
+    box-shadow: 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 0px 30px 20px rgba(213, 166, 95, 0.72);
+
 }
 
 
 .mainbutton:hover {
-    background : rgba(163, 117, 19, 0.63);
+    background-image: url(compass.png);
+    background-size: contain;
+    scale: 0.9;
     cursor :pointer;
 }
 

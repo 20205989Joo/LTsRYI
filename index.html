@@ -4,36 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ltryi : E-Learning</title>
+    <link rel="stylesheet" href="styles-frame.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Lucius T’s Remap Your Intuition</h1>
-    </header>
-    <main>
+        <div class="main-page">
+            <div class="date" id="main-page-header">Lucius Ts Remap Your Intuition</div>
         <div id="index_treeframe" class="treeframe">
             <div id="index_corkframe" class="corkframe">
                 <div id="IDPWwindow" class="IDPWwindow">
-                    <label for="username">ID:</label>
+                    <div class="login-section">
+                    <div class="label_ID">ID :</div>        
                     <input type="text" id="username" class="IDinput" placeholder="사용자 이름">
-                    <label for="password">PW:</label>
+                    <div class="label_PW">PW :</div>
                     <input type="password" id="password" class="PWinput" placeholder="비밀번호">
-                </div>
-                <div id="index_decoline1" class="decoline"></div>
-                <div class="login-section">
+                    </div>
                     <button id="loginButton">Log in!</button>
                 </div>
+                <div id="index_decoline1" class="decoline"></div>
+                <div id="index_postitcorner" class="postitcorner"></div>
             </div>
-            <div id="index_postitcorner" class="postitcorner"></div>
         </div>
-    </main>
-
-    <!-- 우측 하단에 Tester 버튼 추가 -->
-    <button id="testerButton" class="tester-btn">Tester</button>
-
-    <footer>
-        <p>Test page</p>
-    </footer>
+        <button id="testerButton" class="tester-btn">Tester</button>
+    </div>
     <script src="script-index.js"></script>
 </body>
 </html>
