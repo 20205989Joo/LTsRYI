@@ -45,12 +45,16 @@ function createrunesystem(parsedData) {
     for (let i = 0; i < 3; i++) {
         console.log(`[createrune] Creating runeprep${i + 1}`);
 
+
+        const runepreptext = [ '어감', '어원', '용례'];
+
         // runeprep 생성
         const runeprep = document.createElement('div');
         runeprep.classList.add('runeprep');
         runeprep.style.top = `${10 + i * 46}px`;
         runeprep.style.left = '10px';
         runeprep.id = `runeprep${i + 1}`;
+        runeprep.textContent = runepreptext[i];
         runeslot.appendChild(runeprep);
 
         console.log(`[createrune] Added runeprep${i + 1} to runeslot`);
@@ -64,9 +68,9 @@ function createrunesystem(parsedData) {
 
         // 하드코딩된 텍스트 추가
         const labelText = [
-            '이 단어의 어감은?',
-            '이 단어의 어원은?',
-            '이 단어를 어디에서 사용할까?'
+            "왼쪽의 룬을 눌러 '연상'합니다",
+            '올려진 룬을 누르면 선택지 등장!',
+            '설정하고, carve하러갑시다.'
         ];
         runeprepDetail.textContent = labelText[i]; // 정적 텍스트 설정
         runeslot.appendChild(runeprepDetail);
@@ -216,7 +220,7 @@ function runetoholderorslot(index, runeprep) {
             // rune이 숨겨진 상태라면 보이게 처리
             rune.style.display = 'block';
             runeprep.style.opacity = '0.5'; // 활성화 상태로 표시
-
+   
             if (runeprepDetail) {
                 runeprepDetail.style.opacity = '0.4'; // 투명하게 처리
             }
@@ -285,7 +289,7 @@ function toggleRuneOptionsContainer(index, rune) {
     const runeOptionsContainer = rune.querySelector('.rune_options_container');
 
     if (runeOptionsContainer) {
-        if (runeOptionsContainer.style.display === 'none') {
+        if (runeOptionsContainer.style.display === 'none' || runeOptionsContainer.style.display === '') {
             runeOptionsContainer.style.display = 'block'; // 옵션 컨테이너 열기
             rune.classList.add('active'); // rune 활성화 상태 추가
         } else {
@@ -294,6 +298,18 @@ function toggleRuneOptionsContainer(index, rune) {
         }
     }
 }
+
+// 외부 클릭 시 옵션 컨테이너 닫기
+document.addEventListener('click', (event) => {
+    const activeRuneContainers = document.querySelectorAll('.rune.active'); // 활성화된 rune 요소 찾기
+    activeRuneContainers.forEach(rune => {
+        const optionsContainer = rune.querySelector('.rune_options_container');
+        if (optionsContainer && !rune.contains(event.target)) {
+            optionsContainer.style.display = 'none'; // 옵션 컨테이너 닫기
+            rune.classList.remove('active'); // rune 활성화 상태 제거
+        }
+    });
+});
 
 fetchRupitOptions(highlightValue)
     .then(wordData => {

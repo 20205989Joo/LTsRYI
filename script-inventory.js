@@ -76,6 +76,8 @@ function createSceneInCorkFrame(className, modelPath) {
 createSceneInCorkFrame('corkframe', 'byuri_multi_actions_test.gltf');
 
 function createSceneInMainCharacterWindow(className, modelPath) {
+
+    
     const container = document.querySelector(`.${className}`);
     const width = container.clientWidth;
     const height = container.clientHeight;
@@ -87,6 +89,10 @@ function createSceneInMainCharacterWindow(className, modelPath) {
     renderer.domElement.id = 'main-character-canvas';
     renderer.domElement.style.zIndex = '30';
     container.appendChild(renderer.domElement);
+        // 클릭 이벤트 추가
+        renderer.domElement.addEventListener('click', () => {
+            window.location.href = 'minefield.html';
+        });
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);

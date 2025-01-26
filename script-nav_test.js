@@ -205,6 +205,9 @@ const checkIntersection = (event) => {
         }
     });
 };
+renderer.domElement.addEventListener('click', (event) => {
+    if (!isMouseDragging) checkIntersection(event);
+});
 
 renderer.domElement.addEventListener('mousedown', onMouseDown);
 renderer.domElement.addEventListener('mouseup', onMouseUp);

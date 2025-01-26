@@ -288,6 +288,57 @@ const animateBalls = () => {
 
 animateBalls();
 
+const makeQuestionBox = () => {
+    // 이미 박스가 존재하면 생성하지 않음
+    if (document.querySelector('.question-box')) return;
+
+    // main-page 요소 찾기
+    const mainPage = document.querySelector('.main-page');
+    if (!mainPage) {
+        console.error("main-page 요소를 찾을 수 없습니다.");
+        return;
+    }
+
+    // 새로 박스 생성
+    const box = document.createElement('div');
+    box.className = 'question-box';
+    box.style.position = 'absolute';
+    box.style.left = '40px';
+    box.style.top = '122px';
+    box.style.width = '295px';
+    box.style.height = '253px';
+    box.style.backgroundImage = 'url("/obfuscate.png")'; // 이미지 경로 설정
+    box.style.backgroundRepeat = 'no-repeat';
+    box.style.backgroundSize = 'contain';
+    box.style.border = '1px solid #ccc';
+    box.style.borderRadius = '5px';
+    box.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+    box.style.zIndex = '1000';
+    box.style.position = 'absolute';
+
+    // 닫기 버튼 생성
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '✖';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.backgroundColor = 'transparent';
+    closeButton.style.border = 'none';
+    closeButton.style.color = '#333';
+    closeButton.style.fontSize = '16px';
+    closeButton.style.cursor = 'pointer';
+
+    // 닫기 버튼 클릭 시 박스 제거
+    closeButton.addEventListener('click', () => {
+        box.remove();
+    });
+
+    // 박스에 닫기 버튼 추가
+    box.appendChild(closeButton);
+
+    // main-page에 박스 추가
+    mainPage.appendChild(box);
+};
 
 const checkIntersection = (event) => {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -305,5 +356,24 @@ const checkIntersection = (event) => {
             console.log('Sphere.026 clicked or touched.');
             createEllipse(event.clientX, event.clientY);
         }
+
+        if (intersect.object.name === 'Cube002') {
+            console.log('Cube002 clicked or touched.');
+            makeQuestionBox(); // 박스 생성
+        }
     });
 };
+
+// 특정 버튼 요소 가져오기 (유니크한 변수명 사용)
+const navigateToMemPageButton = document.getElementById('wg_a_option5');
+
+if (navigateToMemPageButton) {
+    // 클릭 이벤트 리스너 추가
+    navigateToMemPageButton.addEventListener('click', () => {
+        // CasualWordMem1.html로 이동
+        window.location.href = 'CasualWordMem1.html';
+    });
+} else {
+    console.error("버튼 요소를 찾을 수 없습니다: #wg_a_option5");
+}
+

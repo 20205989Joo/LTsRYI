@@ -729,3 +729,33 @@ function animate() {
 
 resizeCanvas();
 animate();
+
+document.addEventListener("DOMContentLoaded", () => {
+    // .trashcanbutton 요소 생성
+    const trashcanButton = document.createElement("div");
+    trashcanButton.className = "trashcanbutton";
+    trashcanButton.style.position = "absolute";
+    trashcanButton.style.width = "50px";
+    trashcanButton.style.height = "25px";
+    trashcanButton.style.left = "240px";
+    trashcanButton.style.top = "4px";
+    trashcanButton.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    trashcanButton.style.borderRadius = '3px';
+    trashcanButton.style.zIndex = "10"; // 캔버스 위로 오도록
+    trashcanButton.textContent = 'Eraser';
+
+    // trashcanButton 클릭 이벤트 추가 (테스트용)
+    trashcanButton.addEventListener("click", () => {
+        console.log("Trashcan button clicked!");
+        alert("Trashcan button clicked!");
+    });
+
+    // .corkframe 요소에 trashcanButton 추가
+    const corkframe = document.getElementById("wm_corkframe");
+    if (corkframe) {
+        corkframe.appendChild(trashcanButton);
+    } else {
+        console.error("wm_corkframe 요소를 찾을 수 없습니다.");
+    }
+});
+

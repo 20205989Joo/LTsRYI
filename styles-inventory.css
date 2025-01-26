@@ -223,3 +223,13 @@
 #corkframe-canvas {
     z-index: 20;
 }
+
+.warning{
+    position :absolute;
+    color: white;
+    width: 80px;
+    font-size: 14px;
+    left:20px;
+    top:15px;
+
+}

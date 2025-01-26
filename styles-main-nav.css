@@ -102,6 +102,8 @@ body {
 #crevasse_to {
     left: 290px;
     top: 520px;
+    scale:1.5;
+    background-color: rgba(122, 49, 167, 0.66);
 }
 
 #crevasse_to:hover {

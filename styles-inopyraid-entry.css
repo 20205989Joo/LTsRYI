@@ -69,6 +69,21 @@
     border: 2px solid rgba(48, 175, 183, 0.68);
 }
 
+.center_bar {
+  box-sizing: border-box;
+  position: absolute;
+  width: 336px;
+  height: 57px;
+  left: 20px;
+  top: 376px;
+  
+  background: rgba(166, 120, 201, 0.68);
+  border: 6px solid rgba(0, 0, 0, 0.5);
+  border-radius: 15px;
+  z-index: 2;
+  
+}
+
 
 .inventory_slot {
     position: absolute;
@@ -122,4 +137,11 @@
     left: 236px;
     top: 100px;
     height: 67px;
+  }
+
+  .submitbutton {
+    position: absolute;
+    left:80px;
+    top:220px;
+    scale:1.4;
   }

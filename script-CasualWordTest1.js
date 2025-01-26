@@ -428,11 +428,14 @@ function sendToServer() {
 
 
 // Submit 버튼 클릭 시 서버로 결과 전송
-document.querySelector('.submitbutton').addEventListener('click', function() {
-    sendToServer();  // 서버로 결과 전송
+//document.querySelector('.submitbutton').addEventListener('click', function() {
+  //  sendToServer();  // 서버로 결과 전송
+//});
+
+document.querySelector('.submitbutton').addEventListener('click', () => {
+    window.location.href = 'inopyraid.html'
+    
 });
-
-
 
 
 // Start Test 버튼 클릭 시, 텍스트 표시 및 문제 영역 보이기
