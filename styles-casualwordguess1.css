@@ -44,8 +44,7 @@
     height: 253px;
     left: 10px;
     top: 32px;
-    background: rgb(255, 255, 255);
-}
+    background: rgba(255, 255, 255, 0.877);}
 
 /* 선택지 스타일 - Option 1 to 5 */
 .wg_a_option {
@@ -94,4 +93,5 @@
     line-height: 16px;
     color: rgba(255, 231, 167, 1);
     margin-top: 5px;
+    user-select: none;
 }

@@ -70,7 +70,8 @@ document.addEventListener('touchmove', (e) => {
 
     updateRoller(currentOffset_for_roller);
     startY_for_roller = e.touches[0].clientY; // Update roller-specific startY
-});
+}, { passive: false });
+
 
 document.addEventListener('touchend', () => {
     if (isSwiping_for_roller) {
