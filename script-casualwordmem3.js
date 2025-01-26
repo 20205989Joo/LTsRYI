@@ -296,45 +296,13 @@ function checkIf40Percent(userStrokes) {
         }
     });
 
-    // 3. 관련된 박스가 없을 경우 경고
-    if (relevantBoxes.length === 0) {
-        console.warn("No relevant LetterBoxes found for user strokes.");
-    }
-}
-
-
-
-
-
-function resetCanvasAndProgress() {
-    // 1. 모든 letterBox가 pass되었는지 확인
-    const allPassed = letterBoxes.every((box) => box.accuracy >= 0.8);
+    // 3. 모든 박스가 Pass되었는지 확인
+    const allPassed = letterBoxes.every((box) => box.accuracy >= 1);
 
     if (allPassed) {
         console.log("All letterBoxes have passed!");
 
-        // 2. 유저의 strokes만 지우기 위해, 초기 상태를 다시 그리기
-        userStrokes.length = 0; // strokes 배열 초기화
-
-        // 캔버스 초기 상태(글자와 배경) 다시 그리기
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 전체 초기화
-        letterBoxes.forEach(({ letter, x, y, width, height }) => {
-            // 글자 배경
-            ctx.fillStyle = "white";
-            ctx.fillRect(x, y - height, width, height);
-
-            // 글자
-            ctx.fillStyle = "black";
-            ctx.font = `${fontSize}px Arial`;
-            ctx.fillText(letter, x, y);
-        });
-
-        // 3. 모든 letterBox의 pass 상태를 리셋
-        letterBoxes.forEach((box) => {
-            box.accuracy = 0;
-        });
-
-        // 4. 'lucin' 클래스의 opacity를 0.2씩 증가
+        // Lucin의 opacity를 0.2씩 증가
         const lucinElements = document.querySelectorAll(".lucin");
         lucinElements.forEach((element) => {
             const currentOpacity = parseFloat(
@@ -349,16 +317,16 @@ function resetCanvasAndProgress() {
                 `'lucin' opacity updated: ${currentOpacity} → ${newOpacity}`
             );
         });
+
+        // 애니메이션 호출
+        animate();
+    }
+
+    // 4. 관련된 박스가 없을 경우 경고
+    if (relevantBoxes.length === 0) {
+        console.warn("No relevant LetterBoxes found for user strokes.");
     }
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -368,9 +336,9 @@ function displayScoredBoxes() {
     ctx.font = `${fontSize}px Arial`;
     letterBoxes.forEach(({ letter, x, y, width, height, accuracy }) => {
         // 정확도에 따라 테두리 색상 변경
-        ctx.strokeStyle = accuracy >= 0.8 ? "rgba(29, 172, 190, 0.99)" : "rgba(221, 79, 23, 0.58)";
+        ctx.strokeStyle = accuracy >= 0.3 ? "rgba(29, 172, 190, 0.99)" : "rgba(221, 79, 23, 0.58)";
         ctx.lineWidth = 1;
-        ctx.shadowColor = accuracy >= 0.8 ? "rgb(150, 205, 219)" : "rgba(255, 0, 0, 0.4)";
+        ctx.shadowColor = accuracy >= 0.3 ? "rgb(150, 205, 219)" : "rgba(255, 0, 0, 0.4)";
         ctx.shadowBlur = 10;
 
         // 테두리와 글자 그리기
@@ -380,23 +348,6 @@ function displayScoredBoxes() {
     });
 }
 
-// mousemove 이벤트에서 정확도 계산 및 업데이트
-canvas.addEventListener("mousemove", (e) => {
-    if (!isDrawing) return;
-
-    const { x, y } = getEventPosition(e);
-    userStrokes[userStrokes.length - 1].points.push({ x, y });
-
-    createParticle(x, y);
-
-    // 정확도 계산 및 LetterBox 스타일 업데이트
-    checkIf40Percent(userStrokes);
-
-    // LetterBox와 stroke를 새로 그리기
-    displayScoredBoxes();
-    drawStrokes();
-    drawParticles();
-});
 
 // 캔버스 크기를 부모 요소에 맞게 동적으로 설정
 function resizeCanvas() {
@@ -589,6 +540,42 @@ function animate() {
     drawParticles();
     requestAnimationFrame(animate);
 }
+
+// mousemove 이벤트에서 정확도 계산 및 업데이트
+canvas.addEventListener("mousemove", (e) => {
+    if (!isDrawing) return;
+
+    const { x, y } = getEventPosition(e);
+    userStrokes[userStrokes.length - 1].points.push({ x, y });
+
+    createParticle(x, y);
+
+    // 정확도 계산 및 LetterBox 스타일 업데이트
+    checkIf40Percent(userStrokes);
+
+    // LetterBox와 stroke를 새로 그리기
+    displayScoredBoxes();
+    drawStrokes();
+    drawParticles();
+});
+
+// mousemove 이벤트에서 정확도 계산 및 업데이트
+canvas.addEventListener("touchmove", (e) => {
+    if (!isDrawing) return;
+
+    const { x, y } = getEventPosition(e);
+    userStrokes[userStrokes.length - 1].points.push({ x, y });
+
+    createParticle(x, y);
+
+    // 정확도 계산 및 LetterBox 스타일 업데이트
+    checkIf40Percent(userStrokes);
+
+    // LetterBox와 stroke를 새로 그리기
+    displayScoredBoxes();
+    drawStrokes();
+    drawParticles();
+});
 
 resizeCanvas();
 animate();
