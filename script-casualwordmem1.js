@@ -60,6 +60,7 @@ container.addEventListener('touchstart', (e) => { if (!e.target.closest('.contai
 });
 
 document.addEventListener('touchmove', (e) => {
+    e.preventDefault();
     if (!isSwiping_for_roller) return; // Check roller-specific swiping flag
     const deltaY_for_roller = e.touches[0].clientY - startY_for_roller; // Use roller-specific deltaY
 

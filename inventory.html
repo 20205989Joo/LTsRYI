@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory</title>
+    <link rel="stylesheet" href="styles-frame.css">
+    <link rel="stylesheet" href="styles-inopyraid-entry.css">
+    <link rel="stylesheet" href="styles-inventory.css">
+</head>
+<body>
+    <!-- Main Page Container -->
+    <div class="main-page">
+        <!-- treeframe as the parent -->
+        <div class="main_character_window"></div>
+        <div class="action_menu_window">
+            <div class="action_menu1">
+                <div class="label_action_menu1">Feed</div>
+            </div>
+            <div class="action_menu2">
+                <div class="label_action_menu2">Talk to</div>
+            </div>
+            <div class="action_menu3">
+                <div class="label_action_menu3">Action 3</div>
+            </div>
+        </div>
+        <div class="snack_window">
+            <div class="arrow_left_snack"></div>
+            <div class="arrow_right_snack"></div>
+        </div>
+
+        <div class ="center_bar" id="center_bar_inventory">
+            <div class="tuerilium"></div>
+            <div class="label_tuerilium_boyu">300</div>
+            <div class="pseudo_unsuk"></div>
+            <div class="label_pseudo_unsuk_boyu">12</div>
+            <div class="purfchains"></div>
+            <div class="label_purfchains_boyu">20</div>
+        </div>
+
+
+        <div class = "corkframe" id = "inv_corkframe">
+            <div id="slot_1st" class="inventory_slot"></div>
+            <div id="slot_2nd" class="inventory_slot"></div>
+            <div id="slot_3rd" class="inventory_slot"></div>
+            <div id="slot_4th" class="inventory_slot"></div>
+            <div id="slot_5th" class="inventory_slot"></div>
+            <div id="slot_6th" class="inventory_slot"></div>
+            <div id="slot_7th" class="inventory_slot"></div>
+            <div id="slot_8th" class="inventory_slot"></div>
+        </div>
+        <!-- Date -->
+        <div class="date">2024. MM. DD</div>
+
+        <!-- Ellipse 2 and 3 -->
+        <div class="ellipse2"></div>
+        <div class="ellipse3"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/utils/SkeletonUtils.js"></script>
+    <script src="script-inventory.js"></script>
+</body>
+</html>

@@ -322,3 +322,14 @@
     margin-top: 2px;
     user-select: none;
 }
+
+.BosangBox {
+    position: absolute;
+    width: 284px;
+    height: 388px;
+    left: 46px;
+    top: 140px;
+    background: rgba(0, 0, 0, 0.66);
+    border-radius: 40px;
+    z-index: 20;
+}

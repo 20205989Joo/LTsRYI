@@ -345,10 +345,11 @@ function rupittolucin() {
         console.log("All letterBoxes have passed!");
 
         const startTime = performance.now();
-        const duration = 2000; // 2초 동안 애니메이션 진행
+        const duration = 1000; // 2초 동안 애니메이션 진행
 
         const lucinElements = document.querySelectorAll(".lucin");
         const lucinEffectBalls = document.querySelectorAll(".lucin_effect_ball");
+        const submitButton = document.querySelector(".submitbutton"); // submitbutton 클래스 선택
 
         // clipPathProgress를 20% 감소
         const newClipPath = Math.max(clipPathProgress - 20, 0); // 최소 0까지 감소
@@ -372,8 +373,8 @@ function rupittolucin() {
 
                 const strokeStart = [255, 255, 255, 1]; // white
                 const strokeEnd = [221, 79, 23, 0.58]; // target color
-                const shadowStart = [255, 0, 0, 1]; // red
-                const shadowEnd = [0, 0, 0, 0]; // transparent black
+                const shadowStart = [255, 255, 255, 0.4]; // red
+                const shadowEnd = [255, 0, 0, 0.1]; // transparent black
 
                 const interpolatedStroke = strokeStart.map((start, i) =>
                     start + (strokeEnd[i] - start) * progress
@@ -385,7 +386,7 @@ function rupittolucin() {
                 const strokeColor = `rgba(${interpolatedStroke[0]}, ${interpolatedStroke[1]}, ${interpolatedStroke[2]}, ${interpolatedStroke[3]})`;
                 const shadowColor = `rgba(${interpolatedShadow[0]}, ${interpolatedShadow[1]}, ${interpolatedShadow[2]}, ${interpolatedShadow[3]})`;
 
-                const maxLineWidth = 5;
+                const maxLineWidth = 3;
                 const minLineWidth = 1;
                 const currentLineWidth = maxLineWidth - (maxLineWidth - minLineWidth) * progress;
 
@@ -406,6 +407,16 @@ function rupittolucin() {
                 // 이전 상태에서 점진적으로 진행
                 const interpolatedClipPath = previousClipPath - (previousClipPath - newClipPath) * progress;
                 element.style.clipPath = `inset(${interpolatedClipPath}% 0 0 0)`; // 위에서 아래로 드러남
+            
+                // clip-path가 0이 되면 submitbutton을 "press" 상태로 만들고 다음 페이지로 이동
+                if (interpolatedClipPath <= 0) {
+                    console.log("Submit button pressed. Redirecting...");
+                    submitButton.classList.add("pressed"); // pressed 상태 추가
+                    submitButton.disabled = false; // 버튼 활성화 (만약 disabled 상태였다면)
+                    setTimeout(() => {
+                        window.location.href = "CasualWordMem4.html"; // 페이지 이동
+                    }, 200); // 짧은 지연 후 페이지 이동
+                }
             });
 
             // Lucin_effect_ball의 shadow를 애니메이션과 함께 적용
