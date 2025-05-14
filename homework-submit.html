@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>숙제 제출 - Ltryi</title>
+  <link rel="stylesheet" href="styles-frame.css">
+  <link rel="stylesheet" href="styles-room.css">
+</head>
+<body>
+  <div class="main-page">
+    <div class="date" id="main-page-header">숙제 제출</div>
+
+    <div class="treeframe">
+      <div class="corkframe">
+
+        <!-- 숙제 다운로드 링크 -->
+        <div style="margin-bottom: 10px;">
+          <label>📄 오늘의 숙제 파일:</label><br>
+          <a id="hwDownload" href="#" download style="color:#4b2600; font-weight: bold;">다운로드 하기</a>
+        </div>
+
+        <!-- 숙제 업로드 -->
+        <label>📸 숙제 사진 업로드:</label>
+        <input type="file" id="hwImage" accept="image/*" style="margin-bottom: 10px;"><br>
+
+        <!-- 숙제 완료 체크 -->
+        <label>
+          <input type="checkbox" id="hwDoneCheck">
+          오늘 숙제를 완료했어요!
+        </label><br><br>
+
+        <!-- 코멘트 -->
+        <label>📝 코멘트:</label>
+        <textarea class="comment-box" id="hwComment" placeholder="코멘트 (선택)"></textarea>
+
+        <!-- 제출 버튼 -->
+        <button class="room-btn" onclick="submitHomework()">제출하기</button>
+      </div>
+
+      <div class="postitcorner"></div>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('id');
+
+  async function submitHomework() {
+    const fileInput = document.getElementById('hwImage');
+    const isDone = document.getElementById('hwDoneCheck').checked;
+    const comment = document.getElementById('hwComment').value;
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert("숙제 파일을 업로드해주세요!");
+      return;
+    }
+
+    // ✅ 업로드용 정보 구성 (임시로 고정값 사용)
+    const formData = new FormData();
+    formData.append("UserId", userId);
+    formData.append("QLevel", "7");        // 학년 or 수준
+    formData.append("QYear", "2025");       // 연도
+    formData.append("QMonth", "5");        // 월
+    formData.append("QNo", "1");           // 과제번호
+    formData.append("WhichHW", isDone ? "done" : "draft"); // 제출 여부
+    formData.append("HWImage", file);       // 파일 본체
+
+    try {
+      const res = await fetch("https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWImages", {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        alert("제출 성공! 🎉\nURL: " + result.url);
+      } else {
+        console.error(result);
+        alert("제출 실패: " + result.message);
+      }
+    } catch (err) {
+      console.error("요청 중 에러:", err);
+      alert("서버와 통신 중 오류가 발생했습니다.");
+    }
+  }
+  </script>
+</body>
+</html>

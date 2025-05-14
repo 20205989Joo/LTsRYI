@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>학부모 보기</title>
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .status-box {
+      position: absolute;
+      top: 90px;
+      left: 20px;
+      width: 335px;
+      height: 40px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .image-list {
+      position: absolute;
+      top: 140px;
+      left: 20px;
+      width: 335px;
+      height: 420px;
+      overflow-y: scroll;
+    }
+
+    .image-card {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 12px;
+    }
+
+    .image-card img {
+      max-width: 100%;
+      border-radius: 6px;
+    }
+
+    .grades-button {
+      position: absolute;
+      bottom: 20px;
+      left: 90px;
+      width: 180px;
+      height: 35px;
+      background: rgba(213, 166, 95, 0.85);
+      color: #000;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .grades-button:hover {
+      background: #7e3106;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-page">
+    <div class="date" id="main-page-header">📖 학부모 보기</div>
+
+    <div class="status-box" id="todayStatus">오늘 숙제 여부 확인 중...</div>
+
+    <div class="image-list" id="recentHomework">
+      <!-- 숙제 목록 자동 생성됨 -->
+    </div>
+
+    <button class="grades-button" id="goGrades">📊 Grades 포탈로 이동</button>
+  </div>
+
+    <script src="script-parents.js" defer></script>
+</body>
+</html>

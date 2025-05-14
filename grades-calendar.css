@@ -1,0 +1,80 @@
+/* 제목과 겹치지 않도록 padding 추가 */
+.main-page {
+  padding-top: 80px;
+  padding-bottom: 40px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* 상단 날짜 텍스트 */
+.date {
+  position: absolute;
+  top: 25px;
+  width: 100%;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 누적 그래프 영역 */
+.grades-chart-section {
+  margin-top: 20px;
+  margin-bottom: 30px;
+  padding: 15px;
+  width: 100%;
+  max-width: 330px;
+  background-color: #ffffffdc;
+  border-radius: 12px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.15);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 캘린더 영역 */
+.calendar-section {
+  padding: 15px;
+  width: 100%;
+  max-width: 330px;
+  background-color: #fff7e6;
+  border-radius: 12px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 30px;
+}
+
+/* 캘린더 제목 */
+#calendarTitle {
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+/* 달력 테이블 */
+#calendarTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#calendarTable td {
+  width: 14.28%;
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #ccc;
+  font-size: 13px;
+}
+
+/* 색상표시 */
+.submitted {
+  background-color: #b1fcb1;
+  color: #003300;
+  font-weight: bold;
+}
+
+.not-submitted {
+  background-color: #fdd;
+  color: #990000;
+  font-weight: bold;
+}

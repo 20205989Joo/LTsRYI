@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Grades Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="grades-calendar.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js CDN -->
+</head>
+<body>
+  <div class="main-page">
+    <div class="date">📊 Homework Grades Overview</div>
+
+    <!-- 누적 그래프 -->
+    <div class="grades-chart-section">
+      <canvas id="submissionChart"></canvas>
+    </div>
+
+    <!-- 캘린더 -->
+    <div class="calendar-section">
+      <div id="calendarTitle">최근 숙제 제출 내역</div>
+      <table id="calendarTable"></table>
+    </div>
+  </div>
+
+  <script src="grades.js" defer></script>
+  <script src="calendar.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>학생 방 - Ltryi</title>
+  <link rel="stylesheet" href="styles-frame.css">
+  <link rel="stylesheet" href="styles-room.css">
+</head>
+<body>
+  <div class="main-page">
+    <!-- 상단 타이틀 -->
+    <div class="date" id="main-page-header">학생 학습 공간</div>
+
+    <!-- 나무틀 프레임 -->
+    <div class="treeframe">
+      <!-- 코르크 배경 -->
+      <div class="corkframe">
+        <!-- 숙제 제출 버튼 -->
+        <button class="room-btn" onclick="goToHomework()">📸 숙제 제출</button>
+
+        <!-- 학습 진도 보기 버튼 -->
+        <button class="room-btn" onclick="goToGrades()">📊 학습 진행 확인</button>
+
+        <!-- 퀴즈 센터 진입 버튼 -->
+        <button class="room-btn" onclick="goToQuiz()">🎯 퀴즈 센터</button>
+      </div>
+
+      <!-- 데코용 포스트잇 코너 -->
+      <div class="postitcorner"></div>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+
+    function goToHomework() {
+      window.location.href = `homework-submit.html?id=${userId}`;
+    }
+
+    function goToGrades() {
+      window.location.href = `grades-calendar.html?id=${userId}`;
+    }
+
+    function goToQuiz() {
+      window.location.href = `quiz-center.html?id=${userId}`;
+    }
+  </script>
+</body>
+</html>
