@@ -46,51 +46,71 @@ window.addEventListener('DOMContentLoaded', async () => {
     // 그래프 그리기
     const ctx = document.getElementById('submissionChart').getContext('2d');
     new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: sortedDates,
-        datasets: [
-          {
-            type: 'bar',
-            label: '오늘의 점수',
-            data: dailyGrades,
-            backgroundColor: 'rgba(123, 200, 164, 0.7)',
-            borderRadius: 4,
-          },
-          {
-            type: 'line',
-            label: '누적 점수',
-            data: cumulativeGrades,
-            borderColor: 'rgba(72, 100, 255, 0.8)',
-            backgroundColor: 'rgba(72, 100, 255, 0.2)',
-            tension: 0.3,
-            fill: false,
-            pointRadius: 3,
-            pointHoverRadius: 6
-          }
-        ]
+  type: 'bar',
+  data: {
+    labels: sortedDates,
+    datasets: [
+      {
+        type: 'bar',
+        label: '일일 점수',
+        data: dailyGrades,
+        backgroundColor: '#FFDBAC',      // 카페 크림톤
+        borderColor: '#D28C45',
+        borderWidth: 1,
+        borderRadius: 6
       },
-      options: {
-        responsive: true,
-        plugins: {
-          title: {
-            display: true,
-            text: '날짜별 점수 및 누적 성장 그래프'
-          },
-          legend: {
-            display: true
+      {
+        type: 'line',
+        label: '누적 점수',
+        data: cumulativeGrades,
+        borderColor: '#FFF2C9',          // 연한 노란 선
+        backgroundColor: 'transparent',
+        tension: 0.3,
+        fill: false,
+        pointRadius: 3,
+        pointHoverRadius: 5
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: {
+        display: false
+      },
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#FFF9E2', // 날짜 라벨 색
+          font: {
+            weight: 'bold'
           }
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              stepSize: 1
-            }
+        grid: {
+          color: 'rgba(255,255,255,0.1)' // 연한 하얀 선
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: '#FFF9E2',
+          stepSize: 1,
+          font: {
+            weight: 'bold'
           }
+        },
+        grid: {
+          color: 'rgba(255,255,255,0.15)'
         }
       }
-    });
+    }
+  }
+});
+
 
   } catch (err) {
     console.error("데이터 불러오기 실패:", err);

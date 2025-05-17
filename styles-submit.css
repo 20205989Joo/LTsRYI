@@ -1,0 +1,150 @@
+/* ✅ cafe_int 기본 배경 */
+#cafe_int {
+  position: absolute;
+  width: 340px;
+  height: 626px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(
+    to bottom,
+    #d99863 0px,
+    #d99863 116px,
+    #553e2f 116px,
+    #553e2f 484px,
+    rgba(210, 110, 82, 1) 308px
+  );
+  border-radius: 12px;
+  overflow: visible; /* ✅ 제약 제거 */
+}
+
+/* ✅ return-box 이미지 */
+#return-box {
+  position: absolute;
+  top: 81px;
+  left: -18px;
+  width: 376px;
+  height: 450px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* ✅ 전체 UI 묶는 컨테이너 */
+.submit-ui {
+  position: absolute;
+  top: 81px;
+  left: 20px;
+  width: 100%;
+  height: auto;
+  z-index: 2;
+}
+
+/* ✅ 타이틀 박스 */
+.upload-title-block {
+  position: absolute;
+  top: 50px;
+  left: 20px;
+  width: 260px;
+  height: 90px;
+  background: #fdad65;
+  border: 2px solid #422c1f;
+  border-radius: 12px;
+  padding: 16px 14px;
+  font-weight: bold;
+  color: #3a2c22;
+  font-size: 35px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ✅ 파일 업로드 */
+#hwImage {
+  position: absolute;
+  top: 180px;
+  left: 25px;
+  width: 250px;
+  height: 36px;
+  background: linear-gradient(to bottom,
+    #795b47 0px,
+    #795b47 20px,
+    #5E3A29 20px,
+    #5E3A29 100%);
+  border: 4px solid #422c1f;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  padding: 2px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+
+
+/* ✅ 상태 표시 */
+#submissionStatus {
+  position: absolute;
+  top: 0px; /* 너가 조절 */
+  left: 20px;
+  width: 120px;
+  background: #fff8ed;
+  border: 2px solid #422c1f;
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #222;
+  text-align: center;
+}
+
+/* ✅ 코멘트 */
+#hwComment {
+  position: absolute;
+  top: 260px; /* 너가 조절 */
+  left: 18px;
+  width: 270px;
+  height: 100px;
+  border: 2px solid #422c1f;
+  border-radius: 12px;
+  padding: 8px;
+  background: #fff8ed;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+#hwCommentLabel {
+  position: absolute;
+  top: 230px; /* 너가 조정할 위치 */
+  left: 20px;
+  font-weight: bold;
+  color: #3a2c22;
+  font-size: 14px;
+  z-index: 2;
+}
+
+/* ✅ 제출 버튼 */
+#submit-btn {
+  position: absolute;
+  top: 375px; /* 너가 조절 */
+  left: 83px;
+  width: 130px;
+  background: #f7d7a3;
+  border: 2px solid #422c1f;
+  border-radius: 12px;
+  padding: 7px 0;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  box-shadow: 2px 2px 0 #422c1f;
+  text-align: center;
+}
+
+#submit-btn:hover {
+  transform: translateY(-2px);
+  background: #ffe2b5;
+}

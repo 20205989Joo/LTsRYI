@@ -1,107 +1,387 @@
-// kiosk_screen.js
-
-window.addEventListener('DOMContentLoaded', () => {
+// ✅ 1. 팝업 HTML 삽입
+function injectKioskPopupHTML() {
   const popupHTML = `
-    <div id="popup" style="display: none;">
+    <div id="popup" class="popup" style="display: none;">
       <button class="popup-close" id="popupCloseBtn">✖</button>
       <div class="popup-content">
-
-        <!-- ✅ 상단 안내 텍스트 -->
         <div class="popup-header-text">오늘의 숙제를 주문해주세요</div>
-
         <div class="tabs">
           <button class="tab active" data-tab="tukurry">
-            <span class="tab-large">추천 숙제</span><br><span class="tab-small">주세요</span>
-          </button>
-          <button class="tab" data-tab="module">
-            <span class="tab-large">시험</span><br><span class="tab-small">봐주세요</span>
+            <span class="tab-large">숙제</span><br><span class="tab-small">주세요</span>
           </button>
           <button class="tab" data-tab="etc">
             <span class="tab-large">내 숙제</span><br><span class="tab-small">할래요</span>
           </button>
-          <button class="tab" data-tab="custom">
-            <span class="tab-large">커스텀</span><br><span class="tab-small">주문</span>
-          </button>
         </div>
-
         <div class="tab-content" id="tab-tukurry">
-          <button class="menu-btn">단어</button>
-          <button class="menu-btn">문법</button>
-          <button class="menu-btn">독해</button>
+          <button class="menu-btn square">단어</button>
+          <button class="menu-btn square">문법</button>
+          <button class="menu-btn square">독해</button>
         </div>
-
-        <div class="tab-content hidden" id="tab-module">
-          <button class="menu-btn">단어테스트</button>
-          <button class="menu-btn">문법테스트</button>
-          <button class="menu-btn">독해테스트</button>
-        </div>
-
         <div class="tab-content hidden" id="tab-etc">
-          <button class="menu-btn">숙제 사진</button>
+          <button class="menu-btn square">사진 찍어 올리기</button>
+          <button class="menu-btn square">시험봐주세요</button>
+          <button class="menu-btn square">시험 만들어주세요</button>
         </div>
-
-        <div class="tab-content hidden" id="tab-custom">
-          <button class="menu-btn">📦 커스텀 준비 중</button>
+        <div id="sub-popup" class="sub-popup" style="display: none;">
+          <button class="popup-close" id="subPopupCloseBtn">✖</button>
+          <div class="sub-popup-inner"></div>
         </div>
-
-        <div class="quantity-control">
-          <label>몇 번째 숙제?</label>
-          <div class="counter">
-            <button id="minusBtn">－</button>
-            <span id="hwNumber">1</span>
-            <button id="plusBtn">＋</button>
-          </div>
+        <div class="selection-status">
+          선택된 항목:
+          <div id="selectedList" class="selected-list"></div>
         </div>
-
-        <button class="order-btn">🛒 주문하기</button>
+        <button class="order-btn" id="finalOrderBtn">🛒 주문하기</button>
       </div>
     </div>
   `;
+  document.getElementById('popup-container').innerHTML = popupHTML;
+}
 
-  const popupContainer = document.getElementById('popup-container');
-  popupContainer.innerHTML = popupHTML;
+// ✅ 2. 상태 전역 변수
+let selectedItems = [];
+let currentSubItem = null;
+let difficulty = 1, rangeBegin = 1, rangeEnd = 1;
 
+// ✅ 3. 초기 kiosk UI 설정
+function setupKioskUI() {
   const kiosk = document.getElementById('kiosk');
   const popup = document.getElementById('popup');
+  if (!kiosk || !popup) return;
 
-  let closeButtonInitialized = false;
+  kiosk.addEventListener('click', () => {
+    popup.style.display = 'flex';
+    updateSelectedDisplay();
+    setupTabs();
+    bindMenuButtons();
+    document.getElementById('popupCloseBtn').onclick = () => popup.style.display = 'none';
+    document.getElementById('finalOrderBtn').onclick = handleFinalOrder;
+  });
+}
 
-  if (kiosk && popup) {
-    kiosk.addEventListener('click', () => {
-      popup.style.display = 'flex';
+// ✅ 4. 탭 전환 처리
+function setupTabs() {
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
+    };
+  });
+}
 
-      // ✅ 탭 로직 초기화
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-          tab.classList.add('active');
-          document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
-        });
-      });
-
-      // ✅ 숙제 번호 조절 로직
-      let hwNum = 1;
-      const hwNumberSpan = document.getElementById('hwNumber');
-      document.getElementById('minusBtn').onclick = () => {
-        if (hwNum > 1) hwNum--;
-        hwNumberSpan.textContent = hwNum;
-      };
-      document.getElementById('plusBtn').onclick = () => {
-        hwNum++;
-        hwNumberSpan.textContent = hwNum;
-      };
-
-      // ✅ 닫기 버튼: 중복 연결 방지
-      if (!closeButtonInitialized) {
-        const closeBtn = document.getElementById('popupCloseBtn');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', () => {
-            popup.style.display = 'none';
-          });
-          closeButtonInitialized = true;
-        }
+// ✅ 5. 메뉴 버튼 클릭 처리
+function bindMenuButtons() {
+  const triggerSet = new Set(["단어", "문법", "독해"]);
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.onclick = () => {
+      const item = btn.textContent.trim();
+      if (triggerSet.has(item)) {
+        currentSubItem = item;
+        difficulty = 1; rangeBegin = 1; rangeEnd = 1;
+        renderBasicSubPopup();
+      } else {
+        renderSubPopup(item);
       }
+    };
+  });
+}
+
+// ✅ 6. 기본 서브팝업
+function renderBasicSubPopup() {
+  const inner = document.querySelector('.sub-popup-inner');
+  const subPopup = document.getElementById('sub-popup');
+  inner.innerHTML = `
+    <div class="sub-popup-title">난이도를 선택해주세요</div>
+    <div class="sub-counter">
+      <button class="counter-btn" id="diffMinus">-</button>
+      <span id="difficultyLevel">1</span>
+      <button class="counter-btn" id="diffPlus">+</button>
+    </div>
+    <div class="sub-popup-title">범위를 선택해주세요</div>
+    <div class="range-dual">
+      <div class="range-group">
+        <div class="range-label">시작 Day</div>
+        <div class="sub-counter">
+          <button class="counter-btn" id="rangeBeginMinus">-</button>
+          <span id="rangeBegin">1</span>
+          <button class="counter-btn" id="rangeBeginPlus">+</button>
+        </div>
+      </div>
+      <div class="range-group">
+        <div class="range-label">끝 Day</div>
+        <div class="sub-counter">
+          <button class="counter-btn" id="rangeEndMinus">-</button>
+          <span id="rangeEnd">1</span>
+          <button class="counter-btn" id="rangeEndPlus">+</button>
+        </div>
+      </div>
+    </div>
+    <button id="subPopupConfirm" class="order-btn">담기</button>
+  `;
+  setDifficulty(1);
+  setRangeBegin(1);
+  setRangeEnd(1);
+  bindCounter("diffMinus", "diffPlus", () => difficulty, setDifficulty, 1, 3);
+  bindCounter("rangeBeginMinus", "rangeBeginPlus", () => rangeBegin, setRangeBegin);
+  bindCounter("rangeEndMinus", "rangeEndPlus", () => rangeEnd, setRangeEnd);
+
+  document.getElementById('subPopupConfirm').onclick = () => {
+    selectedItems.push({ label: currentSubItem, difficulty, rangeBegin, rangeEnd });
+    updateSelectedDisplay();
+    subPopup.style.display = 'none';
+  };
+  document.getElementById('subPopupCloseBtn').onclick = () => {
+    subPopup.style.display = 'none';
+  };
+  subPopup.style.display = 'block';
+}
+// ✅ 7. 커스텀 서브팝업
+function renderSubPopup(type) {
+  const inner = document.querySelector('.sub-popup-inner');
+  const subPopup = document.getElementById('sub-popup');
+  inner.innerHTML = '';
+  let confirmHandler = null;
+
+  if (type === '사진 찍어 올리기') {
+    inner.innerHTML = `
+      <div class="sub-popup-title">무슨 숙제인가요?</div>
+      <input type="text" id="photo_hwtype" class="custom-input" />
+      <div class="sub-popup-title">얼마만큼 해야하나요?</div>
+      <input type="text" id="photo_amount" class="custom-input" />
+      <div class="sub-popup-title">채점이 필요한가요?</div>
+      <input type="text" id="photo_check" class="custom-input" />
+      <button id="subPopupConfirm" class="order-btn">담기</button>
+    `;
+    confirmHandler = () => ({
+      label: '사진 찍어 올리기',
+      type: 'photo',
+      hwtype: document.getElementById('photo_hwtype').value,
+      amount: document.getElementById('photo_amount').value,
+      check: document.getElementById('photo_check').value
     });
   }
+
+  else if (type === '시험봐주세요') {
+    inner.innerHTML = `
+      <div class="sub-popup-title">어떤 시험을 볼까요?</div>
+      <div class="sub-radio-group">
+        <label><input type="radio" name="examType" value="단어" checked /> 단어</label>
+        <label><input type="radio" name="examType" value="문법" /> 문법</label>
+        <label><input type="radio" name="examType" value="독해" /> 독해</label>
+      </div>
+      <div class="sub-popup-title">난이도를 선택해주세요</div>
+      <div class="sub-counter">
+        <button class="counter-btn" id="diffMinus">-</button>
+        <span id="difficultyLevel">1</span>
+        <button class="counter-btn" id="diffPlus">+</button>
+      </div>
+      <div class="sub-popup-title">범위를 선택해주세요</div>
+      <div class="range-dual">
+        <div class="range-group">
+          <div class="range-label">시작 Day</div>
+          <div class="sub-counter">
+            <button class="counter-btn" id="rangeBeginMinus">-</button>
+            <span id="rangeBegin">1</span>
+            <button class="counter-btn" id="rangeBeginPlus">+</button>
+          </div>
+        </div>
+        <div class="range-group">
+          <div class="range-label">끝 Day</div>
+          <div class="sub-counter">
+            <button class="counter-btn" id="rangeEndMinus">-</button>
+            <span id="rangeEnd">1</span>
+            <button class="counter-btn" id="rangeEndPlus">+</button>
+          </div>
+        </div>
+      </div>
+      <button id="subPopupConfirm" class="order-btn">담기</button>
+    `;
+    confirmHandler = () => ({
+      label: '시험봐주세요',
+      type: 'request-exam',
+      examType: document.querySelector('input[name="examType"]:checked').value,
+      difficulty, rangeBegin, rangeEnd
+    });
+    setDifficulty(1); setRangeBegin(1); setRangeEnd(1);
+    bindCounter("diffMinus", "diffPlus", () => difficulty, setDifficulty, 1, 3);
+    bindCounter("rangeBeginMinus", "rangeBeginPlus", () => rangeBegin, setRangeBegin);
+    bindCounter("rangeEndMinus", "rangeEndPlus", () => rangeEnd, setRangeEnd);
+  }
+
+  else if (type === '시험 만들어주세요') {
+    inner.innerHTML = `
+      <div class="sub-popup-title">어떤 시험을 만들어들릴까요?</div>
+      <input type="text" id="custom_exam_name" class="custom-input" />
+      <div class="sub-popup-title">단어장을 올려주세요</div>
+      <input type="file" id="custom_exam_file" class="custom-file" />
+      <button id="subPopupConfirm" class="order-btn">담기</button>
+    `;
+    confirmHandler = () => ({
+      label: '시험 만들어주세요',
+      type: 'make-exam',
+      examName: document.getElementById('custom_exam_name').value,
+      fileName: document.getElementById('custom_exam_file').files[0]?.name ?? '첨부 없음'
+    });
+  }
+
+  document.getElementById('subPopupConfirm').onclick = () => {
+    const result = confirmHandler();
+    if (result) {
+      selectedItems.push(result);
+      updateSelectedDisplay();
+      subPopup.style.display = 'none';
+    }
+  };
+
+  document.getElementById('subPopupCloseBtn').onclick = () => {
+    subPopup.style.display = 'none';
+  };
+
+  subPopup.style.display = 'block';
+}
+
+// ✅ 8. 카운터 조작 함수들
+function bindCounter(minusId, plusId, get, set, min = 1, max = 999) {
+  document.getElementById(minusId)?.addEventListener('click', () => {
+    const v = get();
+    if (v > min) set(v - 1);
+  });
+  document.getElementById(plusId)?.addEventListener('click', () => {
+    const v = get();
+    if (v < max) set(v + 1);
+  });
+}
+function setDifficulty(v) {
+  difficulty = v;
+  const el = document.getElementById('difficultyLevel');
+  if (el) el.textContent = v;
+}
+function setRangeBegin(v) {
+  rangeBegin = v;
+  const el = document.getElementById('rangeBegin');
+  if (el) el.textContent = v;
+  if (rangeEnd < v) setRangeEnd(v);
+}
+function setRangeEnd(v) {
+  rangeEnd = v;
+  const el = document.getElementById('rangeEnd');
+  if (el) el.textContent = v;
+  if (rangeBegin > v) setRangeBegin(v);
+}
+
+// ✅ 9. 선택된 항목 출력
+function updateSelectedDisplay() {
+  const list = document.getElementById('selectedList');
+  list.innerHTML = '';
+  if (selectedItems.length === 0) {
+    list.innerHTML = `<span style="color: #888;">없음</span>`;
+    return;
+  }
+  selectedItems.forEach((item, index) => {
+    const tag = document.createElement('div');
+    tag.className = 'selected-tag';
+    tag.textContent = item.difficulty
+      ? `${item.label} (난이도: ${item.difficulty}, 범위: ${item.rangeBegin}~${item.rangeEnd})`
+      : item.examType
+      ? `${item.label} (${item.examType}, 난이도: ${item.difficulty}, 범위: ${item.rangeBegin}~${item.rangeEnd})`
+      : item.label;
+
+    const delBtn = document.createElement('span');
+    delBtn.textContent = ' ✖';
+    delBtn.style.cursor = 'pointer';
+    delBtn.onclick = () => {
+      selectedItems.splice(index, 1);
+      updateSelectedDisplay();
+    };
+    tag.appendChild(delBtn);
+    list.appendChild(tag);
+  });
+}
+
+// ✅ 10. 주문하기 로직
+function handleFinalOrder() {
+  const qordered = [];
+  let receiptText = '';
+
+  selectedItems.forEach(entry => {
+    if (["단어", "문법", "독해"].includes(entry.label)) {
+      for (let qno = entry.rangeBegin; qno <= entry.rangeEnd; qno++) {
+        qordered.push({ WhichHW: entry.label, QLevel: entry.difficulty, QNo: qno });
+      }
+      receiptText += `${entry.label} (난이도: ${entry.difficulty}, 범위: ${entry.rangeBegin}~${entry.rangeEnd})\n`;
+    }
+
+    else if (entry.type === 'photo') {
+      qordered.push({
+        WhichHW: entry.hwtype,
+        Comment: `${entry.amount} - 채점: ${entry.check}`
+      });
+      receiptText += `📷 ${entry.hwtype} (${entry.amount}, 채점: ${entry.check})\n`;
+    }
+
+    else if (entry.type === 'request-exam') {
+      for (let qno = entry.rangeBegin; qno <= entry.rangeEnd; qno++) {
+        qordered.push({
+          WhichHW: entry.examType,
+          QLevel: entry.difficulty,
+          QNo: qno
+        });
+      }
+      receiptText += `🧪 ${entry.examType} 시험 요청 (난이도: ${entry.difficulty}, 범위: ${entry.rangeBegin}~${entry.rangeEnd})\n`;
+    }
+
+    else if (entry.type === 'make-exam') {
+      qordered.push({
+        WhichHW: "시험 제작",
+        Comment: entry.examName,
+        HWImageURL: entry.fileName
+      });
+      receiptText += `🛠 시험 제작 요청: ${entry.examName} [파일: ${entry.fileName}]\n`;
+    }
+  });
+
+  localStorage.setItem('Qordered', JSON.stringify(qordered));
+  document.getElementById('popup').style.display = 'none';
+
+  const tray = document.getElementById('food-tray');
+  if (tray) tray.style.display = 'block';
+
+  if (!document.getElementById('receipt_icon')) {
+    const icon = document.createElement('img');
+    icon.src = 'receipt_icon.png';
+    icon.id = 'receipt_icon';
+    icon.className = 'receipt-icon';
+    icon.onclick = () => showReceiptAgain(receiptText);
+    document.querySelector('.main-page').appendChild(icon);
+  }
+
+  showReceiptAgain(receiptText);
+}
+
+
+function showReceiptAgain(text) {
+  const old = document.getElementById('temp-receipt');
+  if (old) old.remove();
+
+  const again = document.createElement('div');
+  again.id = 'temp-receipt';
+  again.className = 'receipt-box';
+  again.innerHTML = `
+    <div class="receipt-title">📄 주문 영수증</div>
+    <div class="receipt-content">${text.trim().replace(/\n/g, '<br>')}</div>
+  `;
+  document.querySelector('.main-page').appendChild(again);
+
+  setTimeout(() => {
+    again.style.opacity = 0;
+    setTimeout(() => again.remove(), 1000);
+  }, 3000);
+}
+
+// ✅ 11. 실행 시작
+window.addEventListener('DOMContentLoaded', () => {
+  injectKioskPopupHTML();
+  setupKioskUI();
 });
