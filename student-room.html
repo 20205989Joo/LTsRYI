@@ -1,50 +1,233 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>학생 방 - Ltryi</title>
-  <link rel="stylesheet" href="styles-frame.css">
-  <link rel="stylesheet" href="styles-room.css">
+  <meta charset="UTF-8" />
+  <title>학생 방 - Cafe Ver</title>
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="styles-room.css" />
+  <link rel="stylesheet" href="kiosk_screen.css" />
+  <style>
+    #cafe_int {
+      position: absolute;
+      width: 340px;
+      height: 626px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 20px;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    #cafe_int::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 208px;
+      background-color: rgba(241, 123, 42, 0.3);
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    #cafe_int::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 418px;
+      background-color: rgba(210, 110, 82, 1);
+      bottom: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .interactive-obj {
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      z-index: 3;
+    }
+
+    .interactive-obj:hover {
+      transform: scale(1.1);
+    }
+
+    #kiosk {
+      width: 306px;
+      height: 493px;
+      left: -50px;
+      top: 228px;
+      z-index: 5;
+    }
+
+    #return-ham {
+      width: 159px;
+      height: 159px;
+      left: 219px;
+      top: 217px;
+    }
+
+    #bar_top {
+      position: absolute;
+      width: 339px;
+      height: 26px;
+      left: 18px;
+      top: 209px;
+      background: #D99863;
+      z-index: 2;
+    }
+
+    #bar_bottom {
+      position: absolute;
+      width: 339px;
+      height: 105px;
+      left: 18px;
+      top: 235px;
+      background: #553E2F;
+      z-index: 2;
+    }
+
+    #cafe_jigi {
+      position: absolute;
+      width: 195px;
+      height: 195px;
+      left: 0px;
+      top: 69px;
+      background-image: url('cafe_jigi.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      transform: matrix(-1, 0, 0, 1, 0, 0);
+      z-index: 1;
+    }
+
+    .cafe-table {
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      z-index: 3;
+    }
+
+.cafe-table.hovered {
+  transform: scale(1.1);
+}
+
+    .table-1 {
+      width: 197px;
+      height: 111px;
+      left: 30px;
+      top: 264px;
+    }
+
+    .table-2 {
+      width: 244px;
+      height: 138px;
+      left: 142px;
+      top: 319px;
+    }
+
+    .table-3 {
+      width: 360px;
+      height: 204px;
+      left: 54px;
+      top: 396px;
+    }
+
+.cafe_billboard {
+  position: absolute;
+  left: 150px;
+  top: 57px;
+  width: auto;
+  height: auto;
+  z-index: 3;
+}
+
+#chalkboard {
+  position: absolute;
+  left: 6px;
+  top: 0px;
+  width: 165px;
+  height: 165px;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+#calendar {
+  position: absolute;
+  left: 102px;
+  top: 77px;
+  width: 94px;
+  height: 94px;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+
+
+  </style>
 </head>
 <body>
   <div class="main-page">
-    <!-- 상단 타이틀 -->
-    <div class="date" id="main-page-header">학생 학습 공간</div>
+    <div id="cafe_int"></div>
+    <div id="bar_top"></div>
+    <div id="bar_bottom"></div>
+    <div id="cafe_jigi"></div>
 
-    <!-- 나무틀 프레임 -->
-    <div class="treeframe">
-      <!-- 코르크 배경 -->
-      <div class="corkframe">
-        <!-- 숙제 제출 버튼 -->
-        <button class="room-btn" onclick="goToHomework()">📸 숙제 제출</button>
+    <img id="kiosk" class="interactive-obj" src="kiosk_png_transparent4.png" alt="키오스크" />
+    <img id="return-ham" class="interactive-obj" src="return-ham2.png" alt="반납함" />
 
-        <!-- 학습 진도 보기 버튼 -->
-        <button class="room-btn" onclick="goToGrades()">📊 학습 진행 확인</button>
+    <img class="cafe-table table-1 interactive-obj" src="cafe-table_transparent.png" alt="테이블1" />
+    <img class="cafe-table table-2 interactive-obj" src="cafe-table_transparent.png" alt="테이블2" />
+    <img class="cafe-table table-3 interactive-obj" src="cafe-table_transparent.png" alt="테이블3" />
 
-        <!-- 퀴즈 센터 진입 버튼 -->
-        <button class="room-btn" onclick="goToQuiz()">🎯 퀴즈 센터</button>
-      </div>
+<div class="cafe_billboard interactive-obj">
+  <img id="chalkboard" src="cafe_board2.png" alt="칠판" />
+  <img id="calendar" src="cafe_calendar.png" alt="달력" />
+</div>
 
-      <!-- 데코용 포스트잇 코너 -->
-      <div class="postitcorner"></div>
-    </div>
+
+    <div id="popup-container"></div>
   </div>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('id');
+<script>
+  const userId = new URLSearchParams(window.location.search).get('id');
 
-    function goToHomework() {
-      window.location.href = `homework-submit.html?id=${userId}`;
-    }
+  // ░░ 테이블 관련 처리 ░░
+  const tables = document.querySelectorAll('.cafe-table');
 
-    function goToGrades() {
-      window.location.href = `grades-calendar.html?id=${userId}`;
-    }
+  tables.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      tables.forEach(t => t.classList.add('hovered'));
+    });
+    el.addEventListener('mouseleave', () => {
+      tables.forEach(t => t.classList.remove('hovered'));
+    });
 
-    function goToQuiz() {
-      window.location.href = `quiz-center.html?id=${userId}`;
-    }
-  </script>
+    el.addEventListener('click', () => {
+      window.location.href = `student-table.html?id=${userId}`;
+    });
+  });
+
+  // ░░ billboard 단독 hover + 이동 ░░
+  const billboard = document.querySelector('.cafe_billboard');
+
+  billboard.addEventListener('mouseenter', () => {
+    billboard.classList.add('hovered');
+  });
+  billboard.addEventListener('mouseleave', () => {
+    billboard.classList.remove('hovered');
+  });
+  billboard.addEventListener('click', () => {
+    window.location.href = `grades-calendar.html?id=${userId}`;
+  });
+
+  // ░░ 반납함 이동 ░░
+  document.getElementById('return-ham').addEventListener('click', () => {
+    window.location.href = `homework-submit.html?id=${userId}`;
+  });
+</script>
+<script src="kiosk_screen.js" defer></script>
+
 </body>
 </html>

@@ -78,3 +78,34 @@
   color: #990000;
   font-weight: bold;
 }
+
+#todayPoint {
+  text-align: center;
+  font-size: 34px;
+  font-weight: bold;
+  margin: 10px 0 20px 0;
+  color: #4B7BEC;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px; /* 필요 시 조정 */
+}
+
+#submissionChart {
+  width: 100%;
+  height: 100%;
+}
+
+.overlay-point {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 36px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.4); /* 흐릿한 강조 */
+  pointer-events: none;
+  z-index: 10;
+}

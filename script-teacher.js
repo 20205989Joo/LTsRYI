@@ -25,12 +25,13 @@ studentSelect.addEventListener('change', async function () {
 
     allData = data;
 
-    const uniqueDates = [...new Set(
-      data.map(entry => {
-        const d = new Date(entry.Timestamp);
-        return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
-      })
-    )];
+const uniqueDates = [...new Set(
+  data.map(entry => {
+    const d = new Date(entry.Timestamp);
+    const kstDate = new Date(d.getTime() + 9 * 60 * 60 * 1000); // KST 보정
+    return `${kstDate.getFullYear()}-${(kstDate.getMonth() + 1).toString().padStart(2, '0')}-${kstDate.getDate().toString().padStart(2, '0')}`;
+  })
+)];
 
     uniqueDates.forEach(date => {
       const opt = document.createElement('option');
@@ -47,11 +48,12 @@ dateSelect.addEventListener('change', function () {
   const selectedDate = this.value;
   imageContainer.innerHTML = '';
 
-  const filtered = allData.filter(entry => {
-    const d = new Date(entry.Timestamp);
-    const dateStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
-    return dateStr === selectedDate;
-  });
+const filtered = allData.filter(entry => {
+  const d = new Date(entry.Timestamp);
+  const kstDate = new Date(d.getTime() + 9 * 60 * 60 * 1000); // KST 보정
+  const dateStr = `${kstDate.getFullYear()}-${(kstDate.getMonth() + 1).toString().padStart(2, '0')}-${kstDate.getDate().toString().padStart(2, '0')}`;
+  return dateStr === selectedDate;
+});
 
   filtered.forEach(entry => {
     if (entry.HWImageURL) {

@@ -8,12 +8,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     const data = await res.json();
 
     const submissionSet = new Set();
-    data.forEach(item => {
-      const d = new Date(item.Timestamp);
-      const key = `${d.getFullYear()}-${(d.getMonth() + 1)
-        .toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
-      submissionSet.add(key);
-    });
+data.forEach(item => {
+  const d = new Date(item.Timestamp);
+  const kstDate = new Date(d.getTime() + 9 * 60 * 60 * 1000); // ★ KST 보정
+  const key = `${kstDate.getFullYear()}-${(kstDate.getMonth() + 1)
+    .toString().padStart(2, '0')}-${kstDate.getDate().toString().padStart(2, '0')}`;
+  submissionSet.add(key);
+});
 
     const today = new Date();
     const calendarTable = document.getElementById('calendarTable');

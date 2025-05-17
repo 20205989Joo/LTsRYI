@@ -1,27 +1,4 @@
-/* 기본 설정 */
-body, html {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    font-family: 'Inter', sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f4f4f4;
-}
 
-.main-page {
-    position: relative;
-    width: 375px;
-    height: 667px;
-    background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
 
 /* 상단 타이틀 */
 #main-page-header {
@@ -67,7 +44,7 @@ body, html {
 
 /* 섹션 버튼 공통 */
 .room-btn {
-    height: 50px;
+    height: 800px;
     margin: 10px 0;
     background: #fffaf0;
     border: 2px solid #7E3106;
@@ -77,6 +54,10 @@ body, html {
     color: #7E3106;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+}
+
+#submit-btn {
+    height: 40px;
 }
 
 .room-btn:hover {
@@ -108,4 +89,29 @@ textarea.comment-box {
     font-size: 14px;
     box-sizing: border-box;
     margin-top: 5px;
+}
+
+.download-section {
+  background-color: #fff5e6; /* 연한 오렌지 베이지 */
+  padding: 10px 12px;
+  border: 1px solid #e0c5a0;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.submit-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.status-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background-color: #ccc; /* 기본값: 제출 안 됨 */
+  border: 1px solid #999;
 }
