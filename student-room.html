@@ -98,6 +98,7 @@
       background-repeat: no-repeat;
       transform: matrix(-1, 0, 0, 1, 0, 0);
       z-index: 1;
+        cursor: pointer;
     }
 
     .cafe-table {
@@ -136,8 +137,8 @@
   position: absolute;
   left: 150px;
   top: 57px;
-  width: auto;
-  height: auto;
+  width: 100px;
+  height: 80px;
   z-index: 3;
 }
 
@@ -165,6 +166,7 @@
 
 #food-tray.hovered {
   transform: scale(1.1);
+  transition: transform 0.2s ease;
 }
 
 #todayPointWrapper {
@@ -197,12 +199,19 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
+#cafe_jigi:hover {
+  transform: matrix(-1.1, 0, 0, 1.1, 0, 0); /* 수평 반전 + 확대 */
+  transition: transform 0.2s ease;
+}
+
+
 
 
   </style>
 </head>
 <body>
   <div class="main-page">
+        <div id="popup-container"></div>
     <div id="cafe_int"></div>
     <div id="bar_top"></div>
     <div id="bar_bottom"></div>
@@ -229,7 +238,7 @@
      style="position:absolute; top:379px; left:200px; width:127px; height:96px; display:none; cursor:pointer; z-index: 5;">
 
 
-    <div id="popup-container"></div>
+
   </div>
 
 <script>
@@ -279,6 +288,11 @@
   document.getElementById('return-ham').addEventListener('click', () => {
     window.location.href = `homework-submit.html?id=${userId}`;
   });
+
+  // ░░ 카페지기 클릭 → 분석 보고서 페이지 이동 ░░
+document.getElementById('cafe_jigi').addEventListener('click', () => {
+  window.location.href = `report-analysis.html?id=${userId}`;
+});
 
     (async () => {
     if (!userId) return;

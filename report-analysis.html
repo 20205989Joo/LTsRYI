@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>분석 보고서 - Cafe Ver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles-frame.css">
+  <link rel="stylesheet" href="styles-room.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    #cafe_int {
+      position: absolute;
+      width: 340px;
+      height: 626px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 20px;
+      background: linear-gradient(to bottom,
+        rgba(241, 123, 42, 0.3) 0px,
+        rgba(241, 123, 42, 0.3) 247px,
+        rgba(210, 110, 82, 1) 247px,
+        rgba(210, 110, 82, 1) 100%);
+    }
+
+    #bar_top {
+      position: absolute;
+      top: 277px;
+      left: 17px;
+      width: 340px;
+      height: 32px;
+      background-color: #d99863;
+      z-index: 1;
+    }
+
+    #bar_bottom {
+      position: absolute;
+      top: 309px;
+      left: 18px;
+      width: 340px;
+      height: 129px;
+      background-color: #553E2F;
+      z-index: 1;
+    }
+
+    #cafe_jigi {
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      top: 80px;
+      left: -10px;
+      background-image: url('cafe_jigi_report.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      z-index: 0;
+    }
+
+    .display-window {
+      position: absolute;
+      top: 118px;
+      right: 20px;
+      width: 160px;
+      height: 160px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1.5px solid rgba(233, 203, 70, 0.4);
+      border-radius: 14px;
+      backdrop-filter: blur(2px);
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+      padding: 10px;
+      color: #eee;
+      font-size: 13px;
+      font-style: italic;
+      z-index: 5;
+    }
+
+    .npc-dialogue-box {
+      position: absolute;
+      bottom: 100px;
+      left: 17px;
+      width: 313px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 14px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+      z-index: 10;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .main-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .main-choice {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 13px;
+      border: 1px solid #bc8546;
+      background: #ffe4c4;
+      color: #333;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .main-choice:hover {
+      background: #f9cba1;
+    }
+
+    .sub-popup {
+      position: absolute;
+      top: 240px;
+      right: 14px;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 13px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.3);
+      z-index: 11;
+    }
+
+    .sub-popup button {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      font-size: 12px;
+      padding: 4px 6px;
+      background: #7e3106;
+      border: none;
+      color: #fffaf0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .sub-popup button:hover {
+      background: #bc8546;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-page">
+    <div id="cafe_int"></div>
+    <div id="bar_top"></div>
+    <div id="bar_bottom"></div>
+    <div id="cafe_jigi"></div>
+    <div class="display-window" id="displayArea">왼쪽에서 메뉴를 골라보세요.</div>
+
+    <div class="npc-dialogue-box">
+      안녕하세요. 무엇이 궁금하신가요?
+      <div class="main-choices">
+        <button class="main-choice" data-cat="analysis">분석</button>
+        <button class="main-choice" data-cat="custom">커스텀</button>
+        <button class="main-choice" data-cat="chat">대화</button>
+      </div>
+    </div>
+
+    <div class="sub-popup" id="subChoiceBox" style="display:none;"></div>
+  </div>
+
+  <script>
+    const userId = new URLSearchParams(window.location.search).get('id');
+    const display = document.getElementById('displayArea');
+    const subBox = document.getElementById('subChoiceBox');
+
+    const menuData = {
+      analysis: [
+        { label: '숙제 추천', type: 'recommend', msg: '지금 상태에 맞는 숙제를 추천해드릴게요.' },
+        { label: '진행 상태', type: 'summary', msg: '최근 학습 진행 상황을 정리해볼게요.' },
+        { label: '상담', type: 'counsel', msg: '고민 있으신가요? 이야기 들어볼게요.' }
+      ],
+      custom: [
+        { label: '시험지 주세요', type: 'exam', msg: '약속했던 시험지를 가져왔어요.' },
+        { label: '채점 결과', type: 'grading', msg: '최근 채점 결과를 정리했어요.' }
+      ],
+      chat: [
+        { label: '룰렛', type: 'gacha', msg: '운명의 룰렛을 돌려볼까요?' },
+        { label: 'TMI', type: 'tmi', msg: '카페지기의 TMI! 하나 알려드릴게요.' }
+      ]
+    };
+
+    document.querySelectorAll('.main-choice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        const list = menuData[cat];
+        subBox.innerHTML = '';
+        list.forEach(item => {
+          const b = document.createElement('button');
+          b.textContent = item.label;
+          b.onclick = () => {
+            display.textContent = item.msg;
+            setTimeout(() => {
+              window.location.href = `report-${item.type}.html?id=${userId}`;
+            }, 1200);
+          };
+          subBox.appendChild(b);
+        });
+        subBox.style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>

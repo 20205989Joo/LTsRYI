@@ -19,11 +19,10 @@ function injectKioskPopupHTML() {
           <button class="menu-btn square">독해</button>
         </div>
         <div class="tab-content hidden" id="tab-etc">
-          <button class="menu-btn square">사진 찍어 올리기</button>
-          <button class="menu-btn square">시험봐주세요</button>
-          <button class="menu-btn square">시험 만들어주세요</button>
+          <button class="menu-btn square">오늘 내 숙제</button>
+          <button class="menu-btn square">시험지 만들어주세요</button>
         </div>
-        <div id="sub-popup" class="sub-popup" style="display: none;">
+        <div id="sub-popup" class="sub-popup hidden">
           <button class="popup-close" id="subPopupCloseBtn">✖</button>
           <div class="sub-popup-inner"></div>
         </div>
@@ -120,6 +119,7 @@ function renderBasicSubPopup() {
     </div>
     <button id="subPopupConfirm" class="order-btn">담기</button>
   `;
+
   setDifficulty(1);
   setRangeBegin(1);
   setRangeEnd(1);
@@ -130,117 +130,60 @@ function renderBasicSubPopup() {
   document.getElementById('subPopupConfirm').onclick = () => {
     selectedItems.push({ label: currentSubItem, difficulty, rangeBegin, rangeEnd });
     updateSelectedDisplay();
-    subPopup.style.display = 'none';
+    subPopup.classList.add('hidden');
   };
+
   document.getElementById('subPopupCloseBtn').onclick = () => {
-    subPopup.style.display = 'none';
+    subPopup.classList.add('hidden');
   };
-  subPopup.style.display = 'block';
+
+  subPopup.classList.remove('hidden');
 }
-// ✅ 7. 커스텀 서브팝업
+
+
 function renderSubPopup(type) {
   const inner = document.querySelector('.sub-popup-inner');
   const subPopup = document.getElementById('sub-popup');
   inner.innerHTML = '';
-  let confirmHandler = null;
+  subPopup.classList.remove('hidden');
 
-  if (type === '사진 찍어 올리기') {
-    inner.innerHTML = `
-      <div class="sub-popup-title">무슨 숙제인가요?</div>
-      <input type="text" id="photo_hwtype" class="custom-input" />
-      <div class="sub-popup-title">얼마만큼 해야하나요?</div>
-      <input type="text" id="photo_amount" class="custom-input" />
-      <div class="sub-popup-title">채점이 필요한가요?</div>
-      <input type="text" id="photo_check" class="custom-input" />
-      <button id="subPopupConfirm" class="order-btn">담기</button>
-    `;
-    confirmHandler = () => ({
-      label: '사진 찍어 올리기',
-      type: 'photo',
-      hwtype: document.getElementById('photo_hwtype').value,
-      amount: document.getElementById('photo_amount').value,
-      check: document.getElementById('photo_check').value
-    });
+  let label = '';
+
+  if (type === '오늘 내 숙제') {
+    label = '오늘 내 숙제';
+  } else if (type === '시험지 만들어주세요') {
+    label = '시험지 만들어주세요';
+  } else {
+    // 알 수 없는 타입일 경우 닫기
+    subPopup.classList.add('hidden');
+    return;
   }
 
-  else if (type === '시험봐주세요') {
-    inner.innerHTML = `
-      <div class="sub-popup-title">어떤 시험을 볼까요?</div>
-      <div class="sub-radio-group">
-        <label><input type="radio" name="examType" value="단어" checked /> 단어</label>
-        <label><input type="radio" name="examType" value="문법" /> 문법</label>
-        <label><input type="radio" name="examType" value="독해" /> 독해</label>
-      </div>
-      <div class="sub-popup-title">난이도를 선택해주세요</div>
-      <div class="sub-counter">
-        <button class="counter-btn" id="diffMinus">-</button>
-        <span id="difficultyLevel">1</span>
-        <button class="counter-btn" id="diffPlus">+</button>
-      </div>
-      <div class="sub-popup-title">범위를 선택해주세요</div>
-      <div class="range-dual">
-        <div class="range-group">
-          <div class="range-label">시작 Day</div>
-          <div class="sub-counter">
-            <button class="counter-btn" id="rangeBeginMinus">-</button>
-            <span id="rangeBegin">1</span>
-            <button class="counter-btn" id="rangeBeginPlus">+</button>
-          </div>
-        </div>
-        <div class="range-group">
-          <div class="range-label">끝 Day</div>
-          <div class="sub-counter">
-            <button class="counter-btn" id="rangeEndMinus">-</button>
-            <span id="rangeEnd">1</span>
-            <button class="counter-btn" id="rangeEndPlus">+</button>
-          </div>
-        </div>
-      </div>
-      <button id="subPopupConfirm" class="order-btn">담기</button>
-    `;
-    confirmHandler = () => ({
-      label: '시험봐주세요',
-      type: 'request-exam',
-      examType: document.querySelector('input[name="examType"]:checked').value,
-      difficulty, rangeBegin, rangeEnd
-    });
-    setDifficulty(1); setRangeBegin(1); setRangeEnd(1);
-    bindCounter("diffMinus", "diffPlus", () => difficulty, setDifficulty, 1, 3);
-    bindCounter("rangeBeginMinus", "rangeBeginPlus", () => rangeBegin, setRangeBegin);
-    bindCounter("rangeEndMinus", "rangeEndPlus", () => rangeEnd, setRangeEnd);
-  }
+  inner.innerHTML = `
+    <div class="sub-popup-title">${label}</div>
+    <div class="sub-popup-desc" style="font-size: 13px; margin: 8px 0 14px; color: #ccc;">
+      상세내용은 테이블에서 작성해주세요.
+    </div>
+    <button id="subPopupConfirm" class="order-btn">담기</button>
+  `;
 
-  else if (type === '시험 만들어주세요') {
-    inner.innerHTML = `
-      <div class="sub-popup-title">어떤 시험을 만들어들릴까요?</div>
-      <input type="text" id="custom_exam_name" class="custom-input" />
-      <div class="sub-popup-title">단어장을 올려주세요</div>
-      <input type="file" id="custom_exam_file" class="custom-file" />
-      <button id="subPopupConfirm" class="order-btn">담기</button>
-    `;
-    confirmHandler = () => ({
-      label: '시험 만들어주세요',
-      type: 'make-exam',
-      examName: document.getElementById('custom_exam_name').value,
-      fileName: document.getElementById('custom_exam_file').files[0]?.name ?? '첨부 없음'
-    });
-  }
+  document.getElementById('subPopupConfirm')?.addEventListener('click', () => {
+    selectedItems.push({ label }); // ✅ label만 푸시
+    updateSelectedDisplay();
+    subPopup.classList.add('hidden');
+  });
 
-  document.getElementById('subPopupConfirm').onclick = () => {
-    const result = confirmHandler();
-    if (result) {
-      selectedItems.push(result);
-      updateSelectedDisplay();
-      subPopup.style.display = 'none';
-    }
-  };
-
-  document.getElementById('subPopupCloseBtn').onclick = () => {
-    subPopup.style.display = 'none';
-  };
-
-  subPopup.style.display = 'block';
+  document.getElementById('subPopupCloseBtn')?.addEventListener('click', () => {
+    subPopup.classList.add('hidden');
+  });
 }
+
+
+
+
+
+
+
 
 // ✅ 8. 카운터 조작 함수들
 function bindCounter(minusId, plusId, get, set, min = 1, max = 999) {
@@ -306,6 +249,7 @@ function handleFinalOrder() {
   let receiptText = '';
 
   selectedItems.forEach(entry => {
+    // ✅ 기본 숙제 (단어, 문법, 독해)
     if (["단어", "문법", "독해"].includes(entry.label)) {
       for (let qno = entry.rangeBegin; qno <= entry.rangeEnd; qno++) {
         qordered.push({ WhichHW: entry.label, QLevel: entry.difficulty, QNo: qno });
@@ -313,6 +257,7 @@ function handleFinalOrder() {
       receiptText += `${entry.label} (난이도: ${entry.difficulty}, 범위: ${entry.rangeBegin}~${entry.rangeEnd})\n`;
     }
 
+    // ✅ 사진 찍어 올리기
     else if (entry.type === 'photo') {
       qordered.push({
         WhichHW: entry.hwtype,
@@ -321,6 +266,7 @@ function handleFinalOrder() {
       receiptText += `📷 ${entry.hwtype} (${entry.amount}, 채점: ${entry.check})\n`;
     }
 
+    // ✅ 시험봐주세요
     else if (entry.type === 'request-exam') {
       for (let qno = entry.rangeBegin; qno <= entry.rangeEnd; qno++) {
         qordered.push({
@@ -332,6 +278,7 @@ function handleFinalOrder() {
       receiptText += `🧪 ${entry.examType} 시험 요청 (난이도: ${entry.difficulty}, 범위: ${entry.rangeBegin}~${entry.rangeEnd})\n`;
     }
 
+    // ✅ 시험 만들어주세요
     else if (entry.type === 'make-exam') {
       qordered.push({
         WhichHW: "시험 제작",
@@ -339,6 +286,14 @@ function handleFinalOrder() {
         HWImageURL: entry.fileName
       });
       receiptText += `🛠 시험 제작 요청: ${entry.examName} [파일: ${entry.fileName}]\n`;
+    }
+
+    // ✅ 오늘 내 숙제 / 시험지 만들어주세요
+    else if (entry.label === '오늘 내 숙제' || entry.label === '시험지 만들어주세요') {
+      qordered.push({
+        WhichHW: entry.label
+      });
+      receiptText += `${entry.label}\n`;
     }
   });
 
@@ -359,6 +314,7 @@ function handleFinalOrder() {
 
   showReceiptAgain(receiptText);
 }
+
 
 
 function showReceiptAgain(text) {
@@ -385,3 +341,4 @@ window.addEventListener('DOMContentLoaded', () => {
   injectKioskPopupHTML();
   setupKioskUI();
 });
+
