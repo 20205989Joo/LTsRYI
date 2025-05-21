@@ -9,35 +9,29 @@
   <link rel="stylesheet" href="styles-submit.css">
 </head>
 <body>
-  <div class="main-page">
-    <div id="cafe_int">
-      <!-- 제출함 이미지 -->
-      <img src="return-ham-front2.png" id="return-box">
+<div class="main-page">
+  <div id="cafe_int">
+    <!-- 📦 반납함 배경 이미지 -->
+    <img src="return-ham-front2.png" id="return-box">
 
-      <!-- 제출 UI -->
-<div class="submit-ui">
-  <!-- ⬛ 타이틀 박스 -->
-  <div class="upload-title-block">
-    숙제사진 제출
+    <!-- 📬 제출 UI -->
+    <div class="submit-ui">
+      <!-- ✅ 타이틀은 유지 -->
+      <div class="upload-title-block">RETURN</div>
+<div id="hwSubmitbutton">눌러서 모두 전송!</div>
+
+
+      <!-- ✅ 오늘 숙제 제출 여부 -->
+      <div id="submissionStatus">로딩 중...</div>
+
+      <!-- ✅ 제출 대기 리스트 -->
+      <div id="pendingListTitle">📦 제출 대기 숙제들</div>
+      <div id="pendingList" class="pending-list"></div>
+    </div>
   </div>
-
-  <!-- 📁 예쁜 업로드 박스 (유지) -->
-  <input type="file" id="hwImage" accept="image/*" />
-
-  <!-- ✅ 제출 상태 -->
-  <div id="submissionStatus">로딩 중...</div>
-
-  <!-- 📝 코멘트 -->
-<label for="hwComment" id="hwCommentLabel">📝 코멘트:</label>
-<textarea id="hwComment" placeholder="(필요 시) 요청사항이 있다면 적어주세요."></textarea>
-
-  <!-- 🟠 버튼 -->
-  <button id="submit-btn" onclick="submitHomework()">제출하기</button>
 </div>
 
 
-    </div>
-  </div>
   <script src="script-homework-submit.js" defer></script>
 </body>
 </html>

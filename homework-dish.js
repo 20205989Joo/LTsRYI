@@ -14,20 +14,26 @@ window.addEventListener('DOMContentLoaded', () => {
     dish.style.top = `${baseOffset + Math.floor(index / 3) * gap}px`;
     dish.textContent = item.WhichHW;
 
-      window.adjustFontSize(dish);
+    window.adjustFontSize(dish);
 
-    const isDone = pending.some(p => p.label === item.WhichHW);
+    const isDone = pending.some(p =>
+      p.label === item.WhichHW &&
+      p.QLevel === item.QLevel &&
+      p.QNo === item.QNo &&
+      p.type === 'upload'
+    );
+
     if (isDone) {
-  dish.style.pointerEvents = 'none';
-  dish.style.opacity = '0.6';
+      dish.style.pointerEvents = 'none';
+      dish.style.opacity = '0.6';
 
-  const doneTag = document.createElement('div');
-  doneTag.className = 'done-label'; // ✅ 클래스만 지정
-  doneTag.textContent = '(완료됨)';
-  dish.appendChild(doneTag);
-} else {
-  dish.addEventListener('click', () => showDishPopup(item));
-}
+      const doneTag = document.createElement('div');
+      doneTag.className = 'done-label';
+      doneTag.textContent = '(완료됨)';
+      dish.appendChild(doneTag);
+    } else {
+      dish.addEventListener('click', () => showDishPopup(item));
+    }
 
     trayArea.appendChild(dish);
   });
@@ -35,11 +41,12 @@ window.addEventListener('DOMContentLoaded', () => {
   window.storePendingHomework = function(entry) {
     const key = 'PendingUploads';
     let existing = JSON.parse(localStorage.getItem(key) || '[]');
-    existing = existing.filter(e => e.label !== entry.label);
+    existing = existing.filter(e =>
+      !(e.label === entry.label && e.QLevel === entry.QLevel && e.QNo === entry.QNo)
+    );
     existing.push(entry);
     localStorage.setItem(key, JSON.stringify(existing));
 
-    // ✅ 제출 후 dish 즉시 비활성화 반영
     document.querySelectorAll('.dish').forEach(dish => {
       if (dish.textContent === entry.label) {
         dish.style.pointerEvents = 'none';
@@ -72,12 +79,6 @@ window.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
   }
-
-  const hiddenFileInput = document.createElement('input');
-  hiddenFileInput.type = 'file';
-  hiddenFileInput.id = 'upload-hidden-file';
-  hiddenFileInput.style.display = 'none';
-  document.body.appendChild(hiddenFileInput);
 
   document.getElementById('receipt_icon')?.addEventListener('click', () => showReceiptFromQordered());
 
@@ -114,64 +115,55 @@ window.addEventListener('DOMContentLoaded', () => {
       text-align: center;
       pointer-events: auto;
     `;
-    const hw = item.WhichHW;
-    let content = '';
 
+    const hw = item.WhichHW;
     const key = `downloaded_HW_${hw}_${item.QLevel}_${item.QNo}`;
     const downloaded = localStorage.getItem(key) === 'true';
 
+    let content = `
+      <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📥 ${hw}</div>
+    `;
     if (['단어', '문법', '독해'].includes(hw)) {
       if (downloaded) {
-        content = `
-          <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📥 ${hw}</div>
+        content += `
           <div style="margin-bottom: 10px;">숙제를 다시 다운로드하거나, 완료 후 제출할 수 있어요.</div>
           <div style="display: flex; gap: 6px; justify-content: center;">
-            <a href="CEFR A1.pdf" download class="room-btn" id="download-a" style="
-              flex: 1;
-              text-decoration: none;
-              height: 18px;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-            ">📂 다시 다운로드</a>
-            <button class="room-btn" style="background: #1976d2; flex: 1;" id="upload-btn">✅ 제출</button>
+            <a href="CEFR A1.pdf" download class="room-btn" id="download-a"
+              style="flex: 1; text-decoration: none; height: 18px; display: inline-flex; align-items: center; justify-content: center;">
+              📂 다시 다운로드
+            </a>
+            <button class="room-btn" style="background: #1976d2; flex: 1;" id="upload-btn">✅ 완료했어요!</button>
           </div>
         `;
       } else {
-        content = `
-          <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📥 ${hw}</div>
+        content += `
           <div style="margin-bottom: 10px;">해당 숙제를 다운로드하세요.</div>
-          <a href="CEFR A1.pdf" download class="room-btn" id="download-btn" style="
-            flex: 1;
-            text-decoration: none;
-            height: 18px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-          ">📂 다운로드</a>
+          <a href="CEFR A1.pdf" download class="room-btn" id="download-btn"
+            style="flex: 1; text-decoration: none; height: 18px; display: inline-flex; align-items: center; justify-content: center;">
+            📂 다운로드
+          </a>
         `;
       }
     } else if (hw === '오늘 내 숙제') {
-      content = `
-        <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📤 오늘 내 숙제</div>
+      content += `
         <label style="font-size: 13px;">어떤 숙제인가요?</label>
         <input type="text" id="custom_hwtype" style="width: 100%; margin-bottom: 6px;" />
         <label style="font-size: 13px;">간단히 설명해주세요</label>
         <textarea id="custom_hwdesc" rows="3" style="width: 100%; resize: none; margin-bottom: 8px;"></textarea>
-        <button class="room-btn" id="custom-upload-btn">📤 제출</button>
+<button class="room-btn" style="background: #1976d2; margin-top: 6px;" id="custom-complete-btn">✅ 완료했어요!</button>
+
       `;
     } else if (hw === '시험지 만들어주세요') {
-      content = `
-        <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">🛠 시험지 만들어주세요</div>
+      content += `
         <label style="font-size: 13px;">어떤 시험지가 필요하신가요?</label>
         <input type="text" id="custom_exam_type" style="width: 100%; margin-bottom: 6px;" />
         <label style="font-size: 13px;">어떻게 만들어드릴까요?</label>
         <textarea id="custom_exam_desc" rows="3" style="width: 100%; resize: none; margin-bottom: 8px;"></textarea>
-        <button class="room-btn" id="custom-exam-btn">📤 제출</button>
+<button class="room-btn" style="background: #1976d2; margin-top: 6px;" id="custom-complete-btn">✅ 완료했어요!</button>
+
       `;
     } else {
-      content = `
-        <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📚 ${hw}</div>
+      content += `
         <div style="margin: 12px 0;">단어 퀴즈를 풀어보아요!</div>
       `;
     }
@@ -186,10 +178,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     popup.innerHTML = content;
     popup.querySelector('#close-popup')?.addEventListener('click', () => popupContainer.remove());
-    popupContainer.appendChild(popup);
-    cafeInt.appendChild(popupContainer);
 
-    // 이어지는 버튼 이벤트 핸들러는 다음 [3/3]에서 계속
     popup.querySelector('#download-btn')?.addEventListener('click', () => {
       localStorage.setItem(key, 'true');
       showDishPopup(item);
@@ -200,66 +189,45 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     popup.querySelector('#upload-btn')?.addEventListener('click', () => {
-      hiddenFileInput.multiple = true;
-      hiddenFileInput.click();
-      hiddenFileInput.onchange = () => {
-        const file = hiddenFileInput.files[0];
-        storePendingHomework({
-          label: hw,
-          type: 'upload',
-          timestamp: new Date().toISOString(),
-          comment: '완료 후 제출됨',
-          fileNames: [file ? file.name : '(첨부 없음)']
-        });
-        document.getElementById('popup-container')?.remove();
-        showReceiptFromQordered(hw);
-        hiddenFileInput.value = '';
-      };
+      storePendingHomework({
+        label: hw,
+        type: 'upload',
+        timestamp: new Date().toISOString(),
+        comment: '완료 후 제출 예정',
+        QLevel: item.QLevel,
+        QNo: item.QNo
+      });
+
+      document.getElementById('popup-container')?.remove();
+      showReceiptFromQordered(hw);
     });
 
-    popup.querySelector('#custom-upload-btn')?.addEventListener('click', () => {
-      const hwtype = document.getElementById('custom_hwtype').value.trim();
-      const desc = document.getElementById('custom_hwdesc').value.trim();
-      hiddenFileInput.multiple = true;
-      hiddenFileInput.click();
-      hiddenFileInput.onchange = () => {
-        const files = Array.from(hiddenFileInput.files);
-        const names = files.map(f => f.name);
-        storePendingHomework({
-          label: '오늘 내 숙제',
-          type: 'upload',
-          timestamp: new Date().toISOString(),
-          comment: desc,
-          detail: hwtype,
-          fileNames: names
-        });
-        document.getElementById('popup-container')?.remove();
-        showReceiptFromQordered('오늘 내 숙제');
-        hiddenFileInput.value = '';
-      };
+    popup.querySelector('#custom-complete-btn')?.addEventListener('click', () => {
+      let detail = '';
+      let comment = '';
+
+      if (hw === '오늘 내 숙제') {
+        detail = document.getElementById('custom_hwtype')?.value.trim();
+        comment = document.getElementById('custom_hwdesc')?.value.trim();
+      } else if (hw === '시험지 만들어주세요') {
+        detail = document.getElementById('custom_exam_type')?.value.trim();
+        comment = document.getElementById('custom_exam_desc')?.value.trim();
+      }
+
+      storePendingHomework({
+        label: hw,
+        type: 'upload',
+        timestamp: new Date().toISOString(),
+        comment,
+        detail
+      });
+
+      document.getElementById('popup-container')?.remove();
+      showReceiptFromQordered(hw);
     });
 
-    popup.querySelector('#custom-exam-btn')?.addEventListener('click', () => {
-      const type = document.getElementById('custom_exam_type').value.trim();
-      const desc = document.getElementById('custom_exam_desc').value.trim();
-      hiddenFileInput.multiple = true;
-      hiddenFileInput.click();
-      hiddenFileInput.onchange = () => {
-        const files = Array.from(hiddenFileInput.files);
-        const names = files.map(f => f.name);
-        storePendingHomework({
-          label: '시험지 만들어주세요',
-          type: 'upload',
-          timestamp: new Date().toISOString(),
-          comment: desc,
-          detail: type,
-          fileNames: names
-        });
-        document.getElementById('popup-container')?.remove();
-        showReceiptFromQordered('시험지 만들어주세요');
-        hiddenFileInput.value = '';
-      };
-    });
+    popupContainer.appendChild(popup);
+    cafeInt.appendChild(popupContainer);
   }
 
   window.clearDownloadHistory = () => {
@@ -284,7 +252,7 @@ function showReceiptFromQordered(latestLabel = null) {
   container.style = `
     position: absolute;
     top: 120px;
-    left: 50%;
+    left:  50%;
     transform: translateX(-50%);
     background: white;
     border: 2px dashed #444;
@@ -308,7 +276,7 @@ function showReceiptFromQordered(latestLabel = null) {
       (p.QNo == null || p.QNo === entry.QNo) &&
       p.type === 'upload'
     );
-    let line = entry.QLevel && entry.QNo
+    const line = entry.QLevel && entry.QNo
       ? `${entry.WhichHW} (난이도: ${entry.QLevel}, 범위: ${entry.QNo})`
       : `${entry.WhichHW}`;
     const highlight = entry.WhichHW === latestLabel;

@@ -5,86 +5,113 @@ const kstOffset = 9 * 60 * 60 * 1000;
 const now = new Date(Date.now() + kstOffset);
 const year = now.getFullYear();
 const month = now.getMonth() + 1;
-const day = now.getDate();
 
-// ✅ 오늘 날짜 판별 함수 (KST 기준)
-function isToday(timestampStr) {
-  const kstTime = new Date(new Date(timestampStr).getTime() + kstOffset);
-  return (
-    kstTime.getFullYear() === year &&
-    kstTime.getMonth() + 1 === month &&
-    kstTime.getDate() === day
-  );
-}
-
-// ✅ 오늘 숙제 제출 여부 확인
 window.addEventListener('DOMContentLoaded', async () => {
-  const checkbox = document.getElementById('hwDoneCheck'); // 현재는 제거 예정
-  const statusBox = document.getElementById('submissionStatus'); // 새로 추가한 표시 박스
+  const statusBox = document.getElementById('submissionStatus');
+  const pendingList = document.getElementById('pendingList');
+  const pending = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
 
   try {
     const res = await fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getHWImages?userId=${userId}`);
     const data = await res.json();
-
-    console.log('📦 받아온 숙제 데이터:', data); // ✅ 로그 출력
-
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형태
-
+    const todayStr = now.toISOString().split('T')[0];
     const hasToday = data.some(item => item.Timestamp?.startsWith(todayStr));
-    console.log('📆 오늘 날짜:', todayStr);
-    console.log('✅ 오늘 숙제 제출 여부:', hasToday);
 
     if (hasToday) {
       statusBox.textContent = "✅ 오늘 숙제 제출됨";
-      statusBox.style.backgroundColor = "#a7e9af"; // 연초록
+      statusBox.style.backgroundColor = "#a7e9af";
     } else {
       statusBox.textContent = "❌ 오늘 숙제 미제출";
-      statusBox.style.backgroundColor = "#f9c0c0"; // 연빨강
+      statusBox.style.backgroundColor = "#f9c0c0";
     }
   } catch (err) {
     console.warn("❗ 오늘 숙제 확인 실패:", err);
   }
-});
 
-
-// ✅ 숙제 제출
-async function submitHomework() {
-  const fileInput = document.getElementById('hwImage');
-  const comment = document.getElementById('hwComment').value;
-  const file = fileInput.files[0];
-
-  if (!file) {
-    alert("숙제 파일을 업로드해주세요!");
+  if (pending.length === 0) {
+    pendingList.innerHTML = '<div style="color:#888; font-size:13px;">⏳ 제출 대기 중인 숙제가 없습니다.</div>';
     return;
   }
 
-  const formData = new FormData();
-  formData.append("UserId", userId);
-  formData.append("QLevel", "7");
-  formData.append("QYear", year.toString());
-  formData.append("QMonth", month.toString());
-  formData.append("QNo", "1");
-  formData.append("WhichHW", "done");
-  formData.append("Comment", comment); // ✅ 코멘트 전송
-  formData.append("HWImage", file);
+  pending.forEach((item) => {
+    const card = document.createElement('div');
+    card.className = 'pending-card';
 
-  try {
-    const res = await fetch("https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWImages", {
-      method: "POST",
-      body: formData
+    const qInfo = (item.QLevel && item.QNo)
+      ? `(난이도: ${item.QLevel}, 범위: ${item.QNo})`
+      : '';
+
+    const commentLine = [item.comment, item.detail].filter(Boolean).join(' - ') || '설명 없음';
+
+    card.innerHTML = `
+      <div><b>${item.label}</b> ${qInfo}</div>
+      <div style="font-size: 12px; color: #555;">📝 ${commentLine}</div>
+      <input type="file" class="file-input" data-label="${item.label}" style="margin-top: 6px; width: 100%;" />
+    `;
+
+    pendingList.appendChild(card);
+  });
+
+  const submitBtn = document.getElementById('hwSubmitbutton');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      let updated = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
+      let qordered = JSON.parse(localStorage.getItem('Qordered') || '[]');
+      let anySubmitted = false;
+
+      for (let i = 0; i < updated.length; i++) {
+        const item = updated[i];
+        const input = document.querySelector(`.file-input[data-label="${item.label}"]`);
+        const file = input?.files?.[0];
+
+        if (!file) {
+          console.warn(`📭 [${item.label}] 파일이 선택되지 않음 – 제출 생략`);
+          continue;
+        }
+
+        const formData = new FormData();
+        formData.append("UserId", userId);
+        formData.append("QLevel", item.QLevel ?? '7');
+        formData.append("QYear", year.toString());
+        formData.append("QMonth", month.toString());
+        formData.append("QNo", item.QNo ?? '1');
+        formData.append("WhichHW", item.label); // ✅ 한글 그대로
+        const comment = [item.comment, item.detail].filter(Boolean).join(' - ') || item.label;
+        formData.append("Comment", comment);
+        formData.append("HWImage", file);
+
+        for (let pair of formData.entries()) {
+          console.log(`📤 ${pair[0]} →`, pair[1]);
+        }
+
+        try {
+          const res = await fetch("https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWImages", {
+            method: "POST",
+            body: formData
+          });
+
+          const result = await res.json();
+
+          if (res.ok) {
+            alert(`✅ ${item.label} 제출 완료!\nURL: ${result.url}`);
+            updated[i] = null;
+            // ✅ Qordered에서도 제거
+            qordered = qordered.filter(entry => entry.WhichHW !== item.label);
+            anySubmitted = true;
+          } else {
+            alert(`❌ ${item.label} 제출 실패: ${result.message}`);
+          }
+        } catch (err) {
+          alert(`🚨 ${item.label} 서버 오류`);
+          console.error(err);
+        }
+      }
+
+      localStorage.setItem('PendingUploads', JSON.stringify(updated.filter(Boolean)));
+      localStorage.setItem('Qordered', JSON.stringify(qordered));
+
+      if (anySubmitted) location.reload();
+      else alert("📎 선택된 파일이 없거나 전송할 항목이 없습니다.");
     });
-
-    const result = await res.json();
-
-    if (res.ok) {
-      alert("제출 성공! 🎉\nURL: " + result.url);
-    } else {
-      console.error(result);
-      alert("제출 실패: " + result.message);
-    }
-  } catch (err) {
-    console.error("요청 중 에러:", err);
-    alert("서버와 통신 중 오류가 발생했습니다.");
   }
-}
+});

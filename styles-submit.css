@@ -49,20 +49,20 @@
   width: 260px;
   height: 90px;
   background: #fdad65;
-  border: 2px solid #422c1f;
-  border-radius: 12px;
-  padding: 16px 14px;
+  border: 5px solid #422c1fac;
+  border-radius: 15px;
+  padding: 11px 14px;
   font-weight: bold;
-  color: #3a2c22;
-  font-size: 35px;
+  color: #6d5442;
+  font-size: 40px;
   text-align: center;
   box-sizing: border-box;
 }
 
 /* ✅ 파일 업로드 */
-#hwImage {
+#hwSubmitbutton {
   position: absolute;
-  top: 180px;
+  top: 170px;
   left: 25px;
   width: 250px;
   height: 36px;
@@ -73,13 +73,28 @@
     #5E3A29 100%);
   border: 4px solid #422c1f;
   border-radius: 12px;
-  color: white;
-  text-align: center;
-  font-weight: bold;
-  padding: 2px;
   box-sizing: border-box;
   cursor: pointer;
+  transition: transform 0.1s ease;
+  
+  /* ✅ 텍스트 정렬 추가 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  user-select: none;
+  text-shadow: 1px 1px 2px #00000060;
 }
+
+#hwSubmitbutton:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 5px rgba(255,255,255,0.4);
+}
+
+
+
 
 
 
@@ -99,52 +114,44 @@
   text-align: center;
 }
 
-/* ✅ 코멘트 */
-#hwComment {
-  position: absolute;
-  top: 260px; /* 너가 조절 */
-  left: 18px;
-  width: 270px;
-  height: 100px;
-  border: 2px solid #422c1f;
-  border-radius: 12px;
-  padding: 8px;
-  background: #fff8ed;
-  font-family: inherit;
-  font-size: 14px;
-  resize: none;
-  box-sizing: border-box;
-}
-
-#hwCommentLabel {
-  position: absolute;
-  top: 230px; /* 너가 조정할 위치 */
-  left: 20px;
-  font-weight: bold;
-  color: #3a2c22;
-  font-size: 14px;
-  z-index: 2;
-}
-
-/* ✅ 제출 버튼 */
-#submit-btn {
-  position: absolute;
-  top: 375px; /* 너가 조절 */
-  left: 83px;
-  width: 130px;
-  background: #f7d7a3;
-  border: 2px solid #422c1f;
-  border-radius: 12px;
-  padding: 7px 0;
-  font-weight: bold;
-  font-size: 15px;
-  cursor: pointer;
-  transition: transform 0.1s ease;
-  box-shadow: 2px 2px 0 #422c1f;
-  text-align: center;
-}
-
 #submit-btn:hover {
   transform: translateY(-2px);
   background: #ffe2b5;
+}
+
+/* ✅ 제출 대기 리스트 타이틀 */
+#pendingListTitle {
+  position: absolute;
+  top: 230px;
+  left: 13px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #3a2c22;
+}
+
+/* ✅ 제출 대기 카드 리스트 */
+.pending-list {
+  position: absolute;
+  top: 255px;
+  left: 10px;
+  width: 280px;
+height: 160px;
+  overflow-y: auto;
+  background: #fffaf2;
+  border: 2px dashed #c49b6b;
+  border-radius: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* ✅ 개별 카드 */
+.pending-card {
+  background: #fff5df;
+  border: 1px solid #d6b083;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #4b392e;
+  box-shadow: 1px 1px 0 #d6b083;
 }
