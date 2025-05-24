@@ -40,3 +40,11 @@ document.getElementById('btnTTeacher').addEventListener('click', function () {
     window.location.href = 'teacher-room.html?id=Tester';
 });
 
+
+  document.getElementById('btnTStudentTutorial')?.addEventListener('click', () => {
+    window.location.href = 'tutorial/student-room_tutorial.html?id=Tutorial';
+  });
+
+  document.getElementById('btnTParentsTutorial')?.addEventListener('click', () => {
+    window.location.href = 'tutorial/parents-room_tutorial.html?id=Tutorial';
+  });
