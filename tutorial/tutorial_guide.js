@@ -42,6 +42,7 @@ function computeResumeStep() {
 
   const path = window.location.pathname;
 
+    if (path.includes('tutorial_ending')) return 45;
   if (path.includes('homework-tray')) return 15;
   if (path.includes('homework-submit')) return 22;
   if (path.includes('report-analysis')) return 29;
@@ -125,6 +126,11 @@ else if (trigger === 'next') {
     return;
   }
 
+    // ✅ 새로운 처리: step 45 → tutorial_ending.html로 이동
+  if (stepNo == 45) {
+    window.location.href = 'tutorial_ending.html';
+    return;
+  }
   showStep(currentSteps[++currentIndex]);
 }
 

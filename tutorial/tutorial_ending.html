@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>튜토리얼 종료</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles-frame.css" />
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="tutorial_guide.js"></script>
+  <style>
+    #cafe_int {
+      position: absolute;
+      width: 340px;
+      height: 626px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 20px;
+      background: linear-gradient(to bottom, #fff3e0, #ffe0b2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-family: 'Gowun Batang', serif;
+      color: #5d4037;
+    }
+
+    .end-box {
+      background: white;
+      padding: 30px 20px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      animation: fadeInUp 1.2s ease;
+      max-width: 280px;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      font-size: 20px;
+      color: #d84315;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .contact {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #795548;
+    }
+
+    .restart-btn {
+      margin-top: 20px;
+      background: #8d6e63;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.3s ease;
+    }
+
+    .restart-btn:hover {
+      background: #6d4c41;
+    }
+
+    .kakao-link {
+      display: inline-block;
+      margin-top: 10px;
+      background: #fae100;
+      color: #3b1e1e;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 12px;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="main-page">
+    <div id="cafe_int">
+      <div class="end-box">
+        <h2>고생하셨어요 ☕</h2>
+        <p>튜토리얼이 모두 끝났습니다.<br>
+        이제 카페에서 자유롭게 활동하실 수 있어요.<br>
+        도움이 더 필요하면 언제든 돌아오세요.</p>
+
+        <button class="restart-btn" onclick="restartTutorial()">튜토리얼 다시 보기</button>
+
+        <div class="contact">
+          문의: ltryi.contact@gmail.com<br>
+          운영: LTRYI E-Class Team<br>
+          <a class="kakao-link" href="https://pf.kakao.com/_yourchannel">카카오톡으로 문의하기</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function restartTutorial() {
+      localStorage.removeItem('tutorial_tray');
+      localStorage.removeItem('tutorial_submit');
+      localStorage.removeItem('tutorial_report');
+      localStorage.removeItem('tutorial_grades');
+      location.href = 'student-room_tutorial.html';
+    }
+  </script>
+</body>
+</html>
