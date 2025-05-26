@@ -95,8 +95,8 @@
       <div class="end-box">
         <h2>고생하셨어요 ☕</h2>
         <p>튜토리얼이 모두 끝났습니다.<br>
-        이제 카페에서 자유롭게 활동하실 수 있어요.<br>
-        도움이 더 필요하면 언제든 돌아오세요.</p>
+        카페는 당신에 맞춰서 꾸준히 성장합니다.<br>
+        도움이 더 필요하시면 언제든 돌아오세요.</p>
 
         <button class="restart-btn" onclick="restartTutorial()">튜토리얼 다시 보기</button>
 
@@ -109,14 +109,20 @@
     </div>
   </div>
 
-  <script>
-    function restartTutorial() {
-      localStorage.removeItem('tutorial_tray');
-      localStorage.removeItem('tutorial_submit');
-      localStorage.removeItem('tutorial_report');
-      localStorage.removeItem('tutorial_grades');
-      location.href = 'student-room_tutorial.html';
-    }
-  </script>
+<script>
+  // 🔐 URL에서 id 가져오기
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('id');  // ← 요 한 줄이 반드시 있어야 함
+
+  function restartTutorial() {
+    localStorage.removeItem('tutorial_tray');
+    localStorage.removeItem('tutorial_submit');
+    localStorage.removeItem('tutorial_report');
+    localStorage.removeItem('tutorial_grades');
+    localStorage.removeItem('tutorial_choice_ready');
+    window.location.href = `student-room_tutorial.html?id=${userId}`;
+  }
+</script>
+
 </body>
 </html>

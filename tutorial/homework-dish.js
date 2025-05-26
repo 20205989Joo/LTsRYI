@@ -82,135 +82,145 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('receipt_icon')?.addEventListener('click', () => showReceiptFromQordered());
 
-  function showDishPopup(item) {
-    const old = document.getElementById('popup-container');
-    if (old) old.remove();
+function showDishPopup(item) {
+  const old = document.getElementById('popup-container');
+  if (old) old.remove();
 
-    const popupContainer = document.createElement('div');
-    popupContainer.id = 'popup-container';
-    popupContainer.style = `
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 10001;
-      pointer-events: none;
-    `;
+  const popupContainer = document.createElement('div');
+  popupContainer.id = 'popup-container';
+  popupContainer.style = `
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 10001;
+    pointer-events: none;
+  `;
 
-    const popup = document.createElement('div');
-    popup.style = `
-      position: absolute;
-      top: 160px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 280px;
-      min-height: 140px;
-      background: #fffaf2;
-      border: 2px solid #7e3106;
-      border-radius: 14px;
-      padding: 16px;
-      font-size: 14px;
-      color: #333;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      z-index: 10001;
-      text-align: center;
-      pointer-events: auto;
-    `;
+  const popup = document.createElement('div');
+  popup.style = `
+    position: absolute;
+    top: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    min-height: 140px;
+    background: #fffaf2;
+    border: 2px solid #7e3106;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 14px;
+    color: #333;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    z-index: 10001;
+    text-align: center;
+    pointer-events: auto;
+  `;
 
-    const hw = item.WhichHW;
-    const key = `downloaded_HW_${hw}_${item.QLevel}_${item.QNo}`;
-    const downloaded = localStorage.getItem(key) === 'true';
+  const hw = item.WhichHW;
+  const key = `downloaded_HW_${hw}_${item.QLevel}_${item.QNo}`;
+  const downloaded = localStorage.getItem(key) === 'true';
 
-    let content = `
-      <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📥 ${hw}</div>
-    `;
-    if (hw === '레벨테스트' || hw === 'Prologue Question') {
-  const filename = hw === '레벨테스트' ? '레벨테스트.pdf' : 'PrologueQuestion.pdf';
+  let content = `
+    <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📥 ${hw}</div>
+  `;
 
-  if (downloaded) {
-    content += `
-      <div style="margin-bottom: 10px;">숙제를 다시 다운로드하거나, 완료 후 제출할 수 있어요.</div>
-      <div style="display: flex; gap: 6px; justify-content: center;">
-        <a href="${filename}" download class="room-btn" id="download-a"
+  if (hw === '레벨테스트' || hw === 'Prologue Question') {
+    const filename = hw === '레벨테스트' ? '레벨테스트.pdf' : 'PrologueQuestions.pdf';
+
+    if (downloaded) {
+      content += `
+        <div style="margin-bottom: 10px;">숙제를 다시 다운로드하거나, 완료 후 제출할 수 있어요.</div>
+        <div style="display: flex; gap: 6px; justify-content: center;">
+          <a href="${filename}" download class="room-btn" id="download-a"
+            style="flex: 1; text-decoration: none; height: 18px; display: inline-flex; align-items: center; justify-content: center;">
+            📂 다시 다운로드
+          </a>
+          <button class="room-btn" style="background: #1976d2; flex: 1;" id="upload-btn">✅ 완료했어요!</button>
+        </div>
+      `;
+    } else {
+      content += `
+        <div style="margin-bottom: 10px;">해당 숙제를 다운로드하세요.</div>
+        <a href="${filename}" download class="room-btn" id="download-btn"
           style="flex: 1; text-decoration: none; height: 18px; display: inline-flex; align-items: center; justify-content: center;">
-          📂 다시 다운로드
+          📂 다운로드
         </a>
-        <button class="room-btn" style="background: #1976d2; flex: 1;" id="upload-btn">✅ 완료했어요!</button>
-      </div>
-    `;
-  } else {
-    content += `
-      <div style="margin-bottom: 10px;">해당 숙제를 다운로드하세요.</div>
-      <a href="${filename}" download class="room-btn" id="download-btn"
-        style="flex: 1; text-decoration: none; height: 18px; display: inline-flex; align-items: center; justify-content: center;">
-        📂 다운로드
-      </a>
-    `;
+      `;
+    }
   }
+
+  content += `
+    <button id="close-popup" class="room-btn" style="
+      margin-top: 14px;
+      width: 100%;
+      background: #f17b2a;
+    ">닫기</button>
+  `;
+
+  popup.innerHTML = content;
+
+  // 🔒 닫기 버튼 강제 잠금 처리
+  const closeBtn = popup.querySelector('#close-popup');
+  if (closeBtn) {
+    closeBtn.disabled = true;
+    closeBtn.style.opacity = '0.5';
+    closeBtn.style.cursor = 'not-allowed';
+    closeBtn.innerText = '닫기 (잠김)';
+  }
+
+  popup.querySelector('#download-btn')?.addEventListener('click', () => {
+    localStorage.setItem(key, 'true');
+    showDishPopup(item); // 재렌더링
+  });
+
+  popup.querySelector('#download-a')?.addEventListener('click', () => {
+    localStorage.setItem(key, 'true');
+  });
+
+  popup.querySelector('#upload-btn')?.addEventListener('click', () => {
+    storePendingHomework({
+      label: hw,
+      type: 'upload',
+      timestamp: new Date().toISOString(),
+      comment: '완료 후 제출 예정',
+      QLevel: item.QLevel,
+      QNo: item.QNo
+    });
+
+    checkTutorialTrayComplete(); // ✅ 튜토리얼 단계 점검 함수
+
+    document.getElementById('popup-container')?.remove();
+    showReceiptFromQordered(hw);
+  });
+
+  popup.querySelector('#custom-complete-btn')?.addEventListener('click', () => {
+    let detail = '';
+    let comment = '';
+
+    if (hw === '오늘 내 숙제') {
+      detail = document.getElementById('custom_hwtype')?.value.trim();
+      comment = document.getElementById('custom_hwdesc')?.value.trim();
+    } else if (hw === '시험지 만들어주세요') {
+      detail = document.getElementById('custom_exam_type')?.value.trim();
+      comment = document.getElementById('custom_exam_desc')?.value.trim();
+    }
+
+    storePendingHomework({
+      label: hw,
+      type: 'upload',
+      timestamp: new Date().toISOString(),
+      comment,
+      detail
+    });
+
+    document.getElementById('popup-container')?.remove();
+    showReceiptFromQordered(hw);
+  });
+
+  popupContainer.appendChild(popup);
+  document.querySelector('.main-page').appendChild(popupContainer);
 }
-    content += `
-      <button id="close-popup" class="room-btn" style="
-        margin-top: 14px;
-        width: 100%;
-        background: #f17b2a;
-      ">닫기</button>
-    `;
 
-    popup.innerHTML = content;
-    popup.querySelector('#close-popup')?.addEventListener('click', () => popupContainer.remove());
-
-    popup.querySelector('#download-btn')?.addEventListener('click', () => {
-      localStorage.setItem(key, 'true');
-      showDishPopup(item);
-    });
-
-    popup.querySelector('#download-a')?.addEventListener('click', () => {
-      localStorage.setItem(key, 'true');
-    });
-
-    popup.querySelector('#upload-btn')?.addEventListener('click', () => {
-      storePendingHomework({
-        label: hw,
-        type: 'upload',
-        timestamp: new Date().toISOString(),
-        comment: '완료 후 제출 예정',
-        QLevel: item.QLevel,
-        QNo: item.QNo
-      });
-
-      checkTutorialTrayComplete(); // ✅ 이거 추가
-
-      document.getElementById('popup-container')?.remove();
-      showReceiptFromQordered(hw);
-    });
-
-    popup.querySelector('#custom-complete-btn')?.addEventListener('click', () => {
-      let detail = '';
-      let comment = '';
-
-      if (hw === '오늘 내 숙제') {
-        detail = document.getElementById('custom_hwtype')?.value.trim();
-        comment = document.getElementById('custom_hwdesc')?.value.trim();
-      } else if (hw === '시험지 만들어주세요') {
-        detail = document.getElementById('custom_exam_type')?.value.trim();
-        comment = document.getElementById('custom_exam_desc')?.value.trim();
-      }
-
-      storePendingHomework({
-        label: hw,
-        type: 'upload',
-        timestamp: new Date().toISOString(),
-        comment,
-        detail
-      });
-
-      document.getElementById('popup-container')?.remove();
-      showReceiptFromQordered(hw);
-    });
-
-    popupContainer.appendChild(popup);
-    document.querySelector('.main-page').appendChild(popupContainer);
-
-  }
 
   window.clearDownloadHistory = () => {
     const keys = [];
@@ -287,5 +297,22 @@ function checkTutorialTrayComplete() {
   if (hasLevelTest && hasPrologue) {
     localStorage.setItem('tutorial_tray', 'done');
     console.log('✅ tutorial_tray = done');
+  }
+}
+
+function checkTutorialTrayComplete() {
+  const pending = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
+  const hasLevelTest = pending.some(p => p.label === '레벨테스트' && p.type === 'upload');
+  const hasPrologue = pending.some(p => p.label === 'Prologue Question' && p.type === 'upload');
+
+  if (hasLevelTest && hasPrologue) {
+    localStorage.setItem('tutorial_tray', 'done');
+    console.log('✅ tutorial_tray = done');
+
+    // ✅ 튜토리얼용 트리거 실행
+    if (window.advanceStep && !window._tutorialTrayStepFired) {
+      window._tutorialTrayStepFired = true; // 중복방지
+      window.advanceStep('done:tray');
+    }
   }
 }

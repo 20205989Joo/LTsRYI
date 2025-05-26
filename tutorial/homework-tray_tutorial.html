@@ -6,6 +6,7 @@
   <title>오늘의 숙제 트레이</title>
   <link rel="stylesheet" href="styles-frame.css" />
   <link rel="stylesheet" href="styles-room.css" />
+    <link rel="stylesheet" href="tutorial_guide.css" />
   <style>
     #cafe_int {
       position: absolute;
@@ -93,7 +94,7 @@
       height: 40px;
       position: absolute;
       top: 90px;
-      left: 50%;
+      left: 280px;
       transform: translateX(-50%);
       background: white;
       border-radius: 10px;
@@ -132,6 +133,9 @@
       </button>
     </div>
   </div>
+  <script>
+  const userId = new URLSearchParams(window.location.search).get('id');
+</script>
 <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <script src="tutorial_guide.js"></script>
   <script src="adjustFontSize.js"></script>
