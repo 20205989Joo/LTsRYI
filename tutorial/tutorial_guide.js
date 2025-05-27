@@ -3,6 +3,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   runTutorial(steps);
 });
 
+
 async function loadTutorialSteps(xlsxURL) {
   const res = await fetch(xlsxURL);
   const arrayBuffer = await res.arrayBuffer();
@@ -24,10 +25,11 @@ async function loadTutorialSteps(xlsxURL) {
       message_summary: row.message_summary || "",
       target: row.target || null,
       trigger: triggerFinal,
-      tooltip_xy: row.tooltip_xy || null
+      tooltip_xyhw: row.tooltip_xyhw ? String(row.tooltip_xyhw) : null // ✅ 여기를 변경
     };
   });
 }
+
 
 let currentIndex = 0;
 let currentSteps = [];
@@ -60,7 +62,7 @@ function computeResumeStep() {
   }
 
   if (path.includes('tutorial_ending')) return 45;
-  if (path.includes('homework-tray')) return 15;
+  if (path.includes('homework-tray')) return 14;
   if (path.includes('homework-submit')) return 22;
 
   if (path.includes('report-analysis')) {
@@ -406,6 +408,8 @@ window.location.href = `student-room_tutorial.html?id=${userId}`;
 
 
 function showHighlight(step, callback) {
+  console.log("🧪 tooltip_xyhw:", step.tooltip_xyhw);
+
   const trigger = step.trigger;
   const els = step.target ? document.querySelectorAll(step.target) : [];
 
@@ -417,7 +421,6 @@ function showHighlight(step, callback) {
     restoredTargets.push(el);
   });
 
-  // ✅ spotlight 대상인지 판단
   const useMask = (
     step.target === '.tabs' ||
     step.target === '.popup-content' ||
@@ -433,12 +436,10 @@ function showHighlight(step, callback) {
     step.target === '#choice3' ||
     step.target === '#subChoiceBox' ||
     step.target === '#chalkboard' ||
-       step.target === '#chalkboard_grades' ||
-              step.target === '.calendar-section' 
-
+    step.target === '#chalkboard_grades' ||
+    step.target === '.calendar-section'
   );
 
-  // ✅ mask spotlight (지연 생성)
   if (step.target && useMask) {
     setTimeout(() => {
       const el = document.querySelector(step.target);
@@ -457,7 +458,6 @@ function showHighlight(step, callback) {
     }, 1);
   }
 
-  // ✅ 일반 오버레이 (mask가 아닐 경우만 생성)
   if (!useMask) {
     const main = document.querySelector('.main-page');
     const overlay = document.createElement('div');
@@ -473,25 +473,30 @@ function showHighlight(step, callback) {
     main.appendChild(overlay);
   }
 
-  // ✅ tooltip 생성
   const tooltip = document.createElement('div');
   tooltip.className = 'tutorial-tooltip';
   tooltip.innerText = step.message;
-  tooltip.style = `
-    background: #fffaf2;
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 2px solid #444;
-    font-size: 14px;
-    z-index: 10000;
-    white-space: pre-wrap;
-    position: fixed;
-  `;
+tooltip.style = `
+        background: #fffaf2;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 2px solid #444;
+      font-size: 14px;
+      z-index: 10006;
+      white-space: pre-wrap;
+      position: absolute;
+      box-sizing: border-box;
+      cursor: move;
+      resize: both;
+`;
 
-  if (step.tooltip_xy) {
-    const [top, left] = step.tooltip_xy.split(',').map(Number);
+
+  if (step.tooltip_xyhw && typeof step.tooltip_xyhw === 'string' && step.tooltip_xyhw.includes('_')) {
+    const [top, left, width, height] = step.tooltip_xyhw.split('_').map(Number);
     tooltip.style.top = `${top}px`;
     tooltip.style.left = `${left}px`;
+    if (!isNaN(width)) tooltip.style.width = `${width}px`;
+    if (!isNaN(height)) tooltip.style.height = `${height}px`;
   } else {
     tooltip.style.top = '80%';
     tooltip.style.left = '50%';
@@ -500,9 +505,6 @@ function showHighlight(step, callback) {
 
   document.body.appendChild(tooltip);
 
-  // ✅ trigger 분기
-
-  // 👉 click 트리거: 요소에 클릭 리스너 등록
   if (trigger?.startsWith('click:')) {
     const selector = trigger.split(':')[1];
     const target = document.querySelector(selector);
@@ -515,29 +517,21 @@ function showHighlight(step, callback) {
     } else {
       console.warn('⚠️ trigger 대상 요소를 찾을 수 없습니다:', selector);
     }
-  }
-
-  // 👉 next 트리거: 다음 버튼 표시
-  else if (trigger === 'next') {
+  } else if (trigger === 'next') {
     const btn = createNextButton(() => {
-  console.log('🟡 highlight → next 클릭됨 → advanceStep 호출로 변경');
-  advanceStep('next');
-});
+      console.log('🟡 highlight → next 클릭됨 → advanceStep 호출로 변경');
+      advanceStep('next');
+    });
     tooltip.appendChild(btn);
+  } else if (trigger?.startsWith('delay:')) {
+    const ms = parseInt(trigger.split(':')[1], 10);
+    console.log(`⏱ highlight 딜레이 ${ms}ms 후 advanceStep 호출`);
+    setTimeout(() => {
+      advanceStep(trigger);
+    }, ms);
   }
-
-  // 👉 trigger 분기 내부에 넣을 것
-else if (trigger?.startsWith('delay:')) {
-  const ms = parseInt(trigger.split(':')[1], 10);
-  console.log(`⏱ highlight 딜레이 ${ms}ms 후 advanceStep 호출`);
-  setTimeout(() => {
-    advanceStep(trigger);
-  }, ms);
 }
 
-
-  // 👉 done:tray, delay:100 등은 외부 또는 advanceStep 내부에서 처리됨 → 버튼 없음
-}
 
 
 
@@ -668,6 +662,12 @@ function handleUnlockByStep(stepNo) {
   if (stepNo === 33) unlockElement('#chalkboard');
   if (stepNo === 34) unlockElement('#calendar');
 
+    if ([6, 7, 8].includes(stepNo)) createClickBlocker();
+  if (stepNo === 9) removeClickBlocker();
+
+  if (stepNo === 15) removeClickBlocker();
+
+
   // ✅ choice 버튼 단계별 해금 처리
   if (stepNo === 29) {
     const btn = document.getElementById('choice1');
@@ -693,7 +693,7 @@ function handleUnlockByStep(stepNo) {
         btn.classList.add('choice-active');
       }
         // ✅ 플래그 저장
-  localStorage.removeItem('tutorial_choice_ready', 'done');
+  localStorage.setItem('tutorial_choice_ready', 'done');
     });
   }
 
@@ -702,6 +702,7 @@ if (stepNo === 32) {
   if (btn) {
     btn.classList.remove('choice-disabled');
     btn.classList.add('choice-active');
+    btn.textContent = '나가서 점수 받아보기'
   }
 
 
@@ -726,4 +727,31 @@ function unlockElement(selector) {
     el.classList.remove('locked');
     el.classList.add('unlocked');
   });
+}
+
+
+
+//마스크 오버레이 blocker 추가. 에휴
+
+function createClickBlocker() {
+  if (document.getElementById('tutorial-click-blocker')) return;
+
+  const blocker = document.createElement('div');
+  blocker.id = 'tutorial-click-blocker';
+  blocker.style = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    z-index: 10004; /* 🚫 모든 것 위에 덮어버림 */
+    pointer-events: auto;
+  `;
+  document.body.appendChild(blocker);
+}
+
+function removeClickBlocker() {
+  const blocker = document.getElementById('tutorial-click-blocker');
+  if (blocker) blocker.remove();
 }

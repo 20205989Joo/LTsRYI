@@ -25,7 +25,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (isDone) {
       dish.style.pointerEvents = 'none';
-      dish.style.opacity = '0.6';
+      dish.style.opacity = '0.3';
+      dish.style.color = 'rgb(2, 47, 61)';
 
       const doneTag = document.createElement('div');
       doneTag.className = 'done-label';
@@ -223,18 +224,38 @@ function showDishPopup(item) {
 
 
   window.clearDownloadHistory = () => {
-    const keys = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith('downloaded_HW_')) keys.push(key);
-    }
-    keys.forEach(k => localStorage.removeItem(k));
-    localStorage.removeItem('PendingUploads');
-    alert('📦 다운로드 및 제출 기록이 초기화되었습니다!');
-  };
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('downloaded_HW_')) keys.push(key);
+  }
+  keys.forEach(k => localStorage.removeItem(k));
+  localStorage.removeItem('PendingUploads');
+  alert('📦 Dish가 다시 차려졌습니다!');
+  location.reload(); // ✅ 새로고침 추가
+};
+
 });
 
 function showReceiptFromQordered(latestLabel = null) {
+
+    // ✅ 1. 애니메이션 스타일 삽입 (한 번만)
+if (!document.getElementById('receipt-animation-style')) {
+  const style = document.createElement('style');
+  style.id = 'receipt-animation-style';
+  style.innerHTML = `
+    @keyframes receiptShadowPop {
+      0% {
+        box-shadow: 0 0 0px rgba(80, 200, 120, 0);
+      }
+      100% {
+        box-shadow: 0 0 30px 25px rgba(80, 200, 120, 0.4);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+    // ✅ 2. 나머지 원래 receipt 로직
   const qordered = JSON.parse(localStorage.getItem('Qordered') || '[]');
   const pending = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
 
@@ -254,9 +275,9 @@ function showReceiptFromQordered(latestLabel = null) {
     font-family: monospace;
     font-size: 13px;
     color: #222;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
     z-index: 20;
     opacity: 1;
+  animation: receiptShadowPop 0.3s ease-out forwards;
     transition: opacity 1s ease;
   `;
 

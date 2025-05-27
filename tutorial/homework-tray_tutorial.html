@@ -93,8 +93,8 @@
       width: 40px;
       height: 40px;
       position: absolute;
-      top: 90px;
-      left: 280px;
+  bottom: 20px;
+  right: 20px;
       transform: translateX(-50%);
       background: white;
       border-radius: 10px;
@@ -106,7 +106,7 @@
 
     .dish .done-label {
   font-size: 11px;
-  color: #666;
+  color: #015d74;
   text-align: center;
   width: 100%;
   margin-top: 2px;
@@ -127,12 +127,12 @@
           <!-- JS가 .dish 요소 삽입 -->
         </div>
       </div>
-      <button onclick="clearDownloadHistory()" class="room-btn"
-              style="position: fixed; bottom: 20px; right: 20px; z-index: 999;">
-        🧹 기록 초기화
-      </button>
     </div>
   </div>
+        <button onclick="clearDownloadHistory()" class="room-btn"
+              style="position: absolute; top: 30px; right: 30px; z-index: 10020;">
+        잘 안된다면 : Reset! 🍽
+      </button>
   <script>
   const userId = new URLSearchParams(window.location.search).get('id');
 </script>
