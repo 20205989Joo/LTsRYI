@@ -1,7 +1,9 @@
 window.addEventListener('DOMContentLoaded', () => {
   const trayArea = document.getElementById('tray-area');
   const cafeInt = document.getElementById('cafe_int');
-  const qordered = JSON.parse(localStorage.getItem('Qordered') || '[]');
+  const qordered = JSON.parse(localStorage.getItem('HWPlus') || '[]');
+    console.log("[🍽 dish check] Qordered 불러온 결과:", qordered);
+
   const pending = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
 
   const baseOffset = 10;
@@ -12,20 +14,21 @@ window.addEventListener('DOMContentLoaded', () => {
     dish.className = 'dish';
     dish.style.left = `${baseOffset + (index % 3) * gap}px`;
     dish.style.top = `${baseOffset + Math.floor(index / 3) * gap}px`;
-    dish.textContent = item.WhichHW;
+    dish.textContent = item.Subcategory;
 
     window.adjustFontSize(dish);
 
     const isDone = pending.some(p =>
-      p.label === item.WhichHW &&
-      p.QLevel === item.QLevel &&
-      p.QNo === item.QNo &&
+      p.label === item.Subcategory &&
+      p.Level === item.Level &&
+      p.LessonNo === item.LessonNo &&
       p.type === 'upload'
     );
 
-    if (isDone) {
-      dish.style.pointerEvents = 'none';
-      dish.style.opacity = '0.6';
+if (isDone) {
+  dish.style.pointerEvents = 'none';
+  dish.style.opacity = '0.3';
+  dish.style.color = 'rgb(2, 47, 61)';
 
       const doneTag = document.createElement('div');
       doneTag.className = 'done-label';
@@ -42,7 +45,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const key = 'PendingUploads';
     let existing = JSON.parse(localStorage.getItem(key) || '[]');
     existing = existing.filter(e =>
-      !(e.label === entry.label && e.QLevel === entry.QLevel && e.QNo === entry.QNo)
+      !(e.label === entry.label && e.Level === entry.Level && e.LessonNo === entry.LessonNo)
     );
     existing.push(entry);
     localStorage.setItem(key, JSON.stringify(existing));
@@ -50,7 +53,8 @@ window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.dish').forEach(dish => {
       if (dish.textContent === entry.label) {
         dish.style.pointerEvents = 'none';
-        dish.style.opacity = '0.6';
+dish.style.opacity = '0.6'; // → 이걸 0.3으로
+dish.style.color = 'rgb(2, 47, 61)'; // 이 줄 새로 추가
         if (!dish.querySelector('.done-label')) {
           const doneTag = document.createElement('div');
           doneTag.className = 'done-label';
@@ -116,15 +120,27 @@ window.addEventListener('DOMContentLoaded', () => {
       pointer-events: auto;
     `;
 
-    const hw = item.WhichHW;
-    const key = `downloaded_HW_${hw}_${item.QLevel}_${item.QNo}`;
+    const hw = item.Subcategory;
+    const key = `downloaded_HW_${hw}_${item.Level}_${item.LessonNo}`;
     const downloaded = localStorage.getItem(key) === 'true';
 
     let content = `
       <div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📥 ${hw}</div>
     `;
-    if (['단어', '문법', '독해'].includes(hw)) {
+
+              const filename = "CEFR_A1.pdf";  // 필요 시 item에 따라 동적으로
+  content += `
+    <div style="margin-bottom: 8px;">
+      <iframe src="${filename}#page=1" width="100%" height="180px"
+        style="border: 1px solid #aaa; border-radius: 6px;"></iframe>
+    </div>
+  `;
+  
+    if (['단어', '연어', '기초문법', '파편의 재구성'].includes(hw)) {
       if (downloaded) {
+
+
+
         content += `
           <div style="margin-bottom: 10px;">숙제를 다시 다운로드하거나, 완료 후 제출할 수 있어요.</div>
           <div style="display: flex; gap: 6px; justify-content: center;">
@@ -194,8 +210,8 @@ window.addEventListener('DOMContentLoaded', () => {
         type: 'upload',
         timestamp: new Date().toISOString(),
         comment: '완료 후 제출 예정',
-        QLevel: item.QLevel,
-        QNo: item.QNo
+        Level: item.Level,
+        LessonNo: item.LessonNo
       });
 
       document.getElementById('popup-container')?.remove();
@@ -243,6 +259,23 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function showReceiptFromQordered(latestLabel = null) {
+
+    if (!document.getElementById('receipt-animation-style')) {
+    const style = document.createElement('style');
+    style.id = 'receipt-animation-style';
+    style.innerHTML = `
+      @keyframes receiptShadowPop {
+        0% {
+          box-shadow: 0 0 0px rgba(80, 200, 120, 0);
+        }
+        100% {
+          box-shadow: 0 0 30px 25px rgba(80, 200, 120, 0.4);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   const qordered = JSON.parse(localStorage.getItem('Qordered') || '[]');
   const pending = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
 
@@ -266,20 +299,21 @@ function showReceiptFromQordered(latestLabel = null) {
     z-index: 20;
     opacity: 1;
     transition: opacity 1s ease;
+     animation: receiptShadowPop 0.3s ease-out forwards;
   `;
 
   let content = '<div class="receipt-title">📄 주문 영수증</div><div class="receipt-content">';
   qordered.forEach(entry => {
     const isChecked = pending.some(p =>
-      p.label === entry.WhichHW &&
-      (p.QLevel == null || p.QLevel === entry.QLevel) &&
-      (p.QNo == null || p.QNo === entry.QNo) &&
+      p.label === entry.Subcategory &&
+      (p.Level == null || p.Level === entry.Level) &&
+      (p.LessonNo == null || p.LessonNo === entry.LessonNo) &&
       p.type === 'upload'
     );
-    const line = entry.QLevel && entry.QNo
-      ? `${entry.WhichHW} (난이도: ${entry.QLevel}, 범위: ${entry.QNo})`
-      : `${entry.WhichHW}`;
-    const highlight = entry.WhichHW === latestLabel;
+    const line = entry.Level && entry.LessonNo
+      ? `${entry.Subcategory} (난이도: ${entry.Level}, 범위: ${entry.LessonNo})`
+      : `${entry.Subcategory}`;
+    const highlight = entry.Subcategory === latestLabel;
     const style = `
       ${isChecked ? 'color: green;' : ''}
       ${highlight ? 'font-weight: bold; animation: flashText 0.5s linear 1;' : ''}
