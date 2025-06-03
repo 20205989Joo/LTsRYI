@@ -1,41 +1,40 @@
-window.addEventListener('DOMContentLoaded', async () => {
-  const res = await fetch(`${BASE}/api/whosmychild?userId=${userId}`);
-  const data = await res.json();
-  childId = data.childId;
-});
+// 튜토리얼용 고정 ID
+const childId = "Tutorial";
 
+// ✅ 로컬 JSON에서 한 번에 불러오기
+let tutorialData = null;
 
+async function loadTutorialData() {
+  if (tutorialData) return tutorialData; // 캐시
+  const res = await fetch("/parents-room_tutorial_data.json");
+  tutorialData = await res.json();
+  return tutorialData;
+}
 
-// ✅ 분석 로직
+// ✅ 요약 메인
 window.summaryMain = async function () {
-  const progress = await loadStudentProgress();
+  const data = await loadTutorialData();
+  const progress = await loadStudentProgress(data);
   const analysis = analyzeStudentProgress(progress);
+  const recent7 = data.diligence.recent7Days;
 
-  let diligenceText = '';
-  try {
-    const res = await fetch(`${BASE}/api/getDiligenceStats?userId=${childId}`);
-    const stats = await res.json();
-    const recent7 = stats.recent7Days;
-    const { totalThisWeek, longestStreak, lateCount, avgLate } = calculateDiligenceFromRecent7(recent7);
+  const { totalThisWeek, longestStreak, lateCount, avgLate } = calculateDiligenceFromRecent7(recent7);
 
-    let icon = '🐢', label = '조금 느림';
-    if (longestStreak >= 5) { icon = '😎'; label = '성실함 장인'; }
-    else if (longestStreak >= 3) { icon = '🙂'; label = '성실보스'; }
-    else if (longestStreak >= 1) { icon = '⛵'; label = '평균적 성실함'; }
+  let icon = '🐢', label = '조금 느림';
+  if (longestStreak >= 5) { icon = '😎'; label = '성실함 장인'; }
+  else if (longestStreak >= 3) { icon = '🙂'; label = '성실보스'; }
+  else if (longestStreak >= 1) { icon = '⛵'; label = '평균적 성실함'; }
 
-    diligenceText = `
-      <div class="diligence-box">
-        <div class="icon">${icon}<br><span>${label}</span></div>
-        <div class="details">
-          • 총 숙제 제출: <b>${totalThisWeek}</b>건<br>
-          • 최장 연속 제출: <b>${longestStreak}</b>일<br>
-          • 이번주 지각: <b>${lateCount}</b>회 / 평균 <b>${avgLate}</b>분
-        </div>
+  const diligenceText = `
+    <div class="diligence-box">
+      <div class="icon">${icon}<br><span>${label}</span></div>
+      <div class="details">
+        • 총 숙제 제출: <b>${totalThisWeek}</b>건<br>
+        • 최장 연속 제출: <b>${longestStreak}</b>일<br>
+        • 이번주 지각: <b>${lateCount}</b>회 / 평균 <b>${avgLate}</b>분
       </div>
-    `;
-  } catch (err) {
-    diligenceText = `<div style="color:red;">🚨 성실도 분석 실패: ${err.message}</div>`;
-  }
+    </div>
+  `;
 
   const dialogueBox = document.querySelector('.npc-dialogue-box');
   dialogueBox.style.bottom = '63px';
@@ -60,9 +59,23 @@ window.summaryMain = async function () {
     <button id="backBtn" style="margin-top: 10px;">← 돌아가기</button>
   `;
 
+  const guideNote = document.createElement("div");
+guideNote.textContent = "⬆학생의 분석이 이곳에 표시됩니다.⬇";
+guideNote.style.position = "absolute";
+guideNote.style.right = "32px";
+guideNote.style.bottom = "180px";
+guideNote.style.fontSize = "18px";
+guideNote.style.color = "white";
+guideNote.style.background = "rgba(0,0,0,0.3)";
+guideNote.style.padding = "40px 10px";
+guideNote.style.borderRadius = "8px";
+guideNote.style.boxShadow = "0px 0px 10px 4px rgb(216, 164, 142)";
+guideNote.style.zIndex = "20";
+
+document.body.appendChild(guideNote);
+
   document.getElementById('backBtn').onclick = () => location.reload();
 };
-
 
 document.getElementById("choiceStatus")?.addEventListener("click", summaryMain);
 
@@ -109,10 +122,9 @@ function analyzeStudentProgress(progressData) {
   );
 }
 
-
-async function loadStudentProgress() {
-  const res = await fetch(`${BASE}/api/getProgressMatrixAll?UserId=${childId}`);
-  const raw = await res.json();
+async function loadStudentProgress(data = null) {
+  const local = data || await loadTutorialData();
+  const raw = local.progressMatrix;
 
   const lessons = {};
   for (const subject in raw) {
@@ -124,7 +136,6 @@ async function loadStudentProgress() {
   }
   return lessons;
 }
-
 
 function calculateDiligenceFromRecent7(arr) {
   let longestStreak = 0;
@@ -155,4 +166,3 @@ function calculateDiligenceFromRecent7(arr) {
     avgLate: lateCount ? Math.round(lateMinutes / lateCount) : 0
   };
 }
-

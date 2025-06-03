@@ -51,33 +51,50 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
 
     // ✅ 오늘 점수 표시 + 숙제 요약 표시
-    const todayEl = document.getElementById('todayPoint');
-    const todayWrapper = todayEl?.parentElement;
+// ✅ 오늘 점수 표시 + 숙제 요약 표시
+const todayEl = document.getElementById('todayPoint');
+const todayWrapper = todayEl?.parentElement;
 
-    if (todayEl) {
-      todayEl.textContent = `${todayQGrade}`;
+if (todayEl) {
+  todayEl.textContent = `${todayQGrade}`;
 
-      // 숙제별 간단 요약
-      const details = todayItems.map(item => {
-        const name = item.Subcategory || '이름없음';
-        const day = item.LessonNo != null ? ` (Day ${item.LessonNo})` : '';
-        return `${name}${day}: ${item.Score}점`;
-      });
+  // ✅ 숙제별 간단 요약 (점수 있는 항목만)
+const details = todayItems
+  .filter(item => (
+    item.Subcategory &&
+    item.Score !== null &&
+    item.Score !== '' &&
+    !isNaN(Number(item.Score)) &&
+    Number(item.Score) > 0
+  ))
+  .map(item => `${item.Subcategory}: ${Number(item.Score)}점`);
 
-      // summary element 추가 또는 갱신
-      let detailEl = document.getElementById('todayPointDetails');
-      if (!detailEl) {
-        detailEl = document.createElement('div');
-        detailEl.id = 'todayPointDetails';
-        detailEl.style.fontSize = '11px';
-        detailEl.style.color = '#eee';
-        detailEl.style.marginBottom = '4px';
-        detailEl.style.whiteSpace = 'pre-line';
-        todayWrapper.insertBefore(detailEl, todayEl);
-      }
 
-      detailEl.textContent = details.join('\n');
-    }
+  // ✅ summary element 추가 또는 갱신
+  let detailEl = document.getElementById('todayPointDetails');
+  if (!detailEl) {
+    detailEl = document.createElement('div');
+    detailEl.id = 'todayPointDetails';
+
+    // ✅ 위치와 스타일 조정
+    detailEl.style.position = 'absolute';
+    detailEl.style.top = '-150px';
+    detailEl.style.left = '20px';
+    detailEl.style.fontSize = '11px';
+    detailEl.style.color = '#fffde0';
+    detailEl.style.lineHeight = '1.2';
+    detailEl.style.whiteSpace = 'pre-line';
+    detailEl.style.maxWidth = '130px';
+    detailEl.style.pointerEvents = 'none';
+    detailEl.style.opacity = '0.85';
+    detailEl.style.zIndex = '6';
+
+    todayWrapper?.appendChild(detailEl);
+  }
+
+  detailEl.textContent = details.join('\n');
+}
+
 
     // ✅ 그래프 그리기
     const ctx = document.getElementById('submissionChart').getContext('2d');
