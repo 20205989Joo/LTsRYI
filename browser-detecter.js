@@ -49,6 +49,13 @@ function showEnvironmentTip(type) {
   document.body.appendChild(tip);
 }
 
+// ✅ 카카오 브라우저는 즉시 Chrome 인텐트 전환 (Android only)
+const ua = navigator.userAgent.toLowerCase();
+if (ua.includes('kakaotalk') && ua.includes('android')) {
+  alert("카카오 브라우저는 제한적입니다. Chrome으로 이동합니다.");
+  window.location.href = "intent://ltryi.world#Intent;scheme=https;package=com.android.chrome;end";
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   const problem = detectBrowserIssue();
   if (problem) {
