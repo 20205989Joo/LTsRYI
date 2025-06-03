@@ -12,19 +12,17 @@ function detectBrowserIssue() {
   console.log("🔍 감지된 브라우저 환경:", navigator.userAgent);
 
   if (isKakao) return 'kakao';
-  if (isIos && !isStandalone) return 'ios-safari';
+  if (isSafari && !isStandalone) return 'ios-safari';
   if (isSamsung) return 'samsung-browser';
   return null;
 }
 
 function showEnvironmentTip(type) {
   const messageMap = {
-    'kakao': "\uD558\uB098\uC758 \uC77C\uBD80 \uAE30\uB2A5\uC774 \uAC1C\uD589\uC801\uC774\uC9C0 \uC54A\uC744 \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uC544\uB798 \uBC84\uD2BC\uC744 \uB204\uB974\uC5B4 Chrome\uC73C\uB85C \uC5F4\uC5B4\uC8FC\uC138\uC694.",
-    'ios-safari': "📲 iPhone\uC5D0\uC11C\uB294 Safari \uD558\uB2E8 \uACF5\uC720\uBC84\uD2BC \uD074\uB9AD \u2192 '홈화면에 추가'를 눌러주세요!",
-    'samsung-browser': "Samsung Internet \uC5EC\uB860\uC5D0\uC11C\uB294 \uC77C\uBD80 \uAE30\uB2A5\uC774 \uBD88\uC548\uC815\uD560 \uC218 \uC788\uC5B4\uC694. Chrome \uC0AC\uC6A9\uC744 \uAD8C\uC7A5\uB4DC\uB9BD\uB2C8\uB2E4."
+    'kakao': "일부 기능이 카카오 브라우저에서는 정상 작동하지 않을 수 있습니다. 아래 버튼을 눌러 Chrome으로 열어주세요.",
+    'ios-safari': "📲 iPhone에서는 Safari 하단 공유버튼 → '홈 화면에 추가'로 설치 시 알림이 가능해집니다.",
+    'samsung-browser': "Samsung 브라우저에서는 알림 기능이 제한될 수 있습니다. Chrome 사용을 권장합니다."
   };
-
-  console.log("⚠️ 문제 감지됨:", type);
 
   const tip = document.createElement('div');
   tip.innerHTML = `
@@ -42,25 +40,20 @@ function showEnvironmentTip(type) {
       line-height: 1.5;
       z-index: 9999;
     ">
-      ${messageMap[type] || "\uD658\uACBD \uC815\uBCF4\uC5D0 \uB530\uB77C \uC548\uB0B4\uB97C \uB4DC\uB9BD\uB2C8\uB2E4."}
-      ${type === 'kakao' ? `<br><a href="intent://ltryi.world#Intent;scheme=https;package=com.android.chrome;end" style="color: #1a73e8;">📎 Chrome\uC73C\uB85C \uC5F4\uAE30</a>` : ''}
+      ${messageMap[type] || "이 브라우저 환경에서는 일부 기능에 제한이 있을 수 있습니다."}
+      ${type === 'kakao' ? `<br><a href="intent://ltryi.world#Intent;scheme=https;package=com.android.chrome;end" style="color: #1a73e8;">📎 Chrome으로 열기</a>` : ''}
     </div>
   `;
   document.body.appendChild(tip);
 }
 
-// ✅ 카카오 브라우저는 즉시 Chrome 인텐트 전환 (Android only)
-const ua = navigator.userAgent.toLowerCase();
-if (ua.includes('kakaotalk') && ua.includes('android')) {
-  alert("카카오 브라우저는 제한적입니다. Chrome으로 이동합니다.");
-  window.location.href = "intent://ltryi.world#Intent;scheme=https;package=com.android.chrome;end";
-}
-
+// ✅ 환경 안내만 표시, 기능은 막지 않음
 window.addEventListener('DOMContentLoaded', () => {
   const problem = detectBrowserIssue();
   if (problem) {
     showEnvironmentTip(problem);
-    document.getElementById('loginButton')?.setAttribute('disabled', 'true');
-    document.getElementById('btnTStudentTutorial')?.setAttribute('disabled', 'true');
+    // ❌ 아래는 제거: 기능 차단 없음
+    // document.getElementById('loginButton')?.setAttribute('disabled', 'true');
+    // document.getElementById('btnTStudentTutorial')?.setAttribute('disabled', 'true');
   }
 });
