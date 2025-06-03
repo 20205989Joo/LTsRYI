@@ -7,18 +7,14 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
 }
 
-
 // ✅ 로그인 처리 (API 연결)
 document.getElementById('loginButton').addEventListener('click', async function () {
-  // 1. 알림 권한 요청 (한 번만, 조용히)
   const permission = await Notification.requestPermission();
-
   if (permission === 'denied') {
     alert("🚫 브라우저 알림이 차단되어 있습니다.\n설정에서 직접 알림 허용을 해주세요.");
-    return; // ❗ 원하면 로그인 차단도 가능 (선택사항)
+    return;
   }
 
-  // 2. 로그인 입력 확인
   const enteredUsername = document.getElementById('username').value;
   const enteredPassword = document.getElementById('password').value;
 
@@ -41,26 +37,51 @@ document.getElementById('loginButton').addEventListener('click', async function 
     );
 
     if (response.status === 200) {
-  const data = await response.json();
-  const userId = data.userId || enteredUsername;
-  const userType = data.userType || 'student'; // fallback
+      const data = await response.json();
+      const userId = data.userId || enteredUsername;
+      const userType = data.userType || 'student';
+      localStorage.setItem('currentUserId', userId);
 
-  localStorage.setItem('currentUserId', userId);
+      // ✅ 알림 등록 및 login-subscription-check 호출
+      try {
+        if (permission === 'granted') {
+          await navigator.serviceWorker.register('service-worker.js');
+          const registration = await navigator.serviceWorker.ready;
 
-  if (userType === 'student') {
-    window.location.href = `student-room.html?id=${userId}`;
-  } else if (userType === 'parent') {
-    window.location.href = `parents-room.html?id=${userId}`;
-  } else if (userType === 'teacher') {
-    window.location.href = `teacher-room.html?id=${userId}`;
-  } else {
-    alert("🚨 알 수 없는 사용자 유형입니다. 관리자에게 문의해주세요.");
-  }
-} else if (response.status === 401) {
-  alert("잘못된 ID 또는 비밀번호입니다.");
-} else {
-  alert("로그인 중 오류가 발생했습니다.");
-}
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+          });
+
+          await fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/login-subscription-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              subscription
+            })
+          });
+        }
+      } catch (err) {
+        console.warn("알림 등록 실패 (무시됨):", err);
+      }
+
+      // ✅ 로그인 성공 후 이동
+      if (userType === 'student') {
+        window.location.href = `student-room.html?id=${userId}`;
+      } else if (userType === 'parent') {
+        window.location.href = `parents-room.html?id=${userId}`;
+      } else if (userType === 'teacher') {
+        window.location.href = `teacher-room.html?id=${userId}`;
+      } else {
+        alert("🚨 알 수 없는 사용자 유형입니다. 관리자에게 문의해주세요.");
+      }
+
+    } else if (response.status === 401) {
+      alert("잘못된 ID 또는 비밀번호입니다.");
+    } else {
+      alert("로그인 중 오류가 발생했습니다.");
+    }
 
   } catch (error) {
     console.error(error);
@@ -74,7 +95,6 @@ document.getElementById('password')?.addEventListener('keypress', function (e) {
     document.getElementById('loginButton')?.click();
   }
 });
-
 
 // ✅ 튜토리얼 진입 전에 알림 설정 팝업
 document.getElementById('btnTStudentTutorial')?.addEventListener('click', () => {
@@ -116,7 +136,6 @@ document.getElementById('confirmStudentPermission')?.addEventListener('click', a
     alert("알림 설정에 실패했습니다. 다시 시도해주세요.");
   }
 });
-
 
 document.getElementById('launchStudentTutorial')?.addEventListener('click', () => {
   const userId = localStorage.getItem('currentUserId') || 'Tutorial';
