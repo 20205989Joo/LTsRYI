@@ -57,3 +57,20 @@ window.addEventListener('DOMContentLoaded', () => {
     // document.getElementById('btnTStudentTutorial')?.setAttribute('disabled', 'true');
   }
 });
+
+// ✅ iOS인 경우: 튜토리얼용 ID 자동 생성 (단, 최초 1회만)
+window.addEventListener('DOMContentLoaded', () => {
+  const problem = detectBrowserIssue();
+  if (problem) {
+    showEnvironmentTip(problem);
+
+    if (problem === 'ios-safari') {
+      const existing = localStorage.getItem('currentUserId');
+      if (!existing || !/^tutorial\d{8}$/.test(existing)) {
+        const newId = 'tutorial' + Math.floor(10000000 + Math.random() * 90000000);
+        localStorage.setItem('currentUserId', newId);
+        console.log("📌 iOS용 튜토리얼 ID 생성됨:", newId);
+      }
+    }
+  }
+});

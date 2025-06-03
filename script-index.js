@@ -7,16 +7,23 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
 }
 
-// ✅ 로그인 처리 (API 연결)
-document.getElementById('loginButton').addEventListener('click', async function () {
-  const permission = await Notification.requestPermission();
-  if (permission === 'denied') {
-    alert("🚫 브라우저 알림이 차단되어 있습니다.\n설정에서 직접 알림 허용을 해주세요.");
-    return;
+document.getElementById('loginButton')?.addEventListener('click', async function () {
+  const currentId = localStorage.getItem('currentUserId');
+  const isFakeTutorialId = currentId && /^tutorial\d{8}$/.test(currentId);
+
+  let permission = 'granted';
+
+  // ✅ iOS가 아닌 경우에만 알림 권한 요청
+  if (!isFakeTutorialId) {
+    permission = await Notification.requestPermission();
+    if (permission === 'denied') {
+      alert("🚫 브라우저 알림이 차단되어 있습니다.\n설정에서 직접 알림 허용을 해주세요.");
+      return;
+    }
   }
 
-  const enteredUsername = document.getElementById('username').value;
-  const enteredPassword = document.getElementById('password').value;
+  const enteredUsername = document.getElementById('username').value.trim();
+  const enteredPassword = document.getElementById('password').value.trim();
 
   if (!enteredUsername || !enteredPassword) {
     alert("ID와 비밀번호를 모두 입력해주세요.");
@@ -42,9 +49,9 @@ document.getElementById('loginButton').addEventListener('click', async function 
       const userType = data.userType || 'student';
       localStorage.setItem('currentUserId', userId);
 
-      // ✅ 알림 등록 및 login-subscription-check 호출
+      // ✅ 푸시 등록은 iOS 아닌 경우만
       try {
-        if (permission === 'granted') {
+        if (!isFakeTutorialId && permission === 'granted') {
           await navigator.serviceWorker.register('service-worker.js');
           const registration = await navigator.serviceWorker.ready;
 
@@ -89,17 +96,22 @@ document.getElementById('loginButton').addEventListener('click', async function 
   }
 });
 
-// ✅ 엔터 키로 로그인 버튼 실행
-document.getElementById('password')?.addEventListener('keypress', function (e) {
-  if (e.key === 'Enter') {
-    document.getElementById('loginButton')?.click();
-  }
-});
 
-// ✅ 튜토리얼 진입 전에 알림 설정 팝업
+// ✅ 튜토리얼 진입 버튼 클릭 시
 document.getElementById('btnTStudentTutorial')?.addEventListener('click', () => {
+  const currentId = localStorage.getItem('currentUserId');
+  const isFakeTutorialId = currentId && /^tutorial\d{8}$/.test(currentId);
+
+  if (isFakeTutorialId) {
+    alert("⚠️ iOS에서는 알림이 작동하지 않습니다.\n경보 알림은 울리지 않으니 참고해주세요.");
+    window.location.href = `tutorial/student-room_tutorial.html?id=${currentId}`;
+    return;
+  }
+
+  // ✅ 정상 환경 → 알림 허용 팝업 열기
   document.getElementById('popup-student').style.display = 'block';
 });
+
 
 document.getElementById('confirmStudentPermission')?.addEventListener('click', async () => {
   try {
