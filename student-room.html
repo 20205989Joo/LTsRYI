@@ -205,7 +205,26 @@
   transition: transform 0.2s ease;
 }
 
+#sub-popup .menu-btn.active {
+  background-color: #ffddb0;
+  border: 2px solid #ff9900;
+  color: #7e3106;
+  font-weight: bold;
+}
 
+.receipt-icon {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  bottom: 40px;
+  right: 60px;
+  background: white;
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+  z-index: 15;
+  cursor: pointer;
+}
 
 
   </style>
@@ -242,6 +261,10 @@
 
   </div>
 
+<script src="kiosk_mainpopup.js"></script>
+<script src="kiosk_subpopup.js"></script>
+<script src="kiosk_receipt.js"></script>
+
 <script>
   const userId = new URLSearchParams(window.location.search).get('id');
 
@@ -273,6 +296,21 @@
     setupHoverAndClick(tray, 'homework-tray.html');
   }
 
+  // ✅ HWPlus가 있을 경우 receipt_icon 표시
+  const hwPlus = JSON.parse(localStorage.getItem('HWPlus') || '[]');
+  if (hwPlus.length > 0) {
+    if (tray) tray.style.display = 'block';
+
+    if (!document.getElementById('receipt_icon')) {
+      const icon = document.createElement('img');
+      icon.src = 'receipt_icon.png';
+      icon.id = 'receipt_icon';
+      icon.className = 'receipt-icon';
+      icon.onclick = () => showReceiptFromHWPlus();
+      document.querySelector('.main-page').appendChild(icon);
+    }
+  }
+
   // ░░ billboard hover + 이동 ░░
   const billboard = document.querySelector('.cafe_billboard');
   billboard.addEventListener('mouseenter', () => {
@@ -291,43 +329,39 @@
   });
 
   // ░░ 카페지기 클릭 → 분석 보고서 페이지 이동 ░░
-document.getElementById('cafe_jigi').addEventListener('click', () => {
-  window.location.href = `report-analysis.html?id=${userId}`;
-});
+  document.getElementById('cafe_jigi').addEventListener('click', () => {
+    window.location.href = `report-analysis.html?id=${userId}`;
+  });
 
-(async () => {
-  if (!userId) return;
+  // ░░ 오늘 점수 표시용 fetch ░░
+  (async () => {
+    if (!userId) return;
 
-  try {
-    const res = await fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getHWPlus?userId=${userId}`);
-    const data = await res.json();
+    try {
+      const res = await fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getHWImages?userId=${userId}`);
+      const data = await res.json();
 
-    const today = new Date();
-    const kstOffset = 9 * 60 * 60 * 1000;
-    const todayKST = new Date(today.getTime() + kstOffset);
-    const todayStr = todayKST.toISOString().slice(0, 10);
+      const today = new Date();
+      const todayStr = today.toISOString().slice(0, 10);
+      let todayQGrade = 0;
 
-    let todayQGrade = 0;
+      data.forEach(entry => {
+        const entryDate = new Date(entry.Timestamp);
+        const entryStr = entryDate.toISOString().slice(0, 10);
+        if (entryStr === todayStr && !isNaN(Number(entry.QGrade))) {
+          todayQGrade += Number(entry.QGrade);
+        }
+      });
 
-    data.forEach(item => {
-      const date = new Date(item.Timestamp);
-      const dateStr = new Date(date.getTime() + kstOffset).toISOString().slice(0, 10);
-      const score = Number(item.Score);
+      const pointEl = document.getElementById('todayPoint');
+      if (pointEl) pointEl.textContent = todayQGrade;
 
-      if (dateStr === todayStr && !isNaN(score)) {
-        todayQGrade += score;
-      }
-    });
-
-    const pointEl = document.getElementById('todayPoint');
-    if (pointEl) pointEl.textContent = todayQGrade;
-
-  } catch (err) {
-    console.error("오늘 점수 불러오기 오류:", err);
-  }
-})();
-
+    } catch (err) {
+      console.error("오늘 점수 불러오기 오류:", err);
+    }
+  })();
 </script>
+
 
 <script src="kiosk_mainpopup.js"></script>
 <script src="kiosk_subpopup.js"></script>

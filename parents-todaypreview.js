@@ -120,12 +120,12 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 function isToday(ts) {
   const today = new Date();
-  const date = new Date(new Date(ts).getTime() + 9 * 60 * 60 * 1000); // 한국시간 변환
+  const date = new Date(new Date(ts).getTime() - 9 * 60 * 60 * 1000); // 한국시간 변환
   return today.toDateString() === date.toDateString();
 }
 
 function formatTime(ts) {
-  const d = new Date(new Date(ts).getTime() + 9 * 60 * 60 * 1000); // 한국시간 변환
+  const d = new Date(new Date(ts).getTime() - 9 * 60 * 60 * 1000); // 한국시간 변환
   return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 

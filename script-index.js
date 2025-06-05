@@ -96,6 +96,13 @@ document.getElementById('loginButton')?.addEventListener('click', async function
   }
 });
 
+document.getElementById('password')?.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    document.getElementById('loginButton')?.click();
+  }
+});
+
+
 
 // ✅ 튜토리얼 진입 버튼 클릭 시
 document.getElementById('btnTStudentTutorial')?.addEventListener('click', () => {
