@@ -7,14 +7,13 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
 }
 
+// ✅ 로그인 버튼 클릭 시
 document.getElementById('loginButton')?.addEventListener('click', async function () {
-  const currentId = localStorage.getItem('currentUserId');
-  const isFakeTutorialId = currentId && /^tutorial\d{8}$/.test(currentId);
+  const iosTutorialId = localStorage.getItem('tutorialIdForSubscription');
+  const isIOS = Boolean(iosTutorialId);
 
   let permission = 'granted';
-
-  // ✅ iOS가 아닌 경우에만 알림 권한 요청
-  if (!isFakeTutorialId) {
+  if (!isIOS) {
     permission = await Notification.requestPermission();
     if (permission === 'denied') {
       alert("🚫 브라우저 알림이 차단되어 있습니다.\n설정에서 직접 알림 허용을 해주세요.");
@@ -24,7 +23,6 @@ document.getElementById('loginButton')?.addEventListener('click', async function
 
   const enteredUsername = document.getElementById('username').value.trim();
   const enteredPassword = document.getElementById('password').value.trim();
-
   if (!enteredUsername || !enteredPassword) {
     alert("ID와 비밀번호를 모두 입력해주세요.");
     return;
@@ -36,10 +34,7 @@ document.getElementById('loginButton')?.addEventListener('click', async function
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: enteredUsername,
-          password: enteredPassword
-        })
+        body: JSON.stringify({ userId: enteredUsername, password: enteredPassword })
       }
     );
 
@@ -49,12 +44,20 @@ document.getElementById('loginButton')?.addEventListener('click', async function
       const userType = data.userType || 'student';
       localStorage.setItem('currentUserId', userId);
 
-      // ✅ 푸시 등록은 iOS 아닌 경우만
-      try {
-        if (!isFakeTutorialId && permission === 'granted') {
+      if (isIOS && iosTutorialId) {
+        try {
+          await fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/append-tutorial-id-fromios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, tutorialId: iosTutorialId })
+          });
+        } catch (err) {
+          console.warn("iOS tutorialId append 실패:", err);
+        }
+      } else if (!isIOS && permission === 'granted') {
+        try {
           await navigator.serviceWorker.register('service-worker.js');
           const registration = await navigator.serviceWorker.ready;
-
           const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
@@ -63,17 +66,13 @@ document.getElementById('loginButton')?.addEventListener('click', async function
           await fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/login-subscription-check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId,
-              subscription
-            })
+            body: JSON.stringify({ userId, subscription })
           });
+        } catch (err) {
+          console.warn("알림 등록 실패 (무시됨):", err);
         }
-      } catch (err) {
-        console.warn("알림 등록 실패 (무시됨):", err);
       }
 
-      // ✅ 로그인 성공 후 이동
       if (userType === 'student') {
         window.location.href = `student-room.html?id=${userId}`;
       } else if (userType === 'parent') {
@@ -102,24 +101,22 @@ document.getElementById('password')?.addEventListener('keydown', function (e) {
   }
 });
 
-
-
 // ✅ 튜토리얼 진입 버튼 클릭 시
 document.getElementById('btnTStudentTutorial')?.addEventListener('click', () => {
-  const currentId = localStorage.getItem('currentUserId');
-  const isFakeTutorialId = currentId && /^tutorial\d{8}$/.test(currentId);
+  const iosTutorialId = localStorage.getItem('tutorialIdForSubscription');
+  const isIOS = Boolean(iosTutorialId);
 
-  if (isFakeTutorialId) {
-    alert("⚠️ iOS에서는 알림이 작동하지 않습니다.\n경보 알림은 울리지 않으니 참고해주세요.");
-    window.location.href = `tutorial/student-room_tutorial.html?id=${currentId}`;
+  if (isIOS) {
+    alert("⚠️ iOS에서는 푸시알림이 불안정할 수 있습니다. \n 경보기 파트에서 주의해주세요!");
+    const idToUse = iosTutorialId || 'Tutorial';
+    window.location.href = `tutorial/student-room_tutorial.html?id=${idToUse}`;
     return;
   }
 
-  // ✅ 정상 환경 → 알림 허용 팝업 열기
   document.getElementById('popup-student').style.display = 'block';
 });
 
-
+// ✅ 알림 권한 팝업에서 허용 클릭 시
 document.getElementById('confirmStudentPermission')?.addEventListener('click', async () => {
   try {
     const permission = await Notification.requestPermission();
@@ -130,7 +127,6 @@ document.getElementById('confirmStudentPermission')?.addEventListener('click', a
 
     await navigator.serviceWorker.register('service-worker.js');
     const registration = await navigator.serviceWorker.ready;
-
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
@@ -146,7 +142,6 @@ document.getElementById('confirmStudentPermission')?.addEventListener('click', a
     const userId = data.userId;
     localStorage.setItem('currentUserId', userId);
 
-    // ✅ 팝업 닫고 바로 튜토리얼 페이지로 이동
     document.getElementById('popup-student').style.display = 'none';
     window.location.href = `tutorial/student-room_tutorial.html?id=${userId}`;
 
@@ -156,16 +151,18 @@ document.getElementById('confirmStudentPermission')?.addEventListener('click', a
   }
 });
 
+// ✅ 튜토리얼 바로 실행 버튼
 document.getElementById('launchStudentTutorial')?.addEventListener('click', () => {
   const userId = localStorage.getItem('currentUserId') || 'Tutorial';
   window.location.href = `tutorial/student-room_tutorial.html?id=${userId}`;
 });
 
+// ✅ 부모 튜토리얼 진입
 document.getElementById('btnTParentsTutorial')?.addEventListener('click', () => {
   window.location.href = 'tutorial/parents-room_tutorial.html?id=ParentsSample';
 });
 
-// ✅ 회원가입 버튼 → register.html로 이동
+// ✅ 회원가입
 document.getElementById('signupButton')?.addEventListener('click', () => {
   window.location.href = 'register.html';
 });
