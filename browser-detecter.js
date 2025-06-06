@@ -144,6 +144,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
   if (isStandalone && Notification.permission !== 'granted') {
-    insertPwaOverlay();
+    requestAnimationFrame(() => {
+      insertPwaOverlay();
+    });
   }
 });
