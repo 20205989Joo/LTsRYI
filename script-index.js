@@ -1,5 +1,3 @@
-const vapidPublicKey = 'BEvKBnLcnotYEeOBexk0i-_2oK5aU3epudG8lszhppdiGeiDT2JPbkXF-THFDYXcWjiGNktD7gIOj4mE_MC_9nE';
-
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -42,8 +40,16 @@ document.getElementById('loginButton')?.addEventListener('click', async function
       const data = await response.json();
       const userId = data.userId || enteredUsername;
       const userType = data.userType || 'student';
+      const isRegistered = data.isRegistered === true;
+
+      if (!isRegistered) {
+        alert("💳 이 계정은 아직 등록되지 않았습니다.\n결제 또는 등록이 완료되어야 사용할 수 있어요.");
+        return;
+      }
+
       localStorage.setItem('currentUserId', userId);
 
+      // ✅ iOS 푸시 구독 ID 처리
       if (isIOS && iosTutorialId) {
         try {
           await fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/append-tutorial-id-fromios', {
@@ -54,7 +60,10 @@ document.getElementById('loginButton')?.addEventListener('click', async function
         } catch (err) {
           console.warn("iOS tutorialId append 실패:", err);
         }
-      } else if (!isIOS && permission === 'granted') {
+      }
+
+      // ✅ 일반 환경에서 푸시 구독 처리
+      else if (!isIOS && permission === 'granted') {
         try {
           await navigator.serviceWorker.register('service-worker.js');
           const registration = await navigator.serviceWorker.ready;
@@ -73,6 +82,7 @@ document.getElementById('loginButton')?.addEventListener('click', async function
         }
       }
 
+      // ✅ 사용자 유형에 따라 리다이렉트
       if (userType === 'student') {
         window.location.href = `student-room.html?id=${userId}`;
       } else if (userType === 'parent') {
@@ -94,6 +104,7 @@ document.getElementById('loginButton')?.addEventListener('click', async function
     alert("네트워크 오류로 로그인할 수 없습니다.");
   }
 });
+
 
 document.getElementById('password')?.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
