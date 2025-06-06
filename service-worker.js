@@ -13,7 +13,7 @@ self.addEventListener('push', event => {
   event.waitUntil(
     self.registration.showNotification(data.title || '알림', {
       body: data.body || '새 메시지가 있습니다.',
-      icon: 'icon.png',
+      icon: 'icon-512.png',
       data: { url: '/' } // 알림 클릭 시 열릴 URL
     })
   );

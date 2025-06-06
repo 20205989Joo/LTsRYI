@@ -136,8 +136,7 @@ function insertPwaOverlay() {
   blocker.appendChild(msg);
   blocker.appendChild(button);
 
-  const container = document.querySelector('.main-page') || document.body;
-  container.appendChild(blocker);
+document.body.appendChild(blocker);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -149,4 +148,37 @@ window.addEventListener('DOMContentLoaded', () => {
   if (isStandalone && Notification.permission !== 'granted') {
     insertPwaOverlay();
   }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  const problem = detectBrowserIssue();
+  if (problem) showEnvironmentTip(problem);
+
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+  if (isStandalone && Notification.permission !== 'granted') {
+    insertPwaOverlay();
+  }
+
+  // ✅ 테스트 버튼 추가
+  const testBtn = document.createElement('button');
+  testBtn.textContent = '🧪 테스트 오버레이 켜기';
+  testBtn.style = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100000;
+    padding: 10px 14px;
+    font-size: 14px;
+    background: #bbf;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+  `;
+  testBtn.onclick = () => {
+    console.log("🧪 테스트 오버레이 실행됨");
+    insertPwaOverlay();
+  };
+  document.body.appendChild(testBtn);
 });
