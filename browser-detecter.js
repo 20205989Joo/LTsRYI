@@ -120,7 +120,8 @@ function insertPwaOverlay() {
       if (data.userId) {
         localStorage.setItem('tutorialIdForSubscription', data.userId);
         console.log('✅ tutorial ID 저장됨:', data.userId);
-        blocker.remove();
+        const blocker = document.getElementById('pwa-overlay-blocker');
+        if (blocker) blocker.remove();
       } else {
         alert("❌ tutorialId 발급 실패: 서버 응답 이상");
       }
@@ -139,7 +140,9 @@ function insertPwaOverlay() {
 
 window.addEventListener('DOMContentLoaded', async () => {
   const problem = detectBrowserIssue();
+  const tutorialId = localStorage.getItem('tutorialIdForSubscription');
 
+  // 환경 메시지 출력
   const hasPushSubscription = await navigator.serviceWorker.ready
     .then(reg => reg.pushManager.getSubscription())
     .then(sub => !!sub)
@@ -149,12 +152,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     showEnvironmentTip(problem);
   }
 
-  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  // 오버레이 항상 생성
+  insertPwaOverlay();
 
-  if (isStandalone && Notification.permission !== 'granted') {
-    requestAnimationFrame(() => {
-      console.log("🟢 requestAnimationFrame으로 insertPwaOverlay 실행");
-      insertPwaOverlay();
-    });
+  // 등록된 튜토리얼 ID 있으면 오버레이 제거
+  if (tutorialId) {
+    console.log("🧾 이미 등록된 tutorialId 확인됨:", tutorialId);
+    const blocker = document.getElementById('pwa-overlay-blocker');
+    if (blocker) blocker.remove();
   }
 });

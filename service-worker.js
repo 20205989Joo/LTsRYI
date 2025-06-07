@@ -1,3 +1,5 @@
+//version1.01
+
 // 🚀 설치되자마자 새로 적용
 self.addEventListener('install', event => {
   self.skipWaiting();
