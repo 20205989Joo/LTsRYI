@@ -1,4 +1,3 @@
-// grades.js
 window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const userId = params.get('id');
@@ -12,32 +11,36 @@ window.addEventListener('DOMContentLoaded', async () => {
     let todayQGrade = 0;
     const todayItems = [];
 
-    // ✅ 오늘 날짜 (KST 기준)
+    // ✅ 오늘 날짜 (KST 기준 문자열)
     const now = new Date();
-    const kstOffset = 9 * 60 * 60 * 1000;
-    const kstNow = new Date(now.getTime() + kstOffset);
-    const todayStr = kstNow.toISOString().slice(0, 10);
-    console.log(`📌 오늘 (KST 기준): ${todayStr}`);
+    const todayStr = now.toLocaleDateString('sv-SE');  // ex: "2025-06-07"
+    console.log("📌 [기준 now 시각 (로컬 KST)]:", now.toString());
+    console.log("📅 [기준 날짜 (YYYY-MM-DD)] :", todayStr);
 
     data.forEach(item => {
-      const date = new Date(item.Timestamp);
-      const dateStr = new Date(date.getTime() + kstOffset).toISOString().slice(0, 10);
+      const timestamp = item.Timestamp;
+      const rawDateStr = timestamp?.slice(0, 10); // "YYYY-MM-DD"
       const score = Number(item.Score);
 
-      console.log(`📅 숙제 Timestamp: ${item.Timestamp} → ${dateStr} / ${item.Subcategory} / ${score}점`);
+      console.log("🧾 [원본 Timestamp (ISO)]      :", timestamp);
+      console.log("📅 [날짜 문자열 비교 기준]    :", rawDateStr);
+      console.log("📦 [Subcategory / Score]     :", item.Subcategory, "/", score);
 
       if (!isNaN(score)) {
-        if (!dateMap[dateStr]) dateMap[dateStr] = 0;
-        dateMap[dateStr] += score;
+        if (!dateMap[rawDateStr]) dateMap[rawDateStr] = 0;
+        dateMap[rawDateStr] += score;
 
-        if (dateStr === todayStr) {
+        if (rawDateStr === todayStr) {
+          console.log("✅ [오늘 숙제로 판정됨]");
           todayQGrade += score;
           todayItems.push(item);
+        } else {
+          console.log("❌ [오늘 숙제가 아님]");
         }
       }
     });
 
-    // ✅ 누적 계산
+    // ✅ 누적 점수 계산
     const sortedDates = Object.keys(dateMap).sort();
     const dailyGrades = [];
     const cumulativeGrades = [];
@@ -50,53 +53,49 @@ window.addEventListener('DOMContentLoaded', async () => {
       cumulativeGrades.push(cumulativeTotal);
     });
 
-    // ✅ 오늘 점수 표시 + 숙제 요약 표시
-// ✅ 오늘 점수 표시 + 숙제 요약 표시
-const todayEl = document.getElementById('todayPoint');
-const todayWrapper = todayEl?.parentElement;
+    // ✅ 오늘 점수 표시 + 숙제 요약
+    const todayEl = document.getElementById('todayPoint');
+    const todayWrapper = todayEl?.parentElement;
 
-if (todayEl) {
-  todayEl.textContent = `${todayQGrade}`;
+    if (todayEl) {
+      todayEl.textContent = `${todayQGrade}`;
 
-  // ✅ 숙제별 간단 요약 (점수 있는 항목만)
-const details = todayItems
-  .filter(item => (
-    item.Subcategory &&
-    item.Score !== null &&
-    item.Score !== '' &&
-    !isNaN(Number(item.Score)) &&
-    Number(item.Score) > 0
-  ))
-  .map(item => `${item.Subcategory}: ${Number(item.Score)}점`);
+      const details = todayItems
+        .filter(item =>
+          item.Subcategory &&
+          item.Score !== null &&
+          item.Score !== '' &&
+          !isNaN(Number(item.Score)) &&
+          Number(item.Score) > 0
+        )
+        .map(item => `${item.Subcategory}: ${Number(item.Score)}점`);
 
+      let detailEl = document.getElementById('todayPointDetails');
+      if (!detailEl) {
+        detailEl = document.createElement('div');
+        detailEl.id = 'todayPointDetails';
 
-  // ✅ summary element 추가 또는 갱신
-  let detailEl = document.getElementById('todayPointDetails');
-  if (!detailEl) {
-    detailEl = document.createElement('div');
-    detailEl.id = 'todayPointDetails';
+        Object.assign(detailEl.style, {
+          position: 'absolute',
+          top: '-150px',
+          left: '20px',
+          fontSize: '11px',
+          color: '#fffde0',
+          lineHeight: '1.2',
+          whiteSpace: 'pre-line',
+          maxWidth: '130px',
+          pointerEvents: 'none',
+          opacity: '0.85',
+          zIndex: '6'
+        });
 
-    // ✅ 위치와 스타일 조정
-    detailEl.style.position = 'absolute';
-    detailEl.style.top = '-150px';
-    detailEl.style.left = '20px';
-    detailEl.style.fontSize = '11px';
-    detailEl.style.color = '#fffde0';
-    detailEl.style.lineHeight = '1.2';
-    detailEl.style.whiteSpace = 'pre-line';
-    detailEl.style.maxWidth = '130px';
-    detailEl.style.pointerEvents = 'none';
-    detailEl.style.opacity = '0.85';
-    detailEl.style.zIndex = '6';
+        todayWrapper?.appendChild(detailEl);
+      }
 
-    todayWrapper?.appendChild(detailEl);
-  }
+      detailEl.textContent = details.join('\n');
+    }
 
-  detailEl.textContent = details.join('\n');
-}
-
-
-    // ✅ 그래프 그리기
+    // ✅ 차트 그리기
     const ctx = document.getElementById('submissionChart').getContext('2d');
     new Chart(ctx, {
       type: 'bar',
@@ -153,6 +152,6 @@ const details = todayItems
     });
 
   } catch (err) {
-    console.error("데이터 불러오기 실패:", err);
+    console.error("❌ 데이터 불러오기 실패:", err);
   }
 });

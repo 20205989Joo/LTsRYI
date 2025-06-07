@@ -171,16 +171,57 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
 if (res.ok) {
   alert(`✅ ${item.Subcategory} 제출 완료!\nURL: ${result.url}`);
+
+  // ✅ 제출된 항목 제거
   updated[i] = null;
   hwplus = hwplus.filter(entry => entry.Subcategory !== item.Subcategory);
   anySubmitted = true;
 
-  // ✅ 시험 기반 숙제였다면 결과도 초기화
+  // ✅ 시험 기반 숙제 결과 초기화
   if (item.HWType === 'doneinweb') {
     localStorage.removeItem('QuizResults');
     console.log('🧹 QuizResults 초기화 완료');
   }
+
+  // ✅ 근면도 기록
+  try {
+    await fetch("https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/logDiligence", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        UserId: userId,
+        Subcategory: item.Subcategory,
+        LessonNo: item.LessonNo ?? 0,
+        RegisteredBy: 'system'
+      })
+    });
+    console.log(`📘 Diligence 기록 완료: ${item.Subcategory}, Day ${item.LessonNo}`);
+  } catch (e) {
+    console.warn(`⚠️ Diligence 기록 실패: ${item.Subcategory}`, e);
+  }
+
+  // ✅ 진도율 기록 (subcategoryMap에 포함된 항목만)
+  if (item.Subcategory in subcategoryMap) {
+    try {
+      await fetch("https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/updateProgressMatrix", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          UserId: userId,
+          Subject: subcategoryMap[item.Subcategory],
+          LessonNo: item.LessonNo ?? 0,
+          Status: "done",
+          RegisteredBy: "system"
+        })
+      });
+      console.log(`📗 ProgressMatrix 기록 완료: ${item.Subcategory} (${subcategoryMap[item.Subcategory]})`);
+    } catch (e) {
+      console.warn(`⚠️ ProgressMatrix 기록 실패: ${item.Subcategory}`, e);
+    }
+  }
 }
+
+
  else {
           alert(`❌ ${item.Subcategory} 제출 실패: ${result.message}`);
         }

@@ -134,13 +134,12 @@ function insertPwaOverlay() {
   blocker.appendChild(msg);
   blocker.appendChild(button);
 
-document.body.appendChild(blocker);
+  document.body.appendChild(blocker);
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
   const problem = detectBrowserIssue();
 
-  // ✅ 이미 푸시 구독 정보가 있으면 안내 메시지 생략
   const hasPushSubscription = await navigator.serviceWorker.ready
     .then(reg => reg.pushManager.getSubscription())
     .then(sub => !!sub)
@@ -153,7 +152,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
   if (isStandalone && Notification.permission !== 'granted') {
-    insertPwaOverlay();
+    requestAnimationFrame(() => {
+      console.log("🟢 requestAnimationFrame으로 insertPwaOverlay 실행");
+      insertPwaOverlay();
+    });
   }
 });
-
