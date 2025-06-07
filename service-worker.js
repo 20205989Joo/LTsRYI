@@ -19,6 +19,7 @@ self.addEventListener('push', event => {
   );
 });
 
+
 // 👆 푸시 알림 클릭 시 index로 이동
 self.addEventListener('notificationclick', event => {
   event.notification.close();
@@ -33,4 +34,4 @@ self.addEventListener('notificationclick', event => {
       return clients.openWindow(urlToOpen);
     })
   );
-});
+}); 
