@@ -120,8 +120,7 @@ function insertPwaOverlay() {
       if (data.userId) {
         localStorage.setItem('tutorialIdForSubscription', data.userId);
         console.log('✅ tutorial ID 저장됨:', data.userId);
-        const blocker = document.getElementById('pwa-overlay-blocker');
-        if (blocker) blocker.remove();
+        blocker.remove();
       } else {
         alert("❌ tutorialId 발급 실패: 서버 응답 이상");
       }
@@ -134,31 +133,98 @@ function insertPwaOverlay() {
 
   blocker.appendChild(msg);
   blocker.appendChild(button);
-
   document.body.appendChild(blocker);
+
+  // blocker 생성 상태 hidden으로 기록
+  const logStatus = document.createElement('div');
+  logStatus.id = 'debug-blocker-status';
+  logStatus.style = 'display:none';
+  logStatus.textContent = '✅ overlay blocker created';
+  document.body.appendChild(logStatus);
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  const problem = detectBrowserIssue();
+  let log = "📋 디버그 로그\n----------------\n";
+  const ua = navigator.userAgent;
   const tutorialId = localStorage.getItem('tutorialIdForSubscription');
+  const problem = detectBrowserIssue();
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  const permission = Notification.permission;
 
-  // 환경 메시지 출력
+  log += `📱 UserAgent: ${ua}\n`;
+  log += `🔍 문제 감지됨: ${problem || '없음'}\n`;
+  log += `📦 standalone 모드: ${isStandalone}\n`;
+  log += `🔔 알림 권한 상태: ${permission}\n`;
+  log += `🧾 tutorialId 존재 여부: ${tutorialId ? '✅ 있음' : '❌ 없음'}\n`;
+
   const hasPushSubscription = await navigator.serviceWorker.ready
     .then(reg => reg.pushManager.getSubscription())
-    .then(sub => !!sub)
-    .catch(() => false);
+    .then(sub => {
+      log += `📬 pushManager 구독 상태: ${sub ? '✅ 있음' : '❌ 없음'}\n`;
+      return !!sub;
+    })
+    .catch(err => {
+      log += `❌ pushManager 오류: ${err}\n`;
+      return false;
+    });
 
   if (problem && !hasPushSubscription) {
     showEnvironmentTip(problem);
+    log += "⚠️ 환경 팁 표시됨\n";
   }
 
-  // 오버레이 항상 생성
   insertPwaOverlay();
+  log += "🧱 insertPwaOverlay() 호출됨\n";
 
-  // 등록된 튜토리얼 ID 있으면 오버레이 제거
-  if (tutorialId) {
-    console.log("🧾 이미 등록된 tutorialId 확인됨:", tutorialId);
+  setTimeout(() => {
     const blocker = document.getElementById('pwa-overlay-blocker');
-    if (blocker) blocker.remove();
-  }
+    if (tutorialId && blocker) {
+      blocker.remove();
+      log += "🧹 오버레이 제거 완료\n";
+    } else {
+      log += "🟥 오버레이 제거 조건 불충족\n";
+    }
+
+    const blockerCheck = document.getElementById('debug-blocker-status');
+    log += `🧱 blocker 생성 여부: ${blockerCheck ? blockerCheck.textContent : '❌ 없음'}\n`;
+  }, 1000);
+
+  const alertBtn = document.createElement('button');
+  alertBtn.textContent = '📋 디버그 로그 보기';
+  alertBtn.style = `
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    z-index: 100000;
+    padding: 10px 14px;
+    font-size: 14px;
+    background: #ffd;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+  `;
+  alertBtn.onclick = () => alert(log);
+  document.body.appendChild(alertBtn);
+
+  const testBtn = document.createElement('button');
+  testBtn.textContent = '🧪 테스트 오버레이 켜기';
+  testBtn.style = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100000;
+    padding: 10px 14px;
+    font-size: 14px;
+    background: #bbf;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+  `;
+  testBtn.onclick = () => {
+    console.log("🧪 테스트 오버레이 실행됨");
+    insertPwaOverlay();
+  };
+  document.body.appendChild(testBtn);
 });
