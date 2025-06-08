@@ -10,15 +10,16 @@ function detectBrowserIssue() {
     console.warn("🧪 Safari 테스트 모드 활성화됨");
     return 'ios-safari';
   }
-    if (localStorage.getItem('forceKakaoMode') === 'true') {
+  if (localStorage.getItem('forceKakaoMode') === 'true') {
     console.warn("🧪 카카오 브라우저 테스트 모드 활성화됨");
     return 'kakao';
   }
 
   const ua = navigator.userAgent.toLowerCase();
   const isIos = /iphone|ipad|ipod/.test(ua);
-  const isSafari = isIos && ua.includes("safari") && !ua.includes("crios") && !ua.includes("fxios");
-  const isKakao = /kakaotalk/.test(ua);
+  const isSafari = isIos && ua.includes("safari") && !ua.includes("crios") && !ua.includes("fxios") && !ua.includes("edgios") && !ua.includes("chrome");
+  
+  const isKakao = /kakao(talk)?/.test(ua);  // ✅ "kakao", "kakaotalk" 둘 다 대응
   const isSamsung = /samsungbrowser/.test(ua);
   const isChrome = /chrome/.test(ua) && !isSamsung;
 
@@ -29,6 +30,7 @@ function detectBrowserIssue() {
   if (isSamsung) return 'samsung-browser';
   return null;
 }
+
 
 function isIosPwa() {
   if (localStorage.getItem('forcePwaMode') === 'true') {
