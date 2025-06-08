@@ -241,16 +241,20 @@ window.addEventListener('DOMContentLoaded', async () => {
       return false;
     });
 
-  if (problem === 'ios-safari' && !tutorialId) {
-    insertIosFallbackOverlay();
-    log += "🧪 iOS fallback 오버레이 표시됨\n";
-  } else if (problem && !hasPushSubscription) {
-    showEnvironmentTip(problem);
-    log += "⚠️ 환경 팁 표시됨\n";
-  } else if (!tutorialId && !hasPushSubscription) {
-    insertPwaOverlay();
-    log += "🧱 insertPwaOverlay() 호출됨\n";
-  }
+if (problem === 'ios-safari' && !tutorialId) {
+  insertIosFallbackOverlay();
+  log += "🧪 iOS fallback 오버레이 표시됨\n";
+} else if (problem === 'kakao' || problem === 'samsung-browser') {
+  showEnvironmentTip(problem);
+  log += `⚠️ ${problem} 환경 팁 무조건 표시됨\n`;
+} else if (problem && !hasPushSubscription) {
+  showEnvironmentTip(problem);
+  log += "⚠️ 일반 브라우저 환경 팁 표시됨\n";
+} else if (!tutorialId && !hasPushSubscription) {
+  insertPwaOverlay();
+  log += "🧱 insertPwaOverlay() 호출됨\n";
+}
+
 
   // ✅ Safari 테스트 토글 버튼
   const testBtn = document.createElement('button');
