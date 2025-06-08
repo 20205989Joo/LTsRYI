@@ -514,7 +514,23 @@ function runOverlayDecisionLogic() {
   }
 
   console.log(log);
+
+  // ✅ 추가: 디버그 리포트 수동 실행
+  runDebugReport?.();
 }
+
+// ✅ 함수 정의: 콘솔에 정보 출력
+function runDebugReport() {
+  console.group("🧪 runDebugReport()");
+  console.log("✅ navigator.userAgent:", navigator.userAgent);
+  console.log("✅ location.href:", location.href);
+  console.log("✅ Notification:", typeof Notification !== 'undefined' ? Notification.permission : '❌ 미지원');
+  console.log("✅ tutorialId:", localStorage.getItem('tutorialIdForSubscription'));
+  console.log("✅ isIosPwa:", isIosPwa());
+  console.log("✅ detectBrowserIssue():", detectBrowserIssue());
+  console.groupEnd();
+}
+
 
 
 
