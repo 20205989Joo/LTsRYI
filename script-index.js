@@ -105,7 +105,7 @@ document.getElementById('loginButton')?.addEventListener('click', async function
   }
 });
 
-
+// ✅ 엔터로 로그인
 document.getElementById('password')?.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
     document.getElementById('loginButton')?.click();
@@ -114,52 +114,12 @@ document.getElementById('password')?.addEventListener('keydown', function (e) {
 
 // ✅ 튜토리얼 진입 버튼 클릭 시
 document.getElementById('btnTStudentTutorial')?.addEventListener('click', () => {
-  const iosTutorialId = localStorage.getItem('tutorialIdForSubscription');
-  const isIOS = Boolean(iosTutorialId);
-
-  if (isIOS) {
-    alert("⚠️ iOS에서는 푸시알림이 불안정할 수 있습니다. \n 경보기 파트에서 주의해주세요!");
-    const idToUse = iosTutorialId || 'Tutorial';
-    window.location.href = `tutorial/student-room_tutorial.html?id=${idToUse}`;
+  const tutorialId = localStorage.getItem('tutorialIdForSubscription');
+  if (!tutorialId) {
+    alert("❌ tutorial ID가 없습니다.\n먼저 '일단 시도!'를 눌러 tutorial ID를 발급받아야 합니다.");
     return;
   }
-
-  document.getElementById('popup-student').style.display = 'block';
-});
-
-// ✅ 알림 권한 팝업에서 허용 클릭 시
-document.getElementById('confirmStudentPermission')?.addEventListener('click', async () => {
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      alert("알림 권한이 필요합니다.");
-      return;
-    }
-
-    await navigator.serviceWorker.register('service-worker.js');
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-    });
-
-    const res = await fetch('https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/grant-tutorial-id', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription })
-    });
-
-    const data = await res.json();
-    const userId = data.userId;
-    localStorage.setItem('currentUserId', userId);
-
-    document.getElementById('popup-student').style.display = 'none';
-    window.location.href = `tutorial/student-room_tutorial.html?id=${userId}`;
-
-  } catch (err) {
-    console.error("튜토리얼 ID 발급 실패:", err);
-    alert("알림 설정에 실패했습니다. 다시 시도해주세요.");
-  }
+  window.location.href = `tutorial/student-room_tutorial.html?id=${tutorialId}`;
 });
 
 // ✅ 튜토리얼 바로 실행 버튼
