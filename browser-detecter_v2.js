@@ -10,6 +10,10 @@ function detectBrowserIssue() {
     console.warn("🧪 Safari 테스트 모드 활성화됨");
     return 'ios-safari';
   }
+    if (localStorage.getItem('forceKakaoMode') === 'true') {
+    console.warn("🧪 카카오 브라우저 테스트 모드 활성화됨");
+    return 'kakao';
+  }
 
   const ua = navigator.userAgent.toLowerCase();
   const isIos = /iphone|ipad|ipod/.test(ua);
@@ -323,5 +327,28 @@ overlayTestBtn.onclick = () => {
   insertPwaOverlay();
 };
 document.body.appendChild(overlayTestBtn);
+
+// ✅ 테스트용 카카오 브라우저 강제 모드
+const kakaoTestBtn = document.createElement('button');
+kakaoTestBtn.textContent = '🧪 카카오 브라우저 테스트';
+kakaoTestBtn.style = `
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  z-index: 100000;
+  padding: 10px 14px;
+  font-size: 14px;
+  background: #ffe0e0;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+`;
+kakaoTestBtn.onclick = () => {
+  const current = localStorage.getItem('forceKakaoMode') === 'true';
+  localStorage.setItem('forceKakaoMode', current ? 'false' : 'true');
+  alert(`🧪 카카오 브라우저 테스트 모드가 ${!current ? '활성화' : '비활성화'}되었습니다.\n페이지를 새로고침 해주세요.`);
+};
+document.body.appendChild(kakaoTestBtn);
 
 });
