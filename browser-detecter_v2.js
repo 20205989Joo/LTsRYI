@@ -245,110 +245,88 @@ window.addEventListener('DOMContentLoaded', async () => {
       return false;
     });
 
-if (problem === 'ios-safari' && !tutorialId) {
-  insertIosFallbackOverlay();
-  log += "🧪 iOS fallback 오버레이 표시됨\n";
-} else if (problem === 'kakao' || problem === 'samsung-browser') {
-  showEnvironmentTip(problem);
-  log += `⚠️ ${problem} 환경 팁 무조건 표시됨\n`;
-} else if (problem && !hasPushSubscription) {
-  showEnvironmentTip(problem);
-  log += "⚠️ 일반 브라우저 환경 팁 표시됨\n";
-} else if (!tutorialId && !hasPushSubscription) {
-  insertPwaOverlay();
-  log += "🧱 insertPwaOverlay() 호출됨\n";
-}
+  // ✅ 환경 조건별 처리
+  if (problem === 'ios-safari' && !tutorialId) {
+    insertIosFallbackOverlay();
+    log += "🧪 iOS fallback 오버레이 표시됨\n";
+  }
 
+  if (['kakao', 'samsung-browser'].includes(problem)) {
+    showEnvironmentTip(problem);
+    log += `⚠️ ${problem} 환경 팁 무조건 표시됨\n`;
+  } else if (problem && !hasPushSubscription) {
+    showEnvironmentTip(problem);
+    log += "⚠️ 일반 브라우저 환경 팁 표시됨\n";
+  }
 
-  // ✅ Safari 테스트 토글 버튼
-  const testBtn = document.createElement('button');
-  testBtn.textContent = '🧪 Safari 테스트';
-  testBtn.style = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 100000;
-    padding: 10px 14px;
-    font-size: 14px;
-    background: #bbf;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    cursor: pointer;
-  `;
-  testBtn.onclick = () => {
-    const current = localStorage.getItem('forceSafariMode') === 'true';
-    localStorage.setItem('forceSafariMode', current ? 'false' : 'true');
-    alert(`🧪 Safari 테스트 모드가 ${!current ? '활성화' : '비활성화'}되었습니다.\n페이지를 새로고침 해주세요.`);
-  };
-  document.body.appendChild(testBtn);
+  if (!tutorialId && !hasPushSubscription && problem !== 'ios-safari') {
+    insertPwaOverlay();
+    log += "🧱 insertPwaOverlay() 호출됨\n";
+  }
 
   console.log(log);
 
-  // ✅ tutorialId 제거 버튼
-const clearBtn = document.createElement('button');
-clearBtn.textContent = '🗑️ tutorialId 제거';
-clearBtn.style = `
-  position: fixed;
-  top: 60px;
-  right: 20px;
-  z-index: 100000;
-  padding: 10px 14px;
-  font-size: 14px;
-  background: #fcc;
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  cursor: pointer;
-`;
-clearBtn.onclick = () => {
-  localStorage.removeItem('tutorialIdForSubscription');
-  alert("🗑️ tutorialId가 제거되었습니다. 페이지를 새로고침합니다.");
-  location.reload();
-};
-document.body.appendChild(clearBtn);
-const overlayTestBtn = document.createElement('button');
-overlayTestBtn.textContent = '🔔 오버레이 테스트';
-overlayTestBtn.style = `
-  position: fixed;
-  top: 140px;
-  right: 20px;
-  z-index: 100000;
-  padding: 10px 14px;
-  font-size: 14px;
-  background: #ffd;
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  cursor: pointer;
-`;
-overlayTestBtn.onclick = () => {
-  console.log('🧪 insertPwaOverlay() 수동 호출');
-  insertPwaOverlay();
-};
-document.body.appendChild(overlayTestBtn);
+  // ✅ 디버그 버튼 설정
+  const debugButtons = [
+    {
+      text: '🧪 Safari 테스트',
+      top: 20,
+      color: '#bbf',
+      onclick: () => {
+        const current = localStorage.getItem('forceSafariMode') === 'true';
+        localStorage.setItem('forceSafariMode', current ? 'false' : 'true');
+        alert(`🧪 Safari 테스트 모드 ${!current ? '활성화' : '비활성화'}됨\n새로고침 해주세요.`);
+      }
+    },
+    {
+      text: '🧪 카카오 브라우저 테스트',
+      top: 60,
+      color: '#ffe0e0',
+      onclick: () => {
+        const current = localStorage.getItem('forceKakaoMode') === 'true';
+        localStorage.setItem('forceKakaoMode', current ? 'false' : 'true');
+        alert(`🧪 카카오 테스트 모드 ${!current ? '활성화' : '비활성화'}됨\n새로고침 해주세요.`);
+      }
+    },
+    {
+      text: '🗑️ tutorialId 제거',
+      top: 100,
+      color: '#fcc',
+      onclick: () => {
+        localStorage.removeItem('tutorialIdForSubscription');
+        alert("🗑️ tutorialId 제거됨. 새로고침합니다.");
+        location.reload();
+      }
+    },
+    {
+      text: '🔔 오버레이 테스트',
+      top: 140,
+      color: '#ffd',
+      onclick: () => {
+        console.log("🧪 insertPwaOverlay() 수동 호출");
+        insertPwaOverlay();
+      }
+    }
+  ];
 
-// ✅ 테스트용 카카오 브라우저 강제 모드
-const kakaoTestBtn = document.createElement('button');
-kakaoTestBtn.textContent = '🧪 카카오 브라우저 테스트';
-kakaoTestBtn.style = `
-  position: fixed;
-  top: 100px;
-  right: 20px;
-  z-index: 100000;
-  padding: 10px 14px;
-  font-size: 14px;
-  background: #ffe0e0;
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  cursor: pointer;
-`;
-kakaoTestBtn.onclick = () => {
-  const current = localStorage.getItem('forceKakaoMode') === 'true';
-  localStorage.setItem('forceKakaoMode', current ? 'false' : 'true');
-  alert(`🧪 카카오 브라우저 테스트 모드가 ${!current ? '활성화' : '비활성화'}되었습니다.\n페이지를 새로고침 해주세요.`);
-};
-document.body.appendChild(kakaoTestBtn);
-
+  for (const btn of debugButtons) {
+    const el = document.createElement('button');
+    el.textContent = btn.text;
+    el.style = `
+      position: fixed;
+      top: ${btn.top}px;
+      right: 20px;
+      z-index: 100000;
+      padding: 10px 14px;
+      font-size: 14px;
+      background: ${btn.color};
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+    `;
+    el.onclick = btn.onclick;
+    document.body.appendChild(el);
+  }
 });
+
