@@ -1,4 +1,4 @@
-//version1.02 trying
+//version1.03 trying
 
 // 🚀 설치되자마자 새로 적용
 self.addEventListener('install', event => {
