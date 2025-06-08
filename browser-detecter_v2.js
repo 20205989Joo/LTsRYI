@@ -447,6 +447,10 @@ function insertNormalOverlay() {
 
 
 window.addEventListener('DOMContentLoaded', async () => {
+
+  insertTesterToggles()
+
+
   // ✅ 서비스워커 등록
   if ('serviceWorker' in navigator) {
     try {
@@ -469,9 +473,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   log += `🔔 알림 권한 상태: ${permission}\n`;
   log += `🧾 tutorialId 존재 여부: ${tutorialId ? '✅ 있음' : '❌ 없음'}\n`;
 
-  // ✅ Safari 제외하고 pushManager 구독 여부 확인
+  // ✅ pushManager 구독 여부 확인
   let hasPushSubscription = false;
-  if (problem !== 'ios-safari') {
+  if (problem === 'ios-safari') {
+    // iOS Safari는 푸시 구독 자체가 불가능하므로 false 고정
+    hasPushSubscription = false;
+    log += `⚠️ iOS Safari → pushManager 생략 (false 고정)\n`;
+  } else {
     try {
       const reg = await navigator.serviceWorker.ready;
       if ('pushManager' in reg) {
@@ -482,10 +490,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         log += `⚠️ pushManager 미지원 환경\n`;
       }
     } catch (err) {
-      log += `❌ pushManager 오류: ${err}\n`;
+      log += `❌ pushManager 오류: ${err.message}\n`;
     }
-  } else {
-    log += `⚠️ iOS Safari → pushManager 확인 생략됨\n`;
   }
 
   // ✅ 환경별 조건 처리
@@ -495,9 +501,11 @@ window.addEventListener('DOMContentLoaded', async () => {
       log += "📲 iOS PWA 환경 → 조건 미충족 → insertPwaOverlay()\n";
     }
   } else if (problem === 'ios-safari') {
-    if (!tutorialId) {
+    if (!tutorialId || !hasPushSubscription) {
       insertIosFallbackOverlay();
-      log += "📱 iOS Safari 환경 → ID 없음 → insertIosFallbackOverlay()\n";
+      log += "📱 iOS Safari 환경 → 조건 미충족 → insertIosFallbackOverlay()\n";
+    } else {
+      log += "✅ iOS Safari 환경 → 조건 충족 → 오버레이 생략\n";
     }
   } else if (['kakao', 'samsung-browser'].includes(problem)) {
     showEnvironmentTip(problem);
@@ -506,6 +514,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (!tutorialId || !hasPushSubscription) {
       insertNormalOverlay();
       log += "🖥️ 일반 브라우저 → 조건 미충족 → insertNormalOverlay()\n";
+    } else {
+      log += "✅ 일반 브라우저 → 조건 충족 → 오버레이 생략\n";
     }
   }
 
@@ -513,8 +523,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 
+
 // 테스터 버튼들
-/*function insertTesterToggles() {
+function insertTesterToggles() {
   // Safari 모드 토글
   const safariBtn = document.createElement('button');
   safariBtn.textContent = 'Safari 강제 ON/OFF';
@@ -543,7 +554,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     location.reload();
   };
 
-  // PWA 모드 토글
+  /*// PWA 모드 토글
   const pwaBtn = document.createElement('button');
   pwaBtn.textContent = 'PWA 강제 ON/OFF';
   pwaBtn.style = `
@@ -621,10 +632,48 @@ window.addEventListener('DOMContentLoaded', async () => {
     alert('🧽 tutorialIdForSubscription 삭제됨');
     location.reload();
   };
-
-  document.body.appendChild(safariBtn);
-  document.body.appendChild(pwaBtn);
-  document.body.appendChild(resetPushBtn);
-  document.body.appendChild(resetIdOnlyBtn);
-}
 */
+  //document.body.appendChild(safariBtn);
+  //document.body.appendChild(pwaBtn);
+  //document.body.appendChild(resetPushBtn);
+  //document.body.appendChild(resetIdOnlyBtn);
+
+    // fallback overlay 강제 호출
+  const fallbackBtn = document.createElement('button');
+  fallbackBtn.textContent = '📱 iOS fallbackOverlay 강제 실행';
+  fallbackBtn.style = `
+    position: fixed;
+    bottom: 180px;
+    left: 20px;
+    z-index: 100003;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: none;
+    background: #f8bbd0;
+    color: #333;
+    cursor: pointer;
+  `;
+  fallbackBtn.onclick = () => {
+    localStorage.removeItem('tutorialIdForSubscription');
+    alert('🧽 tutorialId 삭제됨. fallback overlay 실행!');
+    if (typeof insertIosFallbackOverlay === 'function') {
+      insertIosFallbackOverlay();
+    } else {
+      alert('⚠️ insertIosFallbackOverlay() 함수가 정의되지 않았습니다.');
+    }
+  };
+
+  const ua = navigator.userAgent.toLowerCase();
+  const isIosSafari = /iphone|ipad|ipod/.test(ua) &&
+                      ua.includes("safari") &&
+                      !ua.includes("crios") &&
+                      !ua.includes("fxios") &&
+                      !ua.includes("edgios") &&
+                      !ua.includes("chrome");
+
+  if (isIosSafari || localStorage.getItem('forceSafariMode') === 'true') {
+    document.body.appendChild(fallbackBtn);
+  }
+
+}
