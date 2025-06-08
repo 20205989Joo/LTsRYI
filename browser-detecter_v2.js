@@ -446,10 +446,8 @@ function insertNormalOverlay() {
 }
 
 
-
-
 window.addEventListener('DOMContentLoaded', () => {
-  insertTesterToggles();               // ✅ 버튼 즉시 삽입
+  //insertTesterToggles();               // ✅ 버튼 즉시 삽입
   runOverlayDecisionLogic();           // ✅ overlay 조건 처리
 
   // ✅ serviceWorker는 비동기적으로 따로 처리
@@ -516,27 +514,50 @@ function runOverlayDecisionLogic() {
   console.log(log);
 
   // ✅ 추가: 디버그 리포트 수동 실행
-  runDebugReport?.();
+  //runDebugReport?.();
 }
 
-// ✅ 함수 정의: 콘솔에 정보 출력
+/*// ✅ 함수 정의: 콘솔에 정보 출력
 function runDebugReport() {
-  console.group("🧪 runDebugReport()");
-  console.log("✅ navigator.userAgent:", navigator.userAgent);
-  console.log("✅ location.href:", location.href);
-  console.log("✅ Notification:", typeof Notification !== 'undefined' ? Notification.permission : '❌ 미지원');
-  console.log("✅ tutorialId:", localStorage.getItem('tutorialIdForSubscription'));
-  console.log("✅ isIosPwa:", isIosPwa());
-  console.log("✅ detectBrowserIssue():", detectBrowserIssue());
-  console.groupEnd();
-}
+  let report = "🧪 디버그 리포트\n----------------\n";
+
+  const ua = navigator.userAgent;
+  const tutorialId = localStorage.getItem('tutorialIdForSubscription');
+  const problem = detectBrowserIssue();
+
+  const isStandaloneMode =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+
+  const isIosPwaResult = isIosPwa();
+
+  let permission = 'not-supported';
+  if (typeof Notification !== 'undefined') {
+    permission = Notification.permission;
+  }
+
+  const hasNotification = typeof Notification !== 'undefined';
+  const hasSWController = !!navigator.serviceWorker.controller;
+
+  report += `📱 UserAgent:\n${ua}\n`;
+  report += `🔍 감지된 문제: ${problem || '❌ 없음'}\n`;
+  report += `🏠 isIosPwa(): ${isIosPwaResult ? '✅ true' : '❌ false'}\n`;
+  report += `📦 standalone 매치: ${isStandaloneMode ? '✅ true' : '❌ false'}\n`;
+  report += `🔔 Notification 객체 존재: ${hasNotification ? '✅ 있음' : '❌ 없음'}\n`;
+  report += `🔔 알림 권한 상태: ${permission}\n`;
+  report += `🧾 tutorialId 존재 여부: ${tutorialId ? `✅ 있음 (${tutorialId})` : '❌ 없음'}\n`;
+  report += `🛰️ SW 컨트롤러 존재 여부: ${hasSWController ? '✅ 있음' : '❌ 없음'}\n`;
+
+  alert(report);
+}*/
 
 
 
 
 
 
-// 테스터 버튼들
+
+/*// 테스터 버튼들
 function insertTesterToggles() {
   // Safari 모드 토글
   const safariBtn = document.createElement('button');
@@ -566,7 +587,7 @@ function insertTesterToggles() {
     location.reload();
   };
 
-  /*// PWA 모드 토글
+  // PWA 모드 토글
   const pwaBtn = document.createElement('button');
   pwaBtn.textContent = 'PWA 강제 ON/OFF';
   pwaBtn.style = `
@@ -644,7 +665,7 @@ function insertTesterToggles() {
     alert('🧽 tutorialIdForSubscription 삭제됨');
     location.reload();
   };
-*/
+
   //document.body.appendChild(safariBtn);
   //document.body.appendChild(pwaBtn);
   //document.body.appendChild(resetPushBtn);
@@ -688,4 +709,4 @@ function insertTesterToggles() {
     document.body.appendChild(fallbackBtn);
   }
 
-}
+}*/
