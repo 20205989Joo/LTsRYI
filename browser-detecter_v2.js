@@ -449,15 +449,15 @@ function insertNormalOverlay() {
 
 
 window.addEventListener('DOMContentLoaded', () => {
-  insertTesterToggles();               // ✅ 즉시 버튼 넣기
-  runOverlayDecisionLogic();           // ✅ 오버레이 삽입 조건 분리 처리
+  insertTesterToggles();               // ✅ 버튼 즉시 삽입
+  runOverlayDecisionLogic();           // ✅ overlay 조건 처리
 
-  // ✅ 서비스워커는 완전히 비동기 처리
+  // ✅ serviceWorker는 비동기적으로 따로 처리
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .then(reg => {
         console.log('✅ 서비스워커 등록 성공:', reg.scope);
-        return reg.pushManager.getSubscription();
+        return reg.pushManager?.getSubscription();
       })
       .then(sub => {
         console.log(`📬 pushManager 구독 상태: ${sub ? '✅ 있음' : '❌ 없음'}`);
@@ -470,27 +470,32 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function runOverlayDecisionLogic() {
   let log = "📋 디버그 로그\n----------------\n";
+
   const ua = navigator.userAgent;
   const tutorialId = localStorage.getItem('tutorialIdForSubscription');
   const problem = detectBrowserIssue();
-  const permission = Notification.permission;
+
+  let permission = 'not-supported';
+  if (typeof Notification !== 'undefined') {
+    permission = Notification.permission;
+  }
 
   log += `📱 UserAgent: ${ua}\n`;
   log += `🔍 문제 감지됨: ${problem || '없음'}\n`;
   log += `🔔 알림 권한 상태: ${permission}\n`;
   log += `🧾 tutorialId 존재 여부: ${tutorialId ? '✅ 있음' : '❌ 없음'}\n`;
 
-  const hasPushSubscription = false;  // 초기값 false. SW 등록 이후 비동기로 별도 확인.
+  const hasPushSubscription = false; // 비동기 처리와 무관하게 false로 두고 분기
 
   if (isIosPwa()) {
-    if (!tutorialId) {
+    if (!tutorialId || !hasPushSubscription) {
       insertPwaOverlay();
       log += "📲 iOS PWA 환경 → 조건 미충족 → insertPwaOverlay()\n";
     } else {
       log += "✅ iOS PWA 환경 → 조건 충족 → 오버레이 생략\n";
     }
   } else if (problem === 'ios-safari') {
-    if (!tutorialId) {
+    if (!tutorialId || !hasPushSubscription) {
       insertIosFallbackOverlay();
       log += "📱 iOS Safari 환경 → 조건 미충족 → insertIosFallbackOverlay()\n";
     } else {
@@ -500,7 +505,7 @@ function runOverlayDecisionLogic() {
     showEnvironmentTip(problem);
     log += `⚠️ ${problem} 브라우저 환경 → showEnvironmentTip()\n`;
   } else {
-    if (!tutorialId) {
+    if (!tutorialId || !hasPushSubscription) {
       insertNormalOverlay();
       log += "🖥️ 일반 브라우저 → 조건 미충족 → insertNormalOverlay()\n";
     } else {
@@ -510,6 +515,7 @@ function runOverlayDecisionLogic() {
 
   console.log(log);
 }
+
 
 
 
