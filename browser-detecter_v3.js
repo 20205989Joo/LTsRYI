@@ -135,7 +135,7 @@ left: 48%;
         border-radius: 8px;
         cursor: pointer;
         line-height:0.8;
-        left: 44%;
+        left: 42%;
       ">확인</button>
 
           <button id="retry-btn" style="
