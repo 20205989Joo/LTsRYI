@@ -493,13 +493,13 @@ function runOverlayDecisionLogic() {
       log += "✅ iOS PWA 환경 → 조건 충족 → 오버레이 생략\n";
     }
   } else if (problem === 'ios-safari') {
-    if (!tutorialId || !hasPushSubscription) {
-      insertIosFallbackOverlay();
-      log += "📱 iOS Safari 환경 → 조건 미충족 → insertIosFallbackOverlay()\n";
-    } else {
-      log += "✅ iOS Safari 환경 → 조건 충족 → 오버레이 생략\n";
-    }
-  } else if (['kakao', 'samsung-browser'].includes(problem)) {
+  if (!tutorialId) {
+    insertIosFallbackOverlay();
+    log += "📱 iOS Safari 환경 → tutorialId 없음 → insertIosFallbackOverlay()\n";
+  } else {
+    log += "✅ iOS Safari 환경 → tutorialId 있음 → 오버레이 생략\n";
+  }
+} else if (['kakao', 'samsung-browser'].includes(problem)) {
     showEnvironmentTip(problem);
     log += `⚠️ ${problem} 브라우저 환경 → showEnvironmentTip()\n`;
   } else {
