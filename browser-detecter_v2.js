@@ -483,7 +483,7 @@ function runOverlayDecisionLogic() {
   log += `🔔 알림 권한 상태: ${permission}\n`;
   log += `🧾 tutorialId 존재 여부: ${tutorialId ? '✅ 있음' : '❌ 없음'}\n`;
 
-  const hasPushSubscription = false; // 비동기 처리와 무관하게 false로 두고 분기
+  const hasPushSubscription = !!localStorage.getItem('tutorialIdForSubscription');
 
   if (isIosPwa()) {
     if (!tutorialId || !hasPushSubscription) {
