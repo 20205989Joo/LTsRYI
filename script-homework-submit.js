@@ -83,7 +83,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
       let inputHTML = '';
       if (item.HWType !== 'doneinweb') {
-      inputHTML = `<input type="file" class="file-input" data-subcategory="${item.Subcategory}" multiple style="margin-top: 6px; width: 100%;" />`;
+      inputHTML = `<input type="file" class="file-input" data-subcategory="${item.Subcategory}" multiple accept="*/*" style="margin-top: 6px; width: 100%;" />`;
       }
 
       card.innerHTML = `
