@@ -483,39 +483,35 @@ function runOverlayDecisionLogic() {
   log += `🔔 알림 권한 상태: ${permission}\n`;
   log += `🧾 tutorialId 존재 여부: ${tutorialId ? '✅ 있음' : '❌ 없음'}\n`;
 
-  const hasPushSubscription = !!localStorage.getItem('tutorialIdForSubscription');
-
+  // ✅ iOS PWA는 무조건 insertPwaOverlay 실행 (내부에서 판단)
   if (isIosPwa()) {
-    if (!tutorialId || !hasPushSubscription) {
-      insertPwaOverlay();
-      log += "📲 iOS PWA 환경 → 조건 미충족 → insertPwaOverlay()\n";
-    } else {
-      log += "✅ iOS PWA 환경 → 조건 충족 → 오버레이 생략\n";
-    }
+    insertPwaOverlay();
+    log += "📲 iOS PWA 환경 → insertPwaOverlay() 실행\n";
+
   } else if (problem === 'ios-safari') {
-  if (!tutorialId) {
-    insertIosFallbackOverlay();
-    log += "📱 iOS Safari 환경 → tutorialId 없음 → insertIosFallbackOverlay()\n";
-  } else {
-    log += "✅ iOS Safari 환경 → tutorialId 있음 → 오버레이 생략\n";
-  }
-} else if (['kakao', 'samsung-browser'].includes(problem)) {
+    if (!tutorialId) {
+      insertIosFallbackOverlay();
+      log += "📱 iOS Safari 환경 → tutorialId 없음 → insertIosFallbackOverlay()\n";
+    } else {
+      log += "✅ iOS Safari 환경 → tutorialId 있음 → 오버레이 생략\n";
+    }
+
+  } else if (['kakao', 'samsung-browser'].includes(problem)) {
     showEnvironmentTip(problem);
     log += `⚠️ ${problem} 브라우저 환경 → showEnvironmentTip()\n`;
+
   } else {
-    if (!tutorialId || !hasPushSubscription) {
+    if (!tutorialId) {
       insertNormalOverlay();
-      log += "🖥️ 일반 브라우저 → 조건 미충족 → insertNormalOverlay()\n";
+      log += "🖥️ 일반 브라우저 → tutorialId 없음 → insertNormalOverlay()\n";
     } else {
-      log += "✅ 일반 브라우저 → 조건 충족 → 오버레이 생략\n";
+      log += "✅ 일반 브라우저 → tutorialId 있음 → 오버레이 생략\n";
     }
   }
 
   console.log(log);
-
-  // ✅ 추가: 디버그 리포트 수동 실행
-  //runDebugReport?.();
 }
+
 
 /*// ✅ 함수 정의: 콘솔에 정보 출력
 function runDebugReport() {
