@@ -198,5 +198,5 @@ function restartQuiz() {
 function returnToTray() {
   const params = new URLSearchParams(window.location.search);
   const userId = params.get('id');
-  window.location.href = `homework-tray.html?id=${userId}`;
+  window.location.href = `homework-tray_v1.html?id=${userId}`;
 }
