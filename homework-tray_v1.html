@@ -89,32 +89,43 @@
     }
 
     .receipt-icon {
-  width: 40px;
-  height: 40px;
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  transform: translateX(-50%);
-  background: white;
-  border-radius: 10px;
-  padding: 4px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.2);
-  z-index: 15;
-  cursor: pointer;
-}
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      transform: translateX(-50%);
+      background: white;
+      border-radius: 10px;
+      padding: 4px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.2);
+      z-index: 15;
+      cursor: pointer;
+    }
 
     .dish .done-label {
-  font-size: 11px;
-  color: #666;
-  text-align: center;
-  width: 100%;
-  margin-top: 2px;
-  pointer-events: none;
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-}
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      width: 100%;
+      margin-top: 2px;
+      pointer-events: none;
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+    }
 
+    /* ✅ 좌측 하단 돌아가기 버튼 */
+    #back-to-room-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 999;
+      background: #4caf50;
+    }
+    #back-to-room-btn:hover {
+      background: #388e3c;
+    }
   </style>
 </head>
 <body>
@@ -127,14 +138,24 @@
         </div>
       </div>
       <button onclick="clearDownloadHistory()" class="room-btn"
-              style="position: fixed; top: 30px;right: 30px; z-index: 999;">
+              style="position: fixed; top: 30px; right: 30px; z-index: 999;">
         🧹 기록 초기화
       </button>
+
+      <!-- ✅ student-room.html로 돌아가기 버튼 -->
+      <button id="back-to-room-btn" class="room-btn"> ⬅메인홀로 나가기</button>
     </div>
   </div>
+<script>
+  document.getElementById('back-to-room-btn').addEventListener('click', () => {
+    const userId = new URLSearchParams(window.location.search).get('id');
+    const targetUrl = userId ? `student-room.html?id=${userId}` : `student-room.html`;
+    window.location.replace(targetUrl); // ✅ 스택 비워서 뒤로가기 차단
+  });
+</script>
   <script src="adjustFontSize.js"></script>
-<script src="dish_tray-loader.js"></script>
-<script src="dish_popup-handler.js"></script>
-<script src="dish-receipt.js"></script>
+  <script src="dish_tray-loader.js"></script>
+  <script src="dish_popup-handler.js"></script>
+  <script src="dish-receipt.js"></script>
 </body>
 </html>
