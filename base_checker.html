@@ -220,15 +220,33 @@
     };
   }
 
-  // 로컬 다운로드(.json)
-  function downloadJSON(obj){
-    const blob = new Blob([JSON.stringify(obj, null, 2)], { type:'application/json' });
-    const ts = new Date().toISOString().replace(/[:.]/g,'-');
-    const name = `base_checker_${currentLevel}_${USER_ID}_${ts}.json`;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = name; document.body.appendChild(a); a.click();
-    URL.revokeObjectURL(url); a.remove();
+  /* ---------- iOS 친화 txt 다운로드 유틸 (파일명: Base Checker _ 아이디 _ 레벨.txt) ---------- */
+  function downloadDetailFileTxt(obj){
+    const str = JSON.stringify(obj, null, 2);
+    const fileName = `Base Checker _ ${obj.user} _ ${obj.level}.txt`; // ← 요청 파일명 형식
+
+    const ua = navigator.userAgent;
+    const isIOS   = /iPad|iPhone|iPod/i.test(ua);
+    // 대표 인앱/WKWebView 패턴 (인앱은 download 무시 빈번)
+    const isInApp = /(FBAN|FBAV|Instagram|KAKAOTALK|NAVER|Daum|CriOS|FxiOS|EdgiOS|GSA)/i.test(ua) && !/Safari/i.test(ua);
+
+    if (isIOS && isInApp) {
+      const dataUrl = 'data:text/plain;charset=utf-8,' + encodeURIComponent(str);
+      window.open(dataUrl, '_blank'); // 미리보기 → 공유 시트 → "파일에 저장"
+      return;
+    }
+
+    try{
+      const blob = new Blob([str], { type:'text/plain' });
+      const url  = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fileName;
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1200);
+    }catch(e){
+      const dataUrl = 'data:text/plain;charset=utf-8,' + encodeURIComponent(str);
+      window.open(dataUrl, '_blank');
+    }
   }
 
   // ✅ 대기열에 basechecker 타입으로 등록(업로드 시 .txt로 전송할 원본 JSON 문자열을 저장)
@@ -254,13 +272,13 @@
     }
   }
 
-  // ✨ 최종 저장: JSON 생성 → 대기열 등록 + 로컬 다운로드(보험)
+  // ✨ 최종 저장: JSON 생성 → 대기열 등록 + 로컬 TXT 다운로드(요청 파일명 규칙)
   function saveFinal(){
     const data = buildDetailedJSON();
     try{
-      queueBaseCheckerPending(data);   // 제출 대기리스트 등록
-      downloadJSON(data);              // 로컬에도 .json 저장(보험)
-      alert('최종 저장 완료! (대기열 등록 + JSON 다운로드)');
+      queueBaseCheckerPending(data);   // 제출 대기리스트 등록 (HWType: basechecker)
+      downloadDetailFileTxt(data);     // 로컬에도 .txt로 저장 (Base Checker _ 아이디 _ 레벨.txt)
+      alert('최종 저장 완료! (대기열 등록 + TXT 다운로드)');
     }catch(e){
       alert('저장 중 오류가 발생했습니다.');
     }
