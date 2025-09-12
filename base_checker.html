@@ -10,6 +10,8 @@
 
   <!-- XLSX 파서 (요청 CDN) -->
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <!-- ZIP 생성 (iOS 저장 UX 개선용) -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
   <style>
     :root{
@@ -220,31 +222,37 @@
     };
   }
 
-  /* ---------- iOS 친화 txt 다운로드 유틸 (파일명: Base Checker _ 아이디 _ 레벨.txt) ---------- */
-  function downloadDetailFileTxt(obj){
-    const str = JSON.stringify(obj, null, 2);
-    const fileName = `Base Checker _ ${obj.user} _ ${obj.level}.txt`; // ← 요청 파일명 형식
-
-    const ua = navigator.userAgent;
-    const isIOS   = /iPad|iPhone|iPod/i.test(ua);
-    // 대표 인앱/WKWebView 패턴 (인앱은 download 무시 빈번)
-    const isInApp = /(FBAN|FBAV|Instagram|KAKAOTALK|NAVER|Daum|CriOS|FxiOS|EdgiOS|GSA)/i.test(ua) && !/Safari/i.test(ua);
-
-    if (isIOS && isInApp) {
-      const dataUrl = 'data:text/plain;charset=utf-8,' + encodeURIComponent(str);
-      window.open(dataUrl, '_blank'); // 미리보기 → 공유 시트 → "파일에 저장"
-      return;
-    }
+  /* ---------- ZIP로 저장 (Base Checker _ 아이디 _ 레벨.zip 안에 .txt 포함) ---------- */
+  async function downloadAsZipWithTxt(obj){
+    const text = JSON.stringify(obj, null, 2);
+    const base = `Base Checker _ ${obj.user} _ ${obj.level}`;
+    const txtName = `${base}.txt`;
+    const zipName = `${base}.zip`;
 
     try{
-      const blob = new Blob([str], { type:'text/plain' });
-      const url  = URL.createObjectURL(blob);
+      const zip = new JSZip();
+      zip.file(txtName, text);
+      const blob = await zip.generateAsync({ type:'blob' });
+      const zipFile = new File([blob], zipName, { type: 'application/zip' });
+
+      // iOS 16+ Safari는 파일 공유 지원 → 바로 공유 시트로
+      if (navigator.canShare && navigator.canShare({ files: [zipFile] })) {
+        try {
+          await navigator.share({ files:[zipFile], title: zipName, text:'베이스 체커 결과' });
+          return;
+        } catch(e) {
+          // 사용자가 공유 취소하면 아래 다운로드 폴백
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = fileName;
+      a.href = url; a.download = zipName;
       document.body.appendChild(a); a.click();
       setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1200);
-    }catch(e){
-      const dataUrl = 'data:text/plain;charset=utf-8,' + encodeURIComponent(str);
+    }catch(err){
+      // 최후 폴백: txt를 data:로라도 열어 주기
+      const dataUrl = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
       window.open(dataUrl, '_blank');
     }
   }
@@ -272,13 +280,13 @@
     }
   }
 
-  // ✨ 최종 저장: JSON 생성 → 대기열 등록 + 로컬 TXT 다운로드(요청 파일명 규칙)
-  function saveFinal(){
+  // ✨ 최종 저장: JSON 생성 → 대기열 등록 + ZIP(내부 txt) 다운로드
+  async function saveFinal(){
     const data = buildDetailedJSON();
     try{
-      queueBaseCheckerPending(data);   // 제출 대기리스트 등록 (HWType: basechecker)
-      downloadDetailFileTxt(data);     // 로컬에도 .txt로 저장 (Base Checker _ 아이디 _ 레벨.txt)
-      alert('최종 저장 완료! (대기열 등록 + TXT 다운로드)');
+      queueBaseCheckerPending(data);     // 제출 대기리스트 등록 (HWType: basechecker)
+      await downloadAsZipWithTxt(data);  // 로컬 저장: Base Checker _ 아이디 _ 레벨.zip (내부 txt)
+      alert('최종 저장 완료! (대기열 등록 + ZIP 다운로드)');
     }catch(e){
       alert('저장 중 오류가 발생했습니다.');
     }
