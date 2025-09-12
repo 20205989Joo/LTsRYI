@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>베이스 체커</title>
+
+  <!-- 📱 모바일 프레임(375x667) -->
+  <link rel="stylesheet" href="styles-frame.css"/>
+
+  <!-- XLSX 파서 (요청 CDN) -->
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#fff8ea; --ink:#2b261f; --muted:#6d6155; --border:#eadfc8;
+      --accent:#f17b2a; --accent-d:#e0611e;
+      --ok:#2e7d32; --maybe:#b07d10; --bad:#b00020;
+    }
+
+    /* 📦 내부 카드 */
+    #bc_int{
+      position:absolute; width:340px; height:626px;
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      border-radius:20px; overflow:hidden;
+      background:#f3c3a9; box-shadow: inset 0 0 0 2px rgba(0,0,0,0.04);
+    }
+
+    /* 상단바 */
+    .topbar{
+      position:absolute; top:12px; left:12px; right:12px; height:54px;
+      display:flex; align-items:center; gap:8px; padding:8px 10px;
+      background:#fff8f1; border:1px solid var(--border); border-radius:12px;
+    }
+    .topbar h1{ margin:0; font-size:14px; font-weight:800; color:#7e3106 }
+    .sp{ flex:1 }
+    select, .btn{
+      border:1px solid var(--border); border-radius:10px; padding:8px 10px;
+      background:#fff; font-weight:700; color:var(--ink); font-size:13px;
+      cursor:pointer;
+    }
+    .btn.accent{ background:var(--accent); color:#fff; border-color:#e0a77c }
+    .btn.accent:active{ transform:translateY(1px) }
+    .btn.danger{
+      background:#b00020; color:#fff; border-color:#eec7c7;
+      font-size:10px; padding-top:12px; padding-bottom:12px;
+    }
+    .btn.danger:active{ transform:translateY(1px) }
+
+    /* 리스트 영역 */
+    .content{
+      position:absolute; left:12px; right:12px; top:78px; bottom:96px;
+      background:#fff; border:1px solid var(--border); border-radius:14px; overflow:auto;
+    }
+    .row{
+      display:flex; align-items:center; gap:8px; padding:10px 12px;
+      border-bottom:1px dashed #f0e6d3;
+    }
+    .row:last-child{ border-bottom:0 }
+    .w{
+      font-size:15px; font-weight:800; letter-spacing:.2px;
+      transition:opacity .15s ease;
+    }
+    /* 기본은 '안다' → 흐리게 */
+    .state-ok .w{ opacity:.45 }
+    .badge{
+      margin-left:6px; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:800;
+      display:none;
+    }
+    .badge.maybe{ background:#fff4cf; border:1px solid #f0dfb8; color:#7a5200; }
+    .badge.bad{   background:#ffd9d9; border:1px solid #f1c5c5; color:#7a0000; }
+
+    .actions{ margin-left:auto; display:flex; gap:6px }
+    .pill{
+      border-radius:999px; padding:6px 10px; border:1px solid var(--border);
+      background:#fff; font-weight:800; font-size:12px; cursor:pointer; user-select:none;
+    }
+    .pill.maybe.active{ border-color:#f0dfb8; color:var(--maybe); background:#fffaea }
+    .pill.bad.active{   border-color:#f1c5c5; color:#b00020; background:#fff5f5 }
+
+    /* 하단 푸터(페이지 + 전체 다 모름(토글) + 최종 저장) */
+    .footer{
+      position:absolute; left:12px; right:12px; bottom:12px; height:72px;
+      display:flex; align-items:center; gap:10px; padding:10px;
+      background:#fff8f1; border:1px solid var(--border); border-radius:12px;
+      z-index: 10;
+    }
+    .pager{ display:flex; align-items:center; gap:8px }
+    .pg-btn{ width:36px; height:36px; border-radius:10px; border:1px solid var(--border); background:#fff; font-weight:900; cursor:pointer; }
+    .page-ind{ font-size:12px; color:#6d6155; min-width:80px; text-align:center; }
+
+    .save{ margin-left:auto }
+
+    /* 스크롤 에너지바 */
+    .energy{
+      position:absolute; left:16px; right:16px; bottom:90px;
+      height:12px; border-radius:999px; overflow:hidden;   /* hint를 바 내부에 표시 */
+      background:#ffe5c8; border:1px solid #e6b98f; z-index:20;
+    }
+    .energy .fill{
+      height:100%; width:0%;
+      background:linear-gradient(90deg,#ffd08a,#f17b2a);
+      border-radius:inherit; transition:width .10s linear;
+    }
+    .energy .pct{
+      position:absolute; right:8px; top:50%; transform:translateY(-50%);
+      font-size:10px; font-weight:800; color:#7e3106;
+    }
+    /* ✅ hint를 바 내부 중앙에 고정 */
+    .energy .hint{
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      font-size:11px; font-weight:800; color:#7e3106; display:none;
+      white-space:nowrap; pointer-events:none;
+      text-shadow: 0 1px 0 rgba(255,255,255,.6);
+    }
+
+    /* 안내 문구 */
+    .hint-start{ position:absolute; top:78px; left:12px; right:12px; text-align:center; color:#6d6155;
+                 padding:16px 8px; font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="main-page">
+    <div id="bc_int">
+      <!-- 상단 바 -->
+      <div class="topbar">
+        <h1>베이스 체커</h1>
+        <div class="sp"></div>
+        <label for="level" style="font-size:12px;color:var(--muted)">레벨</label>
+        <select id="level">
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="B1">B1</option>
+          <option value="B2">B2</option>
+          <option value="C1">C1</option>
+        </select>
+        <button id="load" class="btn accent">불러오기</button>
+      </div>
+
+      <!-- 리스트 -->
+      <div class="content" id="list"></div>
+      <div id="empty-hint" class="hint-start">레벨을 선택하고 <b>불러오기</b>를 눌러 시작하세요.</div>
+
+      <!-- 스크롤 에너지바 -->
+      <div class="energy" id="energy">
+        <div class="fill" id="energyFill"></div>
+        <span class="pct" id="energyPct">0%</span>
+        <span class="hint" id="energyHint"></span>
+      </div>
+
+      <!-- 하단: 페이지네이션 + 전체 다 모름(토글) + 최종 저장 -->
+      <div class="footer">
+        <div class="pager">
+          <button class="pg-btn" id="prevPg">◀</button>
+          <div class="page-ind" id="pgInd">0 / 0</div>
+          <button class="pg-btn" id="nextPg">▶</button>
+        </div>
+        <button id="markAllBad" class="btn danger">전체 다 모름</button>
+        <button id="saveFinal" class="btn accent save">최종 저장</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ---------- 설정 ---------- */
+  const LEVEL_FILES = { A1:'A1.xlsx', A2:'A2.xlsx', B1:'B1.xlsx', B2:'B2.xlsx', C1:'C1.xlsx' };
+  const PAGE_SIZE = 100;
+
+  /* ---------- 상태 ---------- */
+  const qs = new URLSearchParams(location.search);
+  const USER_ID = qs.get('id') || 'guest';
+
+  let WORDS = [];        // 전체 단어
+  let decisions = {};    // word -> 'maybe' | 'bad' (없으면 OK=앎)
+  let currentLevel = 'A1';
+  let currentPage = 1;
+  let totalPages = 0;
+
+  const els = {
+    list: document.getElementById('list'),
+    hintStart: document.getElementById('empty-hint'),
+    level: document.getElementById('level'),
+    load: document.getElementById('load'),
+    energyFill: document.getElementById('energyFill'),
+    energyPct: document.getElementById('energyPct'),
+    energyHint: document.getElementById('energyHint'),
+    prevPg: document.getElementById('prevPg'),
+    nextPg: document.getElementById('nextPg'),
+    pgInd: document.getElementById('pgInd'),
+    markAllBad: document.getElementById('markAllBad'),
+    saveFinal: document.getElementById('saveFinal'),
+  };
+
+  /* ---------- 유틸 ---------- */
+  const storageKey = (lvl)=>`base_checker:${USER_ID}:${lvl}`;
+  function saveTemp(){ try{ localStorage.setItem(storageKey(currentLevel), JSON.stringify({ decisions })); }catch(e){} }
+  function loadTemp(lvl){
+    try{
+      const raw = localStorage.getItem(storageKey(lvl));
+      return raw ? (JSON.parse(raw).decisions || {}) : {};
+    }catch(e){ return {}; }
+  }
+
+  // 상세 JSON 만들기(요청한 스키마)
+  function buildDetailedJSON(){
+    const items = WORDS.map((w, idx) => {
+      const st = decisions[w]; // undefined|maybe|bad
+      const state = !st ? '앎' : (st === 'maybe' ? '헷갈림' : '모름');
+      const page = Math.floor(idx / PAGE_SIZE) + 1; // 1-based
+      const index = idx + 1; // 1-based
+      return { level: currentLevel, page, index, word: w, state };
+    });
+    return {
+      user: USER_ID,
+      level: currentLevel,
+      pageSize: PAGE_SIZE,
+      total: WORDS.length,
+      createdAt: new Date().toISOString(),
+      items
+    };
+  }
+
+  // 로컬 다운로드(.json)
+  function downloadJSON(obj){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type:'application/json' });
+    const ts = new Date().toISOString().replace(/[:.]/g,'-');
+    const name = `base_checker_${currentLevel}_${USER_ID}_${ts}.json`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click();
+    URL.revokeObjectURL(url); a.remove();
+  }
+
+  // ✅ 대기열에 basechecker 타입으로 등록(업로드 시 .txt로 전송할 원본 JSON 문자열을 저장)
+  function queueBaseCheckerPending(jsonObj){
+    const bcKey = `BaseCheckerResults:${USER_ID}:${currentLevel}`; // 원본 JSON 문자열 저장 키
+    localStorage.setItem(bcKey, JSON.stringify(jsonObj));          // 그대로 저장
+
+    const pending = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
+    const exists = pending.some(p => p.HWType==='basechecker' && p.UserId===USER_ID && p.Level===currentLevel);
+    if(!exists){
+      pending.push({
+        UserId: USER_ID,
+        Subcategory: '베이스체커',
+        HWType: 'basechecker',     // 제출 페이지에서 이 타입을 감지해 .txt로 업로드(내용은 JSON 문자열)
+        Level: currentLevel,
+        LessonNo: 0,
+        comment: `${currentLevel} 결과(JSON txt)`,
+        detail: `총 ${jsonObj.total}개`,
+        BCKey: bcKey,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('PendingUploads', JSON.stringify(pending));
+    }
+  }
+
+  // ✨ 최종 저장: JSON 생성 → 대기열 등록 + 로컬 다운로드(보험)
+  function saveFinal(){
+    const data = buildDetailedJSON();
+    try{
+      queueBaseCheckerPending(data);   // 제출 대기리스트 등록
+      downloadJSON(data);              // 로컬에도 .json 저장(보험)
+      alert('최종 저장 완료! (대기열 등록 + JSON 다운로드)');
+    }catch(e){
+      alert('저장 중 오류가 발생했습니다.');
+    }
+  }
+
+  /* ---------- 에너지바 & 힌트 ---------- */
+  let _raf = 0, hintTimer = null, hintStep = 1;
+  function startNextHint(){
+    clearNextHint();
+    if(currentPage === totalPages){
+      // 마지막 페이지: 고정 메시지
+      els.energyHint.style.display = 'inline';
+      els.energyHint.textContent = '최종 저장 click ⬇';
+      return;
+    }
+    els.energyHint.style.display = 'inline';
+    els.energyHint.textContent = 'next page >';
+    hintStep = 1;
+    hintTimer = setInterval(()=>{
+      hintStep = hintStep % 3 + 1; // 1→2→3→1
+      els.energyHint.textContent = 'next page ' + '>'.repeat(hintStep);
+    }, 500);
+  }
+  function clearNextHint(){
+    if(hintTimer){ clearInterval(hintTimer); hintTimer = null; }
+    els.energyHint.style.display = 'none';
+  }
+  function updateEnergyBar(){
+    const sc = els.list.scrollTop;
+    const max = Math.max(1, els.list.scrollHeight - els.list.clientHeight);
+    const pct = Math.min(100, Math.round((sc / max) * 100));
+    els.energyFill.style.width = pct + '%';
+    els.energyPct.textContent = pct + '%';
+
+    const nearBottom = sc >= max - 2;
+    if(nearBottom) startNextHint(); else clearNextHint();
+  }
+  els.list.addEventListener('scroll', () => {
+    if (_raf) return;
+    _raf = requestAnimationFrame(() => { updateEnergyBar(); _raf = 0; });
+  });
+
+  function pageSlice(page){
+    const start = (page-1) * PAGE_SIZE;
+    return WORDS.slice(start, start + PAGE_SIZE);
+  }
+
+  /* ---------- 엑셀 로딩 (순서 유지) ---------- */
+  async function fetchWords(filePath){
+    const res = await fetch(filePath);
+    if(!res.ok) throw new Error('엑셀을 불러오지 못했습니다.');
+    const ab = await res.arrayBuffer();
+    const wb = XLSX.read(ab, { type:'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header:1, blankrows:false });
+
+    // 헤더 탐지
+    const header = rows[0] || [];
+    const lower = header.map(v => (v ?? '').toString().trim().toLowerCase());
+    const headerCandidates = ['word','단어','english','eng','vocab','vocabulary','표제어'];
+    let col = lower.findIndex(h => headerCandidates.includes(h));
+    let startRow = (col >= 0) ? 1 : 0;
+
+    if(col < 0){
+      // 문자열이 가장 많은 열 선택
+      const maxCols = rows.reduce((m,r)=>Math.max(m, r.length), 0);
+      let bestIdx = 0, bestScore = -1;
+      for(let c=0;c<maxCols;c++){
+        let score = 0;
+        for(let r=0;r<Math.min(rows.length, 50); r++){
+          const v = rows[r]?.[c];
+          if(typeof v === 'string' && v.trim()) score++;
+        }
+        if(score > bestScore){ bestScore=score; bestIdx=c; }
+      }
+      col = bestIdx;
+    }
+
+    const out = [];
+    for(let r=startRow; r<rows.length; r++){
+      const v = rows[r]?.[col];
+      const s = (v ?? '').toString().trim();
+      if(s) out.push(s);
+    }
+    return out; // 셔플 없이 그대로
+  }
+
+  /* ---------- 토글 버튼 상태 ---------- */
+  function isCurrentPageAllBad(){
+    const words = pageSlice(currentPage);
+    if(words.length === 0) return false;
+    return words.every(w => decisions[w] === 'bad');
+  }
+  function updateMarkAllButton(){
+    els.markAllBad.textContent = isCurrentPageAllBad() ? '취소 (롤백)' : '전체 다 모름';
+  }
+
+  /* ---------- 렌더링 ---------- */
+  function renderPage(page){
+    els.list.innerHTML = '';
+    const words = pageSlice(page);
+    words.forEach(w=>{
+      const st = decisions[w]; // undefined(OK) | 'maybe' | 'bad'
+      const row = document.createElement('div');
+      row.className = 'row ' + (st ? '' : 'state-ok'); // 기본 OK는 흐리게
+      row.dataset.word = w;
+
+      const span = document.createElement('span'); span.className = 'w'; span.textContent = w;
+
+      const badge = document.createElement('span');
+      badge.className = 'badge ' + (st || '');
+      if(st){ badge.style.display='inline-block'; badge.textContent = (st==='maybe'?'헷갈림':'모른다'); }
+
+      const actions = document.createElement('div'); actions.className = 'actions';
+
+      // ‘헷갈림’ / ‘모름’ 두 버튼만. 다시 누르면 해제되어 OK(안다)로 복귀.
+      const bMaybe = document.createElement('button');
+      bMaybe.textContent = '헷갈림'; bMaybe.className = 'pill maybe' + (st==='maybe'?' active':'');
+      bMaybe.addEventListener('click', ()=>{
+        if(decisions[w] === 'maybe'){
+          delete decisions[w];
+          row.classList.add('state-ok'); badge.style.display='none'; bMaybe.classList.remove('active');
+        }else{
+          decisions[w] = 'maybe';
+          row.classList.remove('state-ok'); badge.className='badge maybe'; badge.textContent='헷갈림'; badge.style.display='inline-block';
+          bBad.classList.remove('active'); bMaybe.classList.add('active');
+        }
+        saveTemp(); updateMarkAllButton();
+      });
+
+      const bBad = document.createElement('button');
+      bBad.textContent = '모름'; bBad.className = 'pill bad' + (st==='bad'?' active':'');
+      bBad.addEventListener('click', ()=>{
+        if(decisions[w] === 'bad'){
+          delete decisions[w];
+          row.classList.add('state-ok'); badge.style.display='none'; bBad.classList.remove('active');
+        }else{
+          decisions[w] = 'bad';
+          row.classList.remove('state-ok'); badge.className='badge bad'; badge.textContent='모른다'; badge.style.display='inline-block';
+          bMaybe.classList.remove('active'); bBad.classList.add('active');
+        }
+        saveTemp(); updateMarkAllButton();
+      });
+
+      actions.append(bMaybe, bBad);
+      row.append(span, badge, actions);
+      els.list.appendChild(row);
+    });
+
+    // 스크롤 초기화 + 에너지바 + 토글버튼 라벨
+    els.list.scrollTop = 0;
+    updateEnergyBar();
+    updateMarkAllButton();
+  }
+
+  function applyPaging(){
+    totalPages = Math.max(1, Math.ceil(WORDS.length / PAGE_SIZE));
+    currentPage = Math.min(currentPage, totalPages);
+    els.pgInd.textContent = `${currentPage} / ${totalPages}`;
+    els.prevPg.disabled = (currentPage<=1);
+    els.nextPg.disabled = (currentPage>=totalPages);
+    renderPage(currentPage);
+  }
+
+  /* ---------- 일괄 적용(토글: 모두 모름 ↔ 모두 앎) ---------- */
+  function toggleCurrentPageAllBad(){
+    const words = pageSlice(currentPage);
+    const allBad = words.length>0 && words.every(w => decisions[w] === 'bad');
+    if(allBad){
+      // 초기화: 모두 '앎'(OK)으로
+      words.forEach(w => { delete decisions[w]; });
+    }else{
+      // 모두 '모름'으로
+      words.forEach(w => { decisions[w] = 'bad'; });
+    }
+    saveTemp();
+    renderPage(currentPage); // 라벨/행/버튼상태 일괄 반영
+  }
+
+  /* ---------- 이벤트 ---------- */
+  els.level.addEventListener('change', e => currentLevel = e.target.value);
+
+  els.load.addEventListener('click', async ()=>{
+    try{
+      WORDS = await fetchWords(LEVEL_FILES[currentLevel]);   // 순서 그대로
+      decisions = loadTemp(currentLevel);                    // 저장된 선택 복원
+      els.hintStart.style.display = 'none';
+      currentPage = 1;
+      applyPaging();
+    }catch(err){ alert(err.message || '불러오기 실패'); }
+  });
+
+  els.prevPg.addEventListener('click', ()=>{ if(currentPage>1){ saveTemp(); currentPage--; applyPaging(); }});
+  els.nextPg.addEventListener('click', ()=>{ if(currentPage<totalPages){ saveTemp(); currentPage++; applyPaging(); }});
+
+  els.markAllBad.addEventListener('click', toggleCurrentPageAllBad);
+  els.saveFinal.addEventListener('click', saveFinal);
+
+  // 초기 상태
+  (function init(){
+    currentLevel = els.level.value;
+    // 안내만 표시
+  })();
+</script>
+</body>
+</html>
