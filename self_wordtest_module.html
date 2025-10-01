@@ -81,13 +81,14 @@
     }
     .q .prompt{ font-size:18px; font-weight:800; margin-bottom:8px; text-align:center }
     .q .sub{ font-size:12px; color:#6d6155; margin-bottom:10px; text-align:center }
-    .q .controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center }
+    .q .controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center }
     .pill{ display:inline-flex; align-items:center; gap:6px; padding:6px 8px;
            border:1px solid var(--border); border-radius:999px; font-size:12px; background:#fff; }
     .ans-reveal{ margin-top:10px; font-size:14px; font-weight:800; color:#6b4f3a; display:none; text-align:center }
     .ans-reveal.show{ display:block }
     .markX{ color:var(--bad); font-weight:900 }
     .markO{ color:var(--ok); font-weight:900 }
+    .q-count{ font-size:11px; color:#7c6c5c; min-width:54px; text-align:right }
 
     /* 결과 오버레이 모달 */
     .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:9999; }
@@ -192,6 +193,7 @@
               <div class="controls" style="margin-top:8px">
                 <button class="btn" id="prevQ">이전</button>
                 <button class="btn accent" id="nextQ">다음</button>
+                <span class="q-count" id="q-count">0 / 0</span>
               </div>
 
               <div class="ans-reveal" id="answer-reveal"></div>
@@ -208,7 +210,7 @@
         <div class="pct" id="energyPct">0%</div>
       </div>
 
-      <!-- Footer (pager 제거) -->
+      <!-- Footer (pager 없음) -->
       <div class="footer">
         <div class="save">
           <label class="chk"><input type="checkbox" id="shuffle-chk" /> 섞기</label>
@@ -273,6 +275,7 @@
     markPill: document.getElementById('mark-pill'),
     prevQ: document.getElementById('prevQ'),
     nextQ: document.getElementById('nextQ'),
+    qCount: document.getElementById('q-count'),
 
     // 결과 오버레이
     overlay: document.getElementById('result-overlay'),
@@ -374,8 +377,12 @@
     cur = 0;
   }
 
+  function updateQCount(){
+    els.qCount.textContent = runSet.length ? `${cur+1} / ${runSet.length}` : '0 / 0';
+  }
+
   function renderPrompt(){
-    if(!runSet.length){ setEnergy(0,'대기 중'); return; }
+    if(!runSet.length){ setEnergy(0,'대기 중'); updateQCount(); return; }
     const q = runSet[cur];
     els.prompt.textContent = q.prompt || '(빈 항목)';
     els.answerReveal.textContent = `정답: ${q.answer || '-'}`;
@@ -384,6 +391,7 @@
     els.markPill.innerHTML = '표시: ' + (mark === 'X' ? '<span class="markX">X</span>' : mark === 'O' ? '<span class="markO">O</span>' : '-');
     const pct = Math.round((cur/runSet.length)*100);
     setEnergy(pct, '진행 중…');
+    updateQCount();
   }
 
   function saveXMarks(){
@@ -413,7 +421,19 @@
     els.scoreline.textContent = `X 표시: ${xCnt}개`;
   }
 
-  function nextQ(){ if(!runSet.length) return; if(cur<runSet.length-1){ cur++; renderPrompt(); } }
+  function nextQ(){
+    if(!runSet.length) return;
+    if(cur < runSet.length - 1){
+      cur++;
+      renderPrompt();
+    }else{
+      // 마지막 문제에서 다음 버튼
+      setEnergy(100, '완료');
+      alert('모든 테스트를 마무리하셨습니다! 결과표를 체크해주세요!');
+      // 마지막 문제 화면 유지
+      updateQCount();
+    }
+  }
   function prevQ(){ if(!runSet.length) return; if(cur>0){ cur--; renderPrompt(); } }
 
   // 불러오기
@@ -466,7 +486,7 @@
 
   // 결과 오버레이 열기/닫기/필터
   els.openResult.addEventListener('click', ()=>{
-    els.xonlyChk.checked = false; // 기본은 전체 보기
+    els.xonlyChk.checked = false; // 기본 전체 보기
     refreshResultTable();
     show(els.overlay, true);
     els.overlay.setAttribute('aria-hidden','false');
@@ -491,6 +511,7 @@
   // 초기: 입력 비활성화 + placeholder '-'
   disableRangeInputs();
   setEnergy(0,'대기 중');
+  updateQCount();
 })();
 </script>
 </body>
