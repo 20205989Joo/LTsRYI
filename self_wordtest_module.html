@@ -7,6 +7,7 @@
 
   <link rel="stylesheet" href="styles-frame.css"/>
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
   <style>
     :root{
@@ -45,59 +46,43 @@
     .section{ padding:10px 0; border-bottom:1px dashed #f0e6d3; width:100%; }
     .section:last-child{ border-bottom:0 }
 
-    /* 범위/개수 컨테이너 (중앙, mt-100) */
     #range-box{ margin-top:100px; }
-    .range-card{
-      background:var(--card); border:1px solid var(--border);
-      border-radius:12px; padding:10px 12px;
-    }
+    .range-card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
     .range-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .num-col{ display:flex; flex-direction:column; align-items:center; gap:4px; }
-    .num-col .label { font-size:12px; color:var(--muted) }
+    .num-col .label { font-size:12px; color:#6d6155 }
     .num-col input[type="number"]{
-      width:96px; height:34px; padding:0 8px;
-      border:1px solid var(--border); border-radius:8px; background:#fff;
+      width:96px; height:34px; padding:0 8px; border:1px solid var(--border); border-radius:8px; background:#fff;
       font-size:13px; text-align:center;
     }
     .num-col input[disabled]{ background:#f7f3ea; color:#958a7c; }
     .num-col input::placeholder{ color:#a79a89; }
     .daynote{ font-size:11px; color:#8a7a68; line-height:1; }
     .count-row{ display:flex; justify-content:center; align-items:center; gap:8px; margin-top:8px; }
-    .count-row .label{ font-size:12px; color:var(--muted) }
+    .count-row .label{ font-size:12px; color:#6d6155 }
     .count-row input[type="number"]{
-      width:96px; height:34px; padding:0 8px;
-      border:1px solid var(--border); border-radius:8px; background:#fff;
+      width:96px; height:34px; padding:0 8px; border:1px solid var(--border); border-radius:8px; background:#fff;
       font-size:13px; text-align:center;
     }
     .count-row input[disabled]{ background:#f7f3ea; color:#958a7c; }
     .count-row input::placeholder{ color:#a79a89; }
     .range-hint{ margin-top:10px; font-size:12px; color:#6d6155; text-align:center; }
 
-    /* 문제 컨테이너 (중앙, mt-100, width 90%) */
     #quiz-box{ margin-top:100px; }
-    .q-card{
-      background:#fffbf6; border:1px solid var(--border); border-radius:12px;
-      padding:12px; width:90%; margin:0 auto;
-    }
+    .q-card{ background:#fffbf6; border:1px solid var(--border); border-radius:12px; padding:12px; width:90%; margin:0 auto; }
     .q .prompt{ font-size:18px; font-weight:800; margin-bottom:8px; text-align:center }
     .q .sub{ font-size:12px; color:#6d6155; margin-bottom:10px; text-align:center }
     .q .controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center }
-    .pill{ display:inline-flex; align-items:center; gap:6px; padding:6px 8px;
-           border:1px solid var(--border); border-radius:999px; font-size:12px; background:#fff; }
+    .pill{ display:inline-flex; align-items:center; gap:6px; padding:6px 8px; border:1px solid var(--border); border-radius:999px; font-size:12px; background:#fff; }
     .ans-reveal{ margin-top:10px; font-size:14px; font-weight:800; color:#6b4f3a; display:none; text-align:center }
     .ans-reveal.show{ display:block }
     .markX{ color:var(--bad); font-weight:900 }
     .markO{ color:var(--ok); font-weight:900 }
     .q-count{ font-size:11px; color:#7c6c5c; min-width:54px; text-align:right }
 
-    /* 결과 오버레이 모달 */
     .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:9999; }
     .overlay.show{ display:flex; }
-    .modal{
-      width:320px; max-height:80vh; overflow:auto;
-      background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.2);
-      padding:12px;
-    }
+    .modal{ width:320px; max-height:80vh; overflow:auto; background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.2); padding:12px; }
     .modal-header{ display:flex; align-items:center; gap:8px; justify-content:space-between; margin-bottom:8px }
     .modal-title{ font-weight:800; color:#6b4f3a }
     .modal-actions{ display:flex; align-items:center; gap:8px }
@@ -131,8 +116,7 @@
     .chk input{ transform: translateY(1px); }
 
     .hide{ display:none !important }
-    .hint-start{ position:absolute; top:78px; left:12px; right:12px; text-align:center; color:#6d6155;
-                 padding:16px 8px; font-size:12px; }
+    .hint-start{ position:absolute; top:78px; left:12px; right:12px; text-align:center; color:#6d6155; padding:16px 8px; font-size:12px; }
   </style>
 </head>
 <body>
@@ -143,18 +127,22 @@
         <div class="sp"></div>
         <label for="level" style="font-size:12px;color:var(--muted)">레벨</label>
         <select id="level">
+          <!-- placeholder -->
+          <option value="" selected>단어장 선택</option>
+          <!-- A1~C1 -->
           <option value="A1">A1</option>
           <option value="A2">A2</option>
           <option value="B1">B1</option>
           <option value="B2">B2</option>
           <option value="C1">C1</option>
+          <!-- custom -->
+          <option value="MY">내 단어장</option>
         </select>
         <button id="load" class="btn accent">불러오기</button>
       </div>
 
       <div class="content">
         <div class="center-wrap">
-          <!-- 범위/개수 (중앙, mt-100) -->
           <div class="section" id="range-box">
             <div class="range-card">
               <div class="range-grid">
@@ -173,11 +161,10 @@
                 <span class="label">개수</span>
                 <input type="number" id="count" min="1" placeholder="-" disabled/>
               </div>
-              <div class="range-hint">아래 <b>시험 시작</b> 버튼을 클릭하세요!</div>
+              <div class="range-hint" id="range-hint">아래 <b>시험 시작</b> 버튼을 클릭하세요!</div>
             </div>
           </div>
 
-          <!-- 문제(중앙, mt-100, width 90%) -->
           <div class="section hide" id="quiz-box">
             <div class="q q-card">
               <div class="prompt" id="q-prompt">prompt</div>
@@ -210,7 +197,6 @@
         <div class="pct" id="energyPct">0%</div>
       </div>
 
-      <!-- Footer (pager 없음) -->
       <div class="footer">
         <div class="save">
           <label class="chk"><input type="checkbox" id="shuffle-chk" /> 섞기</label>
@@ -221,7 +207,6 @@
     </div>
   </div>
 
-  <!-- 결과표 오버레이 모달 -->
   <div class="overlay" id="result-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
       <div class="modal-header">
@@ -246,13 +231,20 @@
 <script>
 (() => {
   const LEVEL_FILES = { A1:'A1.xlsx', A2:'A2.xlsx', B1:'B1.xlsx', B2:'B2.xlsx', C1:'C1.xlsx' };
+  const CUSTOM_VALUE = 'MY';
+  const PLACEHOLDER = '';
 
-  let wordbook = [];   // [{en, ko, idx}]
-  let runSet = [];     // [{prompt, answer, idxOrig}]
-  let marks = [];      // ['O'|'X'|null]
+  let wordbook = [];      // [{en, ko, idx}]
+  let runSet = [];        // [{prompt, answer, idxOrig?, idx?}]
+  let marks = [];         // ['O'|'X'|null]
   let cur = 0;
   let currentLevel = 'A1';
   let loaded = false;
+
+  // custom mode (내 단어장)
+  let usingCustom = false;
+  let customAll = [];     // [{prompt, answer, idxOrig, idx}]  // idx = 새 인덱스(1..N)
+  let customMeta = null;  // {level, size}
 
   const els = {
     level: document.getElementById('level'),
@@ -266,6 +258,7 @@
     count: document.getElementById('count'),
     startDay: document.getElementById('start-day'),
     endDay: document.getElementById('end-day'),
+    rangeHint: document.getElementById('range-hint'),
 
     prompt: document.getElementById('q-prompt'),
     reveal: document.getElementById('reveal-btn'),
@@ -277,7 +270,6 @@
     nextQ: document.getElementById('nextQ'),
     qCount: document.getElementById('q-count'),
 
-    // 결과 오버레이
     overlay: document.getElementById('result-overlay'),
     closeOverlay: document.getElementById('close-result'),
     xonlyChk: document.getElementById('xonly-chk'),
@@ -338,9 +330,9 @@
   function enableRangeInputs(){
     [els.startNo, els.endNo, els.count].forEach(inp => { inp.disabled = false; });
   }
-  function disableRangeInputs(){
+  function disableRangeInputs(clear=true){
     [els.startNo, els.endNo, els.count].forEach(inp => {
-      inp.value = '';
+      if (clear) inp.value = '';
       inp.disabled = true;
     });
     els.startNo.placeholder = '-';
@@ -358,28 +350,38 @@
   }
 
   function buildRunSet(){
-    // 범위에서 풀 구성
+    if(usingCustom){
+      // 새 인덱스(idx: 1..N) 기준으로 범위/개수 적용
+      let s = Math.max(1, +els.startNo.value || 1);
+      let eInput = +els.endNo.value;
+      let e = Number.isFinite(eInput) && eInput>0 ? eInput : customAll.length;
+      const [lo,hi] = s<=e ? [s,e] : [e,s];
+
+      let pool = customAll.filter(w => w.idx>=lo && w.idx<=hi);
+      if(els.shuffleChk.checked) shuffle(pool);
+      const cnt = Math.max(1, +els.count.value || pool.length || 1);
+      pool = pool.slice(0, Math.min(cnt, pool.length));
+
+      runSet = pool.map(w => ({ prompt:w.prompt||'', answer:w.answer||'', idxOrig:w.idxOrig, idx:w.idx }));
+      marks = new Array(runSet.length).fill(null);
+      cur = 0;
+      return;
+    }
+
+    // 기본(A1~C1) 범위/개수
     let s = Math.max(1, +els.startNo.value||1);
     let e = Math.max(1, +els.endNo.value||wordbook.length||1);
     const [lo,hi] = s<=e ? [s,e] : [e,s];
     let pool = wordbook.filter(w => w.idx>=lo && w.idx<=hi);
-
-    // 섞기 체크 시 셔플
     if(els.shuffleChk.checked) shuffle(pool);
-
-    // 개수만큼 자르기
     const cnt = Math.max(1, +els.count.value||1);
     pool = pool.slice(0, Math.min(cnt, pool.length));
-
-    // 세트 구성
-    runSet = pool.map(w => ({ prompt:w.en||'', answer:w.ko||'', idxOrig:w.idx }));
+    runSet = pool.map(w => ({ prompt:w.en||'', answer:w.ko||'', idx:w.idx }));
     marks = new Array(runSet.length).fill(null);
     cur = 0;
   }
 
-  function updateQCount(){
-    els.qCount.textContent = runSet.length ? `${cur+1} / ${runSet.length}` : '0 / 0';
-  }
+  function updateQCount(){ els.qCount.textContent = runSet.length ? `${cur+1} / ${runSet.length}` : '0 / 0'; }
 
   function renderPrompt(){
     if(!runSet.length){ setEnergy(0,'대기 중'); updateQCount(); return; }
@@ -424,40 +426,142 @@
   function nextQ(){
     if(!runSet.length) return;
     if(cur < runSet.length - 1){
-      cur++;
-      renderPrompt();
+      cur++; renderPrompt();
     }else{
-      // 마지막 문제에서 다음 버튼
       setEnergy(100, '완료');
       alert('모든 테스트를 마무리하셨습니다! 결과표를 체크해주세요!');
-      // 마지막 문제 화면 유지
       updateQCount();
     }
   }
   function prevQ(){ if(!runSet.length) return; if(cur>0){ cur--; renderPrompt(); } }
 
-  // 불러오기
-  document.getElementById('load').addEventListener('click', async ()=>{
+  // ---------- Custom(내 단어장) 유틸 ----------
+  function pickLocalFile(accept='.txt,.zip'){
+    return new Promise(resolve=>{
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      input.onchange = ()=> {
+        const f = input.files && input.files[0];
+        document.body.removeChild(input);
+        resolve(f || null);
+      };
+      input.click();
+    });
+  }
+
+  async function readCustomTxtOrZip(file){
+    if(!file) throw new Error('파일이 선택되지 않았습니다.');
+    const name = (file.name||'').toLowerCase();
+    if(name.endsWith('.zip')){
+      const z = await JSZip.loadAsync(file);
+      const txtEntry = Object.values(z.files).find(f => f.name.toLowerCase().endsWith('.txt'));
+      if(!txtEntry) throw new Error('ZIP 안에서 .txt 파일을 찾지 못했습니다.');
+      const text = await txtEntry.async('string');
+      return JSON.parse(text);
+    }else if(name.endsWith('.txt')){
+      const text = await file.text();
+      return JSON.parse(text);
+    }else{
+      throw new Error('지원하지 않는 형식입니다. (.txt 또는 .zip)');
+    }
+  }
+
+  function extractCustomIndices(obj){
+    // 예상 스키마: { level:"B2", items:[{index:123, state:"헷갈림"|"모름"|...}, ...] }
+    const detectedLevel = obj.level || (obj.items && obj.items[0]?.level);
+    if(!detectedLevel || !LEVEL_FILES[detectedLevel]) throw new Error('level을 판독할 수 없습니다.');
+
+    const idxs = (obj.items || [])
+      .filter(it => it && (it.state === '헷갈림' || it.state === '모름'))
+      .map(it => +it.index)
+      .filter(n => Number.isFinite(n) && n > 0);
+
+    const uniqAsc = [...new Set(idxs)].sort((a,b)=>a-b);
+    if(uniqAsc.length === 0) throw new Error('헷갈림/모름 상태의 단어가 없습니다.');
+    return { detectedLevel, indices: uniqAsc };
+  }
+
+  // ---------- 불러오기 ----------
+  els.load.addEventListener('click', async ()=>{
     try{
       setEnergy(0,'불러오는 중…');
-      currentLevel = document.getElementById('level').value;
+      const picked = els.level.value;
+      if (picked === PLACEHOLDER){
+        alert('먼저 단어장을 선택하세요.');
+        setEnergy(0,'대기 중');
+        return;
+      }
+
+      if (picked === CUSTOM_VALUE){
+        // 1) 파일 선택 + 파싱
+        const file = await pickLocalFile('.txt,.zip');
+        const obj = await readCustomTxtOrZip(file);
+        const { detectedLevel, indices } = extractCustomIndices(obj);
+
+        // 2) 원본 엑셀 로드 (detected level)
+        currentLevel = detectedLevel; // 저장키/타이틀용 레벨은 유지
+        const raw = await fetchLevelXlsx(currentLevel);
+        const baseBook = normalizeWordbook(raw);
+
+        // 3) indices → 풀 구성
+        const pool = indices.map(i => baseBook[i-1]).filter(Boolean);
+        if(pool.length === 0) throw new Error('해당 인덱스에 해당하는 단어를 찾지 못했습니다.');
+
+        // 4) ✅ 새 인덱스 부여(1..N)
+        customAll = pool.map((w, i) => ({
+          prompt: w.en || '',
+          answer: w.ko || '',
+          idxOrig: w.idx,     // 원본 인덱스 (참조용)
+          idx: i + 1          // 새 인덱스 (필터/Day 기준)
+        }));
+        usingCustom = true;
+        customMeta = { level: detectedLevel, size: customAll.length };
+
+        // 5) 범위/개수 초기값: 새 인덱스 기준
+        enableRangeInputs();
+        els.startNo.value = '1';
+        els.endNo.value   = String(customAll.length);
+        els.count.value   = String(Math.min(10, customAll.length));
+        syncDays();
+
+        document.getElementById('empty-hint').classList.add('hide');
+        els.rangeHint.innerHTML = `내 단어장(<b>${detectedLevel}</b>)에서 ${customAll.length}개 불러옴. <b>새 인덱스 1~${customAll.length}</b> 기준으로 범위/개수를 설정하고 시작하세요.`;
+        loaded = true;
+        setEnergy(0,'대기 중');
+        return;
+      }
+
+      // 기본(A1~C1)
+      usingCustom = false;
+      customAll = [];
+      customMeta = null;
+
+      currentLevel = picked;
       const raw = await fetchLevelXlsx(currentLevel);
       wordbook = normalizeWordbook(raw);
       if(!wordbook.length){ alert('단어를 찾지 못했습니다.'); setEnergy(0,'대기 중'); return; }
-      // 범위 활성화 및 기본값
+
       els.startNo.value = 1;
       els.endNo.value = wordbook.length;
       els.count.value = Math.min(10, wordbook.length);
       enableRangeInputs();
+      els.rangeHint.textContent = '아래 시험 시작 버튼을 클릭하세요!';
       loaded = true;
       syncDays();
       document.getElementById('empty-hint').classList.add('hide');
       setEnergy(0,'대기 중');
+
     }catch(e){
       console.error(e);
       alert(e.message || '불러오기에 실패했습니다.');
       disableRangeInputs();
       loaded = false;
+      usingCustom = false;
+      customAll = [];
+      customMeta = null;
       setEnergy(0,'대기 중');
     }
   });
@@ -470,8 +574,10 @@
   document.getElementById('start-btn').addEventListener('click', ()=>{
     if(!loaded){ alert('먼저 레벨을 불러오세요.'); return; }
     buildRunSet();
-    if(!runSet.length){ alert('출제 범위가 비었습니다.'); return; }
-    // 범위 카드 숨기고 문제 카드 표시
+    if(!runSet.length){
+      alert('출제 범위가 비었습니다. (선택한 구간에 단어가 없을 수 있음)');
+      return;
+    }
     document.getElementById('range-box').classList.add('hide');
     document.getElementById('quiz-box').classList.remove('hide');
     renderPrompt();
@@ -484,9 +590,9 @@
   els.prevQ.addEventListener('click', prevQ);
   els.nextQ.addEventListener('click', nextQ);
 
-  // 결과 오버레이 열기/닫기/필터
+  // 결과 오버레이
   els.openResult.addEventListener('click', ()=>{
-    els.xonlyChk.checked = false; // 기본 전체 보기
+    els.xonlyChk.checked = false;
     refreshResultTable();
     show(els.overlay, true);
     els.overlay.setAttribute('aria-hidden','false');
@@ -508,7 +614,7 @@
   });
   els.xonlyChk.addEventListener('change', refreshResultTable);
 
-  // 초기: 입력 비활성화 + placeholder '-'
+  // 초기 상태
   disableRangeInputs();
   setEnergy(0,'대기 중');
   updateQCount();
