@@ -1,3 +1,6 @@
+// kiosk_receipt.js
+
+// ✅ Day 계산용 범위 맵
 const RECEIPT_RANGES = {
   '단어': {
     'A1': [1, 45],
@@ -28,10 +31,10 @@ function inferLevel(subcategory, level, lessonNo) {
   return null;
 }
 
+// ✅ 최종 주문 처리 (주문 담기 버튼)
 window.handleFinalOrder = function () {
   const MAX_LIMIT = 6;
 
-  // ✅ 이미 고른 항목 체크
   if (!Array.isArray(window.selectedItems) || window.selectedItems.length === 0) {
     alert("선택된 항목이 없습니다.");
     return;
@@ -42,7 +45,6 @@ window.handleFinalOrder = function () {
     return;
   }
 
-  // ✅ 이하 기존 로직 유지
   const hwPlusEntries = [];
   let receiptText = '';
 
@@ -58,6 +60,7 @@ window.handleFinalOrder = function () {
       const dayStr = meta ? `Day ${meta.day}` : `Lesson ${entry.LessonNo}`;
       receiptText += `${entry.label || entry.Subcategory} > ${entry.Level} > ${dayStr}\n`;
     } else {
+      // label-only 항목 (오늘 내 숙제 / 시험지 만들어주세요 등)
       hwPlusEntries.push({
         Subcategory: entry.label,
         Level: null,
@@ -81,18 +84,27 @@ window.handleFinalOrder = function () {
     icon.src = 'receipt_icon.png';
     icon.id = 'receipt_icon';
     icon.className = 'receipt-icon';
-    icon.onclick = () => window.showReceiptFromHWPlus();  // ✅ 최신 반영
+    icon.onclick = () => window.showReceiptFromHWPlus(); // 나중에 보는 영수증
     document.querySelector('.main-page').appendChild(icon);
   }
 
-  showReceiptAgain(receiptText);
+  // ✅ 주문 직후: 영수증 + 1.5초 후 테이블로 이동
+  showReceiptAgain(receiptText, { autoRedirect: true });
 };
 
 
-function showReceiptAgain(text) {
+// ✅ 영수증 표시 공통 함수
+function showReceiptAgain(text, options = {}) {
+  const { autoRedirect = false } = options;
+
   const existing = document.getElementById('temp-receipt');
   if (existing) existing.remove();
+  const existingToast = document.getElementById('redirect-toast');
+  if (existingToast) existingToast.remove();
 
+  const host = document.querySelector('.main-page') || document.body;
+
+  // ░░ 영수증 박스 ░░
   const receipt = document.createElement('div');
   receipt.id = 'temp-receipt';
   receipt.className = 'receipt-box';
@@ -113,23 +125,92 @@ function showReceiptAgain(text) {
       " id="cancelOrderBtn">🗑 주문 취소</button>
     </div>
   `;
-  document.querySelector('.main-page').appendChild(receipt);
+  host.appendChild(receipt);
 
+  let redirectTimerId = null;
+
+  // ░░ 자동 이동 토스트 (autoRedirect=true일 때만) ░░
+  if (autoRedirect) {
+    const toast = document.createElement('div');
+    toast.id = 'redirect-toast';
+    toast.style.position = 'fixed';
+    toast.style.left = '50%';
+    toast.style.top = '50%';
+    toast.style.transform = 'translate(-50%, -50%)';
+    toast.style.background = 'rgba(0, 0, 0, 0.82)';
+    toast.style.color = '#fff';
+    toast.style.padding = '10px 18px';
+    toast.style.borderRadius = '14px';
+    toast.style.fontSize = '13px';
+    toast.style.zIndex = '9999';
+    toast.style.textAlign = 'center';
+    toast.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
+    toast.innerHTML = `
+      <div style="margin-bottom: 6px;">☕ 테이블로 이동합니다...</div>
+      <div style="
+        width: 140px;
+        height: 6px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255,255,255,0.15);
+        margin: 0 auto;
+      ">
+        <div id="redirect-progress-bar" style="
+          width: 0%;
+          height: 100%;
+          background: #ffcc66;
+          transition: width 1.5s linear;
+        "></div>
+      </div>
+    `;
+    host.appendChild(toast);
+
+    // 진행바 애니메이션 시작
+    requestAnimationFrame(() => {
+      const bar = document.getElementById('redirect-progress-bar');
+      if (bar) bar.style.width = '100%';
+    });
+
+    // 1.5초 후 테이블로 이동
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+    redirectTimerId = setTimeout(() => {
+      const target = `homework-tray_v1.html${userId ? `?id=${encodeURIComponent(userId)}` : ''}`;
+      window.location.href = target;
+    }, 1500);
+  }
+
+  // ░░ 주문 취소 버튼 ░░
   document.getElementById('cancelOrderBtn')?.addEventListener('click', () => {
     localStorage.removeItem('HWPlus');
     receipt.remove();
+
     const icon = document.getElementById('receipt_icon');
     if (icon) icon.remove();
+
+    const toast = document.getElementById('redirect-toast');
+    if (toast) toast.remove();
+
+    if (redirectTimerId) {
+      clearTimeout(redirectTimerId);
+    }
+
     alert('🗑 주문이 취소되었습니다!');
-    location.reload();
+    // 여기서는 student-room 그대로 유지 (테이블로 이동 취소)
   });
 
+  // 영수증 자체는 3초 후 서서히 사라지게 유지 (이동이 막힌 경우 대비)
   setTimeout(() => {
+    if (!document.getElementById('temp-receipt')) return;
     receipt.style.opacity = 0;
-    setTimeout(() => receipt.remove(), 1000);
+    setTimeout(() => {
+      if (receipt.parentNode) receipt.parentNode.removeChild(receipt);
+    }, 1000);
   }, 3000);
 }
 
+
+// ✅ 아이콘 눌렀을 때: 단순 영수증만 보기 (이동 없음)
 window.showReceiptFromHWPlus = function () {
   const hwPlusEntries = JSON.parse(localStorage.getItem('HWPlus') || '[]');
   if (hwPlusEntries.length === 0) return;
@@ -145,5 +226,6 @@ window.showReceiptFromHWPlus = function () {
     }
   });
 
-  showReceiptAgain(receiptText);
+  // autoRedirect: false → 그냥 보기만
+  showReceiptAgain(receiptText, { autoRedirect: false });
 };

@@ -1,6 +1,12 @@
+// ✅ script-homework-submit1.js (for homework-tray_v1.html)
+
 window.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const userId = urlParams.get('id');
+
+  // ✅ 전송 후 항상 돌아갈 테이블(또는 메인) 페이지
+  const redirectUrl = `homework-tray_v1.html?id=${encodeURIComponent(userId || '')}`;
+
   const kstOffset = 9 * 60 * 60 * 1000;
   const now = new Date(Date.now() + kstOffset);
   const todayStr = now.toISOString().split('T')[0];
@@ -9,13 +15,102 @@ window.addEventListener('DOMContentLoaded', async () => {
   const pendingList = document.getElementById('pendingList');
   const submitBtn = document.getElementById("hwSubmitbutton");
 
+  // 버튼 텍스트 강제 세팅
+  if (submitBtn) {
+    submitBtn.textContent = '여기를 눌러서 모두 전송!';
+  }
+
   const pending = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
-  const hwplus = JSON.parse(localStorage.getItem('HWPlus') || '[]');
+  const hwplusInitial = JSON.parse(localStorage.getItem('HWPlus') || '[]');
 
   console.log('📦 제출 전 PendingUploads 목록:', pending);
+  console.log('📦 제출 전 HWPlus 목록:', hwplusInitial);
 
+  // === 로딩 오버레이 & 스피너 세팅 ===
+  let isSubmitting = false;
+  let overlay = null;
+
+  // keyframes 추가 (로딩 스피너)
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    @keyframes hwSubmitSpin {
+      to { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(styleEl);
+
+  function createLoadingOverlay() {
+    overlay = document.createElement('div');
+    overlay.id = 'hw-submit-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.25);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+    `;
+
+    const box = document.createElement('div');
+    box.style.cssText = `
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+      min-width: 220px;
+    `;
+
+    const spinner = document.createElement('div');
+    spinner.style.cssText = `
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid rgba(0,0,0,0.15);
+      border-top-color: #ff9800;
+      animation: hwSubmitSpin 0.8s linear infinite;
+    `;
+
+    const text = document.createElement('div');
+    text.textContent = '전송 중입니다...';
+    text.style.cssText = `
+      font-size: 14px;
+      color: #333;
+    `;
+
+    box.appendChild(spinner);
+    box.appendChild(text);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+
+  function showLoadingOverlay() {
+    if (!overlay) createLoadingOverlay();
+    overlay.style.display = 'flex';
+    if (submitBtn) {
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.pointerEvents = 'none';
+    }
+  }
+
+  function hideLoadingOverlay() {
+    if (overlay) overlay.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.style.opacity = '';
+      submitBtn.style.pointerEvents = '';
+    }
+    isSubmitting = false;
+  }
+
+  // === 오늘 숙제 제출 여부 확인 ===
   try {
-    const res = await fetch(`https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getHWPlus?userId=${userId}`);
+    const res = await fetch(
+      `https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/getHWPlus?userId=${userId}`
+    );
     const data = await res.json();
     const hasToday = data.some(item => item.Timestamp?.startsWith(todayStr));
     if (hasToday) {
@@ -30,7 +125,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   const RANGES = {
-    '단어': { 'A1': [1, 45], 'A2': [46, 89], 'B1': [90, 130], 'B2': [131, 202], 'C1': [203, 266] },
+    '단어': { 'A1': [1, 45], 'A2': [46, 89], 'B1': [90, 130], 'B2': [131, 201], 'C1': [202, 266] },
     '연어': { '900핵심연어': [1, 42] },
     '문법': { 'Basic': [1, 50] },
     '단계별 독해': { 'RCStepper': [1, 50] }
@@ -45,6 +140,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   };
 
   function inferLevel(subcategory, lessonNo) {
+    if (lessonNo == null) return null;
     const ranges = RANGES[subcategory];
     if (!ranges) return null;
     for (const [level, [start, end]] of Object.entries(ranges)) {
@@ -53,25 +149,30 @@ window.addEventListener('DOMContentLoaded', async () => {
     return null;
   }
 
-  if (pending.length === 0) {
-    pendingList.innerHTML = '<div style="color:#888; font-size:13px;">⏳ 제출 대기 중인 숙제가 없습니다.</div>';
+  // === 제출 대기 카드 렌더링 ===
+  if (!pendingList) {
+    console.warn('❌ pendingList 요소가 없습니다.');
+  } else if (pending.length === 0) {
+    pendingList.innerHTML =
+      '<div style="color:#888; font-size:13px;">⏳ 제출 대기 중인 숙제가 없습니다.</div>';
   } else {
     pending.forEach((item) => {
       const card = document.createElement('div');
       card.className = 'pending-card';
 
       const meta = inferLevel(item.Subcategory, item.LessonNo);
-      const level = meta?.level;
+      const level = meta?.level ?? item.Level ?? null;
       const day = meta ? item.LessonNo - meta.start + 1 : null;
-      const levelStr = level ? ` (${level}, Day${day})` : '';
+      const levelStr = level ? ` (${level}${day ? `, Day${day}` : ''})` : '';
       const title = `${item.Subcategory}${levelStr}`;
       const detail = [item.comment, item.detail].filter(Boolean).join(' - ') || '설명 없음';
 
+      // 디버그: doneinweb 매칭 확인용
       if (item.HWType === 'doneinweb') {
         const quizRaw = localStorage.getItem('QuizResults');
         if (quizRaw) {
           const result = JSON.parse(quizRaw);
-          const expectedDayStr = `Day${day}`;
+          const expectedDayStr = day != null ? `Day${day}` : null;
           console.log('🔍 로드시 비교 로그 →', {
             expected: { subcategory: item.Subcategory, level, day: expectedDayStr },
             actual: { subcategory: result.subcategory, level: result.level, day: result.day }
@@ -83,7 +184,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 
       let inputHTML = '';
       if (item.HWType !== 'doneinweb') {
-      inputHTML = `<input type="file" class="file-input" data-subcategory="${item.Subcategory}" multiple accept="*/*" style="margin-top: 6px; width: 100%;" />`;
+        inputHTML = `
+          <input type="file"
+                 class="file-input"
+                 data-subcategory="${item.Subcategory}"
+                 data-level="${item.Level ?? ''}"
+                 data-lessonno="${item.LessonNo ?? ''}"
+                 multiple
+                 accept="*/*"
+                 style="margin-top: 6px; width: 100%;" />
+        `;
       }
 
       card.innerHTML = `
@@ -93,136 +203,129 @@ window.addEventListener('DOMContentLoaded', async () => {
       `;
 
       pendingList.appendChild(card);
+
+      // ✅ 파일 선택 여부에 따라 카드에 filled 클래스 토글
+      if (item.HWType === 'doneinweb') {
+        // 웹에서 푼 시험은 자동으로 '채워진' 상태
+        card.classList.add('filled');
+      } else {
+        const input = card.querySelector('.file-input');
+        if (input) {
+          const updateFilled = () => {
+            if (input.files && input.files.length > 0) {
+              card.classList.add('filled');
+            } else {
+              card.classList.remove('filled');
+            }
+          };
+          // 초기 한 번 호출 (브라우저가 파일 상태 기억하는 경우 대비)
+          updateFilled();
+          input.addEventListener('change', updateFilled);
+        }
+      }
     });
   }
 
   if (!submitBtn) return;
 
   submitBtn.addEventListener("click", async () => {
-  let updated = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
-  let hwplus = JSON.parse(localStorage.getItem('HWPlus') || '[]');
-  let anySubmitted = false;
+    if (isSubmitting) return;
+    isSubmitting = true;
+    showLoadingOverlay();
 
-  for (let i = 0; i < updated.length; i++) {
-    const item = updated[i];
+    let updated = JSON.parse(localStorage.getItem('PendingUploads') || '[]');
+    let hwplus = JSON.parse(localStorage.getItem('HWPlus') || '[]');
 
-    if (item.HWType === 'doneinweb') {
-      const quizRaw = localStorage.getItem('QuizResults');
-      if (!quizRaw) {
-        alert(`❌ ${item.Subcategory}: 시험 결과 없음`);
-        continue;
-      }
+    let anySubmitted = false;
+    const successMessages = [];
+    const failMessages = [];
+    const errorMessages = [];
 
-      const quiz = JSON.parse(quizRaw);
-      const meta = inferLevel(item.Subcategory, item.LessonNo);
-      const level = meta?.level;
-      const start = meta?.start ?? 1;
-      const day = item.LessonNo - start + 1;
-      const expectedSub = subcategoryMap[item.Subcategory] || item.Subcategory;
-      const expected = { subcategory: expectedSub, level, day: `Day${day}` };
+    // 작은 유틸: 정규화
+    const normalizeLevel = v => (v == null ? null : String(v));
+    const normalizeNo = v => {
+      if (v == null || v === '') return null;
+      const n = Number(v);
+      return Number.isNaN(n) ? null : n;
+    };
 
-      if (
-        quiz.subcategory !== expected.subcategory ||
-        quiz.level !== expected.level ||
-        quiz.day !== expected.day
-      ) {
-        console.warn(`❌ 매칭 실패 – 제출 생략`, { expected, actual: quiz });
-        continue;
-      }
-
-      const txtContent = quiz.testspecific.map(r =>
-        `번호: ${r.no}, 문제: ${r.word}, 본인 답: ${r.selected}, 정답 여부: ${r.correct ? '⭕' : '❌'}`
-      ).join('\n');
-
-      const file = new File([txtContent], `${item.Subcategory}_결과.txt`, { type: "text/plain" });
-
-      const formData = new FormData();
-      formData.append("UserId", userId);
-      formData.append("Subcategory", item.Subcategory);
-      formData.append("HWType", item.HWType);
-      formData.append("LessonNo", item.LessonNo ?? 0);
-      formData.append("Comment", item.comment || "");
-      formData.append("HWImage", file);
+    for (let i = 0; i < updated.length; i++) {
+      const item = updated[i];
+      if (!item) continue;
 
       try {
-        const res = await fetch("https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWPlus", {
-          method: "POST",
-          body: formData
-        });
-
-        const result = await res.json();
-
-        if (res.ok) {
-          anySubmitted = true;
-          updated[i] = null;
-          hwplus = hwplus.filter(entry => entry.Subcategory !== item.Subcategory);
-          localStorage.removeItem('QuizResults');
-          console.log('🧹 QuizResults 초기화 완료');
-          alert(`✅ ${item.Subcategory} 제출 완료!\nURL: ${result.url}`);
-
-          // diligence
-          await fetch("/api/logDiligence", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              UserId: userId,
-              Subcategory: item.Subcategory,
-              LessonNo: item.LessonNo ?? 0,
-              RegisteredBy: 'system'
-            })
-          });
-
-          if (item.Subcategory in subcategoryMap) {
-            await fetch("/api/updateProgressMatrix", {
-              method: "POST",
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                UserId: userId,
-                Subject: subcategoryMap[item.Subcategory],
-                LessonNo: item.LessonNo ?? 0,
-                Status: "done",
-                RegisteredBy: "system"
-              })
-            });
+        // === 1) 웹에서 푼 시험 (doneinweb) ===
+        if (item.HWType === 'doneinweb') {
+          const quizRaw = localStorage.getItem('QuizResults');
+          if (!quizRaw) {
+            failMessages.push(`❌ ${item.Subcategory}: 시험 결과 없음`);
+            continue;
           }
 
-        } else {
-          alert(`❌ ${item.Subcategory} 제출 실패: ${result.message}`);
-        }
-      } catch (err) {
-        alert(`🚨 ${item.Subcategory} 서버 오류`);
-        console.error(err);
-      }
+          const quiz = JSON.parse(quizRaw);
+          const meta = inferLevel(item.Subcategory, item.LessonNo);
+          const metaLevel = meta?.level ?? null;
+          const start = meta?.start ?? 1;
+          const day = item.LessonNo != null ? item.LessonNo - start + 1 : null;
 
-    } else {
-      const input = document.querySelector(`.file-input[data-subcategory="${item.Subcategory}"]`);
-      const files = input?.files;
+          const expectedSub = subcategoryMap[item.Subcategory] || item.Subcategory;
+          const expected = {
+            subcategory: expectedSub,
+            level: metaLevel,
+            day: day != null ? `Day${day}` : null
+          };
 
-      if (!files || files.length === 0) {
-        console.warn(`📭 [${item.Subcategory}] 파일이 선택되지 않음 – 제출 생략`);
-        continue;
-      }
+          if (
+            quiz.subcategory !== expected.subcategory ||
+            quiz.level !== expected.level ||
+            quiz.day !== expected.day
+          ) {
+            console.warn(`❌ 매칭 실패 – 제출 생략`, { expected, actual: quiz });
+            failMessages.push(`❌ ${item.Subcategory}: 시험 결과와 숙제 정보가 일치하지 않아 제출 생략`);
+            continue;
+          }
 
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("UserId", userId);
-        formData.append("Subcategory", item.Subcategory);
-        formData.append("HWType", item.HWType || "pdf사진");
-        formData.append("LessonNo", item.LessonNo ?? 0);
-        formData.append("Comment", item.comment || "");
-        formData.append("HWImage", file);
+          const txtContent = quiz.testspecific.map(r =>
+            `번호: ${r.no}, 문제: ${r.word}, 본인 답: ${r.selected}, 정답 여부: ${r.correct ? '⭕' : '❌'}`
+          ).join('\n');
 
-        try {
-          const res = await fetch("https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWPlus", {
-            method: "POST",
-            body: formData
-          });
+          const file = new File([txtContent], `${item.Subcategory}_결과.txt`, { type: "text/plain" });
 
+          const formData = new FormData();
+          formData.append("UserId", userId);
+          formData.append("Subcategory", item.Subcategory);
+          formData.append("HWType", item.HWType);
+          formData.append("LessonNo", item.LessonNo ?? 0);
+          formData.append("Comment", item.comment || "");
+          formData.append("HWImage", file);
+
+          const res = await fetch(
+            "https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWPlus",
+            { method: "POST", body: formData }
+          );
           const result = await res.json();
 
           if (res.ok) {
             anySubmitted = true;
-            alert(`✅ ${item.Subcategory} 제출 완료!\nURL: ${result.url}`);
+            // PendingUploads에서 이 항목 제거
+            updated[i] = null;
+
+            // ✅ HWPlus에서 정확히 일치하는 (Subcategory + Level + LessonNo)만 제거
+            const deleteLevel = item.Level ?? metaLevel ?? null;
+            const deleteLessonNo = item.LessonNo ?? null;
+
+            hwplus = hwplus.filter(entry => {
+              if (entry.Subcategory !== item.Subcategory) return true;
+              const entryLevel = normalizeLevel(entry.Level);
+              const entryNo = normalizeNo(entry.LessonNo);
+              const targetLevel = normalizeLevel(deleteLevel);
+              const targetNo = normalizeNo(deleteLessonNo);
+              return !(entryLevel === targetLevel && entryNo === targetNo);
+            });
+
+            localStorage.removeItem('QuizResults');
+            console.log('🧹 QuizResults 초기화 완료');
+            successMessages.push(`✅ ${item.Subcategory} 제출 완료 (URL: ${result.url || 'N/A'})`);
 
             // diligence
             await fetch("/api/logDiligence", {
@@ -251,25 +354,125 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
 
           } else {
-            alert(`❌ ${item.Subcategory} 제출 실패: ${result.message}`);
+            failMessages.push(`❌ ${item.Subcategory} 제출 실패: ${result.message || res.status}`);
           }
 
-        } catch (err) {
-          alert(`🚨 ${item.Subcategory} 서버 오류`);
-          console.error(err);
+        } else {
+          // === 2) 사진/파일 업로드형 ===
+
+          // 이 항목에 대응하는 input 찾기 (Subcategory + Level + LessonNo 기준)
+          const selector = `.file-input[data-subcategory="${item.Subcategory}"]` +
+            `[data-level="${item.Level ?? ''}"][data-lessonno="${item.LessonNo ?? ''}"]`;
+          const input = document.querySelector(selector);
+          const files = input?.files;
+
+          if (!files || files.length === 0) {
+            console.warn(`📭 [${item.Subcategory}] 파일이 선택되지 않음 – 제출 생략`);
+            failMessages.push(`📭 ${item.Subcategory}: 파일이 선택되지 않아 제출 생략`);
+            continue;
+          }
+
+          for (const file of files) {
+            const formData = new FormData();
+            formData.append("UserId", userId);
+            formData.append("Subcategory", item.Subcategory);
+            formData.append("HWType", item.HWType || "pdf사진");
+            formData.append("LessonNo", item.LessonNo ?? 0);
+            formData.append("Comment", item.comment || "");
+            formData.append("HWImage", file);
+
+            const res = await fetch(
+              "https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWPlus",
+              { method: "POST", body: formData }
+            );
+            const result = await res.json();
+
+            if (res.ok) {
+              anySubmitted = true;
+              successMessages.push(`✅ ${item.Subcategory} 제출 완료 (URL: ${result.url || 'N/A'})`);
+
+              // diligence
+              await fetch("/api/logDiligence", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  UserId: userId,
+                  Subcategory: item.Subcategory,
+                  LessonNo: item.LessonNo ?? 0,
+                  RegisteredBy: 'system'
+                })
+              });
+
+              if (item.Subcategory in subcategoryMap) {
+                await fetch("/api/updateProgressMatrix", {
+                  method: "POST",
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    UserId: userId,
+                    Subject: subcategoryMap[item.Subcategory],
+                    LessonNo: item.LessonNo ?? 0,
+                    Status: "done",
+                    RegisteredBy: "system"
+                  })
+                });
+              }
+
+            } else {
+              failMessages.push(`❌ ${item.Subcategory} 제출 실패: ${result.message || res.status}`);
+            }
+          }
+
+          // 제출 성공 후 PendingUploads/ HWPlus에서 이 항목 제거
+          updated[i] = null;
+
+          const meta = inferLevel(item.Subcategory, item.LessonNo);
+          const metaLevel = meta?.level ?? null;
+          const deleteLevel = item.Level ?? metaLevel ?? null;
+          const deleteLessonNo = item.LessonNo ?? null;
+
+          hwplus = hwplus.filter(entry => {
+            if (entry.Subcategory !== item.Subcategory) return true;
+            const entryLevel = normalizeLevel(entry.Level);
+            const entryNo = normalizeNo(entry.LessonNo);
+            const targetLevel = normalizeLevel(deleteLevel);
+            const targetNo = normalizeNo(deleteLessonNo);
+            return !(entryLevel === targetLevel && entryNo === targetNo);
+          });
         }
+
+      } catch (err) {
+        console.error(err);
+        errorMessages.push(`🚨 ${item.Subcategory} 서버 오류`);
+      }
+    }
+
+    // 로컬 저장소 정리
+    localStorage.setItem('PendingUploads', JSON.stringify(updated.filter(Boolean)));
+    localStorage.setItem('HWPlus', JSON.stringify(hwplus));
+
+    console.log('📦 제출 후 PendingUploads:', JSON.parse(localStorage.getItem('PendingUploads') || '[]'));
+    console.log('📦 제출 후 HWPlus:', JSON.parse(localStorage.getItem('HWPlus') || '[]'));
+
+    // ✅ 최종 피드백 & 이동
+    if (anySubmitted) {
+      hideLoadingOverlay();
+
+      let msg = '숙제 제출이 완료되었습니다!\n';
+      if (successMessages.length) {
+        msg += '\n[성공]\n' + successMessages.join('\n');
+      }
+      if (failMessages.length || errorMessages.length) {
+        msg += '\n\n[주의]\n' + [...failMessages, ...errorMessages].join('\n');
       }
 
-      updated[i] = null;
-      hwplus = hwplus.filter(entry => entry.Subcategory !== item.Subcategory);
+      alert(msg);
+
+      // 🔥 여기서 무조건 homework-tray_v1.html?id=... 로 이동 (뒤로가기 방지)
+      window.location.replace(redirectUrl);
+
+    } else {
+      hideLoadingOverlay();
+      alert("📎 선택된 파일이 없거나 전송할 항목이 없습니다.");
     }
-  }
-
-  localStorage.setItem('PendingUploads', JSON.stringify(updated.filter(Boolean)));
-  localStorage.setItem('HWPlus', JSON.stringify(hwplus));
-
-  if (anySubmitted) location.reload();
-  else alert("📎 선택된 파일이 없거나 전송할 항목이 없습니다.");
-});
-
+  });
 });
