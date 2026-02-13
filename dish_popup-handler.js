@@ -73,6 +73,28 @@ function getLessonPageDefinitionForItem(item) {
   return dm.getLessonPageDefinition(canonicalSubcategory, level);
 }
 
+function getSelfCheckToolConfig(subcategory) {
+  const key = String(subcategory || "").trim();
+  const map = {
+    "베이스 체커": {
+      path: "base_checker.html",
+      icon: "🧪",
+      desc: "제출 없이 바로 연습할 수 있어요."
+    },
+    "셀프 단어시험": {
+      path: "self_wordtest_module.html",
+      icon: "📝",
+      desc: "제출 없이 바로 단어시험을 볼 수 있어요."
+    },
+    "모의고사 전용도구": {
+      path: "mock-exam-tool.html",
+      icon: "🧰",
+      desc: "제출 없이 바로 전용 도구를 사용할 수 있어요."
+    }
+  };
+  return map[key] || null;
+}
+
 function buildTargetUrl(path, extraParams = {}) {
   const current = new URL(window.location.href);
   const target = new URL(path, current.href);
@@ -220,6 +242,45 @@ window.showDishPopup = function (item) {
   `;
 
   const hw = item.Subcategory;
+  const selfCheckTool = getSelfCheckToolConfig(hw);
+
+  if (selfCheckTool) {
+    let toolContent = `<div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">${selfCheckTool.icon} ${hw}</div>`;
+    toolContent += `
+      <div style="
+        margin-bottom: 10px;
+        height: 150px;
+        border-radius: 12px;
+        border: 1px solid #d7c6ad;
+        background: linear-gradient(145deg, #fff7ea 0%, #fff0dc 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7e3106;
+        font-size: 14px;
+        font-weight: 700;
+      ">
+        ${hw}
+      </div>
+      <div style="margin-bottom: 10px;">${selfCheckTool.desc}</div>
+      <button class="room-btn" style="background: #2e7d32; width: 100%;" id="tool-open-btn">🚀 바로 사용하기</button>
+      <button id="close-popup" class="room-btn" style="margin-top:14px; width:100%; background:#f17b2a;">닫기</button>
+    `;
+
+    popup.innerHTML = toolContent;
+    popup.querySelector("#close-popup")?.addEventListener("click", () => popupContainer.remove());
+    popup.querySelector("#tool-open-btn")?.addEventListener("click", () => {
+      const targetUrl = buildTargetUrl(selfCheckTool.path, {
+        id: userId || ""
+      });
+      window.location.href = targetUrl;
+    });
+
+    popupContainer.appendChild(popup);
+    cafeInt.appendChild(popupContainer);
+    return;
+  }
+
   const key = `downloaded_HW_${hw}_${item.Level}_${item.LessonNo}`;
   const downloaded = localStorage.getItem(key) === "true";
   const lessonRouteInfo = getLessonRouteInfo(item);

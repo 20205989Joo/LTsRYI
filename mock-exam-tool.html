@@ -1,0 +1,2757 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>모의고사 전용도구</title>
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="nav-buttons.css" />
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+
+    :root {
+      --topbar-bg: #2e2b27;
+      --topbar-border: #b08d57;
+      --icon-ink: #f0e6d2;
+      --icon-hover: #3a352f;
+      --icon-active: #4a433a;
+
+      --panel-bg: #0b0f16;
+      --panel-border-a: #ffae42;
+      --panel-border-b: #ffd27f;
+      --combo-bg: #141c26;
+      --combo-ink: #ffd27f;
+      --combo-border: #ffae42;
+      --combo-hover-bg: #1d2835;
+      --button-ink: #0b0f16;
+
+      --workspace-bg: #111722;
+      --workspace-border: rgba(255, 210, 127, 0.22);
+      --memo-font-size: 15px;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #f0eee9;
+    }
+
+    .main-page {
+      position: relative;
+      width: min(1120px, 96vw);
+      height: min(840px, 92vh);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+      background: #ddd7ca;
+    }
+
+    #cafe_int {
+      position: absolute;
+      inset: 12px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #f5efe2 0%, #e8dfcf 100%);
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+    }
+
+    .exam-topbar {
+      width: 100%;
+      height: 60px;
+      box-sizing: border-box;
+      background: var(--topbar-bg);
+      border-bottom: 2px solid var(--topbar-border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 10px 10px 20px;
+      position: relative;
+      z-index: 30;
+    }
+
+    .topbar-icon-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--icon-ink);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.18s ease, box-shadow 0.18s ease;
+      flex: 0 0 auto;
+    }
+
+    .topbar-icon-btn:hover {
+      background: var(--icon-hover);
+    }
+
+    .topbar-icon-btn.is-active {
+      background: var(--icon-active);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    .topbar-status {
+      width: min(380px, 50vw);
+      min-width: 210px;
+      height: 45px;
+      border-radius: 8px;
+      border: 1px solid rgba(176, 141, 87, 0.7);
+      background: linear-gradient(180deg, #fff0c8 0%, #f0d2a0 100%);
+      color: #2e2b27;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 26px 0 10px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+    }
+
+    .topbar-status::after {
+      content: "▾";
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    .topbar-status:hover {
+      background: linear-gradient(180deg, #fff4d6 0%, #f4dbb1 100%);
+    }
+
+    .topbar-status.is-active {
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.45);
+    }
+
+    .topbar-spacer {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .topbar-power-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      background: var(--topbar-bg);
+      color: var(--icon-ink);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .pdf-picker-backdrop {
+      position: absolute;
+      inset: 60px 0 0;
+      z-index: 40;
+      background: transparent;
+    }
+
+    .pdf-picker-popup {
+      position: absolute;
+      top: 68px;
+      left: 20px;
+      right: 20px;
+      z-index: 45;
+    }
+
+    .session-picker-backdrop {
+      position: absolute;
+      inset: 60px 0 0;
+      z-index: 46;
+      background: transparent;
+    }
+
+    .session-picker-popup {
+      position: absolute;
+      top: 68px;
+      right: 18px;
+      width: min(430px, calc(100% - 36px));
+      z-index: 48;
+    }
+
+    .session-picker-card {
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 12px;
+      border: 1px solid rgba(176, 141, 87, 0.7);
+      background:
+        radial-gradient(220px 100px at 8% -20%, rgba(255, 189, 216, 0.45), transparent 70%),
+        radial-gradient(280px 120px at 100% 125%, rgba(255, 225, 166, 0.32), transparent 75%),
+        linear-gradient(180deg, #fff8ed 0%, #ffefd8 100%);
+      box-shadow: 0 10px 22px rgba(24, 20, 16, 0.24);
+      overflow: hidden;
+    }
+
+    .session-picker-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(86, 74, 55, 0.2);
+      background: linear-gradient(180deg, rgba(255, 238, 206, 0.95) 0%, rgba(255, 226, 177, 0.9) 100%);
+    }
+
+    .session-picker-title {
+      color: #4d3b2b;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .session-picker-sub {
+      color: rgba(77, 59, 43, 0.75);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .session-picker-list {
+      max-height: min(46vh, 360px);
+      overflow: auto;
+      padding: 10px;
+      box-sizing: border-box;
+      display: grid;
+      gap: 8px;
+    }
+
+    .session-item-btn {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(126, 104, 76, 0.25);
+      background: rgba(255, 255, 255, 0.72);
+      cursor: pointer;
+      text-align: left;
+      padding: 9px 10px;
+      box-sizing: border-box;
+      transition: border-color 0.16s ease, transform 0.16s ease, background 0.16s ease;
+    }
+
+    .session-item-btn:hover {
+      border-color: rgba(255, 158, 98, 0.7);
+      background: rgba(255, 250, 242, 0.98);
+      transform: translateY(-1px);
+    }
+
+    .session-item-btn.is-selected {
+      border-color: rgba(255, 154, 76, 0.95);
+      background:
+        linear-gradient(180deg, rgba(255, 236, 210, 0.98) 0%, rgba(255, 226, 191, 0.98) 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.66);
+    }
+
+    .session-item-title {
+      color: #443425;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .session-item-meta {
+      margin-top: 3px;
+      color: rgba(58, 44, 30, 0.88);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .session-item-note {
+      margin-top: 4px;
+      color: rgba(64, 48, 33, 0.7);
+      font-size: 10px;
+      line-height: 1.3;
+    }
+
+    .pdf-picker-wrap {
+      width: 100%;
+      margin: 0;
+      box-sizing: border-box;
+      background: var(--panel-bg);
+      border: 2px solid transparent;
+      border-radius: 10px;
+      background-image:
+        linear-gradient(var(--panel-bg), var(--panel-bg)),
+        linear-gradient(135deg, var(--panel-border-a) 0%, var(--panel-border-b) 48%, var(--panel-border-a) 100%);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (min-width: 860px) {
+      .pdf-picker-wrap {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .pdf-open-btn {
+        grid-column: auto;
+      }
+    }
+
+    .pdf-picker-wrap select {
+      width: 100%;
+      height: 34px;
+      border-radius: 6px;
+      border: 1px solid var(--combo-border);
+      background: var(--combo-bg);
+      color: var(--combo-ink);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 0 8px;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .pdf-picker-wrap select:hover {
+      background: var(--combo-hover-bg);
+      border-color: var(--panel-border-b);
+    }
+
+    .pdf-open-btn {
+      grid-column: span 2;
+      height: 34px;
+      border-radius: 6px;
+      border: 1px solid var(--combo-border);
+      background: linear-gradient(135deg, #ffd27f 0%, #ffae42 100%);
+      color: var(--button-ink);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .pdf-open-btn:hover {
+      background: linear-gradient(135deg, #fff0b3 0%, #ffcf70 100%);
+    }
+
+    .workspace {
+      width: calc(100% - 24px);
+      flex: 1;
+      margin: 12px auto 14px;
+      border-radius: 12px;
+      border: 1px solid var(--workspace-border);
+      background:
+        radial-gradient(130px 70px at 15% 15%, rgba(255, 210, 127, 0.16), transparent 75%),
+        radial-gradient(220px 120px at 88% 98%, rgba(255, 174, 66, 0.11), transparent 75%),
+        var(--workspace-bg);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #ebd9a7;
+      text-align: center;
+      padding: 14px;
+      position: relative;
+    }
+
+    .workspace--has-pdf {
+      justify-content: flex-start;
+      align-items: stretch;
+      gap: 0;
+      padding: 10px;
+    }
+
+    .pdf-preview {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+      border: 1px solid rgba(255, 210, 127, 0.35);
+      border-radius: 10px;
+      background: #101722;
+      overflow: hidden;
+      position: relative;
+      touch-action: pan-y;
+    }
+
+    .pdf-pages {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 10px 0 16px;
+      box-sizing: border-box;
+      position: relative;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+    }
+
+    .pdf-page {
+      position: relative;
+      width: fit-content;
+      margin: 0 auto 12px;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+    }
+
+    .pdf-page canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+      touch-action: pan-y;
+      cursor: default;
+      image-rendering: auto;
+    }
+
+    .pdf-text-layer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+      line-height: 1;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y;
+      pointer-events: auto;
+    }
+
+    .pdf-text-layer span {
+      color: transparent;
+      position: absolute;
+      white-space: pre;
+      cursor: default;
+      transform-origin: 0 0;
+      touch-action: pan-y;
+      -webkit-tap-highlight-color: transparent;
+      pointer-events: none;
+    }
+
+    .pdf-text-layer span:hover {
+      background: rgba(255, 204, 112, 0.34);
+    }
+
+    .pdf-text-layer ::selection {
+      background: rgba(255, 183, 85, 0.55);
+    }
+
+    .pdf-preview iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #101722;
+      position: absolute;
+      inset: 0;
+    }
+
+    .overlay-memo {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 50%;
+      min-width: 320px;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.98);
+      border-left: 2px solid #b08d57;
+      border-right: 2px solid #b08d57;
+      box-sizing: border-box;
+      transform: translateX(102%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .overlay-memo.is-left {
+      left: 0;
+      right: auto;
+      transform: translateX(-102%);
+    }
+
+    .overlay-memo.is-open {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .overlay-memo-topbar {
+      height: 70px;
+      background-color: #2e2b27;
+      border-bottom: 2px solid #b08d57;
+      color: #f0e6d2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      box-sizing: border-box;
+      flex: 0 0 auto;
+    }
+
+    .overlay-memo-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #f0e6d2;
+      margin-right: 6px;
+      white-space: nowrap;
+    }
+
+    .overlay-memo-close {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      color: #f0e6d2;
+      font-size: 16px;
+      cursor: pointer;
+      flex: 0 0 auto;
+      padding: 0;
+    }
+
+    .overlay-memo-close:hover {
+      color: #ff6666;
+    }
+
+    .overlay-memo-topbar-spacer {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .overlay-memo-tool-btn {
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background-color: #4a463f;
+      color: #f0e6d2;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 0 10px;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .overlay-memo-tool-btn:hover {
+      background-color: #5c574e;
+    }
+
+    .overlay-mini-popup {
+      position: absolute;
+      top: 76px;
+      right: 12px;
+      z-index: 8;
+      background: #2e2b27;
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      border-radius: 8px;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
+    }
+
+    .overlay-mini-popup[hidden] {
+      display: none;
+    }
+
+    .overlay-mini-step-btn {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 6px;
+      background: #4a463f;
+      color: #f0e6d2;
+      font-size: 17px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .overlay-mini-step-btn:hover {
+      background: #5c574e;
+    }
+
+    .overlay-font-size-value {
+      min-width: 46px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #f0e6d2;
+      letter-spacing: 0.01em;
+    }
+
+    .overlay-memo-body {
+      flex: 1;
+      min-height: 0;
+      background-color: #fdf3e7;
+      display: flex;
+      position: relative;
+    }
+
+    .overlay-pane {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+    }
+
+    .overlay-pane[hidden] {
+      display: none;
+    }
+
+    .overlay-memo-textarea {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      box-sizing: border-box;
+      resize: none;
+      border: none;
+      outline: none;
+      padding: 12px;
+      font-size: var(--memo-font-size);
+      line-height: 1.45;
+      background: #fdf3e7;
+      color: #2e2b27;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    }
+
+    .overlay-memo-textarea::placeholder {
+      color: rgba(46, 43, 39, 0.38);
+    }
+
+    .overlay-two-three {
+      display: grid;
+      grid-template-columns: 3fr 7fr;
+      gap: 0;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .overlay-two-three.is-flipped {
+      grid-template-columns: 7fr 3fr;
+    }
+
+    .overlay-two-col {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .overlay-two-col--twoT {
+      background: #fdf3e7;
+      color: #2e2b27;
+    }
+
+    .overlay-two-col--threeT {
+      background: #463b2c;
+      color: #f7f2e8;
+      border-left: 1px solid rgba(42, 30, 23, 0.95);
+    }
+
+    .overlay-two-three.is-flipped .overlay-two-col--threeT {
+      border-left: none;
+      border-right: 1px solid rgba(42, 30, 23, 0.95);
+      order: 1;
+    }
+
+    .overlay-two-three.is-flipped .overlay-two-col--twoT {
+      order: 2;
+    }
+
+    .overlay-two-head {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(42, 30, 23, 0.25);
+      box-sizing: border-box;
+    }
+
+    .overlay-two-col--threeT .overlay-two-head {
+      border-bottom-color: rgba(247, 242, 232, 0.18);
+    }
+
+    .overlay-two-scroll {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      overflow-y: auto;
+      box-sizing: border-box;
+      padding: 8px 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .overlay-two-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .overlay-two-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 999px;
+    }
+
+    .overlay-card {
+      border-radius: 8px;
+      overflow: hidden;
+      box-sizing: border-box;
+      flex: 0 0 auto;
+      width: 100%;
+    }
+
+    .overlay-card--twoT {
+      background: #f3e5bb;
+      border: 2px solid #d6b97f;
+      min-height: 84px;
+    }
+
+    .overlay-card--threeT {
+      background: #3b2a1f;
+      border: 1px solid #2a1e17;
+      min-height: 86px;
+    }
+
+    .overlay-card-inner {
+      box-sizing: border-box;
+      padding: 7px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .overlay-card-inner--twoT {
+      background: linear-gradient(180deg, #fff6d6 0%, #edd8a2 100%);
+      border: 1px solid #e4c98e;
+      border-radius: 6px;
+    }
+
+    .overlay-card-inner--threeT {
+      background: #3f2d22;
+      border: 1px solid #201711;
+      border-radius: 5px;
+    }
+
+    .overlay-card-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .overlay-card-row .overlay-card-input,
+    .overlay-card-row .overlay-card-textarea {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .overlay-card-row--twoT {
+      display: grid;
+      grid-template-columns: 14px minmax(0, 1fr);
+      align-items: center;
+      gap: 6px;
+    }
+
+    .overlay-card-index {
+      flex: 0 0 auto;
+      min-width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .overlay-card-index--twoT {
+      background: rgba(42, 30, 23, 0.08);
+      color: #2e2b27;
+      border: 1px solid rgba(42, 30, 23, 0.2);
+      min-width: 12px;
+      width: 12px;
+      height: 12px;
+      font-size: 8px;
+      border-radius: 3px;
+    }
+
+    .overlay-card-index--threeT {
+      background: #2a1e17;
+      color: #f7f2e8;
+      border: 1px solid #1b130e;
+    }
+
+    .overlay-card-input,
+    .overlay-card-textarea {
+      border: none;
+      outline: none;
+      box-sizing: border-box;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      font-size: var(--memo-font-size);
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .overlay-card-input {
+      height: 30px;
+      border-radius: 5px;
+      padding: 3px 6px;
+    }
+
+    .overlay-card-textarea {
+      min-height: 48px;
+      border-radius: 5px;
+      padding: 5px 6px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .overlay-card-input--twoT,
+    .overlay-card-textarea--twoT {
+      background: #fff9e9;
+      color: #2e2b27;
+      border: 1px solid #d6b97f;
+      font-size: calc(var(--memo-font-size) - 1px) !important;
+      line-height: 1.35;
+    }
+
+    .overlay-card-input--twoT {
+      height: 32px !important;
+      padding: 3px 8px !important;
+    }
+
+    .overlay-card-textarea--twoT {
+      min-height: 44px !important;
+      padding: 5px 8px !important;
+      resize: vertical;
+    }
+
+    .overlay-card-textarea--threeT {
+      min-height: 30px;
+      padding: 5px 6px;
+      resize: vertical;
+    }
+
+    .overlay-card-textarea--threeT-sentence {
+      min-height: 32px !important;
+      max-height: 90px;
+    }
+
+    .overlay-card-input--threeT,
+    .overlay-card-textarea--threeT {
+      background: #2f221a;
+      color: #f7f2e8;
+      border: 1px solid #1c140f;
+    }
+
+    .overlay-card-input--threeT::placeholder,
+    .overlay-card-textarea--threeT::placeholder {
+      color: rgba(247, 242, 232, 0.45);
+    }
+
+    .overlay-card-input--twoT::placeholder,
+    .overlay-card-textarea--twoT::placeholder {
+      color: rgba(46, 43, 39, 0.38);
+    }
+
+    .overlay-side-flip {
+      position: absolute;
+      top: 50%;
+      left: -12px;
+      width: 12px;
+      height: 44px;
+      transform: translateY(-50%);
+      border: none;
+      background: #d6b97f;
+      clip-path: polygon(100% 0, 0 50%, 100% 100%);
+      cursor: pointer;
+      padding: 0;
+      z-index: 95;
+      opacity: 0.94;
+    }
+
+    .overlay-side-flip:hover {
+      background: #c4a96b;
+      opacity: 1;
+    }
+
+    .overlay-memo.is-left .overlay-side-flip {
+      left: auto;
+      right: -12px;
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    .overlay-memo-tabbar {
+      height: 42px;
+      background-color: #2e2b27;
+      border-top: 2px solid #b08d57;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px;
+      box-sizing: border-box;
+      flex: 0 0 auto;
+    }
+
+    .overlay-tab-list {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+      overflow-x: auto;
+      flex: 1;
+    }
+
+    .overlay-tab-list::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .overlay-tab-list::-webkit-scrollbar-thumb {
+      background: rgba(240, 230, 210, 0.35);
+      border-radius: 999px;
+    }
+
+    .overlay-tab-item {
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+      gap: 0;
+    }
+
+    .overlay-tab-btn {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .overlay-tab-btn.is-active {
+      background-color: #2e2b27;
+      color: #f0e6d2;
+    }
+
+    .overlay-tab-btn.is-active:hover {
+      background-color: #3a3733;
+    }
+
+    .overlay-tab-btn.is-inactive {
+      background-color: #4a463f;
+      color: #d0c9b9;
+    }
+
+    .overlay-tab-btn.is-inactive:hover {
+      background-color: #5c574e;
+      color: #f0e6d2;
+    }
+
+    .overlay-tab-close {
+      width: 20px;
+      height: 30px;
+      border: none;
+      background: transparent;
+      color: #f0e6d2;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+    }
+
+    .overlay-tab-close:hover {
+      color: #ff6666;
+    }
+
+    .overlay-tab-add {
+      width: 32px;
+      height: 30px;
+      border: none;
+      border-radius: 6px;
+      background-color: #4a463f;
+      color: #f0e6d2;
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .overlay-tab-add:hover {
+      background-color: #5c574e;
+    }
+
+    .overlay-tab-type-popup {
+      position: absolute;
+      right: 10px;
+      bottom: 52px;
+      z-index: 8;
+      background: #2e2b27;
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      border-radius: 8px;
+      padding: 6px;
+      display: grid;
+      gap: 6px;
+      min-width: 164px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
+    }
+
+    .overlay-tab-type-popup[hidden] {
+      display: none;
+    }
+
+    .overlay-type-option {
+      border: none;
+      border-radius: 6px;
+      background: #4a463f;
+      color: #f0e6d2;
+      height: 32px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      padding: 0 10px;
+    }
+
+    .overlay-type-option:hover {
+      background: #5c574e;
+    }
+
+    .pdf-preview-empty {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: rgba(235, 217, 167, 0.75);
+      padding: 12px;
+      text-align: center;
+      box-sizing: border-box;
+      position: absolute;
+      inset: 0;
+    }
+
+    .pdf-quick-link {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 4;
+      color: #ffe9bb;
+      font-size: 12px;
+      text-decoration: underline;
+      cursor: pointer;
+      border: none;
+      background: rgba(0, 0, 0, 0.24);
+      border-radius: 8px;
+      padding: 5px 8px;
+    }
+
+    #back-to-tray-btn {
+      position: absolute;
+      bottom: 18px;
+      left: 18px;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-page">
+    <div id="cafe_int">
+      <div class="exam-topbar">
+        <button id="mock-topbar-picker-btn" class="topbar-icon-btn" type="button" title="PDF 불러오기">📂</button>
+        <button id="mock-topbar-memo-btn" class="topbar-icon-btn" type="button" title="오버레이 메모">📝</button>
+        <div class="topbar-spacer"></div>
+        <button id="mock-topbar-status" class="topbar-status" type="button">고3 · 연도 선택</button>
+        <button class="topbar-power-btn" type="button" title="전원">⏻</button>
+      </div>
+      <div id="mock-session-backdrop" class="session-picker-backdrop" hidden></div>
+      <div id="mock-session-popup" class="session-picker-popup" hidden>
+        <div class="session-picker-card">
+          <div class="session-picker-head">
+            <span class="session-picker-title">오늘 수업 리스트</span>
+            <span class="session-picker-sub">sample presets</span>
+          </div>
+          <div id="mock-session-list" class="session-picker-list"></div>
+        </div>
+      </div>
+
+      <div id="mock-workspace" class="workspace workspace--has-pdf">
+        <button id="mock-pdf-open-newtab" class="pdf-quick-link" type="button" hidden>새 탭에서 열기</button>
+        <div class="pdf-preview">
+          <div id="pdf-preview-empty" class="pdf-preview-empty">상단에서 시험 구성을 고른 뒤<br />PDF 불러오기를 눌러주세요.</div>
+          <div id="mock-pdf-pages" class="pdf-pages" hidden></div>
+          <iframe id="mock-pdf-frame" title="모의고사 PDF 미리보기" hidden></iframe>
+        </div>
+      </div>
+
+      <div id="mock-overlay-memo" class="overlay-memo" aria-hidden="true">
+        <div class="overlay-memo-topbar">
+          <span class="overlay-memo-title">NOTES : 필기</span>
+          <button id="mock-overlay-close-btn" class="overlay-memo-close" type="button" aria-label="메모 닫기">✕</button>
+          <div class="overlay-memo-topbar-spacer"></div>
+          <button id="mock-overlay-font-open" class="overlay-memo-tool-btn" type="button">A+-</button>
+          <div id="mock-overlay-font-popup" class="overlay-mini-popup" hidden>
+            <button id="mock-overlay-font-dec" class="overlay-mini-step-btn" type="button" aria-label="폰트 줄이기">-</button>
+            <div id="mock-overlay-font-size-value" class="overlay-font-size-value">16px</div>
+            <button id="mock-overlay-font-inc" class="overlay-mini-step-btn" type="button" aria-label="폰트 키우기">+</button>
+          </div>
+        </div>
+        <button id="mock-overlay-two-flip-triangle" class="overlay-side-flip" type="button" aria-label="오버레이 좌우 전환" title="오버레이 좌우 전환"></button>
+        <div class="overlay-memo-body">
+          <div id="mock-overlay-blank-pane" class="overlay-pane">
+            <textarea id="mock-overlay-memo-text" class="overlay-memo-textarea" placeholder="메모를 적어주세요..."></textarea>
+          </div>
+          <div id="mock-overlay-two-three-pane" class="overlay-pane overlay-two-three" hidden>
+            <div class="overlay-two-col overlay-two-col--twoT">
+              <div class="overlay-two-head">2T · 단어/뜻</div>
+              <div id="mock-overlay-two-left-list" class="overlay-two-scroll"></div>
+            </div>
+            <div class="overlay-two-col overlay-two-col--threeT">
+              <div class="overlay-two-head">3T · 문장/분석</div>
+              <div id="mock-overlay-two-right-list" class="overlay-two-scroll"></div>
+            </div>
+          </div>
+        </div>
+        <div class="overlay-memo-tabbar">
+          <div id="mock-overlay-tab-list" class="overlay-tab-list"></div>
+          <button id="mock-overlay-add-tab" class="overlay-tab-add" type="button" aria-label="메모 탭 추가">＋</button>
+          <div id="mock-overlay-tab-type-popup" class="overlay-tab-type-popup" hidden>
+            <button class="overlay-type-option" type="button" data-type="blank">blank</button>
+            <button class="overlay-type-option" type="button" data-type="two_three">two three page</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mock-picker-backdrop" class="pdf-picker-backdrop" hidden></div>
+      <div id="mock-picker-popup" class="pdf-picker-popup" hidden>
+        <div class="pdf-picker-wrap" aria-label="PDF 불러오기">
+          <select id="mock-grade-select" aria-label="학년">
+            <option value="">학년 로딩중...</option>
+          </select>
+          <select id="mock-year-select" aria-label="연도">
+            <option value="">연도 로딩중...</option>
+          </select>
+          <select id="mock-exam-select" aria-label="몇평">
+            <option value="">몇평 선택</option>
+          </select>
+          <select id="mock-type-select" aria-label="유형">
+            <option value="">유형 선택</option>
+          </select>
+          <button id="mock-pdf-open-btn" class="pdf-open-btn" type="button">PDF 불러오기</button>
+        </div>
+      </div>
+    </div>
+
+    <button
+      id="back-to-tray-btn"
+      class="nav-mainhall-btn"
+      data-nav-mainhall="homework-tray_v1.html"
+      data-nav-replace="true"
+    >
+      ⬅ 영수증으로
+    </button>
+  </div>
+
+  <script src="nav-buttons.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>
+    (function () {
+      const pickerToggleBtn = document.getElementById("mock-topbar-picker-btn");
+      const memoToggleBtn = document.getElementById("mock-topbar-memo-btn");
+      const pickerPopup = document.getElementById("mock-picker-popup");
+      const pickerBackdrop = document.getElementById("mock-picker-backdrop");
+      const sessionPopup = document.getElementById("mock-session-popup");
+      const sessionBackdrop = document.getElementById("mock-session-backdrop");
+      const sessionList = document.getElementById("mock-session-list");
+      const overlayMemo = document.getElementById("mock-overlay-memo");
+      const overlayCloseBtn = document.getElementById("mock-overlay-close-btn");
+      const overlayFontOpenBtn = document.getElementById("mock-overlay-font-open");
+      const overlayFontPopup = document.getElementById("mock-overlay-font-popup");
+      const overlayFontDecBtn = document.getElementById("mock-overlay-font-dec");
+      const overlayFontIncBtn = document.getElementById("mock-overlay-font-inc");
+      const overlayFontSizeValue = document.getElementById("mock-overlay-font-size-value");
+      const overlayBlankPane = document.getElementById("mock-overlay-blank-pane");
+      const overlayTwoThreePane = document.getElementById("mock-overlay-two-three-pane");
+      const overlayTwoFlipTriangleBtn = document.getElementById("mock-overlay-two-flip-triangle");
+      const overlayMemoText = document.getElementById("mock-overlay-memo-text");
+      const overlayTwoLeftList = document.getElementById("mock-overlay-two-left-list");
+      const overlayTwoRightList = document.getElementById("mock-overlay-two-right-list");
+      const overlayTabList = document.getElementById("mock-overlay-tab-list");
+      const overlayAddTabBtn = document.getElementById("mock-overlay-add-tab");
+      const overlayTabTypePopup = document.getElementById("mock-overlay-tab-type-popup");
+      const overlayTypeOptionBtns = Array.from(document.querySelectorAll("#mock-overlay-tab-type-popup [data-type]"));
+      const topbarStatus = document.getElementById("mock-topbar-status");
+      const openBtn = document.getElementById("mock-pdf-open-btn");
+      const gradeSel = document.getElementById("mock-grade-select");
+      const yearSel = document.getElementById("mock-year-select");
+      const examSel = document.getElementById("mock-exam-select");
+      const typeSel = document.getElementById("mock-type-select");
+      const previewPages = document.getElementById("mock-pdf-pages");
+      const previewFrame = document.getElementById("mock-pdf-frame");
+      const previewEmpty = document.getElementById("pdf-preview-empty");
+      const newTabBtn = document.getElementById("mock-pdf-open-newtab");
+
+      const SUPABASE_ORIGIN = "https://yslwgaephsnbfoiqnpuw.supabase.co";
+      const SUPABASE_BASE = `${SUPABASE_ORIGIN}/storage/v1/object/public`;
+      const BUCKET = "ksat-moi-sets";
+      const FOLDER = "High3";
+      const GRADE_OPTIONS = [{ value: "High3", label: "고3" }];
+
+      const YEAR_CANDIDATES = (function () {
+        const years = [];
+        const startYear = 2017;
+        const latestStartYear = new Date().getFullYear() - 1; // 예: 2026 -> 2025to2026
+        for (let y = startYear; y <= latestStartYear; y += 1) {
+          years.push(`${y}to${y + 1}`);
+        }
+        return years;
+      })();
+
+      const EXAM_META = [
+        { key: "march", label: "3평", token: "march" },
+        { key: "april", label: "4평", token: "april" },
+        { key: "june", label: "6평", token: "june" },
+        { key: "july", label: "7평", token: "july" },
+        { key: "october", label: "10평", token: "october" },
+        { key: "november", label: "수능", token: "november" }
+      ];
+
+      const TYPE_META = [
+        { label: "시험지", suffix: "" },
+        { label: "대본", suffix: "_script" },
+        { label: "해설", suffix: "_answer" }
+      ];
+      const DEFAULT_TYPE_LABEL = "시험지";
+      const FIXED_STUDENT_ID = new URLSearchParams(window.location.search).get("id") || "";
+      const PDFJS_WORKER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+      const RENDER_QUALITY_BOOST = 1.35;
+
+      let lastBlobUrl = "";
+      let lastPdfUrl = "";
+      let memoFontSize = 15;
+      let overlaySide = "right";
+      let nextMemoTabId = 2;
+      const DEFAULT_TWO_T_CARD_COUNT = 50;
+      const DEFAULT_THREE_T_CARD_COUNT = 15;
+      const memoTabs = [{
+        id: 1,
+        type: "blank",
+        blankText: "",
+        twoThree: null
+      }];
+      let activeMemoTabIndex = 0;
+      const TAB_TYPE_LABEL = {
+        blank: "blank",
+        two_three: "two three page"
+      };
+      const SAMPLE_CLASS_SESSIONS = [
+        {
+          date: "2026-02-13 09:00",
+          note: "단어 체크 + 수능 지문 감각 유지",
+          mock: { year: "2023to2024", examKey: "november" },
+          overlaySide: "right",
+          openMemo: true,
+          activeTabIndex: 0,
+          tabs: [
+            {
+              type: "two_three",
+              words: [
+                { word: "cherish", meaning: "소중히 여기다" },
+                { word: "vivid", meaning: "생생한, 선명한" },
+                { word: "crucial", meaning: "아주 중요한" },
+                { word: "tremble", meaning: "떨다, 떨리다" },
+                { word: "fragile", meaning: "깨지기 쉬운, 약한" },
+                { word: "nurture", meaning: "양육하다, 키우다" },
+                { word: "cozy", meaning: "아늑한" },
+                { word: "polish", meaning: "다듬다, 윤을 내다" }
+              ],
+              sentences: [
+                { sentence: "A cozy routine can make hard study days feel softer." },
+                { sentence: "The teacher's vivid examples helped her keep each idea." },
+                { sentence: "Consistency is crucial when preparing for mock exams." },
+                { sentence: "He polished his weak part before the timed drill." },
+                { sentence: "Even a fragile confidence can grow with steady practice." },
+                { sentence: "They nurtured calm focus by checking one paragraph at a time." }
+              ]
+            },
+            {
+              type: "blank",
+              blankText: "today plan\n1) 31번 근거문장 표시\n2) 낯선 어휘 8개 외우기\n3) 마지막 10분 검토 루틴"
+            }
+          ]
+        },
+        {
+          date: "2026-02-13 11:00",
+          note: "듣기 대본 기반 표현 정리",
+          mock: { year: "2017to2018", examKey: "july", typeLabel: "대본" },
+          overlaySide: "left",
+          openMemo: true,
+          activeTabIndex: 0,
+          tabs: [
+            {
+              type: "two_three",
+              words: [
+                { word: "clarify", meaning: "명확히 하다" },
+                { word: "observe", meaning: "관찰하다" },
+                { word: "stitch", meaning: "꿰매다, 이어붙이다" },
+                { word: "steady", meaning: "안정적인, 꾸준한" },
+                { word: "gentle", meaning: "부드러운" },
+                { word: "boost", meaning: "끌어올리다" }
+              ],
+              sentences: [
+                { sentence: "Please clarify the main point before moving to details." },
+                { sentence: "She observed the speaker's tone and matched the intent." },
+                { sentence: "A steady speaking pace boosts listening accuracy." },
+                { sentence: "Gentle repetition can stitch fragmented clues together." }
+              ]
+            },
+            {
+              type: "blank",
+              blankText: "체크\n- 끊어 듣기 단위 표시\n- 접속부사 들리면 바로 메모"
+            }
+          ]
+        },
+        {
+          date: "2026-02-13 19:00",
+          note: "해설 기반 오답 복원",
+          mock: { year: "2017to2018", examKey: "october", typeLabel: "해설" },
+          overlaySide: "right",
+          openMemo: true,
+          activeTabIndex: 0,
+          tabs: [
+            {
+              type: "two_three",
+              words: [
+                { word: "pinpoint", meaning: "정확히 찾아내다" },
+                { word: "distort", meaning: "왜곡하다" },
+                { word: "anchor", meaning: "기준점, 고정하다" },
+                { word: "derive", meaning: "이끌어내다" },
+                { word: "resolve", meaning: "해결하다, 결심하다" }
+              ],
+              sentences: [
+                { sentence: "Pinpoint the exact line that supports your option." },
+                { sentence: "If one phrase distorts meaning, eliminate the choice." },
+                { sentence: "Anchor every answer in a concrete textual clue." },
+                { sentence: "Derive the tone before deciding author's attitude." },
+                { sentence: "Resolve uncertainty by checking contrast markers twice." }
+              ]
+            },
+            {
+              type: "blank",
+              blankText: "오답복원\n- 선지별 반박 근거 1개씩\n- 정답 근거는 문장 번호로 적기"
+            }
+          ]
+        }
+      ];
+      let selectedSessionId = "";
+      let selectedSessionTitle = "";
+      let pdfRenderToken = 0;
+      let lastPreviewScrollAt = 0;
+      let activeWordIndex = null;
+      const DEBUG_SCROLL_DIAG = false;
+
+      if (
+        !pickerToggleBtn ||
+        !memoToggleBtn ||
+        !pickerPopup ||
+        !pickerBackdrop ||
+        !sessionPopup ||
+        !sessionBackdrop ||
+        !sessionList ||
+        !overlayMemo ||
+        !overlayCloseBtn ||
+        !overlayFontOpenBtn ||
+        !overlayFontPopup ||
+        !overlayFontDecBtn ||
+        !overlayFontIncBtn ||
+        !overlayFontSizeValue ||
+        !overlayBlankPane ||
+        !overlayTwoThreePane ||
+        !overlayTwoFlipTriangleBtn ||
+        !overlayMemoText ||
+        !overlayTwoLeftList ||
+        !overlayTwoRightList ||
+        !overlayTabList ||
+        !overlayAddTabBtn ||
+        !overlayTabTypePopup ||
+        !overlayTypeOptionBtns.length ||
+        !topbarStatus ||
+        !openBtn ||
+        !gradeSel ||
+        !yearSel ||
+        !examSel ||
+        !typeSel ||
+        !previewPages ||
+        !previewFrame ||
+        !previewEmpty ||
+        !newTabBtn
+      ) return;
+
+      function showPanel(el) {
+        el.hidden = false;
+        el.style.display = "";
+      }
+
+      function hidePanel(el) {
+        el.hidden = true;
+        el.style.display = "none";
+      }
+
+      function setBtnActive(btn, active) {
+        btn.classList.toggle("is-active", !!active);
+      }
+
+      function closePickerPopup() {
+        pickerPopup.hidden = true;
+        pickerBackdrop.hidden = true;
+        setBtnActive(pickerToggleBtn, false);
+      }
+
+      function openPickerPopup() {
+        closeSessionPopup();
+        pickerPopup.hidden = false;
+        pickerBackdrop.hidden = false;
+        setBtnActive(pickerToggleBtn, true);
+      }
+
+      function togglePickerPopup() {
+        if (pickerPopup.hidden) {
+          openPickerPopup();
+        } else {
+          closePickerPopup();
+        }
+      }
+
+      function closeSessionPopup() {
+        sessionPopup.hidden = true;
+        sessionBackdrop.hidden = true;
+        setBtnActive(topbarStatus, false);
+      }
+
+      function openSessionPopup() {
+        closePickerPopup();
+        sessionPopup.hidden = false;
+        sessionBackdrop.hidden = false;
+        setBtnActive(topbarStatus, true);
+      }
+
+      function toggleSessionPopup() {
+        if (sessionPopup.hidden) {
+          openSessionPopup();
+        } else {
+          closeSessionPopup();
+        }
+      }
+
+      function closeFontPopup() {
+        overlayFontPopup.hidden = true;
+      }
+
+      function toggleFontPopup() {
+        overlayFontPopup.hidden = !overlayFontPopup.hidden;
+        if (!overlayFontPopup.hidden) {
+          closeTabTypePopup();
+        }
+      }
+
+      function closeTabTypePopup() {
+        overlayTabTypePopup.hidden = true;
+      }
+
+      function toggleTabTypePopup() {
+        overlayTabTypePopup.hidden = !overlayTabTypePopup.hidden;
+        if (!overlayTabTypePopup.hidden) {
+          closeFontPopup();
+        }
+      }
+
+      function applyOverlaySide() {
+        const isLeft = overlaySide === "left";
+        overlayMemo.classList.toggle("is-left", isLeft);
+        overlayTwoThreePane.classList.toggle("is-flipped", isLeft);
+      }
+
+      function flipOverlaySide() {
+        overlaySide = overlaySide === "right" ? "left" : "right";
+        applyOverlaySide();
+      }
+
+      function isMemoOpen() {
+        return overlayMemo.classList.contains("is-open");
+      }
+
+      function makeDefaultTwoTCards() {
+        return Array.from({ length: DEFAULT_TWO_T_CARD_COUNT }, function () {
+          return {
+            word: "",
+            meaning: ""
+          };
+        });
+      }
+
+      function makeDefaultThreeTCards() {
+        return Array.from({ length: DEFAULT_THREE_T_CARD_COUNT }, function () {
+          return {
+            sentence: ""
+          };
+        });
+      }
+
+      function ensureTwoThreeData(tab) {
+        if (!tab) return null;
+        if (!tab.twoThree) {
+          tab.twoThree = {
+            words: makeDefaultTwoTCards(),
+            sentences: makeDefaultThreeTCards()
+          };
+        }
+
+        if (Array.isArray(tab.twoThree.cards) && tab.twoThree.cards.length) {
+          const legacyCards = tab.twoThree.cards;
+          tab.twoThree.words = legacyCards.slice(0, DEFAULT_TWO_T_CARD_COUNT).map(function (row) {
+            return {
+              word: row && typeof row.word === "string" ? row.word : "",
+              meaning: row && typeof row.meaning === "string" ? row.meaning : ""
+            };
+          });
+          tab.twoThree.sentences = legacyCards.slice(0, DEFAULT_THREE_T_CARD_COUNT).map(function (row) {
+            return {
+              sentence: row && typeof row.sentence === "string" ? row.sentence : ""
+            };
+          });
+          delete tab.twoThree.cards;
+        }
+
+        if (!Array.isArray(tab.twoThree.words)) {
+          tab.twoThree.words = makeDefaultTwoTCards();
+        }
+        if (!Array.isArray(tab.twoThree.sentences)) {
+          tab.twoThree.sentences = makeDefaultThreeTCards();
+        }
+        while (tab.twoThree.words.length < DEFAULT_TWO_T_CARD_COUNT) {
+          tab.twoThree.words.push({ word: "", meaning: "" });
+        }
+        while (tab.twoThree.sentences.length < DEFAULT_THREE_T_CARD_COUNT) {
+          tab.twoThree.sentences.push({ sentence: "" });
+        }
+        if (tab.twoThree.words.length > DEFAULT_TWO_T_CARD_COUNT) {
+          tab.twoThree.words = tab.twoThree.words.slice(0, DEFAULT_TWO_T_CARD_COUNT);
+        }
+        if (tab.twoThree.sentences.length > DEFAULT_THREE_T_CARD_COUNT) {
+          tab.twoThree.sentences = tab.twoThree.sentences.slice(0, DEFAULT_THREE_T_CARD_COUNT);
+        }
+        return tab.twoThree;
+      }
+
+      function getActiveMemoTab() {
+        return memoTabs[activeMemoTabIndex] || null;
+      }
+
+      function saveActiveMemoText() {
+        const tab = getActiveMemoTab();
+        if (!tab) return;
+        if (tab.type === "blank") {
+          tab.blankText = overlayMemoText.value;
+        }
+      }
+
+      function applyMemoFontSize() {
+        const px = `${memoFontSize}px`;
+        overlayMemo.style.setProperty("--memo-font-size", px);
+        overlayFontSizeValue.textContent = px;
+      }
+
+      function buildTwoTCard(card, idx) {
+        const outer = document.createElement("div");
+        outer.className = "overlay-card overlay-card--twoT";
+        const inner = document.createElement("div");
+        inner.className = "overlay-card-inner overlay-card-inner--twoT";
+
+        const row = document.createElement("div");
+        row.className = "overlay-card-row overlay-card-row--twoT";
+
+        const idxEl = document.createElement("span");
+        idxEl.className = "overlay-card-index overlay-card-index--twoT";
+        idxEl.textContent = String(idx + 1);
+
+        const wordInput = document.createElement("input");
+        wordInput.type = "text";
+        wordInput.className = "overlay-card-input overlay-card-input--twoT";
+        wordInput.placeholder = "단어";
+        wordInput.value = card.word || "";
+        wordInput.addEventListener("input", function () {
+          card.word = wordInput.value;
+        });
+
+        row.appendChild(idxEl);
+        row.appendChild(wordInput);
+
+        const meaningArea = document.createElement("textarea");
+        meaningArea.className = "overlay-card-textarea overlay-card-textarea--twoT";
+        meaningArea.placeholder = "뜻/메모";
+        meaningArea.value = card.meaning || "";
+        meaningArea.addEventListener("input", function () {
+          card.meaning = meaningArea.value;
+        });
+
+        inner.appendChild(row);
+        inner.appendChild(meaningArea);
+        outer.appendChild(inner);
+        return outer;
+      }
+
+      function buildThreeTCard(card, idx) {
+        const outer = document.createElement("div");
+        outer.className = "overlay-card overlay-card--threeT";
+        const inner = document.createElement("div");
+        inner.className = "overlay-card-inner overlay-card-inner--threeT";
+
+        const row = document.createElement("div");
+        row.className = "overlay-card-row";
+
+        const idxEl = document.createElement("span");
+        idxEl.className = "overlay-card-index overlay-card-index--threeT";
+        idxEl.textContent = String(idx + 1).padStart(2, "0");
+
+        const sentenceInput = document.createElement("textarea");
+        sentenceInput.className = "overlay-card-textarea overlay-card-textarea--threeT overlay-card-textarea--threeT-sentence";
+        sentenceInput.placeholder = "문장";
+        sentenceInput.value = card.sentence || "";
+        sentenceInput.addEventListener("input", function () {
+          card.sentence = sentenceInput.value;
+        });
+
+        row.appendChild(idxEl);
+        row.appendChild(sentenceInput);
+
+        inner.appendChild(row);
+        outer.appendChild(inner);
+        return outer;
+      }
+
+      function renderTwoThreeCards() {
+        const tab = getActiveMemoTab();
+        if (!tab || tab.type !== "two_three") return;
+        const twoThree = ensureTwoThreeData(tab);
+        if (!twoThree) return;
+
+        overlayTwoThreePane.classList.toggle("is-flipped", overlaySide === "left");
+        overlayTwoLeftList.innerHTML = "";
+        overlayTwoRightList.innerHTML = "";
+
+        for (let idx = 0; idx < twoThree.words.length; idx += 1) {
+          const wordCard = twoThree.words[idx];
+          overlayTwoLeftList.appendChild(buildTwoTCard(wordCard, idx));
+        }
+        for (let idx = 0; idx < twoThree.sentences.length; idx += 1) {
+          const sentCard = twoThree.sentences[idx];
+          overlayTwoRightList.appendChild(buildThreeTCard(sentCard, idx));
+        }
+      }
+
+      function renderActiveMemoPane() {
+        const tab = getActiveMemoTab();
+        const isTwoThree = !!tab && tab.type === "two_three";
+        overlayBlankPane.hidden = isTwoThree;
+        overlayTwoThreePane.hidden = !isTwoThree;
+
+        if (!tab) return;
+        if (isTwoThree) {
+          ensureTwoThreeData(tab);
+          renderTwoThreeCards();
+        } else {
+          overlayMemoText.value = tab.blankText || "";
+        }
+      }
+
+      function renderMemoTabbar() {
+        overlayTabList.innerHTML = "";
+        for (let idx = 0; idx < memoTabs.length; idx += 1) {
+          const item = memoTabs[idx];
+          const wrapper = document.createElement("div");
+          wrapper.className = "overlay-tab-item";
+
+          const tabBtn = document.createElement("button");
+          tabBtn.type = "button";
+          tabBtn.className = `overlay-tab-btn ${idx === activeMemoTabIndex ? "is-active" : "is-inactive"}`;
+          tabBtn.textContent = String(item.id);
+          tabBtn.title = TAB_TYPE_LABEL[item.type] || item.type;
+          tabBtn.addEventListener("click", function () {
+            switchMemoTab(idx);
+          });
+
+          const closeBtn = document.createElement("button");
+          closeBtn.type = "button";
+          closeBtn.className = "overlay-tab-close";
+          closeBtn.textContent = "✕";
+          closeBtn.title = "탭 닫기";
+          closeBtn.addEventListener("click", function () {
+            closeMemoTab(idx);
+          });
+
+          wrapper.appendChild(tabBtn);
+          wrapper.appendChild(closeBtn);
+          overlayTabList.appendChild(wrapper);
+        }
+      }
+
+      function switchMemoTab(index) {
+        if (index < 0 || index >= memoTabs.length) return;
+        saveActiveMemoText();
+        activeMemoTabIndex = index;
+        renderActiveMemoPane();
+        renderMemoTabbar();
+      }
+
+      function addMemoTab(tabType) {
+        saveActiveMemoText();
+        const type = tabType === "two_three" ? "two_three" : "blank";
+        memoTabs.push({
+          id: nextMemoTabId,
+          type,
+          blankText: "",
+          twoThree: type === "two_three" ? {
+            words: makeDefaultTwoTCards(),
+            sentences: makeDefaultThreeTCards()
+          } : null
+        });
+        nextMemoTabId += 1;
+        activeMemoTabIndex = memoTabs.length - 1;
+        renderActiveMemoPane();
+        renderMemoTabbar();
+        closeTabTypePopup();
+      }
+
+      function closeMemoTab(index) {
+        if (index < 0 || index >= memoTabs.length) return;
+        saveActiveMemoText();
+        if (memoTabs.length === 1) {
+          memoTabs[0].blankText = "";
+          memoTabs[0].twoThree = null;
+          renderActiveMemoPane();
+          return;
+        }
+        memoTabs.splice(index, 1);
+        if (activeMemoTabIndex >= memoTabs.length) {
+          activeMemoTabIndex = memoTabs.length - 1;
+        } else if (index < activeMemoTabIndex) {
+          activeMemoTabIndex -= 1;
+        }
+        renderActiveMemoPane();
+        renderMemoTabbar();
+      }
+
+      function toggleMemoOverlay(forceVisible) {
+        const shouldShow = typeof forceVisible === "boolean" ? forceVisible : !isMemoOpen();
+        if (shouldShow && !pickerPopup.hidden) {
+          closePickerPopup();
+        }
+        if (shouldShow && !sessionPopup.hidden) {
+          closeSessionPopup();
+        }
+        overlayMemo.classList.toggle("is-open", shouldShow);
+        overlayMemo.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+        setBtnActive(memoToggleBtn, shouldShow);
+        if (!shouldShow) {
+          closeFontPopup();
+          closeTabTypePopup();
+        }
+      }
+
+      function trace(level, message, meta) {
+        const fn = (console && typeof console[level] === "function") ? console[level] : console.log;
+        if (meta !== undefined) {
+          fn(`[mock-exam-tool] ${message}`, meta);
+        } else {
+          fn(`[mock-exam-tool] ${message}`);
+        }
+      }
+
+      function describeNodeForDiag(node) {
+        if (!(node instanceof Element)) return String(node);
+        const id = node.id ? `#${node.id}` : "";
+        let cls = "";
+        if (node.classList && node.classList.length) {
+          cls = "." + Array.from(node.classList).slice(0, 3).join(".");
+        }
+        return `${node.tagName.toLowerCase()}${id}${cls}`;
+      }
+
+      function getScrollHostMetrics(host) {
+        if (!host) return null;
+        const cs = window.getComputedStyle(host);
+        return {
+          node: describeNodeForDiag(host),
+          clientH: host.clientHeight,
+          scrollH: host.scrollHeight,
+          scrollTop: host.scrollTop,
+          canScrollY: host.scrollHeight > host.clientHeight + 1,
+          overflowY: cs.overflowY,
+          touchAction: cs.touchAction,
+          pointerEvents: cs.pointerEvents
+        };
+      }
+
+      function lockPreviewViewportHeight(reason) {
+        const previewBox = previewPages.parentElement;
+        if (!previewBox) return;
+
+        const workspace = document.getElementById("mock-workspace");
+        let target = 0;
+        if (workspace) {
+          const wsRect = workspace.getBoundingClientRect();
+          const topPad = 8;
+          const bottomPad = 12;
+          target = wsRect.height - topPad - bottomPad;
+        }
+        if (!Number.isFinite(target) || target <= 0) {
+          target = window.innerHeight - 220;
+        }
+        target = Math.max(260, Math.min(760, Math.floor(target)));
+
+        previewBox.style.height = `${target}px`;
+        previewBox.style.maxHeight = `${target}px`;
+        previewPages.style.height = "100%";
+        previewPages.style.maxHeight = "100%";
+        previewPages.style.minHeight = "0";
+
+        if (DEBUG_SCROLL_DIAG) {
+          trace("info", `diag/layout-${reason}`, {
+            target,
+            previewBox: getScrollHostMetrics(previewBox),
+            host: getScrollHostMetrics(previewPages)
+          });
+        }
+      }
+
+      function attachPreviewScrollDiagnostics(host) {
+        if (!DEBUG_SCROLL_DIAG || !host) return;
+        let lastEmitAt = 0;
+        const emit = function (stage, payload) {
+          const now = Date.now();
+          if (stage === "scroll" && now - lastEmitAt < 120) return;
+          lastEmitAt = now;
+          trace("info", `diag/${stage}`, payload);
+        };
+
+        emit("init", getScrollHostMetrics(host));
+
+        host.addEventListener("scroll", function () {
+          emit("scroll", {
+            top: host.scrollTop,
+            left: host.scrollLeft,
+            maxY: Math.max(0, host.scrollHeight - host.clientHeight)
+          });
+        }, { passive: true });
+
+        host.addEventListener("wheel", function (event) {
+          const before = host.scrollTop;
+          const target = describeNodeForDiag(event.target);
+          requestAnimationFrame(function () {
+            const topEl = document.elementFromPoint(event.clientX, event.clientY);
+            emit("wheel", {
+              deltaY: event.deltaY,
+              before,
+              after: host.scrollTop,
+              target,
+              topElement: describeNodeForDiag(topEl),
+              defaultPrevented: event.defaultPrevented
+            });
+          });
+        }, { passive: true });
+
+        host.addEventListener("touchstart", function (event) {
+          const t = event.touches && event.touches[0];
+          emit("touchstart", {
+            target: describeNodeForDiag(event.target),
+            x: t ? t.clientX : null,
+            y: t ? t.clientY : null
+          });
+        }, { passive: true });
+
+        host.addEventListener("touchmove", function (event) {
+          const before = host.scrollTop;
+          const t = event.touches && event.touches[0];
+          const x = t ? t.clientX : 0;
+          const y = t ? t.clientY : 0;
+          requestAnimationFrame(function () {
+            const topEl = document.elementFromPoint(x, y);
+            emit("touchmove", {
+              before,
+              after: host.scrollTop,
+              target: describeNodeForDiag(event.target),
+              topElement: describeNodeForDiag(topEl),
+              defaultPrevented: event.defaultPrevented
+            });
+          });
+        }, { passive: true });
+
+        host.addEventListener("pointerdown", function (event) {
+          emit("pointerdown", {
+            target: describeNodeForDiag(event.target),
+            pointerType: event.pointerType,
+            x: event.clientX,
+            y: event.clientY
+          });
+        }, { passive: true });
+      }
+
+      function clearBlobUrl() {
+        if (!lastBlobUrl) return;
+        try {
+          URL.revokeObjectURL(lastBlobUrl);
+        } catch (_err) {}
+        lastBlobUrl = "";
+      }
+
+      function getSupabaseKey() {
+        const fromWindow = window.SUPABASE_ANON_KEY || window.__SUPABASE_ANON_KEY__;
+        if (fromWindow) return String(fromWindow).trim();
+
+        const fromLocal = localStorage.getItem("SUPABASE_ANON_KEY");
+        if (fromLocal) return String(fromLocal).trim();
+
+        const fromQuery = new URLSearchParams(window.location.search).get("sbkey");
+        if (fromQuery) return String(fromQuery).trim();
+
+        return "";
+      }
+
+      function resetPdfPreviewToEmpty(message) {
+        pdfRenderToken += 1;
+        clearBlobUrl();
+        if (message) {
+          previewEmpty.textContent = message;
+        }
+        previewPages.innerHTML = "";
+        hidePanel(previewPages);
+        hidePanel(previewFrame);
+        previewFrame.removeAttribute("src");
+        showPanel(previewEmpty);
+        newTabBtn.hidden = true;
+      }
+
+      function showPdfWithIframeBlob(blob) {
+        clearBlobUrl();
+        lastBlobUrl = URL.createObjectURL(blob);
+        previewFrame.src = `${lastBlobUrl}#toolbar=0&navpanes=0&statusbar=0&messages=0&view=FitH`;
+        showPanel(previewFrame);
+        hidePanel(previewPages);
+        hidePanel(previewEmpty);
+        lockPreviewViewportHeight("iframe");
+      }
+
+      function normalizeCapturedWord(raw) {
+        const text = String(raw || "").trim();
+        if (!text) return "";
+        const cleaned = text
+          .replace(/[’`]/g, "'")
+          .replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+        if (!cleaned || /\s/.test(cleaned) || cleaned.length > 64) return "";
+        return cleaned;
+      }
+
+      function findWordByApproxOffset(text, approxOffset) {
+        const src = String(text || "");
+        if (!src) return "";
+        const regex = /[A-Za-z][A-Za-z0-9'-]*/g;
+        let bestWord = "";
+        let bestDistance = Number.POSITIVE_INFINITY;
+        let match = regex.exec(src);
+        while (match) {
+          const start = match.index;
+          const end = start + match[0].length;
+          const mid = (start + end) / 2;
+          const dist = Math.abs(mid - approxOffset);
+          const candidate = normalizeCapturedWord(match[0]);
+          if (candidate && dist < bestDistance) {
+            bestDistance = dist;
+            bestWord = candidate;
+          }
+          match = regex.exec(src);
+        }
+        return bestWord;
+      }
+
+      function extractWordAtOffset(text, offset) {
+        const src = String(text || "");
+        if (!src) return "";
+        const isWordChar = function (ch) {
+          return /[A-Za-z0-9'-]/.test(ch);
+        };
+        let start = Math.max(0, Math.min(offset, src.length));
+        let end = start;
+        while (start > 0 && isWordChar(src[start - 1])) {
+          start -= 1;
+        }
+        while (end < src.length && isWordChar(src[end])) {
+          end += 1;
+        }
+        return normalizeCapturedWord(src.slice(start, end));
+      }
+
+      function buildWordHitsFromSpan(rawText, rect, layerRect) {
+        const src = String(rawText || "");
+        if (!src || !rect || !layerRect || rect.width <= 0 || rect.height <= 0) return [];
+
+        const words = [];
+        const totalChars = Math.max(1, src.length);
+        const regex = /[A-Za-z][A-Za-z0-9'-]*/g;
+        let match = regex.exec(src);
+        while (match) {
+          const word = normalizeCapturedWord(match[0]);
+          if (word) {
+            const start = match.index;
+            const end = start + match[0].length;
+            words.push({
+              word,
+              x1: (rect.left - layerRect.left) + (rect.width * (start / totalChars)),
+              x2: (rect.left - layerRect.left) + (rect.width * (end / totalChars)),
+              y1: rect.top - layerRect.top,
+              y2: rect.bottom - layerRect.top
+            });
+          }
+          match = regex.exec(src);
+        }
+        return words;
+      }
+
+      function findWordHitAtPoint(hits, x, y) {
+        if (!Array.isArray(hits) || !hits.length) return "";
+        let nearestWord = "";
+        let nearestDistSq = Number.POSITIVE_INFINITY;
+        for (let idx = 0; idx < hits.length; idx += 1) {
+          const hit = hits[idx];
+          if (x >= hit.x1 && x <= hit.x2 && y >= hit.y1 && y <= hit.y2) {
+            return hit.word || "";
+          }
+
+          const cx = x < hit.x1 ? hit.x1 : (x > hit.x2 ? hit.x2 : x);
+          const cy = y < hit.y1 ? hit.y1 : (y > hit.y2 ? hit.y2 : y);
+          const dx = x - cx;
+          const dy = y - cy;
+          const distSq = (dx * dx) + (dy * dy);
+          if (distSq < nearestDistSq) {
+            nearestDistSq = distSq;
+            nearestWord = hit.word || "";
+          }
+        }
+
+        // Slightly tolerant pick to absorb renderer/canvas rounding offsets.
+        if (nearestWord && nearestDistSq <= (12 * 12)) {
+          return nearestWord;
+        }
+        return "";
+      }
+
+      function buildWordHitsFromIndexRows(rows, scaleX, scaleY, pageHeightPx) {
+        if (!Array.isArray(rows) || !rows.length) return [];
+        const hits = [];
+
+        for (let i = 0; i < rows.length; i += 1) {
+          const row = rows[i];
+          if (!row || !Array.isArray(row.bbox) || row.bbox.length !== 4) continue;
+          const text = normalizeCapturedWord(row.text || "");
+          if (!text) continue;
+
+          const x0 = Number(row.bbox[0]) * scaleX;
+          const y0 = Number(row.bbox[1]) * scaleY;
+          const x1 = Number(row.bbox[2]) * scaleX;
+          const y1 = Number(row.bbox[3]) * scaleY;
+          if (!Number.isFinite(x0) || !Number.isFinite(y0) || !Number.isFinite(x1) || !Number.isFinite(y1)) continue;
+
+          const lx = Math.min(x0, x1);
+          const rx = Math.max(x0, x1);
+          const ty = Math.min(y0, y1);
+          const by = Math.max(y0, y1);
+          hits.push({ word: text, x1: lx, y1: ty, x2: rx, y2: by });
+
+          // Fallback for coordinate-system mismatch (top-origin vs bottom-origin).
+          if (Number.isFinite(pageHeightPx)) {
+            const fty = pageHeightPx - by;
+            const fby = pageHeightPx - ty;
+            hits.push({ word: text, x1: lx, y1: fty, x2: rx, y2: fby });
+          }
+        }
+        return hits;
+      }
+
+      function extractWordFromTextSpan(span, event) {
+        if (!span) return "";
+        const raw = String(span.textContent || "");
+        if (!raw.trim()) return "";
+
+        let offset = -1;
+        if (document.caretPositionFromPoint) {
+          const pos = document.caretPositionFromPoint(event.clientX, event.clientY);
+          if (pos && span.contains(pos.offsetNode)) {
+            offset = Number(pos.offset) || 0;
+          }
+        } else if (document.caretRangeFromPoint) {
+          const range = document.caretRangeFromPoint(event.clientX, event.clientY);
+          if (range && span.contains(range.startContainer)) {
+            offset = Number(range.startOffset) || 0;
+          }
+        }
+
+        if (offset >= 0) {
+          const atOffset = extractWordAtOffset(raw, offset);
+          if (atOffset) return atOffset;
+        }
+
+        if (offset < 0) {
+          const rect = span.getBoundingClientRect();
+          if (rect.width > 0) {
+            const ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+            offset = Math.round(ratio * raw.length);
+          }
+        }
+
+        const byApprox = findWordByApproxOffset(raw, Math.max(0, offset));
+        if (byApprox) return byApprox;
+
+        const firstMatch = raw.match(/[A-Za-z][A-Za-z0-9'-]*/);
+        return normalizeCapturedWord(firstMatch ? firstMatch[0] : "");
+      }
+
+      function appendWordToBlankMemo(word) {
+        const cleanWord = normalizeCapturedWord(word);
+        if (!cleanWord) return false;
+        const tab = getActiveMemoTab();
+        if (!tab || tab.type !== "blank") return false;
+
+        const current = typeof tab.blankText === "string" ? tab.blankText : "";
+        const next = current.trimEnd().length ? `${current.trimEnd()}\n${cleanWord}` : cleanWord;
+        tab.blankText = next;
+        overlayMemoText.value = next;
+        overlayMemoText.scrollTop = overlayMemoText.scrollHeight;
+        return true;
+      }
+
+      async function renderPdfPagesWithTextLayer(blob) {
+        if (!window.pdfjsLib) {
+          throw new Error("pdf.js is not loaded");
+        }
+        pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC;
+
+        const myToken = ++pdfRenderToken;
+        const bytes = await blob.arrayBuffer();
+        const loadingTask = pdfjsLib.getDocument({ data: bytes });
+        const pdfDoc = await loadingTask.promise;
+
+        previewPages.innerHTML = "";
+        previewPages.style.minHeight = "0";
+        previewPages.style.height = "100%";
+        hidePanel(previewFrame);
+        previewFrame.removeAttribute("src");
+        showPanel(previewPages);
+        hidePanel(previewEmpty);
+        lockPreviewViewportHeight("before-render");
+
+        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum += 1) {
+          if (myToken !== pdfRenderToken) return;
+          const page = await pdfDoc.getPage(pageNum);
+          const baseViewport = page.getViewport({ scale: 1 });
+          const hostWidth = (previewPages.parentElement && previewPages.parentElement.clientWidth) || previewPages.clientWidth;
+          const usableWidth = Math.max(320, hostWidth - 24);
+          const scale = Math.max(1, Math.min(2.7, usableWidth / baseViewport.width));
+          const viewport = page.getViewport({ scale });
+          const deviceScale = Math.max(1, window.devicePixelRatio || 1);
+          const outputScale = Math.min(4, Math.max(1, deviceScale * RENDER_QUALITY_BOOST));
+
+          const pageWrap = document.createElement("div");
+          pageWrap.className = "pdf-page";
+          pageWrap.style.width = `${viewport.width}px`;
+          pageWrap.style.height = `${viewport.height}px`;
+
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d", { alpha: false });
+          canvas.width = Math.floor(viewport.width * outputScale);
+          canvas.height = Math.floor(viewport.height * outputScale);
+          canvas.style.width = `${viewport.width}px`;
+          canvas.style.height = `${viewport.height}px`;
+
+          pageWrap.appendChild(canvas);
+          previewPages.appendChild(pageWrap);
+
+          const renderContext = {
+            canvasContext: ctx,
+            viewport
+          };
+          if (outputScale !== 1) {
+            renderContext.transform = [outputScale, 0, 0, outputScale, 0, 0];
+          }
+          await page.render(renderContext).promise;
+
+          const indexPages = activeWordIndex && activeWordIndex.pages && typeof activeWordIndex.pages === "object"
+            ? activeWordIndex.pages
+            : null;
+          const indexRows = indexPages
+            ? (indexPages[String(pageNum)] || indexPages[pageNum] || [])
+            : [];
+          const scaleX = viewport.width / baseViewport.width;
+          const scaleY = viewport.height / baseViewport.height;
+          const wordHits = buildWordHitsFromIndexRows(indexRows, scaleX, scaleY, viewport.height);
+          canvas.style.cursor = wordHits.length ? "pointer" : "default";
+
+          if (wordHits.length) {
+            canvas.addEventListener("mousemove", function (event) {
+              const rect = canvas.getBoundingClientRect();
+              const px = event.clientX - rect.left;
+              const py = event.clientY - rect.top;
+              const found = findWordHitAtPoint(wordHits, px, py);
+              canvas.style.cursor = found ? "pointer" : "default";
+            }, { passive: true });
+            canvas.addEventListener("mouseleave", function () {
+              canvas.style.cursor = "default";
+            }, { passive: true });
+          }
+
+          canvas.addEventListener("wheel", function (event) {
+            const host = previewPages;
+            if (!host) return;
+            const before = host.scrollTop;
+            host.scrollTop += event.deltaY;
+            host.scrollLeft += event.deltaX;
+            if (DEBUG_SCROLL_DIAG) {
+              trace("info", "diag/canvas-wheel", {
+                deltaY: event.deltaY,
+                before,
+                after: host.scrollTop,
+                changed: host.scrollTop !== before
+              });
+            }
+            event.preventDefault();
+          }, { passive: false });
+
+          canvas.addEventListener("click", function (event) {
+            if (Date.now() - lastPreviewScrollAt < 140) return;
+            if (!wordHits.length) return;
+
+            const canvasRect = canvas.getBoundingClientRect();
+            const px = event.clientX - canvasRect.left;
+            const py = event.clientY - canvasRect.top;
+            const word = findWordHitAtPoint(wordHits, px, py);
+            if (!word) return;
+            const added = appendWordToBlankMemo(word);
+            if (added) {
+              trace("info", `memo append word: ${word}`);
+            }
+          });
+        }
+        if (DEBUG_SCROLL_DIAG) {
+          trace("info", "diag/render-done", {
+            host: getScrollHostMetrics(previewPages),
+            pagesClientHeight: previewPages.clientHeight,
+            pagesScrollHeight: previewPages.scrollHeight
+          });
+        }
+        lockPreviewViewportHeight("after-render");
+      }
+
+      function getExamLabel(examKey) {
+        const row = EXAM_META.find(item => item.key === examKey);
+        return row ? row.label : "";
+      }
+
+      function getGradeLabel(gradeValue) {
+        const row = GRADE_OPTIONS.find(function (item) {
+          return item.value === gradeValue;
+        });
+        return row ? row.label : String(gradeValue || "");
+      }
+
+      function getSessionDateLabel(session) {
+        if (!session || typeof session !== "object") return "";
+        return String(session.date || session.scheduledAt || session.title || "").trim();
+      }
+
+      function getSessionKey(session, idx) {
+        const dateLabel = getSessionDateLabel(session) || `slot-${idx + 1}`;
+        return `${FIXED_STUDENT_ID || "student"}::${dateLabel}::${idx}`;
+      }
+
+      function ensureSelectValue(selectEl, value, label) {
+        if (!value) return;
+        const hasOption = Array.from(selectEl.options).some(function (opt) {
+          return opt.value === value;
+        });
+        if (!hasOption) {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = label || value;
+          selectEl.appendChild(option);
+        }
+        selectEl.value = value;
+      }
+
+      function normalizeSessionTabs(rawTabs) {
+        const sourceTabs = Array.isArray(rawTabs) && rawTabs.length ? rawTabs : [{ type: "blank", blankText: "" }];
+        return sourceTabs.map(function (raw, idx) {
+          const safeRaw = raw && typeof raw === "object" ? raw : {};
+          const type = safeRaw.type === "two_three" ? "two_three" : "blank";
+          if (type === "two_three") {
+            const words = Array.isArray(safeRaw.words) ? safeRaw.words.map(function (row) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return {
+                word: typeof safeRow.word === "string" ? safeRow.word : "",
+                meaning: typeof safeRow.meaning === "string" ? safeRow.meaning : ""
+              };
+            }) : [];
+            const sentences = Array.isArray(safeRaw.sentences) ? safeRaw.sentences.map(function (row) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return {
+                sentence: typeof safeRow.sentence === "string" ? safeRow.sentence : ""
+              };
+            }) : [];
+            return {
+              id: idx + 1,
+              type: "two_three",
+              blankText: "",
+              twoThree: { words, sentences }
+            };
+          }
+          return {
+            id: idx + 1,
+            type: "blank",
+            blankText: typeof safeRaw.blankText === "string" ? safeRaw.blankText : "",
+            twoThree: null
+          };
+        });
+      }
+
+      function renderSessionList() {
+        sessionList.innerHTML = "";
+        SAMPLE_CLASS_SESSIONS.forEach(function (session, idx) {
+          const sessionKey = getSessionKey(session, idx);
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "session-item-btn";
+          if (sessionKey === selectedSessionId) {
+            btn.classList.add("is-selected");
+          }
+
+          const title = document.createElement("div");
+          title.className = "session-item-title";
+          title.textContent = getSessionDateLabel(session) || "수업 일정";
+
+          const mockInfo = session.mock || {};
+          const meta = document.createElement("div");
+          meta.className = "session-item-meta";
+          meta.textContent = [
+            getGradeLabel(mockInfo.grade || FOLDER),
+            mockInfo.year || "",
+            getExamLabel(mockInfo.examKey || "")
+          ].filter(Boolean).join(" · ");
+
+          const note = document.createElement("div");
+          note.className = "session-item-note";
+          note.textContent = session.note || "";
+
+          btn.appendChild(title);
+          btn.appendChild(meta);
+          if (note.textContent) {
+            btn.appendChild(note);
+          }
+          btn.addEventListener("click", function () {
+            applySessionPreset(session, sessionKey);
+          });
+          sessionList.appendChild(btn);
+        });
+      }
+
+      async function applySessionPreset(session, sessionKey) {
+        if (!session || !session.mock) return;
+        const mockInfo = session.mock;
+
+        selectedSessionId = sessionKey || "";
+        selectedSessionTitle = getSessionDateLabel(session);
+
+        ensureSelectValue(gradeSel, mockInfo.grade || FOLDER, getGradeLabel(mockInfo.grade || FOLDER));
+        ensureSelectValue(yearSel, mockInfo.year, mockInfo.year);
+        ensureSelectValue(examSel, mockInfo.examKey, getExamLabel(mockInfo.examKey));
+        ensureSelectValue(typeSel, mockInfo.typeLabel || DEFAULT_TYPE_LABEL, mockInfo.typeLabel || DEFAULT_TYPE_LABEL);
+
+        overlaySide = session.overlaySide === "left" ? "left" : "right";
+        applyOverlaySide();
+
+        const normalizedTabs = normalizeSessionTabs(session.tabs);
+        memoTabs.length = 0;
+        normalizedTabs.forEach(function (tab) {
+          memoTabs.push(tab);
+        });
+        nextMemoTabId = memoTabs.length + 1;
+        const nextIndex = Number(session.activeTabIndex);
+        activeMemoTabIndex = Number.isFinite(nextIndex)
+          ? Math.min(Math.max(nextIndex, 0), memoTabs.length - 1)
+          : 0;
+        renderActiveMemoPane();
+        renderMemoTabbar();
+        closeFontPopup();
+        closeTabTypePopup();
+        renderSessionList();
+        updateTopbarStatus();
+        closeSessionPopup();
+
+        const loaded = await tryLoadPdf();
+        if (session.openMemo && loaded) {
+          toggleMemoOverlay(true);
+        }
+      }
+
+      function updateTopbarStatus() {
+        const parts = [];
+        if (selectedSessionTitle) {
+          parts.push(selectedSessionTitle);
+        }
+        const gradeLabel = gradeSel.options && gradeSel.selectedIndex >= 0
+          ? gradeSel.options[gradeSel.selectedIndex].text
+          : "";
+        if (gradeLabel) parts.push(gradeLabel);
+        if (yearSel.value) parts.push(yearSel.value);
+        if (examSel.value) parts.push(getExamLabel(examSel.value));
+        if (typeSel.value) parts.push(typeSel.value);
+        topbarStatus.textContent = parts.length ? parts.join(" · ") : "고3 · 연도 선택";
+      }
+
+      function clearSessionSelection() {
+        if (!selectedSessionId && !selectedSessionTitle) return;
+        selectedSessionId = "";
+        selectedSessionTitle = "";
+        renderSessionList();
+      }
+
+      function setSelectOptions(selectEl, options, placeholderLabel) {
+        const html = [];
+        if (placeholderLabel) {
+          html.push(`<option value="">${placeholderLabel}</option>`);
+        }
+        for (const opt of options) {
+          html.push(`<option value="${opt.value}">${opt.label}</option>`);
+        }
+        selectEl.innerHTML = html.join("");
+      }
+
+      function buildPublicUrl(filename) {
+        return `${SUPABASE_BASE}/${BUCKET}/${FOLDER}/${filename}`;
+      }
+
+      async function loadWordIndexForFile(fileInfo) {
+        activeWordIndex = null;
+        if (!fileInfo || !fileInfo.filename) return null;
+        const indexName = String(fileInfo.filename).replace(/\.pdf$/i, ".words.json");
+        if (!indexName || indexName === fileInfo.filename) return null;
+
+        const candidates = [
+          indexName,
+          buildPublicUrl(indexName)
+        ];
+
+        for (let i = 0; i < candidates.length; i += 1) {
+          const url = candidates[i];
+          try {
+            const res = await fetch(url);
+            if (!res.ok) continue;
+            const data = await res.json();
+            const pages = data && data.pages && typeof data.pages === "object"
+              ? Object.keys(data.pages).length
+              : 0;
+            activeWordIndex = data;
+            trace("info", `word-index loaded: ${indexName} (${pages}p) from ${url}`);
+            return data;
+          } catch (_err) {
+            // try next candidate
+          }
+        }
+
+        trace("warn", `word-index not found: ${indexName}`);
+        return null;
+      }
+
+      function buildFilename(grade, year, examKey, typeLabel) {
+        const exam = EXAM_META.find(item => item.key === examKey);
+        const type = TYPE_META.find(item => item.label === typeLabel);
+        if (!exam || !type) return "";
+        return `${grade}_${year}_${exam.token}${type.suffix}.pdf`;
+      }
+
+      function refreshYearExamTypeOptions() {
+        const years = YEAR_CANDIDATES.slice().sort().reverse();
+        setSelectOptions(
+          yearSel,
+          years.map(y => ({ value: y, label: y })),
+          "연도 선택"
+        );
+        if (!yearSel.value || !years.includes(yearSel.value)) {
+          yearSel.value = years.includes("2023to2024") ? "2023to2024" : (years[0] || "");
+        }
+
+        const examOptions = EXAM_META.map(meta => ({ value: meta.key, label: meta.label }));
+        setSelectOptions(examSel, examOptions, "몇평 선택");
+        if (!examSel.value || !examOptions.some(opt => opt.value === examSel.value)) {
+          examSel.value = examOptions.some(opt => opt.value === "november")
+            ? "november"
+            : (examOptions[0] ? examOptions[0].value : "");
+        }
+
+        const typeOptions = TYPE_META.map(meta => ({ value: meta.label, label: meta.label }));
+        setSelectOptions(typeSel, typeOptions, "유형 선택");
+        if (!typeSel.value || !typeOptions.some(opt => opt.value === typeSel.value)) {
+          typeSel.value = "시험지";
+        }
+      }
+
+      function initializeFileMap() {
+        setSelectOptions(gradeSel, GRADE_OPTIONS, "학년 선택");
+        gradeSel.value = FOLDER;
+        refreshYearExamTypeOptions();
+        openBtn.disabled = false;
+        updateTopbarStatus();
+        trace("info", "mode=direct-request");
+      }
+
+      function getSelectedFileInfo() {
+        const grade = gradeSel.value || FOLDER;
+        const year = yearSel.value;
+        const examKey = examSel.value;
+        const typeLabel = typeSel.value;
+        if (!grade || !year || !examKey || !typeLabel) return null;
+
+        const filename = buildFilename(grade, year, examKey, typeLabel);
+        if (!filename) return null;
+        return {
+          grade,
+          year,
+          examKey,
+          typeLabel,
+          filename,
+          url: buildPublicUrl(filename)
+        };
+      }
+
+      async function fetchPdfBlob(url) {
+        const res = await fetch(url);
+        if (!res.ok) {
+          const err = new Error(`HTTP ${res.status}`);
+          err.httpStatus = res.status;
+          throw err;
+        }
+        return res.blob();
+      }
+
+      async function tryLoadPdf() {
+        const fileInfo = getSelectedFileInfo();
+        if (!fileInfo) {
+          resetPdfPreviewToEmpty("선택한 조건의 PDF가 없습니다.");
+          trace("warn", "selected combo is incomplete");
+          return false;
+        }
+
+        openBtn.disabled = true;
+        newTabBtn.hidden = true;
+        lastPdfUrl = fileInfo.url;
+        topbarStatus.textContent = "PDF 불러오는 중...";
+        trace("info", `load start: ${fileInfo.filename}`);
+
+        try {
+          const pdfBlob = await fetchPdfBlob(fileInfo.url);
+          trace("info", `download ok: ${fileInfo.filename} (${Math.round(pdfBlob.size / 1024)}KB)`);
+          const wordIndex = await loadWordIndexForFile(fileInfo);
+          if (wordIndex && window.pdfjsLib) {
+            try {
+              await renderPdfPagesWithTextLayer(pdfBlob);
+            } catch (renderErr) {
+              trace("warn", `word-index renderer failed -> iframe fallback: ${fileInfo.filename}`, renderErr);
+              showPdfWithIframeBlob(pdfBlob);
+            }
+          } else {
+            showPdfWithIframeBlob(pdfBlob);
+          }
+          if (DEBUG_SCROLL_DIAG) {
+            trace("info", "diag/post-load", {
+              frameHidden: previewFrame.hidden,
+              pagesHidden: previewPages.hidden,
+              emptyHidden: previewEmpty.hidden,
+              host: getScrollHostMetrics(previewPages)
+            });
+          }
+          newTabBtn.hidden = false;
+          updateTopbarStatus();
+          trace("info", `load success: ${fileInfo.filename}`);
+          return true;
+        } catch (err) {
+          const code = Number(err && err.httpStatus);
+          if (code === 400 || code === 404) {
+            resetPdfPreviewToEmpty("해당 조합의 PDF가 아직 없습니다.");
+            updateTopbarStatus();
+            trace("warn", `missing file: ${fileInfo.filename}`);
+            return false;
+          }
+
+          resetPdfPreviewToEmpty("PDF를 불러오지 못했습니다.");
+          updateTopbarStatus();
+          trace("error", `load failed: ${fileInfo.filename}`, err);
+          return false;
+        } finally {
+          openBtn.disabled = false;
+        }
+      }
+
+      yearSel.addEventListener("change", function () {
+        clearSessionSelection();
+        updateTopbarStatus();
+      });
+
+      examSel.addEventListener("change", function () {
+        clearSessionSelection();
+        updateTopbarStatus();
+      });
+
+      gradeSel.addEventListener("change", function () {
+        clearSessionSelection();
+        updateTopbarStatus();
+      });
+
+      typeSel.addEventListener("change", function () {
+        clearSessionSelection();
+        updateTopbarStatus();
+      });
+
+      openBtn.addEventListener("click", async function () {
+        const loaded = await tryLoadPdf();
+        if (loaded) {
+          closePickerPopup();
+        }
+      });
+
+      pickerToggleBtn.addEventListener("click", togglePickerPopup);
+      pickerBackdrop.addEventListener("click", closePickerPopup);
+      topbarStatus.addEventListener("click", function (event) {
+        event.stopPropagation();
+        toggleSessionPopup();
+      });
+      sessionBackdrop.addEventListener("click", closeSessionPopup);
+      memoToggleBtn.addEventListener("click", function () {
+        toggleMemoOverlay();
+      });
+      overlayCloseBtn.addEventListener("click", function () {
+        toggleMemoOverlay(false);
+      });
+      overlayTwoFlipTriangleBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        flipOverlaySide();
+      });
+      overlayFontOpenBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        toggleFontPopup();
+      });
+      overlayAddTabBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        toggleTabTypePopup();
+      });
+      overlayMemoText.addEventListener("input", saveActiveMemoText);
+      overlayFontIncBtn.addEventListener("click", function () {
+        memoFontSize = Math.min(36, memoFontSize + 1);
+        applyMemoFontSize();
+      });
+      overlayFontDecBtn.addEventListener("click", function () {
+        memoFontSize = Math.max(10, memoFontSize - 1);
+        applyMemoFontSize();
+      });
+      overlayTypeOptionBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const type = btn.getAttribute("data-type") || "blank";
+          addMemoTab(type);
+        });
+      });
+
+      newTabBtn.addEventListener("click", function () {
+        const target = lastBlobUrl || lastPdfUrl;
+        if (!target) return;
+        window.open(target, "_blank", "noopener,noreferrer");
+      });
+
+      const previewScrollHost = previewPages;
+      if (previewScrollHost) {
+        attachPreviewScrollDiagnostics(previewScrollHost);
+        previewScrollHost.addEventListener("scroll", function () {
+          lastPreviewScrollAt = Date.now();
+        }, { passive: true });
+      }
+      window.addEventListener("resize", function () {
+        lockPreviewViewportHeight("resize");
+      });
+
+      document.addEventListener("click", function (event) {
+        const target = event.target;
+        if (!(target instanceof Node)) return;
+
+        if (!overlayFontPopup.hidden && !overlayFontPopup.contains(target) && target !== overlayFontOpenBtn) {
+          closeFontPopup();
+        }
+        if (!overlayTabTypePopup.hidden && !overlayTabTypePopup.contains(target) && target !== overlayAddTabBtn) {
+          closeTabTypePopup();
+        }
+        if (!sessionPopup.hidden && !sessionPopup.contains(target) && target !== topbarStatus) {
+          closeSessionPopup();
+        }
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key !== "Escape") return;
+        if (!sessionPopup.hidden) {
+          closeSessionPopup();
+          return;
+        }
+        if (!pickerPopup.hidden) {
+          closePickerPopup();
+          return;
+        }
+        if (!overlayFontPopup.hidden) {
+          closeFontPopup();
+          return;
+        }
+        if (!overlayTabTypePopup.hidden) {
+          closeTabTypePopup();
+          return;
+        }
+        if (isMemoOpen()) {
+          toggleMemoOverlay(false);
+        }
+      });
+
+      initializeFileMap();
+      renderSessionList();
+      applyMemoFontSize();
+      applyOverlaySide();
+      switchMemoTab(0);
+      renderMemoTabbar();
+      updateTopbarStatus();
+    })();
+  </script>
+</body>
+</html>

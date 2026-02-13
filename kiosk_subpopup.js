@@ -1,6 +1,7 @@
 // kiosk_subpopup.js
 
 window.selectedItems = [];
+const MAX_SELECTION_LIMIT = 6;
 
 function getDayManager() {
   return window.DayManager || null;
@@ -39,6 +40,57 @@ function setAddButtonEnabled(enabled) {
   addBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
 }
 
+function isSameSelectionItem(a, b) {
+  return (
+    (a?.label || null) === (b?.label || null) &&
+    (a?.Subcategory || null) === (b?.Subcategory || null) &&
+    (a?.Level || null) === (b?.Level || null) &&
+    (a?.LessonNo ?? null) === (b?.LessonNo ?? null)
+  );
+}
+
+function buildProgressEntry(temp, lessonNo) {
+  return {
+    label: temp.label,
+    Subcategory: temp.Subcategory,
+    Level: temp.Level,
+    LessonNo: lessonNo
+  };
+}
+
+function collectRangeEntriesToAdd(temp, startLessonNo, endLessonNo) {
+  const start = Number(startLessonNo);
+  const end = Number(endLessonNo);
+  if (!Number.isInteger(start) || !Number.isInteger(end) || end < start) return [];
+
+  const results = [];
+  for (let lessonNo = start; lessonNo <= end; lessonNo += 1) {
+    const entry = buildProgressEntry(temp, lessonNo);
+    const duplicate = selectedItems.some(item => isSameSelectionItem(item, entry));
+    if (!duplicate) {
+      results.push(entry);
+    }
+  }
+  return results;
+}
+
+function exceedsSelectionLimit(addCount) {
+  return selectedItems.length + Number(addCount || 0) > MAX_SELECTION_LIMIT;
+}
+
+function getRemainingSelectionSlots() {
+  return Math.max(0, MAX_SELECTION_LIMIT - selectedItems.length);
+}
+
+function alertSelectionLimit() {
+  const remaining = getRemainingSelectionSlots();
+  if (remaining <= 0) {
+    alert(`최대 ${MAX_SELECTION_LIMIT}개까지 담을 수 있어요.\n지금은 더 담을 수 없어요.`);
+    return;
+  }
+  alert(`최대 ${MAX_SELECTION_LIMIT}개까지 담을 수 있어요.\n지금은 ${remaining}개까지 더 담을 수 있어요.`);
+}
+
 function updateSelectedDisplay() {
   const list = document.getElementById('selectedList');
   if (!list) return;
@@ -48,20 +100,23 @@ function updateSelectedDisplay() {
     const tag = document.createElement('div');
     tag.className = 'selected-tag';
 
-    let dayStr = '';
+    let dayLabel = '';
     if (item.Level && item.LessonNo !== undefined) {
       const dm = getDayManager();
       const canonicalSub = resolveSubcategoryName(item.Subcategory);
       const day = dm && typeof dm.getDay === 'function'
         ? dm.getDay(canonicalSub, item.Level, item.LessonNo)
         : null;
-      if (day != null) dayStr = ` - Day ${day}`;
+      if (day != null) dayLabel = `Day ${day}`;
     }
 
+    const mainLabel = item.Subcategory || item.label || '기타';
+    const parts = [mainLabel];
+    if (item.Level) parts.push(item.Level);
+    if (dayLabel) parts.push(dayLabel);
+
     tag.innerHTML = `
-      ${item.label}${item.Subcategory ? ' - ' + item.Subcategory : ''}
-      ${item.Level ? ' - ' + item.Level : ''}
-      ${dayStr}
+      ${parts.join(' - ')}
       <span class="remove-tag" data-index="${index}">✖</span>
     `;
     list.appendChild(tag);
@@ -88,7 +143,7 @@ function renderBasicSubPopup(label) {
   const temp = { label };
 
   container.innerHTML = `
-    <div style="position: relative; min-height: 290px; padding-bottom: 70px;">
+    <div style="position: relative; min-height: 330px; padding-bottom: 70px;">
       <div class="sub-section" id="subcategorySection"></div>
       <div class="sub-section" id="levelSection"></div>
       <div class="sub-section" id="lessonSection"></div>
@@ -110,29 +165,65 @@ function renderBasicSubPopup(label) {
       return;
     }
 
-    const isValid =
-      temp.Subcategory &&
-      (
-        (temp.Level && temp.LessonNo !== undefined && temp.LessonNo !== null)
-      );
+    const hasBaseSelection = temp.Subcategory && temp.Level;
+    const daySelection = temp.DaySelection || null;
+    const isMultiReady =
+      daySelection &&
+      daySelection.mode === 'multi' &&
+      daySelection.phase === 'ready' &&
+      Number.isInteger(daySelection.startLessonNo) &&
+      Number.isInteger(daySelection.endLessonNo);
 
-    if (isValid) {
-      const duplicate = selectedItems.some(
-        item =>
-          item.label === temp.label &&
-          item.Subcategory === temp.Subcategory &&
-          item.Level === temp.Level &&
-          item.LessonNo === temp.LessonNo
-      );
-
-      if (!duplicate) {
-        selectedItems.push({ ...temp });
-        updateSelectedDisplay();
-      }
-      subPopup.classList.add('hidden');
-    } else {
+    if (!hasBaseSelection) {
       alert('모든 항목을 선택해주세요!');
+      return;
     }
+
+    if (isMultiReady) {
+      const entriesToAdd = collectRangeEntriesToAdd(
+        temp,
+        daySelection.startLessonNo,
+        daySelection.endLessonNo
+      );
+
+      if (entriesToAdd.length === 0) {
+        alert('이미 담긴 Day 범위예요.');
+        return;
+      }
+
+      if (exceedsSelectionLimit(entriesToAdd.length)) {
+        alertSelectionLimit();
+        return;
+      }
+
+      selectedItems.push(...entriesToAdd);
+      updateSelectedDisplay();
+      subPopup.classList.add('hidden');
+      return;
+    }
+
+    const hasSingleDay = temp.LessonNo !== undefined && temp.LessonNo !== null;
+    if (!hasSingleDay) {
+      alert('모든 항목을 선택해주세요!');
+      return;
+    }
+
+    const singleEntry = buildProgressEntry(temp, temp.LessonNo);
+    const duplicate = selectedItems.some(item => isSameSelectionItem(item, singleEntry));
+
+    if (duplicate) {
+      alert('이미 담긴 Day예요.');
+      return;
+    }
+
+    if (exceedsSelectionLimit(1)) {
+      alertSelectionLimit();
+      return;
+    }
+
+    selectedItems.push(singleEntry);
+    updateSelectedDisplay();
+    subPopup.classList.add('hidden');
   };
 
   setAddButtonEnabled(false);
@@ -149,7 +240,14 @@ function renderSubcategoryOptions(label, temp) {
       ? dm.listSubcategories(label)
       : [];
 
-  section.innerHTML = '세부 유형을 골라주세요:<br>';
+  section.innerHTML = `
+    <div class="sub-section-header">
+      <span class="sub-section-title">세부 유형을 선택해주세요</span>
+    </div>
+    <div class="sub-option-grid"></div>
+  `;
+  const optionGrid = section.querySelector('.sub-option-grid');
+
   (subcategories || []).forEach(sub => {
     const btn = document.createElement('button');
     btn.className = 'menu-btn small';
@@ -162,7 +260,7 @@ function renderSubcategoryOptions(label, temp) {
       btn.classList.add('active');
       renderLevelOptions(temp);
     };
-    section.appendChild(btn);
+    optionGrid?.appendChild(btn);
   });
 }
 
@@ -191,10 +289,10 @@ function renderLevelOptions(temp) {
   setAddButtonEnabled(false);
   section.innerHTML = '';
 
-  const title = document.createElement('div');
-  title.className = 'level-section-title';
-  title.textContent = '난이도를 골라주세요:';
-  section.appendChild(title);
+  const header = document.createElement('div');
+  header.className = 'sub-section-header';
+  header.innerHTML = '<span class="sub-section-title">난이도를 선택해주세요</span>';
+  section.appendChild(header);
 
   const grid = document.createElement('div');
   grid.className = 'level-grid';
@@ -234,7 +332,6 @@ function renderLessonOptions(temp) {
   const section = document.getElementById('lessonSection');
   if (!section) return;
 
-  section.innerHTML = 'Day를 골라주세요:<br>';
   const dm = getDayManager();
   const sub = resolveSubcategoryName(temp.Subcategory);
   const range = dm && typeof dm.getRange === 'function'
@@ -244,25 +341,45 @@ function renderLessonOptions(temp) {
   const { start, end } = range;
   const total = end - start + 1;
 
+  section.innerHTML = `
+    <div class="sub-section-header sub-section-header--day">
+      <span class="sub-section-title">Day를 선택해주세요</span>
+      <span class="sub-section-hint-inline">1 ~ ${total} Day</span>
+    </div>
+  `;
+
+  const dayTitle = section.querySelector('.sub-section-title');
+  const dayHint = section.querySelector('.sub-section-hint-inline');
+  const addBtn = document.getElementById('subPopupAddBtn');
+
   const wrapper = document.createElement('div');
-  wrapper.style.display = 'flex';
-  wrapper.style.alignItems = 'center';
-  wrapper.style.gap = '8px';
-  wrapper.style.marginTop = '8px';
+  wrapper.className = 'day-stepper';
 
   const minus = document.createElement('button');
+  minus.type = 'button';
+  minus.className = 'day-stepper-btn';
   minus.textContent = '－';
   const plus = document.createElement('button');
+  plus.type = 'button';
+  plus.className = 'day-stepper-btn';
   plus.textContent = '＋';
   const input = document.createElement('input');
+  input.className = 'day-stepper-input';
   input.type = 'text';
   input.inputMode = 'numeric';
   input.pattern = '[0-9]*';
   input.value = 1;
-  input.style.width = '60px';
-  input.style.textAlign = 'center';
 
   let currentDay = 1;
+  const daySelection = {
+    mode: 'single',
+    phase: 'idle',
+    startDay: null,
+    endDay: null,
+    startLessonNo: null,
+    endLessonNo: null
+  };
+  temp.DaySelection = daySelection;
 
   const dayToLessonNo = day => start + (day - 1);
 
@@ -273,12 +390,95 @@ function renderLessonOptions(temp) {
     return day;
   };
 
+  const setAddButtonMode = (mode, enabled) => {
+    if (addBtn) {
+      if (mode === 'multi') {
+        addBtn.textContent = '🧺 여러개 담기';
+        addBtn.classList.add('multi-add-mode');
+      } else {
+        addBtn.textContent = '🛒 담기';
+        addBtn.classList.remove('multi-add-mode');
+      }
+    }
+    setAddButtonEnabled(enabled);
+  };
+
+  const applyDayGuide = guide => {
+    if (!dayTitle || !dayHint) return;
+    dayTitle.classList.remove('day-guide-start', 'day-guide-end');
+
+    if (guide === 'start') {
+      dayTitle.textContent = '시작 day를 선택해주세요';
+      dayTitle.classList.add('day-guide-start');
+      dayHint.textContent = `1 ~ ${total} Day`;
+      return;
+    }
+
+    if (guide === 'end') {
+      dayTitle.textContent = '끝 day를 선택해주세요';
+      dayTitle.classList.add('day-guide-end');
+      dayHint.textContent = daySelection.startDay != null
+        ? `시작: Day ${daySelection.startDay}`
+        : `1 ~ ${total} Day`;
+      return;
+    }
+
+    if (guide === 'ready') {
+      dayTitle.textContent = '끝 day를 선택해주세요';
+      dayTitle.classList.add('day-guide-end');
+      dayHint.textContent = daySelection.startDay != null && daySelection.endDay != null
+        ? `선택: Day ${daySelection.startDay} ~ Day ${daySelection.endDay}`
+        : `1 ~ ${total} Day`;
+      return;
+    }
+
+    dayTitle.textContent = 'Day를 선택해주세요';
+    dayHint.textContent = `1 ~ ${total} Day`;
+  };
+
+  const multiToggleBtn = document.createElement('button');
+  multiToggleBtn.type = 'button';
+  multiToggleBtn.className = 'day-multi-toggle-btn';
+  multiToggleBtn.textContent = '여러개 담기';
+
+  const setMultiToggleState = ({ text, modeClass = '', disabled = false }) => {
+    multiToggleBtn.textContent = text;
+    multiToggleBtn.classList.remove('mode-start', 'mode-end');
+    if (modeClass) {
+      multiToggleBtn.classList.add(modeClass);
+    }
+    multiToggleBtn.disabled = !!disabled;
+  };
+
   const setDay = day => {
     const next = Math.min(Math.max(Number(day) || 1, 1), total);
     currentDay = next;
     input.value = String(next);
-    temp.LessonNo = dayToLessonNo(next);
-    setAddButtonEnabled(true);
+
+    if (daySelection.mode === 'single') {
+      temp.LessonNo = dayToLessonNo(next);
+      setAddButtonMode('single', true);
+      return;
+    }
+
+    temp.LessonNo = null;
+
+    if (daySelection.phase === 'ready') {
+      daySelection.phase = 'end';
+      daySelection.endDay = null;
+      daySelection.endLessonNo = null;
+      applyDayGuide('end');
+      setMultiToggleState({ text: '여기까지 끝', modeClass: 'mode-end', disabled: false });
+      setAddButtonMode('multi', false);
+      return;
+    }
+
+    if (daySelection.phase === 'start') {
+      setAddButtonMode('single', false);
+      return;
+    }
+
+    setAddButtonMode('multi', false);
   };
 
   const commitTypedDay = () => {
@@ -289,6 +489,70 @@ function renderLessonOptions(temp) {
       return;
     }
     setDay(parsed);
+  };
+
+  const startMultiSelection = () => {
+    daySelection.mode = 'multi';
+    daySelection.phase = 'start';
+    daySelection.startDay = null;
+    daySelection.endDay = null;
+    daySelection.startLessonNo = null;
+    daySelection.endLessonNo = null;
+
+    temp.LessonNo = null;
+    applyDayGuide('start');
+    setMultiToggleState({ text: '여기서 시작', modeClass: 'mode-start', disabled: false });
+    setAddButtonMode('single', false);
+  };
+
+  const confirmStartDay = () => {
+    daySelection.mode = 'multi';
+    daySelection.phase = 'end';
+    daySelection.startDay = currentDay;
+    daySelection.startLessonNo = dayToLessonNo(currentDay);
+    daySelection.endDay = null;
+    daySelection.endLessonNo = null;
+
+    applyDayGuide('end');
+    setMultiToggleState({ text: '여기까지 끝', modeClass: 'mode-end', disabled: false });
+    setAddButtonMode('multi', false);
+  };
+
+  const confirmEndDay = () => {
+    if (!Number.isInteger(daySelection.startDay)) {
+      alert('먼저 시작 Day를 선택해주세요.');
+      return;
+    }
+
+    if (currentDay < daySelection.startDay) {
+      alert('끝 Day는 시작 Day보다 같거나 커야 해요.');
+      return;
+    }
+
+    const candidateStartLessonNo = daySelection.startLessonNo;
+    const candidateEndLessonNo = dayToLessonNo(currentDay);
+    const entriesToAdd = collectRangeEntriesToAdd(
+      temp,
+      candidateStartLessonNo,
+      candidateEndLessonNo
+    );
+
+    if (entriesToAdd.length === 0) {
+      alert('이미 담긴 Day 범위예요.');
+      return;
+    }
+
+    if (exceedsSelectionLimit(entriesToAdd.length)) {
+      alertSelectionLimit();
+      return;
+    }
+
+    daySelection.phase = 'ready';
+    daySelection.endDay = currentDay;
+    daySelection.endLessonNo = candidateEndLessonNo;
+    applyDayGuide('ready');
+    setMultiToggleState({ text: '여기까지 끝', modeClass: 'mode-end', disabled: true });
+    setAddButtonMode('multi', true);
   };
 
   minus.onclick = () => {
@@ -319,8 +583,7 @@ function renderLessonOptions(temp) {
     }
 
     currentDay = parsed;
-    temp.LessonNo = dayToLessonNo(parsed);
-    setAddButtonEnabled(true);
+    setDay(parsed);
   });
 
   input.addEventListener('blur', commitTypedDay);
@@ -332,12 +595,32 @@ function renderLessonOptions(temp) {
     }
   });
 
+  multiToggleBtn.addEventListener('click', () => {
+    if (multiToggleBtn.disabled) return;
+
+    if (daySelection.mode === 'single') {
+      startMultiSelection();
+      return;
+    }
+
+    if (daySelection.phase === 'start') {
+      confirmStartDay();
+      return;
+    }
+
+    confirmEndDay();
+  });
+
   setDay(1);
+  applyDayGuide('single');
+  setMultiToggleState({ text: '여러개 담기', modeClass: '', disabled: false });
+  setAddButtonMode('single', true);
 
   wrapper.appendChild(minus);
   wrapper.appendChild(input);
   wrapper.appendChild(plus);
   section.appendChild(wrapper);
+  section.appendChild(multiToggleBtn);
 }
 
 // ✅ 셀프 체크 전용 팝업
@@ -395,6 +678,41 @@ function renderSelfCheckSubPopup() {
 function renderSubPopup(label) {
   if (label === '셀프 체크') {
     renderSelfCheckSubPopup();
+    return;
+  }
+
+  if (label === '모의고사 전용도구') {
+    const container = document.querySelector('.sub-popup-inner');
+    const subPopup = document.getElementById('sub-popup');
+    if (!container || !subPopup) return;
+
+    subPopup.classList.remove('hidden');
+    container.innerHTML = `
+      <div style="position: relative; min-height: 220px; padding-bottom: 70px;">
+        <div style="margin: 18px 0 14px; font-size: 14px; text-align:center;">
+          모의고사 전용 도구를 상차림에 담습니다.
+        </div>
+        <div style="font-size:12px; color:#666; text-align:center;">
+          담은 뒤 테이블에서 바로 사용할 수 있어요.
+        </div>
+        <div class="sub-footer" style="position:absolute; bottom:16px; width:100%; text-align:center;">
+          <button class="order-btn confirm-btn" id="subPopupAddBtn">🛒 담기</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('subPopupCloseBtn').onclick = () => {
+      subPopup.classList.add('hidden');
+    };
+
+    document.getElementById('subPopupAddBtn').onclick = () => {
+      const duplicate = selectedItems.some(item => item.label === label);
+      if (!duplicate) {
+        selectedItems.push({ label });
+        updateSelectedDisplay();
+      }
+      subPopup.classList.add('hidden');
+    };
     return;
   }
 
