@@ -188,28 +188,36 @@ window.showDishPopup = function (item) {
         display: inline-flex; align-items: center; justify-content: center;">📂 다운로드</a>
       `;
     }
-  } else if (["오늘 내 숙제", "시험지 만들어주세요", "채점만 해주세요", "이거 잘 모르겠어요"].includes(hw)) {
-    let question = "어떤 숙제인가요?";
-    let explanation = "간단히 설명해주세요.";
+  } else if (hw === "오늘 내 숙제") {
+    // ✅ '오늘 내 숙제' 전용 커스텀 팝업 + 드롭다운 + 단일 코멘트창
+    const requestTypes = [
+      "오늘 내 숙제",
+      "시험지 만들어주세요",
+      "채점만 해주세요",
+      "이거 잘 모르겠어요"
+    ];
 
-    if (hw === "시험지 만들어주세요") {
-      question = "어떤 시험지가 필요하신가요?";
-      explanation = "시험지 구성이나 범위를 알려주세요.";
-    } else if (hw === "채점만 해주세요") {
-      question = "어떤 걸 채점해드릴까요?";
-      explanation = "채점 기준이나 요청 사항이 있다면 적어주세요.";
-    } else if (hw === "이거 잘 모르겠어요") {
-      question = "어떤 부분이 어려우셨나요?";
-      explanation = "잘 모르겠는 이유를 자유롭게 적어주세요.";
-    }
+    const optionsHtml = requestTypes
+      .map(type => `<option value="${type}">${type}</option>`)
+      .join("");
 
     content += `
-      <label>${question}</label>
-      <input type="text" id="custom_hwtype" style="width:100%; margin-bottom:6px;" />
-      <label>${explanation}</label>
-      <textarea id="custom_hwdesc" rows="3" style="width:100%; resize:none;"
-        placeholder="제출함에서 사진과 함께 보내주세요!"></textarea>
-      <button class="room-btn" style="background: #1976d2; margin-top: 6px;" id="custom-complete-btn">✅ 완료했어요!</button>
+      <label for="custom_hwcategory">어떤 종류의 요청인가요?</label>
+      <select id="custom_hwcategory" style="width:100%; margin-bottom:6px;">
+        ${optionsHtml}
+      </select>
+
+      <label for="custom_hwcomment">요청 사항이 있다면 적어주세요 (선택)</label>
+      <textarea
+        id="custom_hwcomment"
+        rows="3"
+        style="width:100%; resize:none;"
+        placeholder="필요할 때만 적어주세요. 예: 사진으로 보낼 자료 설명, 채점 기준, 모르는 부분 메모 등"
+      ></textarea>
+
+      <button class="room-btn" style="background: #1976d2; margin-top: 6px;" id="custom-complete-btn">
+        ✅ 완료했어요!
+      </button>
     `;
   } else {
     content += `<div style="margin: 12px 0;">단어 퀴즈를 풀어보아요!</div>`;
@@ -317,12 +325,21 @@ window.showDishPopup = function (item) {
 
   // ✅ 커스텀 요청형도 동일하게 로딩바 + 이동
   popup.querySelector('#custom-complete-btn')?.addEventListener('click', () => {
-    let detail = document.getElementById('custom_hwtype')?.value.trim();
-    let explanation = document.getElementById('custom_hwdesc')?.value.trim();
-    const combinedComment = `[${detail}] ${explanation}`;
+    const typeSelect = document.getElementById('custom_hwcategory');
+    const selectedType =
+      (typeSelect && typeSelect.value) ? typeSelect.value : "오늘 내 숙제";
+
+    const explanation = document.getElementById('custom_hwcomment')?.value.trim() || '';
+
+    // [선택 타입] + (선택적) 코멘트
+    const pieces = [`[${selectedType}]`];
+    if (explanation) pieces.push(explanation);
+
+    const combinedComment = pieces.join(' ');
 
     window.storePendingHomework({
-      Subcategory: item.Subcategory,
+      // 🔥 드롭다운에서 고른 값을 Subcategory로 저장
+      Subcategory: selectedType,
       HWType: "사진촬영",
       LessonNo: null,
       Status: "readyToBeSent",
@@ -330,6 +347,7 @@ window.showDishPopup = function (item) {
     });
 
     popupContainer.remove();
+    // 영수증에는 기존 접시 이름(오늘 내 숙제)이 찍히는 구조 유지
     window.showReceiptFromQordered(item.Subcategory);
 
     showRedirectToast();

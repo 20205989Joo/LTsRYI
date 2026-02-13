@@ -26,9 +26,7 @@ function injectKioskPopupHTML() {
 
         <div class="tab-content hidden" id="tab-etc">
           <button class="menu-btn square">오늘 내 숙제</button>
-          <button class="menu-btn square">시험지 만들어주세요</button>
-        <button class="menu-btn square">채점만 해주세요</button>
-          <button class="menu-btn square">이거 잘 모르겠어요</button>
+          <button class="menu-btn square">셀프 체크</button>
         </div>
 
         <div id="sub-popup" class="sub-popup hidden">
@@ -61,7 +59,8 @@ function setupKioskUI() {
 
     popup.style.display = 'flex';
 
-    updateSelectedDisplay();   // ⬅️ 전역 함수 (subpopup.js에서 정의됨)
+    // ⬇️ 전역 함수 (kiosk_subpopup.js에서 정의)
+    updateSelectedDisplay();
     setupTabs();
     bindMenuButtons();
 
@@ -69,7 +68,8 @@ function setupKioskUI() {
       popup.style.display = 'none';
     };
 
-    document.getElementById('finalOrderBtn').onclick = handleFinalOrder; // ⬅️ receipt.js에서 정의됨
+    // ⬇️ 최종 주문 → kiosk_receipt.js의 handleFinalOrder
+    document.getElementById('finalOrderBtn').onclick = handleFinalOrder;
   });
 }
 
@@ -93,15 +93,17 @@ function setupTabs() {
 
 // 메뉴 버튼 클릭 처리
 function bindMenuButtons() {
-  const triggerSet = new Set(["단어", "문법", "독해", "구문"]);
+  const triggerSet = new Set(['단어', '문법', '독해', '구문']);
 
   document.querySelectorAll('.menu-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const label = btn.textContent.trim();
       if (triggerSet.has(label)) {
-        renderBasicSubPopup(label); // ⬅️ subpopup.js에서 정의됨
+        // ⬇️ 세부 유형 + Level + Day까지 고르는 기본 서브팝업
+        renderBasicSubPopup(label);
       } else {
-        renderSubPopup(label);      // ⬅️ subpopup.js에서 정의됨
+        // ⬇️ 그 외 (오늘 내 숙제, 셀프 체크 등)
+        renderSubPopup(label);
       }
     });
   });
