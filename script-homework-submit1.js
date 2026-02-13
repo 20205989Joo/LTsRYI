@@ -124,14 +124,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.warn("❗ 오늘 숙제 확인 실패:", err);
   }
 
-  const RANGES = {
+  const FALLBACK_RANGES = {
     '단어': { 'A1': [1, 45], 'A2': [46, 89], 'B1': [90, 130], 'B2': [131, 201], 'C1': [202, 266] },
     '연어': { '900핵심연어': [1, 42] },
     '문법': { 'Basic': [1, 50] },
     '단계별 독해': { 'RCStepper': [1, 50] }
   };
 
-  const subcategoryMap = {
+  const FALLBACK_SUBCATEGORY_TOKEN = {
     '단어': 'Words',
     '연어': 'Collocations',
     '문법': 'Grammar',
@@ -139,14 +139,65 @@ window.addEventListener('DOMContentLoaded', async () => {
     '파편의 재구성': 'Fragments'
   };
 
-  function inferLevel(subcategory, lessonNo) {
+  function getDayManager() {
+    return window.DayManager || null;
+  }
+
+  function resolveSubcategoryName(subcategory) {
+    const dm = getDayManager();
+    if (!subcategory) return subcategory;
+    if (!dm || typeof dm.resolveSubcategoryName !== 'function') return subcategory;
+    return dm.resolveSubcategoryName(subcategory) || subcategory;
+  }
+
+  function inferLevelFromFallback(subcategory, lessonNo) {
     if (lessonNo == null) return null;
-    const ranges = RANGES[subcategory];
+    const ranges = FALLBACK_RANGES[subcategory];
     if (!ranges) return null;
     for (const [level, [start, end]] of Object.entries(ranges)) {
-      if (lessonNo >= start && lessonNo <= end) return { level, start };
+      if (lessonNo >= start && lessonNo <= end) {
+        return { level, start, day: lessonNo - start + 1 };
+      }
     }
     return null;
+  }
+
+  function getLevelDayMeta(subcategory, level, lessonNo) {
+    const dm = getDayManager();
+    const canonicalSub = resolveSubcategoryName(subcategory);
+    const lesson = lessonNo == null ? null : Number(lessonNo);
+
+    let resolvedLevel = level ?? null;
+    let day = null;
+
+    if (dm) {
+      if (!resolvedLevel && typeof dm.inferLevel === 'function' && lesson != null && !Number.isNaN(lesson)) {
+        const inferred = dm.inferLevel(canonicalSub, lesson);
+        resolvedLevel = inferred?.level ?? null;
+      }
+      if (resolvedLevel && typeof dm.getDay === 'function' && lesson != null && !Number.isNaN(lesson)) {
+        day = dm.getDay(canonicalSub, resolvedLevel, lesson);
+      }
+    } else {
+      const inferred = inferLevelFromFallback(canonicalSub, lesson);
+      resolvedLevel = resolvedLevel ?? inferred?.level ?? null;
+      day = inferred?.day ?? null;
+    }
+
+    return {
+      canonicalSub,
+      level: resolvedLevel,
+      day
+    };
+  }
+
+  function getSubcategoryToken(subcategory) {
+    const dm = getDayManager();
+    const canonicalSub = resolveSubcategoryName(subcategory);
+    if (dm && typeof dm.getSubcategoryToken === 'function') {
+      return dm.getSubcategoryToken(canonicalSub) || canonicalSub;
+    }
+    return FALLBACK_SUBCATEGORY_TOKEN[canonicalSub] || canonicalSub;
   }
 
   // === 제출 대기 카드 렌더링 ===
@@ -160,11 +211,13 @@ window.addEventListener('DOMContentLoaded', async () => {
       const card = document.createElement('div');
       card.className = 'pending-card';
 
-      const meta = inferLevel(item.Subcategory, item.LessonNo);
-      const level = meta?.level ?? item.Level ?? null;
-      const day = meta ? item.LessonNo - meta.start + 1 : null;
+      const canonicalSub = resolveSubcategoryName(item.Subcategory);
+      item.Subcategory = canonicalSub;
+      const meta = getLevelDayMeta(canonicalSub, item.Level, item.LessonNo);
+      const level = meta.level ?? null;
+      const day = meta.day ?? null;
       const levelStr = level ? ` (${level}${day ? `, Day${day}` : ''})` : '';
-      const title = `${item.Subcategory}${levelStr}`;
+      const title = `${canonicalSub}${levelStr}`;
       const detail = [item.comment, item.detail].filter(Boolean).join(' - ') || '설명 없음';
 
       // 디버그: doneinweb 매칭 확인용
@@ -173,8 +226,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (quizRaw) {
           const result = JSON.parse(quizRaw);
           const expectedDayStr = day != null ? `Day${day}` : null;
+          const expectedSub = getSubcategoryToken(canonicalSub);
           console.log('🔍 로드시 비교 로그 →', {
-            expected: { subcategory: item.Subcategory, level, day: expectedDayStr },
+            expected: { subcategory: expectedSub, level, day: expectedDayStr },
             actual: { subcategory: result.subcategory, level: result.level, day: result.day }
           });
         } else {
@@ -252,6 +306,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     for (let i = 0; i < updated.length; i++) {
       const item = updated[i];
       if (!item) continue;
+      const canonicalSub = resolveSubcategoryName(item.Subcategory);
+      item.Subcategory = canonicalSub;
 
       try {
         // === 1) 웹에서 푼 시험 (doneinweb) ===
@@ -263,12 +319,11 @@ window.addEventListener('DOMContentLoaded', async () => {
           }
 
           const quiz = JSON.parse(quizRaw);
-          const meta = inferLevel(item.Subcategory, item.LessonNo);
-          const metaLevel = meta?.level ?? null;
-          const start = meta?.start ?? 1;
-          const day = item.LessonNo != null ? item.LessonNo - start + 1 : null;
+          const meta = getLevelDayMeta(canonicalSub, item.Level, item.LessonNo);
+          const metaLevel = meta.level ?? null;
+          const day = meta.day ?? null;
 
-          const expectedSub = subcategoryMap[item.Subcategory] || item.Subcategory;
+          const expectedSub = getSubcategoryToken(canonicalSub);
           const expected = {
             subcategory: expectedSub,
             level: metaLevel,
@@ -293,7 +348,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
           const formData = new FormData();
           formData.append("UserId", userId);
-          formData.append("Subcategory", item.Subcategory);
+          formData.append("Subcategory", canonicalSub);
           formData.append("HWType", item.HWType);
           formData.append("LessonNo", item.LessonNo ?? 0);
           formData.append("Comment", item.comment || "");
@@ -315,7 +370,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             const deleteLessonNo = item.LessonNo ?? null;
 
             hwplus = hwplus.filter(entry => {
-              if (entry.Subcategory !== item.Subcategory) return true;
+              if (resolveSubcategoryName(entry.Subcategory) !== canonicalSub) return true;
               const entryLevel = normalizeLevel(entry.Level);
               const entryNo = normalizeNo(entry.LessonNo);
               const targetLevel = normalizeLevel(deleteLevel);
@@ -339,13 +394,14 @@ window.addEventListener('DOMContentLoaded', async () => {
               })
             });
 
-            if (item.Subcategory in subcategoryMap) {
+            const progressSubject = getSubcategoryToken(canonicalSub);
+            if (progressSubject) {
               await fetch("/api/updateProgressMatrix", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   UserId: userId,
-                  Subject: subcategoryMap[item.Subcategory],
+                  Subject: progressSubject,
                   LessonNo: item.LessonNo ?? 0,
                   Status: "done",
                   RegisteredBy: "system"
@@ -375,7 +431,7 @@ window.addEventListener('DOMContentLoaded', async () => {
           for (const file of files) {
             const formData = new FormData();
             formData.append("UserId", userId);
-            formData.append("Subcategory", item.Subcategory);
+            formData.append("Subcategory", canonicalSub);
             formData.append("HWType", item.HWType || "pdf사진");
             formData.append("LessonNo", item.LessonNo ?? 0);
             formData.append("Comment", item.comment || "");
@@ -403,13 +459,14 @@ window.addEventListener('DOMContentLoaded', async () => {
                 })
               });
 
-              if (item.Subcategory in subcategoryMap) {
+              const progressSubject = getSubcategoryToken(canonicalSub);
+              if (progressSubject) {
                 await fetch("/api/updateProgressMatrix", {
                   method: "POST",
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     UserId: userId,
-                    Subject: subcategoryMap[item.Subcategory],
+                    Subject: progressSubject,
                     LessonNo: item.LessonNo ?? 0,
                     Status: "done",
                     RegisteredBy: "system"
@@ -425,13 +482,13 @@ window.addEventListener('DOMContentLoaded', async () => {
           // 제출 성공 후 PendingUploads/ HWPlus에서 이 항목 제거
           updated[i] = null;
 
-          const meta = inferLevel(item.Subcategory, item.LessonNo);
-          const metaLevel = meta?.level ?? null;
+          const meta = getLevelDayMeta(canonicalSub, item.Level, item.LessonNo);
+          const metaLevel = meta.level ?? null;
           const deleteLevel = item.Level ?? metaLevel ?? null;
           const deleteLessonNo = item.LessonNo ?? null;
 
           hwplus = hwplus.filter(entry => {
-            if (entry.Subcategory !== item.Subcategory) return true;
+            if (resolveSubcategoryName(entry.Subcategory) !== canonicalSub) return true;
             const entryLevel = normalizeLevel(entry.Level);
             const entryNo = normalizeNo(entry.LessonNo);
             const targetLevel = normalizeLevel(deleteLevel);

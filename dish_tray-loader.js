@@ -13,22 +13,37 @@ window.addEventListener('DOMContentLoaded', () => {
   const baseOffset = 10;
   const gap = 90;
 
-  // ✅ Day → Level/Day 계산용 (submit 쪽과 동일한 룰)
-  const RANGES = {
-    '단어': { 'A1': [1, 45], 'A2': [46, 89], 'B1': [90, 130], 'B2': [131, 201], 'C1': [202, 266] },
-    '연어': { '900핵심연어': [1, 42] },
-    '문법': { 'Basic': [1, 50] },
-    '단계별 독해': { 'RCStepper': [1, 50] }
-  };
+  function getDayManager() {
+    return window.DayManager || null;
+  }
 
-  function inferLevel(subcategory, lessonNo) {
-    if (lessonNo == null) return null;
-    const ranges = RANGES[subcategory];
-    if (!ranges) return null;
-    for (const [level, [start, end]] of Object.entries(ranges)) {
-      if (lessonNo >= start && lessonNo <= end) return { level, start };
+  function resolveSubcategoryName(subcategory) {
+    const dm = getDayManager();
+    if (!subcategory || !dm || typeof dm.resolveSubcategoryName !== 'function') return subcategory;
+    return dm.resolveSubcategoryName(subcategory) || subcategory;
+  }
+
+  function getLevelDayMeta(subcategory, level, lessonNo) {
+    const dm = getDayManager();
+    const canonicalSub = resolveSubcategoryName(subcategory);
+    const lesson = lessonNo != null ? Number(lessonNo) : null;
+
+    let resolvedLevel = level ?? null;
+    if (!resolvedLevel && dm && typeof dm.inferLevel === 'function' && lesson != null) {
+      const inferred = dm.inferLevel(canonicalSub, lesson);
+      resolvedLevel = inferred?.level ?? null;
     }
-    return null;
+
+    let day = null;
+    if (dm && resolvedLevel && typeof dm.getDay === 'function' && lesson != null) {
+      day = dm.getDay(canonicalSub, resolvedLevel, lesson);
+    }
+
+    return {
+      subcategory: canonicalSub,
+      level: resolvedLevel,
+      day
+    };
   }
 
   // ✅ 공통 "완료됨" 처리 (부제목에 붙이기)
@@ -60,24 +75,24 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   qordered.forEach((item, index) => {
+    const canonicalSub = resolveSubcategoryName(item.Subcategory);
+    item.Subcategory = canonicalSub;
+
     const dish = document.createElement('div');
     dish.className = 'dish';
     dish.style.left = `${baseOffset + (index % 3) * gap}px`;
     dish.style.top = `${baseOffset + Math.floor(index / 3) * gap}px`;
 
     // ✅ dataset으로 이 접시의 키 저장
-    dish.dataset.subcategory = item.Subcategory || '';
+    dish.dataset.subcategory = canonicalSub || '';
     dish.dataset.level = item.Level ?? '';
     dish.dataset.lessonNo =
       item.LessonNo != null ? String(item.LessonNo) : '';
 
     // ✅ 부제목용 Level / Day 계산
-    const meta = inferLevel(item.Subcategory, item.LessonNo);
-    const level = item.Level ?? meta?.level ?? null;
-    let day = null;
-    if (meta && item.LessonNo != null) {
-      day = item.LessonNo - meta.start + 1;
-    }
+    const meta = getLevelDayMeta(canonicalSub, item.Level, item.LessonNo);
+    const level = meta.level;
+    const day = meta.day;
 
     let subtitleText = '';
     if (level && day != null) {
@@ -101,7 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const titleEl = document.createElement('div');
     titleEl.className = 'dish-title';
-    titleEl.textContent = item.Subcategory;
+    titleEl.textContent = canonicalSub;
     titleEl.style.fontWeight = 'bold';
 
     const subtitleEl = document.createElement('div');
@@ -122,7 +137,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // ✅ 이미 완료된 접시인지 PendingUploads 기준으로 체크
     const isDone = pending.some(p =>
-      p.Subcategory === item.Subcategory &&
+      resolveSubcategoryName(p.Subcategory) === canonicalSub &&
       (p.Level == null || p.Level === item.Level) &&
       (p.LessonNo == null || String(p.LessonNo) === String(item.LessonNo)) &&
       p.Status === 'readyToBeSent'
@@ -150,13 +165,14 @@ window.addEventListener('DOMContentLoaded', () => {
     let existing = JSON.parse(localStorage.getItem(key) || '[]');
 
     const subcategory = entry.Subcategory;
+    const canonicalSub = resolveSubcategoryName(subcategory);
     const level = entry.Level ?? null;
     const lessonNo = entry.LessonNo ?? null;
 
     // 같은 유저 / 같은 과목+레벨+LessonNo 인 기존 pending 제거
     existing = existing.filter(e =>
       !(
-        e.Subcategory === subcategory &&
+        resolveSubcategoryName(e.Subcategory) === canonicalSub &&
         (e.Level ?? null) === level &&
         (e.LessonNo ?? null) === lessonNo &&
         e.UserId === userId
@@ -165,7 +181,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const newEntry = {
       UserId: userId,
-      Subcategory: subcategory,
+      Subcategory: canonicalSub,
       Level: level,
       HWType: entry.HWType || 'pdf사진',
       LessonNo: lessonNo,
@@ -191,7 +207,7 @@ window.addEventListener('DOMContentLoaded', () => {
         dish.dataset.lessonNo !== '' ? Number(dish.dataset.lessonNo) : null;
 
       if (
-        dishSub === subcategory &&
+        dishSub === canonicalSub &&
         (level == null || dishLevel === level) &&
         (lessonNo == null || dishLessonNo === Number(lessonNo))
       ) {

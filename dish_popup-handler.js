@@ -1,89 +1,104 @@
-// ✅ 팝업 핸들러 - dish_popup-handler.js
+// dish_popup-handler.js
 
-function buildFilename(item) {
-  const subjectMap = {
-    '단어': 'Vocabulary',
-    '문법': 'Grammar',
-    '구문': 'Syntax',
-    '독해': 'Reading'
-  };
-
-  const subcategoryMap = {
-    '단어': 'Words',
-    '연어': 'Collocations',
-    '문법': 'Grammar',
-    '단계별 독해': 'Pattern',
-    '파편의 재구성': 'Fragments'
-  };
-
-  const RANGES = {
-    '단어': {
-      'A1': [1, 45],
-      'A2': [46, 89],
-      'B1': [90, 130],
-      'B2': [131, 201],
-      'C1': [202, 266]
-    },
-    '연어': {
-      '900핵심연어': [1, 42]
-    },
-    '문법': {
-      'Basic': [1, 50]
-    },
-    '단계별 독해': {
-      'RCStepper': [1, 50]
-    }
-  };
-
-  if (!item.label && item.Subcategory) {
-    const reverseLabelMap = {
-      '단어': '단어',
-      '연어': '단어',
-      '기초문법': '문법',
-      '단계별 독해': '구문',
-      '파편의 재구성': '독해'
-    };
-    item.label = reverseLabelMap[item.Subcategory] || item.Subcategory;
-  }
-
-  const subject = subjectMap[item.label] || item.label;
-  const sub = subcategoryMap[item.Subcategory] || item.Subcategory;
-  const level = item.Level;
-  const lessonNo = item.LessonNo;
-
-  const [start] = RANGES[item.Subcategory]?.[item.Level] || [1];
-  const day = lessonNo - start + 1;
-
-  return `${subject}_${sub}_${level}_Day${day}_Lesson${lessonNo}_v1.pdf`;
+function getDayManager() {
+  return window.DayManager || null;
 }
 
+function resolveSubcategory(subcategory) {
+  const dm = getDayManager();
+  if (!subcategory) return subcategory;
+  if (!dm || typeof dm.resolveSubcategoryName !== "function") return subcategory;
+  return dm.resolveSubcategoryName(subcategory) || subcategory;
+}
+
+function resolveCategoryLabel(item, subcategory) {
+  const dm = getDayManager();
+  const label = item?.label || null;
+
+  if (!dm) return label || subcategory;
+
+  if (label && typeof dm.resolveCategoryName === "function") {
+    const fromLabel = dm.resolveCategoryName(label);
+    if (fromLabel) return fromLabel;
+  }
+
+  if (subcategory && typeof dm.getCategoryBySubcategory === "function") {
+    const fromSub = dm.getCategoryBySubcategory(subcategory);
+    if (fromSub) return fromSub;
+  }
+
+  return label || subcategory;
+}
+
+function hasCurriculumLevels(subcategory) {
+  const dm = getDayManager();
+  if (!dm || typeof dm.listLevels !== "function") return false;
+  const levels = dm.listLevels(subcategory);
+  return Array.isArray(levels) && levels.length > 0;
+}
+
+function buildFilename(item) {
+  const dm = getDayManager();
+  const canonicalSubcategory = resolveSubcategory(item.Subcategory);
+  const category = resolveCategoryLabel(item, canonicalSubcategory);
+
+  const lessonNo = Number(item.LessonNo);
+  let level = item.Level;
+  if (!level && dm && typeof dm.inferLevel === "function") {
+    const inferred = dm.inferLevel(canonicalSubcategory, lessonNo);
+    level = inferred?.level || null;
+  }
+
+  let day = null;
+  if (dm && level && typeof dm.getDay === "function") {
+    day = dm.getDay(canonicalSubcategory, level, lessonNo);
+  }
+  if (day == null && Number.isFinite(lessonNo)) {
+    day = lessonNo;
+  }
+
+  const subjectToken =
+    (dm && typeof dm.getSubjectToken === "function" && dm.getSubjectToken(category)) ||
+    category;
+  const subToken =
+    (dm && typeof dm.getSubcategoryToken === "function" && dm.getSubcategoryToken(canonicalSubcategory)) ||
+    canonicalSubcategory;
+
+  if (!subjectToken || !subToken || !level || !Number.isFinite(lessonNo) || day == null) {
+    return "";
+  }
+
+  return `${subjectToken}_${subToken}_${level}_Day${day}_Lesson${lessonNo}_v1.pdf`;
+}
+
+window.buildFilename = buildFilename;
+
 window.showDishPopup = function (item) {
-  const cafeInt = document.getElementById('cafe_int');
+  const cafeInt = document.getElementById("cafe_int");
   if (!cafeInt) {
-    console.warn('❌ cafe_int가 없습니다.');
+    console.warn("cafe_int가 없습니다.");
     return;
   }
 
-  // ✅ 현재 URL에서 사용자 id 가져오기
-  const userId = new URLSearchParams(window.location.search).get('id');
+  const dm = getDayManager();
+  const userId = new URLSearchParams(window.location.search).get("id");
 
-  // ✅ label 보정
-  if (!item.label && item.Subcategory) {
-    const reverseLabelMap = {
-      '단어': '단어',
-      '연어': '단어',
-      '기초문법': '문법',
-      '단계별 독해': '구문',
-      '파편의 재구성': '독해'
-    };
-    item.label = reverseLabelMap[item.Subcategory] || item.Subcategory;
+  if (!dm) {
+    console.warn("DayManager가 로드되지 않았습니다.");
   }
 
-  const old = document.getElementById('popup-container');
+  const canonicalSubcategory = resolveSubcategory(item.Subcategory);
+  if (canonicalSubcategory) {
+    item.Subcategory = canonicalSubcategory;
+  }
+
+  item.label = resolveCategoryLabel(item, item.Subcategory);
+
+  const old = document.getElementById("popup-container");
   if (old) old.remove();
 
-  const popupContainer = document.createElement('div');
-  popupContainer.id = 'popup-container';
+  const popupContainer = document.createElement("div");
+  popupContainer.id = "popup-container";
   popupContainer.style = `
     position: absolute;
     top: 0; left: 0;
@@ -92,7 +107,7 @@ window.showDishPopup = function (item) {
     pointer-events: none;
   `;
 
-  const popup = document.createElement('div');
+  const popup = document.createElement("div");
   popup.style = `
     position: absolute;
     top: 160px;
@@ -114,28 +129,26 @@ window.showDishPopup = function (item) {
 
   const hw = item.Subcategory;
   const key = `downloaded_HW_${hw}_${item.Level}_${item.LessonNo}`;
-  const downloaded = localStorage.getItem(key) === 'true';
+  const downloaded = localStorage.getItem(key) === "true";
 
   let content = `<div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📥 ${hw}</div>`;
 
   const filename = buildFilename(item);
-  const baseFile = filename.replace(/\.pdf$/, '');
-  const folder = {
-    '단어': 'words',
-    '연어': 'words',
-    '문법': 'grammar',
-    '단계별 독해': 'syntax',
-    '파편의 재구성': 'fragments'
-  }[hw] || 'misc';
-  const fileURL =
-    `https://yslwgaephsnbfoiqnpuw.supabase.co/storage/v1/object/public/hw-datasets/${folder}/${filename}`;
-  const previewImageURL =
-    `https://yslwgaephsnbfoiqnpuw.supabase.co/storage/v1/object/public/hw-datasets/${folder}/${baseFile}.png`;
+  const baseFile = filename ? filename.replace(/\.pdf$/, "") : "";
 
-  const isRegularHW = ["단어", "연어", "문법", "단계별 독해"].includes(hw);
+  const folder =
+    (dm && typeof dm.getStorageFolder === "function" && dm.getStorageFolder(hw)) || "misc";
 
-  // ✅ 이미지로 미리보기
-  if (isRegularHW) {
+  const fileURL = filename
+    ? `https://yslwgaephsnbfoiqnpuw.supabase.co/storage/v1/object/public/hw-datasets/${folder}/${filename}`
+    : "";
+  const previewImageURL = baseFile
+    ? `https://yslwgaephsnbfoiqnpuw.supabase.co/storage/v1/object/public/hw-datasets/${folder}/${baseFile}.png`
+    : "";
+
+  const isRegularHW = hasCurriculumLevels(hw);
+
+  if (isRegularHW && previewImageURL) {
     content += `
       <div style="margin-bottom: 8px; height: 180px; overflow-y: auto; border: 1px solid #aaa; border-radius: 6px;">
         <img src="${previewImageURL}" style="width: 100%;" />
@@ -144,9 +157,9 @@ window.showDishPopup = function (item) {
   }
 
   if (isRegularHW) {
-    const quizResult = JSON.parse(localStorage.getItem('QuizResults') || '{}');
+    const quizResult = JSON.parse(localStorage.getItem("QuizResults") || "{}");
     const quizKey = baseFile;
-    const isDone = quizResult.quiztitle === quizKey && quizResult.teststatus === 'done';
+    const isDone = quizKey && quizResult.quiztitle === quizKey && quizResult.teststatus === "done";
 
     if (isDone) {
       content += `
@@ -159,7 +172,8 @@ window.showDishPopup = function (item) {
         </div>
       `;
     } else if (downloaded) {
-      if (item.label === '단어') {
+      const isWordCategory = item.label === "단어";
+      if (isWordCategory) {
         content += `
           <div style="margin-bottom: 10px;">숙제를 다시 다운로드하거나, 시험을 보러 갈 수 있어요.</div>
           <div style="display: flex; gap: 6px; justify-content: center;">
@@ -189,7 +203,6 @@ window.showDishPopup = function (item) {
       `;
     }
   } else if (hw === "오늘 내 숙제") {
-    // ✅ '오늘 내 숙제' 전용 커스텀 팝업 + 드롭다운 + 단일 코멘트창
     const requestTypes = [
       "오늘 내 숙제",
       "시험지 만들어주세요",
@@ -229,13 +242,12 @@ window.showDishPopup = function (item) {
 
   popup.innerHTML = content;
 
-  // ✅ 중앙 토스트 + 진행바 표시
   function showRedirectToast() {
-    const existing = document.getElementById('redirect-toast');
+    const existing = document.getElementById("redirect-toast");
     if (existing) existing.remove();
 
-    const toast = document.createElement('div');
-    toast.id = 'redirect-toast';
+    const toast = document.createElement("div");
+    toast.id = "redirect-toast";
     toast.style = `
       position: fixed;
       top: 50%;
@@ -271,38 +283,36 @@ window.showDishPopup = function (item) {
 
     document.body.appendChild(toast);
 
-    const bar = toast.querySelector('.redirect-toast-bar');
+    const bar = toast.querySelector(".redirect-toast-bar");
     requestAnimationFrame(() => {
-      bar.style.width = '100%';
+      bar.style.width = "100%";
     });
   }
 
-  // ✅ 이벤트 바인딩
-  popup.querySelector('#close-popup')?.addEventListener('click', () => popupContainer.remove());
+  popup.querySelector("#close-popup")?.addEventListener("click", () => popupContainer.remove());
 
-  popup.querySelector('#download-btn')?.addEventListener('click', () => {
-    localStorage.setItem(key, 'true');
+  popup.querySelector("#download-btn")?.addEventListener("click", () => {
+    localStorage.setItem(key, "true");
     showDishPopup(item);
   });
 
-  popup.querySelector('#download-a')?.addEventListener('click', () => {
-    localStorage.setItem(key, 'true');
+  popup.querySelector("#download-a")?.addEventListener("click", () => {
+    localStorage.setItem(key, "true");
   });
 
-  popup.querySelector('#quiz-btn')?.addEventListener('click', () => {
-    const quizKey = buildFilename(item).replace(/\.pdf$/, '');
+  popup.querySelector("#quiz-btn")?.addEventListener("click", () => {
+    const quizKey = buildFilename(item).replace(/\.pdf$/, "");
     window.location.href =
-      `dish-quiz.html?id=${encodeURIComponent(userId || '')}&key=${encodeURIComponent(quizKey)}`;
+      `dish-quiz.html?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(quizKey)}`;
   });
 
-  // ✅ 일반 숙제 "완료했어요" → 영수증 + 2초 로딩바 + 제출함 이동
-  popup.querySelector('#upload-btn')?.addEventListener('click', () => {
-    const isWord = item.label === '단어';
+  popup.querySelector("#upload-btn")?.addEventListener("click", () => {
+    const isWord = item.label === "단어";
     const hwType = isWord ? "doneinweb" : "pdf사진";
 
-    console.log('✅ [제출] 라벨:', item.label);
-    console.log('✅ [제출] Subcategory:', item.Subcategory);
-    console.log('✅ [제출] 저장될 HWType:', hwType);
+    console.log("✅ [제출] 라벨:", item.label);
+    console.log("✅ [제출] Subcategory:", item.Subcategory);
+    console.log("✅ [제출] 저장될 HWType:", hwType);
 
     window.storePendingHomework({
       Subcategory: item.Subcategory,
@@ -319,26 +329,23 @@ window.showDishPopup = function (item) {
 
     setTimeout(() => {
       window.location.href =
-        `homework-submit.html?id=${encodeURIComponent(userId || '')}`;
+        `homework-submit.html?id=${encodeURIComponent(userId || "")}`;
     }, 2000);
   });
 
-  // ✅ 커스텀 요청형도 동일하게 로딩바 + 이동
-  popup.querySelector('#custom-complete-btn')?.addEventListener('click', () => {
-    const typeSelect = document.getElementById('custom_hwcategory');
+  popup.querySelector("#custom-complete-btn")?.addEventListener("click", () => {
+    const typeSelect = document.getElementById("custom_hwcategory");
     const selectedType =
       (typeSelect && typeSelect.value) ? typeSelect.value : "오늘 내 숙제";
 
-    const explanation = document.getElementById('custom_hwcomment')?.value.trim() || '';
+    const explanation = document.getElementById("custom_hwcomment")?.value.trim() || "";
 
-    // [선택 타입] + (선택적) 코멘트
     const pieces = [`[${selectedType}]`];
     if (explanation) pieces.push(explanation);
 
-    const combinedComment = pieces.join(' ');
+    const combinedComment = pieces.join(" ");
 
     window.storePendingHomework({
-      // 🔥 드롭다운에서 고른 값을 Subcategory로 저장
       Subcategory: selectedType,
       HWType: "사진촬영",
       LessonNo: null,
@@ -347,14 +354,13 @@ window.showDishPopup = function (item) {
     });
 
     popupContainer.remove();
-    // 영수증에는 기존 접시 이름(오늘 내 숙제)이 찍히는 구조 유지
     window.showReceiptFromQordered(item.Subcategory);
 
     showRedirectToast();
 
     setTimeout(() => {
       window.location.href =
-        `homework-submit.html?id=${encodeURIComponent(userId || '')}`;
+        `homework-submit.html?id=${encodeURIComponent(userId || "")}`;
     }, 2000);
   });
 

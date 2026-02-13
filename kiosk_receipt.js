@@ -1,34 +1,34 @@
 // kiosk_receipt.js
 
-// ✅ Day 계산용 범위 맵
-const RECEIPT_RANGES = {
-  '단어': {
-    'A1': [1, 45],
-    'A2': [46, 89],
-    'B1': [90, 130],
-    'B2': [131, 201],
-    'C1': [202, 266]
-  },
-  '연어': {
-    '900핵심연어': [1, 42]
-  },
-  '문법': {
-    'Basic': [1, 50]
-  },
-  '단계별 독해': {
-    'RCStepper': [1, 50]
-  }
-};
+function getDayManager() {
+  return window.DayManager || null;
+}
+
+function resolveSubcategoryName(subcategory) {
+  const dm = getDayManager();
+  if (!subcategory || !dm || typeof dm.resolveSubcategoryName !== 'function') return subcategory;
+  return dm.resolveSubcategoryName(subcategory) || subcategory;
+}
 
 function inferLevel(subcategory, level, lessonNo) {
-  const range = RECEIPT_RANGES?.[subcategory]?.[level];
-  if (!range) return null;
-  const [start, end] = range;
-  if (lessonNo >= start && lessonNo <= end) {
-    const day = lessonNo - start + 1;
-    return { start, day };
-  }
-  return null;
+  const dm = getDayManager();
+  const canonicalSub = resolveSubcategoryName(subcategory);
+  if (!dm || !level || lessonNo === undefined || lessonNo === null) return null;
+
+  if (typeof dm.getDay !== 'function') return null;
+  const day = dm.getDay(canonicalSub, level, lessonNo);
+  if (day == null) return null;
+
+  const range =
+    typeof dm.getRange === 'function'
+      ? dm.getRange(canonicalSub, level)
+      : null;
+
+  return {
+    start: range?.start ?? null,
+    day,
+    subcategory: canonicalSub
+  };
 }
 
 // ✅ 최종 주문 처리 (주문 담기 버튼)
@@ -49,25 +49,40 @@ window.handleFinalOrder = function () {
   let receiptText = '';
 
   window.selectedItems.forEach(entry => {
-    if (entry.Subcategory && entry.Level && entry.LessonNo !== undefined) {
+    // Level/Day를 가진 일반 진도형
+    if (entry.Subcategory && entry.Level && entry.LessonNo !== undefined && entry.LessonNo !== null) {
+      const canonicalSub = resolveSubcategoryName(entry.Subcategory);
       hwPlusEntries.push({
-        Subcategory: entry.Subcategory,
+        Subcategory: canonicalSub,
         Level: entry.Level,
         LessonNo: entry.LessonNo
       });
 
-      const meta = inferLevel(entry.Subcategory, entry.Level, entry.LessonNo);
+      const meta = inferLevel(canonicalSub, entry.Level, entry.LessonNo);
       const dayStr = meta ? `Day ${meta.day}` : `Lesson ${entry.LessonNo}`;
-      receiptText += `${entry.label || entry.Subcategory} > ${entry.Level} > ${dayStr}\n`;
-    } else {
-      // label-only 항목 (오늘 내 숙제 / 시험지 만들어주세요 등)
+      receiptText += `${entry.label || canonicalSub} > ${entry.Level} > ${dayStr}\n`;
+      return;
+    }
+
+    // Subcategory만 있는 유형 (Level/Day 없음)
+    if (entry.Subcategory) {
+      const canonicalSub = resolveSubcategoryName(entry.Subcategory);
       hwPlusEntries.push({
-        Subcategory: entry.label,
+        Subcategory: canonicalSub,
         Level: null,
         LessonNo: null
       });
-      receiptText += `${entry.label}\n`;
+      receiptText += `${entry.label || canonicalSub} > ${canonicalSub}\n`;
+      return;
     }
+
+    // label-only 항목 (오늘 내 숙제 / 시험지 만들어주세요 등)
+    hwPlusEntries.push({
+      Subcategory: entry.label,
+      Level: null,
+      LessonNo: null
+    });
+    receiptText += `${entry.label}\n`;
   });
 
   localStorage.setItem('HWPlus', JSON.stringify(hwPlusEntries));
@@ -217,10 +232,11 @@ window.showReceiptFromHWPlus = function () {
 
   let receiptText = '';
   hwPlusEntries.forEach(entry => {
-    if (entry.Subcategory && entry.Level && entry.LessonNo !== undefined) {
-      const meta = inferLevel(entry.Subcategory, entry.Level, entry.LessonNo);
+    if (entry.Subcategory && entry.Level && entry.LessonNo !== undefined && entry.LessonNo !== null) {
+      const canonicalSub = resolveSubcategoryName(entry.Subcategory);
+      const meta = inferLevel(canonicalSub, entry.Level, entry.LessonNo);
       const dayStr = meta ? `Day ${meta.day}` : `Day ${entry.LessonNo}`;
-      receiptText += `${entry.Subcategory} > ${entry.Level} > ${dayStr}\n`;
+      receiptText += `${canonicalSub} > ${entry.Level} > ${dayStr}\n`;
     } else {
       receiptText += `${entry.Subcategory || entry.label || '기타'}\n`;
     }

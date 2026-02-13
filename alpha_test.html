@@ -41,13 +41,13 @@
   <main>
     <h1>Redirecting...</h1>
     <p id="status">잠시만 기다려 주세요.</p>
-    <p><a id="fallback-link" href="pleks-l1e1.html">이동이 안 되면 직접 클릭</a></p>
+    <p><a id="fallback-link" href="pleks/pleks-l1e1.html">이동이 안 되면 직접 클릭</a></p>
   </main>
 
   <script>
     (function () {
       // 매번 여기 주소만 바꾸면 됩니다.
-      const REDIRECT_TARGET = "pleks-l1e1.html";
+      const REDIRECT_TARGET = "pleks/pleks-l1e1.html";
 
       const currentUrl = new URL(window.location.href);
       const targetUrl = new URL(REDIRECT_TARGET, window.location.href);

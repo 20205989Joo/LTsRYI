@@ -2,29 +2,36 @@
 
 window.selectedItems = [];
 
+function getDayManager() {
+  return window.DayManager || null;
+}
+
+function resolveSubcategoryName(subcategory) {
+  const dm = getDayManager();
+  if (!subcategory || !dm || typeof dm.resolveSubcategoryName !== 'function') return subcategory;
+  return dm.resolveSubcategoryName(subcategory) || subcategory;
+}
+
+function needsLevelAndDay(subcategory) {
+  const dm = getDayManager();
+  const canonicalSub = resolveSubcategoryName(subcategory);
+  if (!dm || typeof dm.listLevels !== 'function') return true;
+  const levels = dm.listLevels(canonicalSub) || [];
+  return levels.length > 0;
+}
+
+function setAddButtonEnabled(enabled) {
+  const addBtn = document.getElementById('subPopupAddBtn');
+  if (!addBtn) return;
+  addBtn.disabled = !enabled;
+  addBtn.style.opacity = enabled ? '1' : '0.45';
+  addBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+}
+
 function updateSelectedDisplay() {
   const list = document.getElementById('selectedList');
   if (!list) return;
   list.innerHTML = '';
-
-  const RANGES = {
-    '단어': {
-      'A1': [1, 45],
-      'A2': [46, 89],
-      'B1': [90, 130],
-      'B2': [131, 201],
-      'C1': [202, 266],
-    },
-    '연어': {
-      '900핵심연어': [1, 42],
-    },
-    '문법': {
-      'Basic': [1, 50],
-    },
-    '단계별 독해': {
-      'RCStepper': [1, 50],
-    },
-  };
 
   selectedItems.forEach((item, index) => {
     const tag = document.createElement('div');
@@ -32,12 +39,12 @@ function updateSelectedDisplay() {
 
     let dayStr = '';
     if (item.Level && item.LessonNo !== undefined) {
-      const range = RANGES[item.Subcategory]?.[item.Level];
-      if (range) {
-        const [start] = range;
-        const day = item.LessonNo - start + 1;
-        dayStr = ` - Day ${day}`;
-      }
+      const dm = getDayManager();
+      const canonicalSub = resolveSubcategoryName(item.Subcategory);
+      const day = dm && typeof dm.getDay === 'function'
+        ? dm.getDay(canonicalSub, item.Level, item.LessonNo)
+        : null;
+      if (day != null) dayStr = ` - Day ${day}`;
     }
 
     tag.innerHTML = `
@@ -86,7 +93,19 @@ function renderBasicSubPopup(label) {
   };
 
   document.getElementById('subPopupAddBtn').onclick = () => {
-    if (temp.Subcategory && temp.Level && temp.LessonNo !== undefined) {
+    const requiresProgress = needsLevelAndDay(temp.Subcategory);
+    if (temp.Subcategory && !requiresProgress) {
+      alert('다음 업데이트를 기다려주세요!');
+      return;
+    }
+
+    const isValid =
+      temp.Subcategory &&
+      (
+        (temp.Level && temp.LessonNo !== undefined && temp.LessonNo !== null)
+      );
+
+    if (isValid) {
       const duplicate = selectedItems.some(
         item =>
           item.label === temp.label &&
@@ -105,6 +124,7 @@ function renderBasicSubPopup(label) {
     }
   };
 
+  setAddButtonEnabled(false);
   renderSubcategoryOptions(label, temp);
 }
 
@@ -112,19 +132,21 @@ function renderSubcategoryOptions(label, temp) {
   const section = document.getElementById('subcategorySection');
   if (!section) return;
 
-  const map = {
-    '단어': ['단어', '연어'],
-    '문법': ['문법'],
-    '구문': ['단계별 독해'],
-  };
+  const dm = getDayManager();
+  const subcategories =
+    dm && typeof dm.listSubcategories === 'function'
+      ? dm.listSubcategories(label)
+      : [];
 
   section.innerHTML = '세부 유형을 골라주세요:<br>';
-  (map[label] || []).forEach(sub => {
+  (subcategories || []).forEach(sub => {
     const btn = document.createElement('button');
     btn.className = 'menu-btn small';
     btn.innerText = sub;
     btn.onclick = () => {
-      temp.Subcategory = sub;
+      temp.Subcategory = resolveSubcategoryName(sub);
+      temp.Level = null;
+      temp.LessonNo = null;
       document.querySelectorAll('#subcategorySection .menu-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderLevelOptions(temp);
@@ -137,16 +159,27 @@ function renderLevelOptions(temp) {
   const section = document.getElementById('levelSection');
   if (!section) return;
 
-  const levelMap = {
-    '단어': ['A1', 'A2', 'B1', 'B2', 'C1'],
-    '연어': ['900핵심연어'],
-    '문법': ['Basic'],
-    '단계별 독해': ['RCStepper'], // ✅ 따옴표 수정됨
-  };
+  const dm = getDayManager();
+  const sub = resolveSubcategoryName(temp.Subcategory);
+  const levels =
+    dm && typeof dm.listLevels === 'function'
+      ? dm.listLevels(sub)
+      : [];
 
+  if (!levels || levels.length === 0) {
+    temp.Level = null;
+    temp.LessonNo = null;
+    section.innerHTML = '다음 업데이트를 기다려주세요!';
+    const lessonSection = document.getElementById('lessonSection');
+    if (lessonSection) lessonSection.innerHTML = '';
+    setAddButtonEnabled(false);
+    alert('다음 업데이트를 기다려주세요!');
+    return;
+  }
+
+  setAddButtonEnabled(false);
   section.innerHTML = '난이도를 골라주세요:<br>';
-  const levels = levelMap[temp.Subcategory] || [];
-  levels.forEach(level => {
+  (levels || []).forEach(level => {
     const btn = document.createElement('button');
     btn.className = 'menu-btn small';
     btn.innerText = level;
@@ -165,22 +198,13 @@ function renderLessonOptions(temp) {
   if (!section) return;
 
   section.innerHTML = 'Day를 골라주세요:<br>';
-  const RANGES = {
-    '단어': {
-      'A1': [1, 45],
-      'A2': [46, 89],
-      'B1': [90, 130],
-      'B2': [131, 201],
-      'C1': [202, 266],
-    },
-    '연어': { '900핵심연어': [1, 42] },
-    '문법': { 'Basic': [1, 50] },
-    '단계별 독해': { 'RCStepper': [1, 50] },
-  };
-
-  const range = RANGES[temp.Subcategory]?.[temp.Level];
+  const dm = getDayManager();
+  const sub = resolveSubcategoryName(temp.Subcategory);
+  const range = dm && typeof dm.getRange === 'function'
+    ? dm.getRange(sub, temp.Level)
+    : null;
   if (!range) return;
-  const [start, end] = range;
+  const { start, end } = range;
   const total = end - start + 1;
 
   const wrapper = document.createElement('div');
@@ -194,24 +218,84 @@ function renderLessonOptions(temp) {
   const plus = document.createElement('button');
   plus.textContent = '＋';
   const input = document.createElement('input');
-  input.type = 'number';
+  input.type = 'text';
+  input.inputMode = 'numeric';
+  input.pattern = '[0-9]*';
   input.value = 1;
-  input.min = 1;
-  input.max = total;
   input.style.width = '60px';
   input.style.textAlign = 'center';
 
-  const updateValue = () => {
-    let v = parseInt(input.value, 10);
-    if (isNaN(v)) v = 1;
-    v = Math.min(Math.max(v, 1), total);
-    input.value = v;
-    temp.LessonNo = start + (v - 1);
+  let currentDay = 1;
+
+  const dayToLessonNo = day => start + (day - 1);
+
+  const parseTypedDay = raw => {
+    if (!/^\d+$/.test(raw)) return null;
+    const day = Number(raw);
+    if (day < 1 || day > total) return null;
+    return day;
   };
-  minus.onclick = () => { input.value = Math.max(1, parseInt(input.value) - 1); updateValue(); };
-  plus.onclick = () => { input.value = Math.min(total, parseInt(input.value) + 1); updateValue(); };
-  input.oninput = updateValue;
-  updateValue();
+
+  const setDay = day => {
+    const next = Math.min(Math.max(Number(day) || 1, 1), total);
+    currentDay = next;
+    input.value = String(next);
+    temp.LessonNo = dayToLessonNo(next);
+    setAddButtonEnabled(true);
+  };
+
+  const commitTypedDay = () => {
+    const typed = input.value.trim();
+    const parsed = parseTypedDay(typed);
+    if (parsed == null) {
+      setDay(currentDay);
+      return;
+    }
+    setDay(parsed);
+  };
+
+  minus.onclick = () => {
+    setDay(currentDay - 1);
+  };
+
+  plus.onclick = () => {
+    setDay(currentDay + 1);
+  };
+
+  input.addEventListener('focus', () => {
+    input.select();
+  });
+
+  input.addEventListener('input', () => {
+    const typed = input.value.trim();
+    if (typed === '') {
+      temp.LessonNo = null;
+      setAddButtonEnabled(false);
+      return;
+    }
+
+    const parsed = parseTypedDay(typed);
+    if (parsed == null) {
+      temp.LessonNo = null;
+      setAddButtonEnabled(false);
+      return;
+    }
+
+    currentDay = parsed;
+    temp.LessonNo = dayToLessonNo(parsed);
+    setAddButtonEnabled(true);
+  });
+
+  input.addEventListener('blur', commitTypedDay);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      commitTypedDay();
+      input.blur();
+    }
+  });
+
+  setDay(1);
 
   wrapper.appendChild(minus);
   wrapper.appendChild(input);
