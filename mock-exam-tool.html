@@ -11,6 +11,12 @@
       display: none !important;
     }
 
+    *,
+    *::before,
+    *::after {
+      -webkit-tap-highlight-color: transparent;
+    }
+
     :root {
       --topbar-bg: #2e2b27;
       --topbar-border: #b08d57;
@@ -464,6 +470,31 @@
       inset: 0;
     }
 
+    .pdf-word-tooltip {
+      position: fixed;
+      z-index: 220;
+      max-width: min(300px, 72vw);
+      background: rgba(17, 14, 11, 0.94);
+      color: #fff1cf;
+      border: 1px solid rgba(255, 192, 102, 0.72);
+      border-radius: 8px;
+      padding: 6px 8px;
+      box-sizing: border-box;
+      font-size: 12px;
+      line-height: 1.4;
+      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.26);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity 0.1s ease, transform 0.1s ease;
+      white-space: pre-wrap;
+    }
+
+    .pdf-word-tooltip.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     .overlay-memo {
       position: absolute;
       top: 0;
@@ -619,6 +650,53 @@
       display: none;
     }
 
+    .overlay-blank-pane {
+      position: relative;
+      overflow: hidden;
+      background: #fdf3e7;
+    }
+
+    .overlay-blank-controls {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      z-index: 6;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .overlay-blank-tool-btn {
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid rgba(46, 43, 39, 0.26);
+      background: rgba(255, 255, 255, 0.92);
+      color: #2e2b27;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 0 10px;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: background 0.14s ease, border-color 0.14s ease;
+      line-height: 1;
+    }
+
+    .overlay-blank-tool-btn:hover {
+      background: #fff6e7;
+      border-color: rgba(46, 43, 39, 0.4);
+    }
+
+    .overlay-blank-tool-btn.is-on {
+      background: linear-gradient(180deg, #ffe09a 0%, #f4bf5a 100%);
+      border-color: rgba(141, 95, 28, 0.72);
+      color: #2c2217;
+    }
+
+    .overlay-blank-tool-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
     .overlay-memo-textarea {
       flex: 1;
       min-height: 0;
@@ -633,10 +711,39 @@
       background: #fdf3e7;
       color: #2e2b27;
       font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      padding-top: 44px;
     }
 
     .overlay-memo-textarea::placeholder {
       color: rgba(46, 43, 39, 0.38);
+    }
+
+    .overlay-blank-pane.is-pen-mode .overlay-memo-textarea {
+      display: none;
+    }
+
+    .overlay-blank-draw-wrap {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      background: #fdf3e7;
+      border-top: 1px solid rgba(46, 43, 39, 0.08);
+      touch-action: none;
+    }
+
+    .overlay-blank-draw-wrap[hidden] {
+      display: none;
+    }
+
+    .overlay-blank-draw-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background:
+        linear-gradient(180deg, rgba(140, 116, 86, 0.06) 0, rgba(140, 116, 86, 0.06) 1px, transparent 1px, transparent 34px);
+      background-size: 100% 34px;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M2 16l3.2-.8 8.6-8.6-2.4-2.4-8.6 8.6L2 16z' fill='%232f2a24' stroke='%23f4c36d' stroke-width='.8'/%3E%3Cpath d='M11.4 2.2l2.4 2.4 1.2-1.2c.7-.7.7-1.8 0-2.5-.7-.7-1.8-.7-2.5 0l-1.1 1.3z' fill='%23463b2c'/%3E%3C/svg%3E") 2 16, pointer;
+      touch-action: none;
     }
 
     .overlay-two-three {
@@ -684,6 +791,8 @@
       height: 32px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 8px;
       padding: 0 8px;
       font-size: 11px;
       font-weight: 700;
@@ -691,8 +800,120 @@
       box-sizing: border-box;
     }
 
+    .overlay-two-head-label {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .overlay-two-head-toggle {
+      height: 24px;
+      min-width: 70px;
+      border-radius: 8px;
+      border: 1px solid rgba(120, 84, 39, 0.58);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.06) 42%, rgba(0, 0, 0, 0.06) 100%),
+        linear-gradient(180deg, #fff2ce 0%, #e8c788 100%);
+      color: #3b2c22;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      flex: 0 0 auto;
+      padding: 0 10px;
+      box-sizing: border-box;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.58),
+        0 1px 2px rgba(0, 0, 0, 0.22);
+      transition: filter 0.16s ease, transform 0.16s ease;
+    }
+
+    .overlay-two-head-toggle:hover {
+      filter: brightness(1.05);
+    }
+
+    .overlay-two-head-toggle.is-on {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.08) 100%),
+        linear-gradient(180deg, #ffd97d 0%, #f0b145 100%);
+      border-color: #ad6f1d;
+      color: #2f241a;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.48),
+        0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
     .overlay-two-col--threeT .overlay-two-head {
       border-bottom-color: rgba(247, 242, 232, 0.18);
+    }
+
+    .overlay-three-head-tools {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .overlay-three-head-pen-toggle {
+      height: 24px;
+      min-width: 56px;
+      border-radius: 8px;
+      border: 1px solid rgba(247, 242, 232, 0.26);
+      background: rgba(77, 65, 50, 0.92);
+      color: #f2e8d4;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0 9px;
+      box-sizing: border-box;
+      flex: 0 0 auto;
+    }
+
+    .overlay-three-head-pen-toggle:hover {
+      background: rgba(94, 80, 62, 0.95);
+    }
+
+    .overlay-three-head-pen-toggle.is-on {
+      background: linear-gradient(180deg, #ffd27c 0%, #f2b14d 100%);
+      border-color: rgba(156, 102, 24, 0.76);
+      color: #2c2116;
+    }
+
+    .overlay-three-head-pen-toggle:disabled {
+      opacity: 0.44;
+      cursor: default;
+    }
+
+    .overlay-three-head-clear-btn {
+      height: 24px;
+      min-width: 56px;
+      border-radius: 8px;
+      border: 1px solid rgba(247, 242, 232, 0.24);
+      background: rgba(71, 59, 46, 0.9);
+      color: #f2e8d4;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0 9px;
+      box-sizing: border-box;
+      flex: 0 0 auto;
+    }
+
+    .overlay-three-head-clear-btn:hover {
+      background: rgba(90, 74, 58, 0.94);
+    }
+
+    .overlay-three-head-clear-btn:disabled {
+      opacity: 0.38;
+      cursor: default;
+    }
+
+    .overlay-two-col--threeT .overlay-two-head.is-dict-mode {
+      background: linear-gradient(180deg, #15120f 0%, #090807 100%);
+      color: #f4e9cc;
+      border-bottom-color: rgba(244, 233, 204, 0.22);
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.52);
     }
 
     .overlay-two-scroll {
@@ -708,6 +929,10 @@
       align-items: stretch;
     }
 
+    #mock-overlay-two-right-list {
+      padding-right: 16px;
+    }
+
     .overlay-two-scroll::-webkit-scrollbar {
       width: 8px;
     }
@@ -715,6 +940,105 @@
     .overlay-two-scroll::-webkit-scrollbar-thumb {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 999px;
+    }
+
+    .overlay-dict-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: #17120e;
+    }
+
+    .overlay-dict-panel:not([hidden]) {
+      animation: overlay-dict-slide-up 0.24s ease-out;
+    }
+
+    @keyframes overlay-dict-slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .overlay-dict-toolbar {
+      height: 30px;
+      border-bottom: 1px solid rgba(247, 242, 232, 0.18);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      box-sizing: border-box;
+      background: rgba(20, 14, 10, 0.86);
+    }
+
+    .overlay-dict-current {
+      flex: 1;
+      min-width: 0;
+      font-size: 10px;
+      color: rgba(247, 242, 232, 0.86);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .overlay-dict-open {
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(247, 242, 232, 0.28);
+      background: #4a463f;
+      color: #f0e6d2;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 0 8px;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .overlay-dict-open:disabled {
+      opacity: 0.42;
+      cursor: default;
+    }
+
+    .overlay-dict-zoom-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1px solid rgba(247, 242, 232, 0.24);
+      background: rgba(87, 78, 67, 0.96);
+      color: #f0e6d2;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .overlay-dict-zoom-btn:hover {
+      background: rgba(106, 95, 82, 0.98);
+    }
+
+    .overlay-dict-zoom-value {
+      min-width: 36px;
+      text-align: center;
+      font-size: 10px;
+      color: rgba(247, 242, 232, 0.92);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      flex: 0 0 auto;
+    }
+
+    .overlay-dict-frame {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      border: none;
+      background: #fff;
     }
 
     .overlay-card {
@@ -731,10 +1055,19 @@
       min-height: 84px;
     }
 
+    .overlay-card--twoT.is-captured {
+      border-color: #efaf47;
+      box-shadow: 0 0 0 2px rgba(239, 175, 71, 0.26);
+    }
+
     .overlay-card--threeT {
       background: #3b2a1f;
       border: 1px solid #2a1e17;
       min-height: 86px;
+    }
+
+    .overlay-two-three.is-three-pen-mode .overlay-card--threeT {
+      min-height: 212px;
     }
 
     .overlay-card-inner {
@@ -760,6 +1093,40 @@
       display: flex;
       align-items: flex-start;
       gap: 6px;
+    }
+
+    .overlay-card-row--threeT {
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .overlay-three-card-tools {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex: 0 0 auto;
+    }
+
+    .overlay-three-card-tool-btn {
+      height: 20px;
+      min-width: 44px;
+      border-radius: 6px;
+      border: 1px solid rgba(247, 242, 232, 0.3);
+      background: rgba(76, 62, 48, 0.92);
+      color: #f6ead5;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 0 6px;
+      cursor: pointer;
+      box-sizing: border-box;
+      line-height: 1;
+    }
+
+    .overlay-three-card-tool-btn:hover {
+      background: rgba(96, 79, 61, 0.96);
     }
 
     .overlay-card-row .overlay-card-input,
@@ -863,6 +1230,12 @@
       max-height: 90px;
     }
 
+    .overlay-two-three.is-three-pen-mode .overlay-card-textarea--threeT-sentence {
+      display: none;
+      min-height: 68px !important;
+      max-height: 180px;
+    }
+
     .overlay-card-input--threeT,
     .overlay-card-textarea--threeT {
       background: #2f221a;
@@ -878,6 +1251,35 @@
     .overlay-card-input--twoT::placeholder,
     .overlay-card-textarea--twoT::placeholder {
       color: rgba(46, 43, 39, 0.38);
+    }
+
+    .overlay-three-ink-wrap {
+      margin-top: 6px;
+      height: 86px;
+      border: 1px solid rgba(247, 242, 232, 0.26);
+      border-radius: 6px;
+      background: rgba(246, 239, 225, 0.06);
+      overflow: hidden;
+      touch-action: none;
+      display: none;
+      position: relative;
+    }
+
+    .overlay-two-three.is-three-pen-mode .overlay-three-ink-wrap {
+      display: block;
+      margin-top: 0;
+      height: 182px;
+    }
+
+    .overlay-three-ink-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M2 16l3.2-.8 8.6-8.6-2.4-2.4-8.6 8.6L2 16z' fill='%23f7f2e8' stroke='%233b2a1f' stroke-width='.8'/%3E%3Cpath d='M11.4 2.2l2.4 2.4 1.2-1.2c.7-.7.7-1.8 0-2.5-.7-.7-1.8-.7-2.5 0l-1.1 1.3z' fill='%23f2b14d'/%3E%3C/svg%3E") 2 16, pointer;
+      background:
+        linear-gradient(180deg, rgba(244, 230, 205, 0.06) 0, rgba(244, 230, 205, 0.06) 1px, transparent 1px, transparent 26px);
+      background-size: 100% 26px;
     }
 
     .overlay-side-flip {
@@ -1122,17 +1524,64 @@
         </div>
         <button id="mock-overlay-two-flip-triangle" class="overlay-side-flip" type="button" aria-label="오버레이 좌우 전환" title="오버레이 좌우 전환"></button>
         <div class="overlay-memo-body">
-          <div id="mock-overlay-blank-pane" class="overlay-pane">
+          <div id="mock-overlay-blank-pane" class="overlay-pane overlay-blank-pane">
+            <div class="overlay-blank-controls">
+              <button id="mock-blank-pen-toggle" class="overlay-blank-tool-btn" type="button" aria-pressed="false" title="필기 모드">
+                펜
+              </button>
+              <button id="mock-blank-pen-clear" class="overlay-blank-tool-btn" type="button" title="필기 지우기">
+                지우기
+              </button>
+            </div>
             <textarea id="mock-overlay-memo-text" class="overlay-memo-textarea" placeholder="메모를 적어주세요..."></textarea>
+            <div id="mock-blank-draw-wrap" class="overlay-blank-draw-wrap" hidden>
+              <canvas id="mock-blank-draw-canvas" class="overlay-blank-draw-canvas"></canvas>
+            </div>
           </div>
           <div id="mock-overlay-two-three-pane" class="overlay-pane overlay-two-three" hidden>
             <div class="overlay-two-col overlay-two-col--twoT">
-              <div class="overlay-two-head">2T · 단어/뜻</div>
+              <div class="overlay-two-head">
+                <span class="overlay-two-head-label">2T · 단어/뜻</span>
+                <button
+                  id="mock-overlay-dict-toggle"
+                  class="overlay-two-head-toggle"
+                  type="button"
+                  aria-pressed="false"
+                  title="3T 영역 사전 검색 토글"
+                >
+                  검색창
+                </button>
+              </div>
               <div id="mock-overlay-two-left-list" class="overlay-two-scroll"></div>
             </div>
-            <div class="overlay-two-col overlay-two-col--threeT">
-              <div class="overlay-two-head">3T · 문장/분석</div>
+            <div id="mock-overlay-three-col" class="overlay-two-col overlay-two-col--threeT">
+              <div id="mock-overlay-three-head" class="overlay-two-head">
+                <span id="mock-overlay-three-head-label" class="overlay-two-head-label">3T · 문장/분석</span>
+                <div class="overlay-three-head-tools">
+                  <button id="mock-overlay-three-pen-toggle" class="overlay-three-head-pen-toggle" type="button" aria-pressed="false">
+                    펜
+                  </button>
+                  <button id="mock-overlay-three-pen-clear" class="overlay-three-head-clear-btn" type="button" disabled title="3T 필기 지우기">
+                    지우기
+                  </button>
+                </div>
+              </div>
               <div id="mock-overlay-two-right-list" class="overlay-two-scroll"></div>
+              <div id="mock-overlay-dict-panel" class="overlay-dict-panel" hidden>
+                <div class="overlay-dict-toolbar">
+                  <span id="mock-overlay-dict-current" class="overlay-dict-current">단어를 클릭하면 검색됩니다.</span>
+                  <button id="mock-overlay-dict-zoom-out" class="overlay-dict-zoom-btn" type="button" aria-label="검색창 축소">-</button>
+                  <span id="mock-overlay-dict-zoom-value" class="overlay-dict-zoom-value">100%</span>
+                  <button id="mock-overlay-dict-zoom-in" class="overlay-dict-zoom-btn" type="button" aria-label="검색창 확대">+</button>
+                  <button id="mock-overlay-dict-open" class="overlay-dict-open" type="button" disabled>새 탭</button>
+                </div>
+                <iframe
+                  id="mock-overlay-dict-frame"
+                  class="overlay-dict-frame"
+                  title="네이버 영한 검색"
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
             </div>
           </div>
         </div>
@@ -1172,7 +1621,7 @@
       data-nav-mainhall="homework-tray_v1.html"
       data-nav-replace="true"
     >
-      ⬅ 영수증으로
+      ⬅ 테이블로 돌아가기
     </button>
   </div>
 
@@ -1198,8 +1647,25 @@
       const overlayTwoThreePane = document.getElementById("mock-overlay-two-three-pane");
       const overlayTwoFlipTriangleBtn = document.getElementById("mock-overlay-two-flip-triangle");
       const overlayMemoText = document.getElementById("mock-overlay-memo-text");
+      const blankPenToggleBtn = document.getElementById("mock-blank-pen-toggle");
+      const blankPenClearBtn = document.getElementById("mock-blank-pen-clear");
+      const blankDrawWrap = document.getElementById("mock-blank-draw-wrap");
+      const blankDrawCanvas = document.getElementById("mock-blank-draw-canvas");
       const overlayTwoLeftList = document.getElementById("mock-overlay-two-left-list");
       const overlayTwoRightList = document.getElementById("mock-overlay-two-right-list");
+      const overlayThreeCol = document.getElementById("mock-overlay-three-col");
+      const overlayThreeHead = document.getElementById("mock-overlay-three-head");
+      const overlayThreeHeadLabel = document.getElementById("mock-overlay-three-head-label");
+      const overlayThreePenToggleBtn = document.getElementById("mock-overlay-three-pen-toggle");
+      const overlayThreePenClearBtn = document.getElementById("mock-overlay-three-pen-clear");
+      const overlayDictToggleBtn = document.getElementById("mock-overlay-dict-toggle");
+      const overlayDictPanel = document.getElementById("mock-overlay-dict-panel");
+      const overlayDictFrame = document.getElementById("mock-overlay-dict-frame");
+      const overlayDictCurrent = document.getElementById("mock-overlay-dict-current");
+      const overlayDictZoomOutBtn = document.getElementById("mock-overlay-dict-zoom-out");
+      const overlayDictZoomInBtn = document.getElementById("mock-overlay-dict-zoom-in");
+      const overlayDictZoomValue = document.getElementById("mock-overlay-dict-zoom-value");
+      const overlayDictOpenBtn = document.getElementById("mock-overlay-dict-open");
       const overlayTabList = document.getElementById("mock-overlay-tab-list");
       const overlayAddTabBtn = document.getElementById("mock-overlay-add-tab");
       const overlayTabTypePopup = document.getElementById("mock-overlay-tab-type-popup");
@@ -1249,6 +1715,12 @@
       const FIXED_STUDENT_ID = new URLSearchParams(window.location.search).get("id") || "";
       const PDFJS_WORKER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
       const RENDER_QUALITY_BOOST = 1.35;
+      const THREE_PEN_COLOR = "#f3e8d2";
+      const THREE_PEN_WIDTH_SCALE = 0.72;
+      const NAVER_EN_KO_SEARCH_BASE = "https://en.dict.naver.com/#/search?query=";
+      const DICT_ZOOM_MIN = 0.8;
+      const DICT_ZOOM_MAX = 1.8;
+      const DICT_ZOOM_STEP = 0.1;
 
       let lastBlobUrl = "";
       let lastPdfUrl = "";
@@ -1261,7 +1733,8 @@
         id: 1,
         type: "blank",
         blankText: "",
-        twoThree: null
+        twoThree: null,
+        blankInk: []
       }];
       let activeMemoTabIndex = 0;
       const TAB_TYPE_LABEL = {
@@ -1372,6 +1845,26 @@
       let pdfRenderToken = 0;
       let lastPreviewScrollAt = 0;
       let activeWordIndex = null;
+      let wordMeaningMap = new Map();
+      let wordTooltipEl = null;
+      let isDictModeOn = false;
+      let lastCapturedWord = "";
+      let dictZoom = 1;
+      let isBlankPenMode = false;
+      let isThreeTPenMode = false;
+      const threePenState = {
+        drawing: false,
+        pointerId: null,
+        card: null,
+        canvas: null,
+        lastPoint: null
+      };
+      const blankPenState = {
+        drawing: false,
+        pointerId: null,
+        stroke: null,
+        lastPoint: null
+      };
       const DEBUG_SCROLL_DIAG = false;
 
       if (
@@ -1393,8 +1886,25 @@
         !overlayTwoThreePane ||
         !overlayTwoFlipTriangleBtn ||
         !overlayMemoText ||
+        !blankPenToggleBtn ||
+        !blankPenClearBtn ||
+        !blankDrawWrap ||
+        !blankDrawCanvas ||
         !overlayTwoLeftList ||
         !overlayTwoRightList ||
+        !overlayThreeCol ||
+        !overlayThreeHead ||
+        !overlayThreeHeadLabel ||
+        !overlayThreePenToggleBtn ||
+        !overlayThreePenClearBtn ||
+        !overlayDictToggleBtn ||
+        !overlayDictPanel ||
+        !overlayDictFrame ||
+        !overlayDictCurrent ||
+        !overlayDictZoomOutBtn ||
+        !overlayDictZoomInBtn ||
+        !overlayDictZoomValue ||
+        !overlayDictOpenBtn ||
         !overlayTabList ||
         !overlayAddTabBtn ||
         !overlayTabTypePopup ||
@@ -1516,9 +2026,49 @@
       function makeDefaultThreeTCards() {
         return Array.from({ length: DEFAULT_THREE_T_CARD_COUNT }, function () {
           return {
-            sentence: ""
+            sentence: "",
+            ink: []
           };
         });
+      }
+
+      function ensureThreeSentenceInk(card) {
+        if (!card || typeof card !== "object") return [];
+        if (!Array.isArray(card.ink)) {
+          card.ink = [];
+        }
+
+        const normalized = [];
+        for (let i = 0; i < card.ink.length; i += 1) {
+          const rawStroke = card.ink[i];
+          if (!rawStroke || !Array.isArray(rawStroke.points)) continue;
+
+          const safeStroke = (typeof rawStroke === "object") ? rawStroke : { points: [] };
+          const safePoints = [];
+          for (let j = 0; j < rawStroke.points.length; j += 1) {
+            const pt = rawStroke.points[j];
+            if (!pt) continue;
+            const xNum = Number(pt.x);
+            const yNum = Number(pt.y);
+            if (!Number.isFinite(xNum) || !Number.isFinite(yNum)) continue;
+            const pNum = Number(pt.p);
+            const pressure = Number.isFinite(pNum)
+              ? Math.max(0.05, Math.min(1, pNum))
+              : 0.5;
+            safePoints.push({
+              x: Math.max(0, Math.min(1, xNum)),
+              y: Math.max(0, Math.min(1, yNum)),
+              p: pressure
+            });
+          }
+
+          if (!safePoints.length) continue;
+          safeStroke.points = safePoints;
+          normalized.push(safeStroke);
+        }
+
+        card.ink = normalized;
+        return normalized;
       }
 
       function ensureTwoThreeData(tab) {
@@ -1540,7 +2090,8 @@
           });
           tab.twoThree.sentences = legacyCards.slice(0, DEFAULT_THREE_T_CARD_COUNT).map(function (row) {
             return {
-              sentence: row && typeof row.sentence === "string" ? row.sentence : ""
+              sentence: row && typeof row.sentence === "string" ? row.sentence : "",
+              ink: Array.isArray(row && row.ink) ? row.ink : []
             };
           });
           delete tab.twoThree.cards;
@@ -1556,13 +2107,24 @@
           tab.twoThree.words.push({ word: "", meaning: "" });
         }
         while (tab.twoThree.sentences.length < DEFAULT_THREE_T_CARD_COUNT) {
-          tab.twoThree.sentences.push({ sentence: "" });
+          tab.twoThree.sentences.push({ sentence: "", ink: [] });
         }
         if (tab.twoThree.words.length > DEFAULT_TWO_T_CARD_COUNT) {
           tab.twoThree.words = tab.twoThree.words.slice(0, DEFAULT_TWO_T_CARD_COUNT);
         }
         if (tab.twoThree.sentences.length > DEFAULT_THREE_T_CARD_COUNT) {
           tab.twoThree.sentences = tab.twoThree.sentences.slice(0, DEFAULT_THREE_T_CARD_COUNT);
+        }
+        for (let i = 0; i < tab.twoThree.sentences.length; i += 1) {
+          const sentenceCard = tab.twoThree.sentences[i];
+          if (!sentenceCard || typeof sentenceCard !== "object") {
+            tab.twoThree.sentences[i] = { sentence: "", ink: [] };
+            continue;
+          }
+          if (typeof sentenceCard.sentence !== "string") {
+            sentenceCard.sentence = "";
+          }
+          ensureThreeSentenceInk(sentenceCard);
         }
         return tab.twoThree;
       }
@@ -1585,9 +2147,596 @@
         overlayFontSizeValue.textContent = px;
       }
 
+      function getActiveBlankTab() {
+        const tab = getActiveMemoTab();
+        return tab && tab.type === "blank" ? tab : null;
+      }
+
+      function ensureBlankInk(tab) {
+        if (!tab) return [];
+        if (!Array.isArray(tab.blankInk)) {
+          tab.blankInk = [];
+        }
+
+        const normalized = [];
+        for (let i = 0; i < tab.blankInk.length; i += 1) {
+          const rawStroke = tab.blankInk[i];
+          if (!rawStroke || !Array.isArray(rawStroke.points)) continue;
+
+          const safeStroke = (typeof rawStroke === "object") ? rawStroke : { points: [] };
+          const safePoints = [];
+          for (let j = 0; j < rawStroke.points.length; j += 1) {
+            const pt = rawStroke.points[j];
+            if (!pt) continue;
+            const xNum = Number(pt.x);
+            const yNum = Number(pt.y);
+            if (!Number.isFinite(xNum) || !Number.isFinite(yNum)) continue;
+            const pNum = Number(pt.p);
+            const pressure = Number.isFinite(pNum)
+              ? Math.max(0.05, Math.min(1, pNum))
+              : 0.5;
+            safePoints.push({
+              x: Math.max(0, Math.min(1, xNum)),
+              y: Math.max(0, Math.min(1, yNum)),
+              p: pressure
+            });
+          }
+
+          if (!safePoints.length) continue;
+          safeStroke.points = safePoints;
+          normalized.push(safeStroke);
+        }
+
+        tab.blankInk = normalized;
+        return normalized;
+      }
+
+      function getBlankPenPressure(event) {
+        const pressure = Number(event.pressure);
+        if (Number.isFinite(pressure) && pressure > 0) {
+          return Math.max(0.05, Math.min(1, pressure));
+        }
+        if (event.pointerType === "pen") return 0.28;
+        if (event.pointerType === "touch") return 0.45;
+        return event.buttons ? 0.55 : 0.35;
+      }
+
+      function setupBlankCanvasContext() {
+        const rect = blankDrawCanvas.getBoundingClientRect();
+        if (!Number.isFinite(rect.width) || !Number.isFinite(rect.height) || rect.width < 8 || rect.height < 8) {
+          return null;
+        }
+        const cssWidth = Math.max(1, Math.floor(rect.width));
+        const cssHeight = Math.max(1, Math.floor(rect.height));
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const targetW = Math.floor(cssWidth * dpr);
+        const targetH = Math.floor(cssHeight * dpr);
+        if (blankDrawCanvas.width !== targetW || blankDrawCanvas.height !== targetH) {
+          blankDrawCanvas.width = targetW;
+          blankDrawCanvas.height = targetH;
+        }
+
+        const ctx = blankDrawCanvas.getContext("2d");
+        if (!ctx) return null;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        return {
+          ctx,
+          width: cssWidth,
+          height: cssHeight
+        };
+      }
+
+      function bindBlankPenWindowListeners() {
+        window.addEventListener("pointermove", handleBlankPenPointerMove, { passive: false });
+        window.addEventListener("pointerup", handleBlankPenPointerEnd, { passive: false });
+        window.addEventListener("pointercancel", handleBlankPenPointerEnd, { passive: false });
+      }
+
+      function unbindBlankPenWindowListeners() {
+        window.removeEventListener("pointermove", handleBlankPenPointerMove);
+        window.removeEventListener("pointerup", handleBlankPenPointerEnd);
+        window.removeEventListener("pointercancel", handleBlankPenPointerEnd);
+      }
+
+      function drawInkDot(ctx, point, width, height, color, widthScale) {
+        const px = point.x * width;
+        const py = point.y * height;
+        const scale = Math.max(0.45, Math.min(1.4, Number(widthScale) || 1));
+        const penW = (0.9 + (3.8 - 0.9) * Math.max(0.05, Math.min(1, point.p || 0.5))) * scale;
+        ctx.fillStyle = color || "#2f2a24";
+        ctx.beginPath();
+        ctx.arc(px, py, Math.max(0.55, penW * 0.5), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawInkSegment(ctx, p1, p2, width, height, color, widthScale) {
+        const x1 = p1.x * width;
+        const y1 = p1.y * height;
+        const x2 = p2.x * width;
+        const y2 = p2.y * height;
+        const pressure = ((p1.p || 0.5) + (p2.p || 0.5)) * 0.5;
+        const scale = Math.max(0.45, Math.min(1.4, Number(widthScale) || 1));
+        const penW = (0.9 + (3.8 - 0.9) * Math.max(0.05, Math.min(1, pressure))) * scale;
+
+        ctx.strokeStyle = color || "#2f2a24";
+        ctx.lineWidth = penW;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
+      function redrawBlankCanvas() {
+        const tab = getActiveBlankTab();
+        const setup = setupBlankCanvasContext();
+        if (!setup) return;
+
+        const ink = tab ? ensureBlankInk(tab) : [];
+        const ctx = setup.ctx;
+        const width = setup.width;
+        const height = setup.height;
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < ink.length; i += 1) {
+          const points = ink[i].points;
+          if (!points || !points.length) continue;
+          if (points.length === 1) {
+            drawInkDot(ctx, points[0], width, height);
+            continue;
+          }
+          for (let j = 1; j < points.length; j += 1) {
+            drawInkSegment(ctx, points[j - 1], points[j], width, height);
+          }
+        }
+      }
+
+      function updateBlankPenUi() {
+        const tab = getActiveBlankTab();
+        const isBlankTab = !!tab && !overlayBlankPane.hidden;
+
+        blankPenToggleBtn.hidden = !isBlankTab;
+        blankPenClearBtn.hidden = !isBlankTab;
+
+        const penOn = isBlankTab && isBlankPenMode;
+        overlayBlankPane.classList.toggle("is-pen-mode", penOn);
+        blankDrawWrap.hidden = !penOn;
+        blankPenToggleBtn.classList.toggle("is-on", penOn);
+        blankPenToggleBtn.setAttribute("aria-pressed", penOn ? "true" : "false");
+        blankPenToggleBtn.textContent = penOn ? "펜 ON" : "펜";
+
+        const ink = tab ? ensureBlankInk(tab) : [];
+        blankPenClearBtn.disabled = !isBlankTab || ink.length === 0;
+
+        if (penOn) {
+          overlayMemoText.blur();
+          redrawBlankCanvas();
+        }
+      }
+
+      function setBlankPenMode(forceOn) {
+        const next = typeof forceOn === "boolean" ? forceOn : !isBlankPenMode;
+        isBlankPenMode = !!next;
+        if (!isBlankPenMode) {
+          blankPenState.drawing = false;
+          blankPenState.pointerId = null;
+          blankPenState.stroke = null;
+          blankPenState.lastPoint = null;
+          unbindBlankPenWindowListeners();
+        }
+        updateBlankPenUi();
+      }
+
+      function clearActiveBlankInk() {
+        const tab = getActiveBlankTab();
+        if (!tab) return;
+        tab.blankInk = [];
+        redrawBlankCanvas();
+        updateBlankPenUi();
+      }
+
+      function getBlankCanvasPoint(event) {
+        const rect = blankDrawCanvas.getBoundingClientRect();
+        const localX = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+        const localY = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+        const safeW = Math.max(1, rect.width);
+        const safeH = Math.max(1, rect.height);
+        return {
+          x: localX / safeW,
+          y: localY / safeH,
+          p: getBlankPenPressure(event)
+        };
+      }
+
+      function handleBlankPenPointerDown(event) {
+        if (!isBlankPenMode) return;
+        const tab = getActiveBlankTab();
+        if (!tab) return;
+
+        event.preventDefault();
+        const ink = ensureBlankInk(tab);
+        const point = getBlankCanvasPoint(event);
+        const stroke = { points: [point] };
+        ink.push(stroke);
+
+        blankPenState.drawing = true;
+        blankPenState.pointerId = event.pointerId;
+        blankPenState.stroke = stroke;
+        blankPenState.lastPoint = point;
+        bindBlankPenWindowListeners();
+
+        if (typeof blankDrawCanvas.setPointerCapture === "function") {
+          try {
+            blankDrawCanvas.setPointerCapture(event.pointerId);
+          } catch (_err) {}
+        }
+
+        const setup = setupBlankCanvasContext();
+        if (setup) {
+          drawInkDot(setup.ctx, point, setup.width, setup.height);
+        }
+        updateBlankPenUi();
+      }
+
+      function handleBlankPenPointerMove(event) {
+        if (!blankPenState.drawing || blankPenState.pointerId !== event.pointerId) return;
+        if (!isBlankPenMode) return;
+
+        event.preventDefault();
+        const nextPoint = getBlankCanvasPoint(event);
+        if (!blankPenState.stroke) return;
+        blankPenState.stroke.points.push(nextPoint);
+
+        const setup = setupBlankCanvasContext();
+        if (setup && blankPenState.lastPoint) {
+          drawInkSegment(setup.ctx, blankPenState.lastPoint, nextPoint, setup.width, setup.height);
+        }
+        blankPenState.lastPoint = nextPoint;
+      }
+
+      function handleBlankPenPointerEnd(event) {
+        if (!blankPenState.drawing || blankPenState.pointerId !== event.pointerId) return;
+        event.preventDefault();
+
+        if (typeof blankDrawCanvas.releasePointerCapture === "function") {
+          try {
+            blankDrawCanvas.releasePointerCapture(event.pointerId);
+          } catch (_err) {}
+        }
+
+        blankPenState.drawing = false;
+        blankPenState.pointerId = null;
+        blankPenState.stroke = null;
+        blankPenState.lastPoint = null;
+        unbindBlankPenWindowListeners();
+        updateBlankPenUi();
+      }
+
+      function setupThreeInkCanvas(canvas) {
+        if (!canvas) return null;
+        const rect = canvas.getBoundingClientRect();
+        if (!Number.isFinite(rect.width) || !Number.isFinite(rect.height) || rect.width < 8 || rect.height < 8) {
+          return null;
+        }
+        const cssWidth = Math.max(1, Math.floor(rect.width));
+        const cssHeight = Math.max(1, Math.floor(rect.height));
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const targetW = Math.floor(cssWidth * dpr);
+        const targetH = Math.floor(cssHeight * dpr);
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+          canvas.width = targetW;
+          canvas.height = targetH;
+        }
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return null;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        return {
+          ctx,
+          width: cssWidth,
+          height: cssHeight
+        };
+      }
+
+      function redrawThreeInkCanvas(canvas, sentenceCard) {
+        const setup = setupThreeInkCanvas(canvas);
+        if (!setup) return;
+        const strokes = ensureThreeSentenceInk(sentenceCard);
+        const ctx = setup.ctx;
+        const width = setup.width;
+        const height = setup.height;
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < strokes.length; i += 1) {
+          const points = strokes[i].points;
+          if (!points || !points.length) continue;
+          if (points.length === 1) {
+            drawInkDot(ctx, points[0], width, height, THREE_PEN_COLOR, THREE_PEN_WIDTH_SCALE);
+            continue;
+          }
+          for (let j = 1; j < points.length; j += 1) {
+            drawInkSegment(ctx, points[j - 1], points[j], width, height, THREE_PEN_COLOR, THREE_PEN_WIDTH_SCALE);
+          }
+        }
+      }
+
+      function getThreeCanvasPoint(canvas, event) {
+        const rect = canvas.getBoundingClientRect();
+        const localX = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+        const localY = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+        const safeW = Math.max(1, rect.width);
+        const safeH = Math.max(1, rect.height);
+        return {
+          x: localX / safeW,
+          y: localY / safeH,
+          p: getBlankPenPressure(event)
+        };
+      }
+
+      function stopThreePenDrawing() {
+        if (threePenState.drawing && threePenState.canvas && typeof threePenState.canvas.releasePointerCapture === "function") {
+          try {
+            threePenState.canvas.releasePointerCapture(threePenState.pointerId);
+          } catch (_err) {}
+        }
+        threePenState.drawing = false;
+        threePenState.pointerId = null;
+        threePenState.card = null;
+        threePenState.canvas = null;
+        threePenState.lastPoint = null;
+      }
+
+      function updateThreePenUi() {
+        const tab = getActiveMemoTab();
+        const isTwoThree = !!tab && tab.type === "two_three" && !overlayTwoThreePane.hidden;
+        const allowPen = isTwoThree && !isDictModeOn;
+        if (!allowPen && isThreeTPenMode) {
+          isThreeTPenMode = false;
+          stopThreePenDrawing();
+        }
+
+        overlayThreePenToggleBtn.hidden = !isTwoThree;
+        overlayThreePenToggleBtn.disabled = !allowPen;
+        overlayThreePenToggleBtn.classList.toggle("is-on", allowPen && isThreeTPenMode);
+        overlayThreePenToggleBtn.setAttribute("aria-pressed", (allowPen && isThreeTPenMode) ? "true" : "false");
+        overlayThreePenToggleBtn.textContent = allowPen && isThreeTPenMode ? "펜 ON" : "펜";
+
+        overlayThreePenClearBtn.hidden = !isTwoThree;
+        overlayThreePenClearBtn.disabled = !isTwoThree;
+
+        overlayTwoThreePane.classList.toggle("is-three-pen-mode", allowPen && isThreeTPenMode);
+      }
+
+      function setThreePenMode(forceOn) {
+        const tab = getActiveMemoTab();
+        if (!tab || tab.type !== "two_three") return;
+        if (isDictModeOn) return;
+        const next = typeof forceOn === "boolean" ? forceOn : !isThreeTPenMode;
+        isThreeTPenMode = !!next;
+        if (!isThreeTPenMode) {
+          stopThreePenDrawing();
+        }
+        renderTwoThreeCards();
+      }
+
+      function clearActiveThreeInk() {
+        const tab = getActiveMemoTab();
+        if (!tab || tab.type !== "two_three") return;
+        const twoThree = ensureTwoThreeData(tab);
+        if (!twoThree || !Array.isArray(twoThree.sentences)) return;
+
+        let changed = false;
+        for (let idx = 0; idx < twoThree.sentences.length; idx += 1) {
+          const sentenceCard = twoThree.sentences[idx];
+          const strokes = ensureThreeSentenceInk(sentenceCard);
+          if (strokes.length > 0) {
+            sentenceCard.ink = [];
+            changed = true;
+          }
+        }
+
+        if (!changed) return;
+        stopThreePenDrawing();
+        renderTwoThreeCards();
+      }
+
+      function clearThreeCardInk(sentenceCard, canvas) {
+        if (!sentenceCard) return;
+        const strokes = ensureThreeSentenceInk(sentenceCard);
+        if (!strokes.length) return;
+        if (threePenState.card === sentenceCard) {
+          stopThreePenDrawing();
+        }
+        sentenceCard.ink = [];
+        redrawThreeInkCanvas(canvas, sentenceCard);
+      }
+
+      function undoThreeCardInk(sentenceCard, canvas) {
+        if (!sentenceCard) return;
+        const strokes = ensureThreeSentenceInk(sentenceCard);
+        if (!strokes.length) return;
+        if (threePenState.card === sentenceCard) {
+          stopThreePenDrawing();
+        }
+        strokes.pop();
+        redrawThreeInkCanvas(canvas, sentenceCard);
+      }
+
+      function handleThreeInkPointerDown(event, sentenceCard, canvas) {
+        if (!isThreeTPenMode || isDictModeOn) return;
+        event.preventDefault();
+
+        const strokes = ensureThreeSentenceInk(sentenceCard);
+        const point = getThreeCanvasPoint(canvas, event);
+        const stroke = { points: [point] };
+        strokes.push(stroke);
+
+        threePenState.drawing = true;
+        threePenState.pointerId = event.pointerId;
+        threePenState.card = sentenceCard;
+        threePenState.canvas = canvas;
+        threePenState.lastPoint = point;
+
+        if (typeof canvas.setPointerCapture === "function") {
+          try {
+            canvas.setPointerCapture(event.pointerId);
+          } catch (_err) {}
+        }
+
+        const setup = setupThreeInkCanvas(canvas);
+        if (setup) {
+          drawInkDot(setup.ctx, point, setup.width, setup.height, THREE_PEN_COLOR, THREE_PEN_WIDTH_SCALE);
+        }
+      }
+
+      function handleThreeInkPointerMove(event, sentenceCard, canvas) {
+        if (!threePenState.drawing || threePenState.pointerId !== event.pointerId) return;
+        if (!isThreeTPenMode || isDictModeOn) return;
+        if (threePenState.canvas !== canvas || threePenState.card !== sentenceCard) return;
+
+        event.preventDefault();
+        const nextPoint = getThreeCanvasPoint(canvas, event);
+        const strokes = ensureThreeSentenceInk(sentenceCard);
+        const activeStroke = strokes[strokes.length - 1];
+        if (!activeStroke || !Array.isArray(activeStroke.points)) return;
+        activeStroke.points.push(nextPoint);
+
+        const setup = setupThreeInkCanvas(canvas);
+        if (setup && threePenState.lastPoint) {
+          drawInkSegment(setup.ctx, threePenState.lastPoint, nextPoint, setup.width, setup.height, THREE_PEN_COLOR, THREE_PEN_WIDTH_SCALE);
+        }
+        threePenState.lastPoint = nextPoint;
+      }
+
+      function handleThreeInkPointerEnd(event, sentenceCard, canvas) {
+        if (!threePenState.drawing || threePenState.pointerId !== event.pointerId) return;
+        if (threePenState.canvas !== canvas || threePenState.card !== sentenceCard) return;
+        event.preventDefault();
+        stopThreePenDrawing();
+      }
+
+      function buildNaverDictUrl(word) {
+        const clean = normalizeCapturedWord(word);
+        if (!clean) return "https://en.dict.naver.com/";
+        return `${NAVER_EN_KO_SEARCH_BASE}${encodeURIComponent(clean)}`;
+      }
+
+      function clampDictZoom(value) {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) return dictZoom;
+        return Math.max(DICT_ZOOM_MIN, Math.min(DICT_ZOOM_MAX, numeric));
+      }
+
+      function applyDictZoom() {
+        overlayDictZoomValue.textContent = `${Math.round(dictZoom * 100)}%`;
+        overlayDictFrame.style.zoom = String(dictZoom);
+      }
+
+      function adjustDictZoom(direction) {
+        const delta = direction > 0 ? DICT_ZOOM_STEP : -DICT_ZOOM_STEP;
+        const next = clampDictZoom(dictZoom + delta);
+        if (Math.abs(next - dictZoom) < 0.001) return;
+        dictZoom = next;
+        applyDictZoom();
+      }
+
+      function refreshDictPanel() {
+        const tab = getActiveMemoTab();
+        const isTwoThree = !!tab && tab.type === "two_three" && !overlayTwoThreePane.hidden;
+        const shouldShowDict = isTwoThree && isDictModeOn;
+
+        overlayDictToggleBtn.classList.toggle("is-on", shouldShowDict);
+        overlayDictToggleBtn.setAttribute("aria-pressed", shouldShowDict ? "true" : "false");
+        overlayDictToggleBtn.textContent = shouldShowDict ? "🔎 검색중" : "🔎 검색";
+        overlayDictToggleBtn.title = shouldShowDict ? "검색창 끄기" : "검색창 켜기";
+
+        overlayTwoRightList.hidden = shouldShowDict;
+        overlayDictPanel.hidden = !shouldShowDict;
+        overlayThreeCol.classList.toggle("is-dict-mode", shouldShowDict);
+        overlayThreeHead.classList.toggle("is-dict-mode", shouldShowDict);
+        overlayThreeHeadLabel.textContent = shouldShowDict ? "단어 검색창" : "3T · 문장/분석";
+        updateThreePenUi();
+
+        if (!shouldShowDict) return;
+
+        let clean = normalizeCapturedWord(lastCapturedWord);
+        if (!clean && tab && tab.type === "two_three") {
+          const twoThree = ensureTwoThreeData(tab);
+          if (twoThree && Array.isArray(twoThree.words)) {
+            for (let i = 0; i < twoThree.words.length; i += 1) {
+              const fromCard = normalizeCapturedWord(twoThree.words[i] && twoThree.words[i].word);
+              if (fromCard) {
+                clean = fromCard;
+                lastCapturedWord = fromCard;
+                break;
+              }
+            }
+          }
+        }
+
+        const targetUrl = buildNaverDictUrl(clean);
+        if (overlayDictFrame.dataset.loadedUrl !== targetUrl) {
+          overlayDictFrame.src = targetUrl;
+          overlayDictFrame.dataset.loadedUrl = targetUrl;
+        }
+        overlayDictCurrent.textContent = clean ? `검색어: ${clean}` : "단어를 클릭하면 검색됩니다.";
+        overlayDictOpenBtn.disabled = !clean;
+        overlayDictOpenBtn.dataset.url = targetUrl;
+        applyDictZoom();
+      }
+
+      function toggleDictPanel(forceOn) {
+        const next = typeof forceOn === "boolean" ? forceOn : !isDictModeOn;
+        isDictModeOn = !!next;
+        refreshDictPanel();
+      }
+
+      function pushWordToDictSearch(word) {
+        const clean = normalizeCapturedWord(word);
+        if (!clean) return;
+        lastCapturedWord = clean;
+        if (!isDictModeOn) return;
+        refreshDictPanel();
+      }
+
+      function findNextTwoTWordSlot(words) {
+        for (let i = 0; i < words.length; i += 1) {
+          const row = words[i] || {};
+          if (!normalizeCapturedWord(row.word || "")) {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      function applyCapturedWordToTwoTView(slotIndex, word) {
+        if (overlayTwoThreePane.hidden) return;
+
+        const inputEl = overlayTwoLeftList.querySelector(`.overlay-card-input--twoT[data-two-t-slot="${slotIndex}"]`);
+        if (inputEl) {
+          inputEl.value = word;
+        }
+
+        const cardEl = overlayTwoLeftList.querySelector(`.overlay-card--twoT[data-two-t-card="${slotIndex}"]`);
+        if (cardEl) {
+          cardEl.classList.remove("is-captured");
+          requestAnimationFrame(function () {
+            cardEl.classList.add("is-captured");
+            cardEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            window.setTimeout(function () {
+              cardEl.classList.remove("is-captured");
+            }, 460);
+          });
+        }
+      }
+
       function buildTwoTCard(card, idx) {
         const outer = document.createElement("div");
         outer.className = "overlay-card overlay-card--twoT";
+        outer.dataset.twoTCard = String(idx);
         const inner = document.createElement("div");
         inner.className = "overlay-card-inner overlay-card-inner--twoT";
 
@@ -1601,10 +2750,12 @@
         const wordInput = document.createElement("input");
         wordInput.type = "text";
         wordInput.className = "overlay-card-input overlay-card-input--twoT";
+        wordInput.dataset.twoTSlot = String(idx);
         wordInput.placeholder = "단어";
         wordInput.value = card.word || "";
         wordInput.addEventListener("input", function () {
           card.word = wordInput.value;
+          rebuildWordMeaningMap();
         });
 
         row.appendChild(idxEl);
@@ -1616,6 +2767,7 @@
         meaningArea.value = card.meaning || "";
         meaningArea.addEventListener("input", function () {
           card.meaning = meaningArea.value;
+          rebuildWordMeaningMap();
         });
 
         inner.appendChild(row);
@@ -1631,25 +2783,71 @@
         inner.className = "overlay-card-inner overlay-card-inner--threeT";
 
         const row = document.createElement("div");
-        row.className = "overlay-card-row";
+        row.className = "overlay-card-row overlay-card-row--threeT";
 
         const idxEl = document.createElement("span");
         idxEl.className = "overlay-card-index overlay-card-index--threeT";
         idxEl.textContent = String(idx + 1).padStart(2, "0");
 
+        const tools = document.createElement("div");
+        tools.className = "overlay-three-card-tools";
+
+        const undoBtn = document.createElement("button");
+        undoBtn.className = "overlay-three-card-tool-btn";
+        undoBtn.type = "button";
+        undoBtn.textContent = "Undo";
+
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "overlay-three-card-tool-btn";
+        clearBtn.type = "button";
+        clearBtn.textContent = "지우기";
+
         const sentenceInput = document.createElement("textarea");
         sentenceInput.className = "overlay-card-textarea overlay-card-textarea--threeT overlay-card-textarea--threeT-sentence";
         sentenceInput.placeholder = "문장";
         sentenceInput.value = card.sentence || "";
+        sentenceInput.readOnly = isThreeTPenMode;
         sentenceInput.addEventListener("input", function () {
           card.sentence = sentenceInput.value;
         });
 
         row.appendChild(idxEl);
-        row.appendChild(sentenceInput);
+        tools.appendChild(undoBtn);
+        tools.appendChild(clearBtn);
+        row.appendChild(tools);
 
         inner.appendChild(row);
+        inner.appendChild(sentenceInput);
+
+        const inkWrap = document.createElement("div");
+        inkWrap.className = "overlay-three-ink-wrap";
+        const inkCanvas = document.createElement("canvas");
+        inkCanvas.className = "overlay-three-ink-canvas";
+        inkCanvas.addEventListener("pointerdown", function (event) {
+          handleThreeInkPointerDown(event, card, inkCanvas);
+        });
+        inkCanvas.addEventListener("pointermove", function (event) {
+          handleThreeInkPointerMove(event, card, inkCanvas);
+        });
+        inkCanvas.addEventListener("pointerup", function (event) {
+          handleThreeInkPointerEnd(event, card, inkCanvas);
+        });
+        inkCanvas.addEventListener("pointercancel", function (event) {
+          handleThreeInkPointerEnd(event, card, inkCanvas);
+        });
+        undoBtn.addEventListener("click", function () {
+          undoThreeCardInk(card, inkCanvas);
+        });
+        clearBtn.addEventListener("click", function () {
+          clearThreeCardInk(card, inkCanvas);
+        });
+        inkWrap.appendChild(inkCanvas);
+        inner.appendChild(inkWrap);
         outer.appendChild(inner);
+
+        requestAnimationFrame(function () {
+          redrawThreeInkCanvas(inkCanvas, card);
+        });
         return outer;
       }
 
@@ -1660,6 +2858,7 @@
         if (!twoThree) return;
 
         overlayTwoThreePane.classList.toggle("is-flipped", overlaySide === "left");
+        updateThreePenUi();
         overlayTwoLeftList.innerHTML = "";
         overlayTwoRightList.innerHTML = "";
 
@@ -1671,21 +2870,29 @@
           const sentCard = twoThree.sentences[idx];
           overlayTwoRightList.appendChild(buildThreeTCard(sentCard, idx));
         }
+        refreshDictPanel();
       }
 
       function renderActiveMemoPane() {
         const tab = getActiveMemoTab();
         const isTwoThree = !!tab && tab.type === "two_three";
+        rebuildWordMeaningMap();
         overlayBlankPane.hidden = isTwoThree;
         overlayTwoThreePane.hidden = !isTwoThree;
 
-        if (!tab) return;
+        if (!tab) {
+          updateBlankPenUi();
+          return;
+        }
         if (isTwoThree) {
           ensureTwoThreeData(tab);
           renderTwoThreeCards();
         } else {
           overlayMemoText.value = tab.blankText || "";
+          refreshDictPanel();
         }
+        updateThreePenUi();
+        updateBlankPenUi();
       }
 
       function renderMemoTabbar() {
@@ -1721,6 +2928,7 @@
 
       function switchMemoTab(index) {
         if (index < 0 || index >= memoTabs.length) return;
+        stopThreePenDrawing();
         saveActiveMemoText();
         activeMemoTabIndex = index;
         renderActiveMemoPane();
@@ -1728,12 +2936,14 @@
       }
 
       function addMemoTab(tabType) {
+        stopThreePenDrawing();
         saveActiveMemoText();
         const type = tabType === "two_three" ? "two_three" : "blank";
         memoTabs.push({
           id: nextMemoTabId,
           type,
           blankText: "",
+          blankInk: [],
           twoThree: type === "two_three" ? {
             words: makeDefaultTwoTCards(),
             sentences: makeDefaultThreeTCards()
@@ -1748,9 +2958,11 @@
 
       function closeMemoTab(index) {
         if (index < 0 || index >= memoTabs.length) return;
+        stopThreePenDrawing();
         saveActiveMemoText();
         if (memoTabs.length === 1) {
           memoTabs[0].blankText = "";
+          memoTabs[0].blankInk = [];
           memoTabs[0].twoThree = null;
           renderActiveMemoPane();
           return;
@@ -1777,6 +2989,12 @@
         overlayMemo.setAttribute("aria-hidden", shouldShow ? "false" : "true");
         setBtnActive(memoToggleBtn, shouldShow);
         if (!shouldShow) {
+          stopThreePenDrawing();
+          blankPenState.drawing = false;
+          blankPenState.pointerId = null;
+          blankPenState.stroke = null;
+          blankPenState.lastPoint = null;
+          unbindBlankPenWindowListeners();
           closeFontPopup();
           closeTabTypePopup();
         }
@@ -1943,6 +3161,7 @@
 
       function resetPdfPreviewToEmpty(message) {
         pdfRenderToken += 1;
+        hideWordTooltip();
         clearBlobUrl();
         if (message) {
           previewEmpty.textContent = message;
@@ -1956,6 +3175,7 @@
       }
 
       function showPdfWithIframeBlob(blob) {
+        hideWordTooltip();
         clearBlobUrl();
         lastBlobUrl = URL.createObjectURL(blob);
         previewFrame.src = `${lastBlobUrl}#toolbar=0&navpanes=0&statusbar=0&messages=0&view=FitH`;
@@ -1973,6 +3193,80 @@
           .replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
         if (!cleaned || /\s/.test(cleaned) || cleaned.length > 64) return "";
         return cleaned;
+      }
+
+      function normalizeMeaningMapKey(raw) {
+        const clean = normalizeCapturedWord(raw);
+        return clean ? clean.toLowerCase() : "";
+      }
+
+      function rebuildWordMeaningMap() {
+        const map = new Map();
+        for (let i = 0; i < memoTabs.length; i += 1) {
+          const tab = memoTabs[i];
+          if (!tab || tab.type !== "two_three") continue;
+          const twoThree = tab.twoThree && typeof tab.twoThree === "object" ? tab.twoThree : null;
+          const words = twoThree && Array.isArray(twoThree.words) ? twoThree.words : [];
+          for (let j = 0; j < words.length; j += 1) {
+            const row = words[j] || {};
+            const key = normalizeMeaningMapKey(row.word);
+            const meaning = String(row.meaning || "").trim();
+            if (!key || !meaning) continue;
+            map.set(key, meaning);
+          }
+        }
+        wordMeaningMap = map;
+      }
+
+      function findMeaningForWord(word) {
+        const key = normalizeMeaningMapKey(word);
+        if (!key) return "";
+        return wordMeaningMap.get(key) || "";
+      }
+
+      function ensureWordTooltip() {
+        if (wordTooltipEl) return wordTooltipEl;
+        const el = document.createElement("div");
+        el.className = "pdf-word-tooltip";
+        el.setAttribute("aria-hidden", "true");
+        document.body.appendChild(el);
+        wordTooltipEl = el;
+        return wordTooltipEl;
+      }
+
+      function hideWordTooltip() {
+        if (!wordTooltipEl) return;
+        wordTooltipEl.classList.remove("is-visible");
+        wordTooltipEl.setAttribute("aria-hidden", "true");
+      }
+
+      function showWordTooltip(text, clientX, clientY) {
+        const content = String(text || "").trim();
+        if (!content) {
+          hideWordTooltip();
+          return;
+        }
+
+        const el = ensureWordTooltip();
+        el.textContent = content;
+        el.classList.add("is-visible");
+        el.setAttribute("aria-hidden", "false");
+
+        const pad = 10;
+        const offset = 14;
+        let left = clientX + offset;
+        let top = clientY + offset;
+
+        const rect = el.getBoundingClientRect();
+        if (left + rect.width + pad > window.innerWidth) {
+          left = Math.max(pad, clientX - rect.width - offset);
+        }
+        if (top + rect.height + pad > window.innerHeight) {
+          top = Math.max(pad, clientY - rect.height - offset);
+        }
+
+        el.style.left = `${Math.round(left)}px`;
+        el.style.top = `${Math.round(top)}px`;
       }
 
       function findWordByApproxOffset(text, approxOffset) {
@@ -2042,28 +3336,11 @@
 
       function findWordHitAtPoint(hits, x, y) {
         if (!Array.isArray(hits) || !hits.length) return "";
-        let nearestWord = "";
-        let nearestDistSq = Number.POSITIVE_INFINITY;
         for (let idx = 0; idx < hits.length; idx += 1) {
           const hit = hits[idx];
           if (x >= hit.x1 && x <= hit.x2 && y >= hit.y1 && y <= hit.y2) {
             return hit.word || "";
           }
-
-          const cx = x < hit.x1 ? hit.x1 : (x > hit.x2 ? hit.x2 : x);
-          const cy = y < hit.y1 ? hit.y1 : (y > hit.y2 ? hit.y2 : y);
-          const dx = x - cx;
-          const dy = y - cy;
-          const distSq = (dx * dx) + (dy * dy);
-          if (distSq < nearestDistSq) {
-            nearestDistSq = distSq;
-            nearestWord = hit.word || "";
-          }
-        }
-
-        // Slightly tolerant pick to absorb renderer/canvas rounding offsets.
-        if (nearestWord && nearestDistSq <= (12 * 12)) {
-          return nearestWord;
         }
         return "";
       }
@@ -2089,13 +3366,6 @@
           const ty = Math.min(y0, y1);
           const by = Math.max(y0, y1);
           hits.push({ word: text, x1: lx, y1: ty, x2: rx, y2: by });
-
-          // Fallback for coordinate-system mismatch (top-origin vs bottom-origin).
-          if (Number.isFinite(pageHeightPx)) {
-            const fty = pageHeightPx - by;
-            const fby = pageHeightPx - ty;
-            hits.push({ word: text, x1: lx, y1: fty, x2: rx, y2: fby });
-          }
         }
         return hits;
       }
@@ -2138,18 +3408,42 @@
         return normalizeCapturedWord(firstMatch ? firstMatch[0] : "");
       }
 
-      function appendWordToBlankMemo(word) {
+      function appendWordToActiveMemo(word) {
         const cleanWord = normalizeCapturedWord(word);
         if (!cleanWord) return false;
-        const tab = getActiveMemoTab();
-        if (!tab || tab.type !== "blank") return false;
 
-        const current = typeof tab.blankText === "string" ? tab.blankText : "";
-        const next = current.trimEnd().length ? `${current.trimEnd()}\n${cleanWord}` : cleanWord;
-        tab.blankText = next;
-        overlayMemoText.value = next;
-        overlayMemoText.scrollTop = overlayMemoText.scrollHeight;
-        return true;
+        lastCapturedWord = cleanWord;
+        pushWordToDictSearch(cleanWord);
+
+        const tab = getActiveMemoTab();
+        if (!tab) return false;
+
+        if (tab.type === "blank") {
+          const current = typeof tab.blankText === "string" ? tab.blankText : "";
+          const next = current.trimEnd().length ? `${current.trimEnd()}\n${cleanWord}` : cleanWord;
+          tab.blankText = next;
+          overlayMemoText.value = next;
+          overlayMemoText.scrollTop = overlayMemoText.scrollHeight;
+          return true;
+        }
+
+        if (tab.type === "two_three") {
+          const twoThree = ensureTwoThreeData(tab);
+          if (!twoThree || !Array.isArray(twoThree.words) || !twoThree.words.length) return false;
+
+          const nextSlot = findNextTwoTWordSlot(twoThree.words);
+          if (nextSlot < 0) {
+            trace("warn", "2T 슬롯이 가득 차서 단어를 추가하지 못했습니다.");
+            return false;
+          }
+
+          twoThree.words[nextSlot].word = cleanWord;
+          rebuildWordMeaningMap();
+          applyCapturedWordToTwoTView(nextSlot, cleanWord);
+          return true;
+        }
+
+        return false;
       }
 
       async function renderPdfPagesWithTextLayer(blob) {
@@ -2157,6 +3451,7 @@
           throw new Error("pdf.js is not loaded");
         }
         pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC;
+        hideWordTooltip();
 
         const myToken = ++pdfRenderToken;
         const bytes = await blob.arrayBuffer();
@@ -2224,10 +3519,23 @@
               const px = event.clientX - rect.left;
               const py = event.clientY - rect.top;
               const found = findWordHitAtPoint(wordHits, px, py);
-              canvas.style.cursor = found ? "pointer" : "default";
+              if (!found) {
+                canvas.style.cursor = "default";
+                hideWordTooltip();
+                return;
+              }
+
+              const meaning = findMeaningForWord(found);
+              canvas.style.cursor = meaning ? "help" : "pointer";
+              if (meaning) {
+                showWordTooltip(meaning, event.clientX, event.clientY);
+              } else {
+                hideWordTooltip();
+              }
             }, { passive: true });
             canvas.addEventListener("mouseleave", function () {
               canvas.style.cursor = "default";
+              hideWordTooltip();
             }, { passive: true });
           }
 
@@ -2245,6 +3553,7 @@
                 changed: host.scrollTop !== before
               });
             }
+            hideWordTooltip();
             event.preventDefault();
           }, { passive: false });
 
@@ -2257,10 +3566,11 @@
             const py = event.clientY - canvasRect.top;
             const word = findWordHitAtPoint(wordHits, px, py);
             if (!word) return;
-            const added = appendWordToBlankMemo(word);
+            const added = appendWordToActiveMemo(word);
             if (added) {
               trace("info", `memo append word: ${word}`);
             }
+            hideWordTooltip();
           });
         }
         if (DEBUG_SCROLL_DIAG) {
@@ -2324,23 +3634,32 @@
             }) : [];
             const sentences = Array.isArray(safeRaw.sentences) ? safeRaw.sentences.map(function (row) {
               const safeRow = row && typeof row === "object" ? row : {};
-              return {
+              const sentenceCard = {
                 sentence: typeof safeRow.sentence === "string" ? safeRow.sentence : ""
               };
+              if (Array.isArray(safeRow.ink)) {
+                sentenceCard.ink = safeRow.ink;
+              };
+              ensureThreeSentenceInk(sentenceCard);
+              return sentenceCard;
             }) : [];
             return {
               id: idx + 1,
               type: "two_three",
               blankText: "",
+              blankInk: [],
               twoThree: { words, sentences }
             };
           }
-          return {
+          const blankTab = {
             id: idx + 1,
             type: "blank",
             blankText: typeof safeRaw.blankText === "string" ? safeRaw.blankText : "",
+            blankInk: Array.isArray(safeRaw.blankInk) ? safeRaw.blankInk : [],
             twoThree: null
           };
+          ensureBlankInk(blankTab);
+          return blankTab;
         });
       }
 
@@ -2387,6 +3706,7 @@
       async function applySessionPreset(session, sessionKey) {
         if (!session || !session.mock) return;
         const mockInfo = session.mock;
+        stopThreePenDrawing();
 
         selectedSessionId = sessionKey || "";
         selectedSessionTitle = getSessionDateLabel(session);
@@ -2674,6 +3994,16 @@
         toggleTabTypePopup();
       });
       overlayMemoText.addEventListener("input", saveActiveMemoText);
+      blankPenToggleBtn.addEventListener("click", function () {
+        setBlankPenMode();
+      });
+      blankPenClearBtn.addEventListener("click", function () {
+        clearActiveBlankInk();
+      });
+      blankDrawCanvas.addEventListener("pointerdown", handleBlankPenPointerDown);
+      blankDrawCanvas.addEventListener("pointermove", handleBlankPenPointerMove);
+      blankDrawCanvas.addEventListener("pointerup", handleBlankPenPointerEnd);
+      blankDrawCanvas.addEventListener("pointercancel", handleBlankPenPointerEnd);
       overlayFontIncBtn.addEventListener("click", function () {
         memoFontSize = Math.min(36, memoFontSize + 1);
         applyMemoFontSize();
@@ -2688,6 +4018,26 @@
           addMemoTab(type);
         });
       });
+      overlayThreePenToggleBtn.addEventListener("click", function () {
+        setThreePenMode();
+      });
+      overlayThreePenClearBtn.addEventListener("click", function () {
+        clearActiveThreeInk();
+      });
+      overlayDictToggleBtn.addEventListener("click", function () {
+        toggleDictPanel();
+      });
+      overlayDictZoomInBtn.addEventListener("click", function () {
+        adjustDictZoom(1);
+      });
+      overlayDictZoomOutBtn.addEventListener("click", function () {
+        adjustDictZoom(-1);
+      });
+      overlayDictOpenBtn.addEventListener("click", function () {
+        const url = overlayDictOpenBtn.dataset.url || buildNaverDictUrl(lastCapturedWord);
+        if (!url) return;
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
 
       newTabBtn.addEventListener("click", function () {
         const target = lastBlobUrl || lastPdfUrl;
@@ -2700,10 +4050,14 @@
         attachPreviewScrollDiagnostics(previewScrollHost);
         previewScrollHost.addEventListener("scroll", function () {
           lastPreviewScrollAt = Date.now();
+          hideWordTooltip();
         }, { passive: true });
       }
       window.addEventListener("resize", function () {
         lockPreviewViewportHeight("resize");
+        if (isBlankPenMode && getActiveBlankTab() && !overlayBlankPane.hidden) {
+          redrawBlankCanvas();
+        }
       });
 
       document.addEventListener("click", function (event) {
@@ -2747,6 +4101,7 @@
       initializeFileMap();
       renderSessionList();
       applyMemoFontSize();
+      applyDictZoom();
       applyOverlaySide();
       switchMemoTab(0);
       renderMemoTabbar();
