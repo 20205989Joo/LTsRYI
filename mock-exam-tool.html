@@ -109,6 +109,29 @@
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
     }
 
+    .topbar-save-btn {
+      width: auto;
+      min-width: 58px;
+      padding: 0 12px;
+      font-size: 12px;
+      letter-spacing: 0.01em;
+    }
+
+    .topbar-save-btn.is-busy {
+      background: rgba(255, 236, 191, 0.5);
+      color: #5a4621;
+    }
+
+    .topbar-save-btn.is-ok {
+      background: rgba(191, 255, 211, 0.52);
+      color: #1f5a38;
+    }
+
+    .topbar-save-btn.is-error {
+      background: rgba(255, 189, 189, 0.52);
+      color: #6a2323;
+    }
+
     .topbar-status {
       width: min(380px, 50vw);
       min-width: 210px;
@@ -150,6 +173,17 @@
 
     .topbar-status.is-active {
       box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.45);
+    }
+
+    .topbar-status.is-local-draft {
+      border-color: rgba(176, 128, 12, 0.9);
+      background: linear-gradient(180deg, #ffe56e 0%, #ffca45 100%);
+      color: #3e2f0f;
+      box-shadow: inset 0 0 0 1px rgba(255, 248, 210, 0.8);
+    }
+
+    .topbar-status.is-local-draft:hover {
+      background: linear-gradient(180deg, #ffeb89 0%, #ffd568 100%);
     }
 
     .topbar-spacer {
@@ -255,6 +289,12 @@
       padding: 9px 10px;
       box-sizing: border-box;
       transition: border-color 0.16s ease, transform 0.16s ease, background 0.16s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .session-item-btn.has-ribbon {
+      padding-right: 76px;
     }
 
     .session-item-btn:hover {
@@ -290,6 +330,111 @@
       color: rgba(64, 48, 33, 0.7);
       font-size: 10px;
       line-height: 1.3;
+    }
+
+    .session-item-ribbon {
+      position: absolute;
+      top: 10px;
+      right: -28px;
+      width: 112px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      color: #fffdf8;
+      transform: rotate(34deg);
+      transform-origin: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+      pointer-events: none;
+      border-radius: 999px;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    .session-item-ribbon.is-afterclass {
+      background: linear-gradient(180deg, #9a6b3a 0%, #7a4f25 100%);
+    }
+
+    .session-item-ribbon.is-solo {
+      background: linear-gradient(180deg, #35b86f 0%, #1f9656 100%);
+    }
+
+    .session-load-more-btn {
+      text-align: center;
+      font-weight: 800;
+      color: #4d3b2b;
+      background: rgba(255, 242, 217, 0.86);
+    }
+
+    .mini-confirm-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 16, 11, 0.12);
+      z-index: 260;
+    }
+
+    .mini-confirm-popup {
+      position: fixed;
+      inset: 0;
+      z-index: 261;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .mini-confirm-card {
+      width: min(320px, calc(100vw - 28px));
+      border-radius: 12px;
+      border: 1px solid rgba(176, 141, 87, 0.84);
+      background: linear-gradient(180deg, #3b342c 0%, #2e2923 100%);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+      padding: 14px;
+      box-sizing: border-box;
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-confirm-text {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--icon-ink);
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .mini-confirm-actions {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .mini-confirm-btn {
+      min-width: 84px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(176, 141, 87, 0.44);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      transition: filter 0.14s ease, transform 0.14s ease;
+    }
+
+    .mini-confirm-btn:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .mini-confirm-btn--cancel {
+      background: #4a433a;
+      color: #f0e6d2;
+    }
+
+    .mini-confirm-btn--ok {
+      background: linear-gradient(180deg, #dbc087 0%, #c49a59 100%);
+      color: #2e2b27;
     }
 
     .pdf-picker-wrap {
@@ -1486,8 +1631,9 @@
       <div class="exam-topbar">
         <button id="mock-topbar-picker-btn" class="topbar-icon-btn" type="button" title="PDF 불러오기">📂</button>
         <button id="mock-topbar-memo-btn" class="topbar-icon-btn" type="button" title="오버레이 메모">📝</button>
+        <button id="mock-topbar-save-btn" class="topbar-icon-btn topbar-save-btn" type="button" title="현재 내용 저장">저장</button>
         <div class="topbar-spacer"></div>
-        <button id="mock-topbar-status" class="topbar-status" type="button">고3 · 연도 선택</button>
+        <button id="mock-topbar-status" class="topbar-status" type="button">학년 · 연도 선택</button>
         <button class="topbar-power-btn" type="button" title="전원">⏻</button>
       </div>
       <div id="mock-session-backdrop" class="session-picker-backdrop" hidden></div>
@@ -1495,9 +1641,19 @@
         <div class="session-picker-card">
           <div class="session-picker-head">
             <span class="session-picker-title">오늘 수업 리스트</span>
-            <span class="session-picker-sub">sample presets</span>
+            <span id="mock-session-sub" class="session-picker-sub">live sessions</span>
           </div>
           <div id="mock-session-list" class="session-picker-list"></div>
+        </div>
+      </div>
+      <div id="mock-tab-close-confirm-backdrop" class="mini-confirm-backdrop" hidden></div>
+      <div id="mock-tab-close-confirm-popup" class="mini-confirm-popup" hidden>
+        <div class="mini-confirm-card" role="dialog" aria-modal="true" aria-labelledby="mock-tab-close-confirm-text">
+          <div id="mock-tab-close-confirm-text" class="mini-confirm-text">탭을 닫을까요?</div>
+          <div class="mini-confirm-actions">
+            <button id="mock-tab-close-cancel-btn" class="mini-confirm-btn mini-confirm-btn--cancel" type="button">취소</button>
+            <button id="mock-tab-close-ok-btn" class="mini-confirm-btn mini-confirm-btn--ok" type="button">닫기</button>
+          </div>
         </div>
       </div>
 
@@ -1589,8 +1745,8 @@
           <div id="mock-overlay-tab-list" class="overlay-tab-list"></div>
           <button id="mock-overlay-add-tab" class="overlay-tab-add" type="button" aria-label="메모 탭 추가">＋</button>
           <div id="mock-overlay-tab-type-popup" class="overlay-tab-type-popup" hidden>
-            <button class="overlay-type-option" type="button" data-type="blank">blank</button>
-            <button class="overlay-type-option" type="button" data-type="two_three">two three page</button>
+            <button class="overlay-type-option" type="button" data-type="blank">Blank</button>
+            <button class="overlay-type-option" type="button" data-type="two_three">Words / Translation</button>
           </div>
         </div>
       </div>
@@ -1631,11 +1787,18 @@
     (function () {
       const pickerToggleBtn = document.getElementById("mock-topbar-picker-btn");
       const memoToggleBtn = document.getElementById("mock-topbar-memo-btn");
+      const saveToServerBtn = document.getElementById("mock-topbar-save-btn");
       const pickerPopup = document.getElementById("mock-picker-popup");
       const pickerBackdrop = document.getElementById("mock-picker-backdrop");
       const sessionPopup = document.getElementById("mock-session-popup");
       const sessionBackdrop = document.getElementById("mock-session-backdrop");
       const sessionList = document.getElementById("mock-session-list");
+      const sessionSub = document.getElementById("mock-session-sub");
+      const tabCloseConfirmBackdrop = document.getElementById("mock-tab-close-confirm-backdrop");
+      const tabCloseConfirmPopup = document.getElementById("mock-tab-close-confirm-popup");
+      const tabCloseConfirmText = document.getElementById("mock-tab-close-confirm-text");
+      const tabCloseCancelBtn = document.getElementById("mock-tab-close-cancel-btn");
+      const tabCloseOkBtn = document.getElementById("mock-tab-close-ok-btn");
       const overlayMemo = document.getElementById("mock-overlay-memo");
       const overlayCloseBtn = document.getElementById("mock-overlay-close-btn");
       const overlayFontOpenBtn = document.getElementById("mock-overlay-font-open");
@@ -1684,8 +1847,12 @@
       const SUPABASE_ORIGIN = "https://yslwgaephsnbfoiqnpuw.supabase.co";
       const SUPABASE_BASE = `${SUPABASE_ORIGIN}/storage/v1/object/public`;
       const BUCKET = "ksat-moi-sets";
-      const FOLDER = "High3";
-      const GRADE_OPTIONS = [{ value: "High3", label: "고3" }];
+      const DEFAULT_GRADE = "High3";
+      const GRADE_OPTIONS = [
+        { value: "High1", label: "고1" },
+        { value: "High2", label: "고2" },
+        { value: "High3", label: "고3" }
+      ];
 
       const YEAR_CANDIDATES = (function () {
         const years = [];
@@ -1702,9 +1869,15 @@
         { key: "april", label: "4평", token: "april" },
         { key: "june", label: "6평", token: "june" },
         { key: "july", label: "7평", token: "july" },
+        { key: "september", label: "9평", token: "september" },
         { key: "october", label: "10평", token: "october" },
-        { key: "november", label: "수능", token: "november" }
+        { key: "november", label: "11평", token: "november" }
       ];
+      const EXAM_KEYS_BY_GRADE = {
+        High1: ["march", "june", "september", "november"],
+        High2: ["march", "june", "september", "november"],
+        High3: ["march", "april", "june", "july", "september", "october", "november"]
+      };
 
       const TYPE_META = [
         { label: "시험지", suffix: "" },
@@ -1712,7 +1885,12 @@
         { label: "해설", suffix: "_answer" }
       ];
       const DEFAULT_TYPE_LABEL = "시험지";
+      const LIVE_API_BASE = "https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app";
+      const LIVE_RECEIVE_URL = `${LIVE_API_BASE}/api/LiveToAfterclass_receive`;
+      const LIVE_SEND_URL = `${LIVE_API_BASE}/api/LiveToAfterclass_send`;
+      const LIVE_RECEIVE_LIMIT = 120;
       const FIXED_STUDENT_ID = new URLSearchParams(window.location.search).get("id") || "";
+      const LOCAL_DRAFT_STORAGE_KEY = `mock-exam-tool:draft:${FIXED_STUDENT_ID || "guest"}`;
       const PDFJS_WORKER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
       const RENDER_QUALITY_BOOST = 1.35;
       const THREE_PEN_COLOR = "#f3e8d2";
@@ -1738,110 +1916,18 @@
       }];
       let activeMemoTabIndex = 0;
       const TAB_TYPE_LABEL = {
-        blank: "blank",
-        two_three: "two three page"
+        blank: "Blank",
+        two_three: "Words / Translation"
       };
-      const SAMPLE_CLASS_SESSIONS = [
-        {
-          date: "2026-02-13 09:00",
-          note: "단어 체크 + 수능 지문 감각 유지",
-          mock: { year: "2023to2024", examKey: "november" },
-          overlaySide: "right",
-          openMemo: true,
-          activeTabIndex: 0,
-          tabs: [
-            {
-              type: "two_three",
-              words: [
-                { word: "cherish", meaning: "소중히 여기다" },
-                { word: "vivid", meaning: "생생한, 선명한" },
-                { word: "crucial", meaning: "아주 중요한" },
-                { word: "tremble", meaning: "떨다, 떨리다" },
-                { word: "fragile", meaning: "깨지기 쉬운, 약한" },
-                { word: "nurture", meaning: "양육하다, 키우다" },
-                { word: "cozy", meaning: "아늑한" },
-                { word: "polish", meaning: "다듬다, 윤을 내다" }
-              ],
-              sentences: [
-                { sentence: "A cozy routine can make hard study days feel softer." },
-                { sentence: "The teacher's vivid examples helped her keep each idea." },
-                { sentence: "Consistency is crucial when preparing for mock exams." },
-                { sentence: "He polished his weak part before the timed drill." },
-                { sentence: "Even a fragile confidence can grow with steady practice." },
-                { sentence: "They nurtured calm focus by checking one paragraph at a time." }
-              ]
-            },
-            {
-              type: "blank",
-              blankText: "today plan\n1) 31번 근거문장 표시\n2) 낯선 어휘 8개 외우기\n3) 마지막 10분 검토 루틴"
-            }
-          ]
-        },
-        {
-          date: "2026-02-13 11:00",
-          note: "듣기 대본 기반 표현 정리",
-          mock: { year: "2017to2018", examKey: "july", typeLabel: "대본" },
-          overlaySide: "left",
-          openMemo: true,
-          activeTabIndex: 0,
-          tabs: [
-            {
-              type: "two_three",
-              words: [
-                { word: "clarify", meaning: "명확히 하다" },
-                { word: "observe", meaning: "관찰하다" },
-                { word: "stitch", meaning: "꿰매다, 이어붙이다" },
-                { word: "steady", meaning: "안정적인, 꾸준한" },
-                { word: "gentle", meaning: "부드러운" },
-                { word: "boost", meaning: "끌어올리다" }
-              ],
-              sentences: [
-                { sentence: "Please clarify the main point before moving to details." },
-                { sentence: "She observed the speaker's tone and matched the intent." },
-                { sentence: "A steady speaking pace boosts listening accuracy." },
-                { sentence: "Gentle repetition can stitch fragmented clues together." }
-              ]
-            },
-            {
-              type: "blank",
-              blankText: "체크\n- 끊어 듣기 단위 표시\n- 접속부사 들리면 바로 메모"
-            }
-          ]
-        },
-        {
-          date: "2026-02-13 19:00",
-          note: "해설 기반 오답 복원",
-          mock: { year: "2017to2018", examKey: "october", typeLabel: "해설" },
-          overlaySide: "right",
-          openMemo: true,
-          activeTabIndex: 0,
-          tabs: [
-            {
-              type: "two_three",
-              words: [
-                { word: "pinpoint", meaning: "정확히 찾아내다" },
-                { word: "distort", meaning: "왜곡하다" },
-                { word: "anchor", meaning: "기준점, 고정하다" },
-                { word: "derive", meaning: "이끌어내다" },
-                { word: "resolve", meaning: "해결하다, 결심하다" }
-              ],
-              sentences: [
-                { sentence: "Pinpoint the exact line that supports your option." },
-                { sentence: "If one phrase distorts meaning, eliminate the choice." },
-                { sentence: "Anchor every answer in a concrete textual clue." },
-                { sentence: "Derive the tone before deciding author's attitude." },
-                { sentence: "Resolve uncertainty by checking contrast markers twice." }
-              ]
-            },
-            {
-              type: "blank",
-              blankText: "오답복원\n- 선지별 반박 근거 1개씩\n- 정답 근거는 문장 번호로 적기"
-            }
-          ]
-        }
-      ];
+      let classSessions = [];
+      let isSessionListLoading = false;
+      let sessionListLoadedOnce = false;
+      let sessionListError = "";
+      let sessionListExpandStep = 0;
       let selectedSessionId = "";
       let selectedSessionTitle = "";
+      let selectedSessionTargetPage = null;
+      let pendingCloseTabIndex = null;
       let pdfRenderToken = 0;
       let lastPreviewScrollAt = 0;
       let activeWordIndex = null;
@@ -1852,6 +1938,11 @@
       let dictZoom = 1;
       let isBlankPenMode = false;
       let isThreeTPenMode = false;
+      let hasLocalDraftSnapshot = false;
+      let localDraftSaveTimer = null;
+      let saveButtonUiTimer = null;
+      let isSavingSessionToServer = false;
+      let isApplyingLocalDraft = false;
       const threePenState = {
         drawing: false,
         pointerId: null,
@@ -1866,15 +1957,22 @@
         lastPoint: null
       };
       const DEBUG_SCROLL_DIAG = false;
+      const DEBUG_LIVE_FETCH_LOG = true;
 
       if (
         !pickerToggleBtn ||
         !memoToggleBtn ||
+        !saveToServerBtn ||
         !pickerPopup ||
         !pickerBackdrop ||
         !sessionPopup ||
         !sessionBackdrop ||
         !sessionList ||
+        !tabCloseConfirmBackdrop ||
+        !tabCloseConfirmPopup ||
+        !tabCloseConfirmText ||
+        !tabCloseCancelBtn ||
+        !tabCloseOkBtn ||
         !overlayMemo ||
         !overlayCloseBtn ||
         !overlayFontOpenBtn ||
@@ -1967,6 +2065,9 @@
         sessionPopup.hidden = false;
         sessionBackdrop.hidden = false;
         setBtnActive(topbarStatus, true);
+        sessionListExpandStep = 0;
+        renderSessionList();
+        void fetchLiveSessions(true);
       }
 
       function toggleSessionPopup() {
@@ -1992,6 +2093,20 @@
         overlayTabTypePopup.hidden = true;
       }
 
+      function closeTabCloseConfirm() {
+        tabCloseConfirmPopup.hidden = true;
+        tabCloseConfirmBackdrop.hidden = true;
+        pendingCloseTabIndex = null;
+      }
+
+      function openTabCloseConfirm(index) {
+        if (!Number.isFinite(Number(index))) return;
+        pendingCloseTabIndex = Math.trunc(Number(index));
+        tabCloseConfirmText.textContent = "탭을 닫을까요?";
+        tabCloseConfirmPopup.hidden = false;
+        tabCloseConfirmBackdrop.hidden = false;
+      }
+
       function toggleTabTypePopup() {
         overlayTabTypePopup.hidden = !overlayTabTypePopup.hidden;
         if (!overlayTabTypePopup.hidden) {
@@ -2008,6 +2123,7 @@
       function flipOverlaySide() {
         overlaySide = overlaySide === "right" ? "left" : "right";
         applyOverlaySide();
+        markMemoDirty("overlay-side");
       }
 
       function isMemoOpen() {
@@ -2133,11 +2249,18 @@
         return memoTabs[activeMemoTabIndex] || null;
       }
 
-      function saveActiveMemoText() {
+      function syncActiveBlankTextFromEditor() {
         const tab = getActiveMemoTab();
-        if (!tab) return;
-        if (tab.type === "blank") {
-          tab.blankText = overlayMemoText.value;
+        if (!tab || tab.type !== "blank") return false;
+        const nextText = overlayMemoText.value;
+        if (tab.blankText === nextText) return false;
+        tab.blankText = nextText;
+        return true;
+      }
+
+      function saveActiveMemoText() {
+        if (syncActiveBlankTextFromEditor()) {
+          markMemoDirty("blank-text");
         }
       }
 
@@ -2334,6 +2457,7 @@
         tab.blankInk = [];
         redrawBlankCanvas();
         updateBlankPenUi();
+        markMemoDirty("blank-ink-clear");
       }
 
       function getBlankCanvasPoint(event) {
@@ -2411,6 +2535,7 @@
         blankPenState.lastPoint = null;
         unbindBlankPenWindowListeners();
         updateBlankPenUi();
+        markMemoDirty("blank-ink-draw");
       }
 
       function setupThreeInkCanvas(canvas) {
@@ -2541,6 +2666,7 @@
         if (!changed) return;
         stopThreePenDrawing();
         renderTwoThreeCards();
+        markMemoDirty("three-ink-clear-all");
       }
 
       function clearThreeCardInk(sentenceCard, canvas) {
@@ -2552,6 +2678,7 @@
         }
         sentenceCard.ink = [];
         redrawThreeInkCanvas(canvas, sentenceCard);
+        markMemoDirty("three-ink-clear-one");
       }
 
       function undoThreeCardInk(sentenceCard, canvas) {
@@ -2563,6 +2690,7 @@
         }
         strokes.pop();
         redrawThreeInkCanvas(canvas, sentenceCard);
+        markMemoDirty("three-ink-undo");
       }
 
       function handleThreeInkPointerDown(event, sentenceCard, canvas) {
@@ -2616,6 +2744,7 @@
         if (threePenState.canvas !== canvas || threePenState.card !== sentenceCard) return;
         event.preventDefault();
         stopThreePenDrawing();
+        markMemoDirty("three-ink-draw");
       }
 
       function buildNaverDictUrl(word) {
@@ -2756,6 +2885,7 @@
         wordInput.addEventListener("input", function () {
           card.word = wordInput.value;
           rebuildWordMeaningMap();
+          markMemoDirty("two-t-word");
         });
 
         row.appendChild(idxEl);
@@ -2768,6 +2898,7 @@
         meaningArea.addEventListener("input", function () {
           card.meaning = meaningArea.value;
           rebuildWordMeaningMap();
+          markMemoDirty("two-t-meaning");
         });
 
         inner.appendChild(row);
@@ -2809,6 +2940,7 @@
         sentenceInput.readOnly = isThreeTPenMode;
         sentenceInput.addEventListener("input", function () {
           card.sentence = sentenceInput.value;
+          markMemoDirty("three-t-sentence");
         });
 
         row.appendChild(idxEl);
@@ -2933,6 +3065,7 @@
         activeMemoTabIndex = index;
         renderActiveMemoPane();
         renderMemoTabbar();
+        markMemoDirty("tab-switch");
       }
 
       function addMemoTab(tabType) {
@@ -2954,9 +3087,15 @@
         renderActiveMemoPane();
         renderMemoTabbar();
         closeTabTypePopup();
+        markMemoDirty("tab-add");
       }
 
       function closeMemoTab(index) {
+        if (!Number.isFinite(Number(index))) return;
+        openTabCloseConfirm(Math.trunc(Number(index)));
+      }
+
+      function closeMemoTabConfirmed(index) {
         if (index < 0 || index >= memoTabs.length) return;
         stopThreePenDrawing();
         saveActiveMemoText();
@@ -2965,6 +3104,7 @@
           memoTabs[0].blankInk = [];
           memoTabs[0].twoThree = null;
           renderActiveMemoPane();
+          markMemoDirty("tab-reset-last");
           return;
         }
         memoTabs.splice(index, 1);
@@ -2975,6 +3115,7 @@
         }
         renderActiveMemoPane();
         renderMemoTabbar();
+        markMemoDirty("tab-close");
       }
 
       function toggleMemoOverlay(forceVisible) {
@@ -2997,6 +3138,7 @@
           unbindBlankPenWindowListeners();
           closeFontPopup();
           closeTabTypePopup();
+          closeTabCloseConfirm();
         }
       }
 
@@ -3159,6 +3301,553 @@
         return "";
       }
 
+      function setLocalDraftState(next, skipStatusTextUpdate) {
+        hasLocalDraftSnapshot = !!next;
+        topbarStatus.classList.toggle("is-local-draft", hasLocalDraftSnapshot);
+        if (!skipStatusTextUpdate) {
+          updateTopbarStatus();
+        }
+      }
+
+      function clearLocalDraftStorage(reason) {
+        clearLocalDraftSaveTimer();
+        try {
+          localStorage.removeItem(LOCAL_DRAFT_STORAGE_KEY);
+        } catch (err) {
+          trace("warn", "local draft delete failed", err);
+        }
+        setLocalDraftState(false);
+        if (reason) {
+          trace("info", `local draft cleared: ${reason}`);
+        }
+      }
+
+      function hasStoredLocalDraftData() {
+        try {
+          return !!localStorage.getItem(LOCAL_DRAFT_STORAGE_KEY);
+        } catch (_err) {
+          return hasLocalDraftSnapshot;
+        }
+      }
+
+      function shouldAskDiscardDraftForSession(nextSessionKey) {
+        if (!hasLocalDraftSnapshot) return false;
+        if (!hasStoredLocalDraftData()) {
+          setLocalDraftState(false, true);
+          return false;
+        }
+        if (nextSessionKey && selectedSessionId && nextSessionKey === selectedSessionId) {
+          return false;
+        }
+        return true;
+      }
+
+      function confirmDiscardWorkingDraft() {
+        const ok = window.confirm("작성중인 임시저장 내용이 있습니다.\n버리고 새 세션을 불러올까요?");
+        if (!ok) return false;
+        clearLocalDraftStorage("discard-by-user");
+        return true;
+      }
+
+      function markMemoDirty(reason) {
+        scheduleLocalDraftSave(reason || "memo-change");
+      }
+
+      function clearLocalDraftSaveTimer() {
+        if (!localDraftSaveTimer) return;
+        clearTimeout(localDraftSaveTimer);
+        localDraftSaveTimer = null;
+      }
+
+      function scheduleLocalDraftSave(reason) {
+        if (isApplyingLocalDraft) return;
+        clearLocalDraftSaveTimer();
+        localDraftSaveTimer = window.setTimeout(function () {
+          localDraftSaveTimer = null;
+          saveLocalDraftNow(reason || "auto");
+        }, 220);
+      }
+
+      function cloneInkStrokes(rawStrokes) {
+        const strokes = Array.isArray(rawStrokes) ? rawStrokes : [];
+        const cloned = [];
+        for (let i = 0; i < strokes.length; i += 1) {
+          const stroke = strokes[i];
+          if (!stroke || !Array.isArray(stroke.points)) continue;
+          const points = [];
+          for (let j = 0; j < stroke.points.length; j += 1) {
+            const pt = stroke.points[j];
+            if (!pt) continue;
+            const x = Number(pt.x);
+            const y = Number(pt.y);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+            const pNum = Number(pt.p);
+            const p = Number.isFinite(pNum) ? Math.max(0.05, Math.min(1, pNum)) : 0.5;
+            points.push({
+              x: Math.max(0, Math.min(1, x)),
+              y: Math.max(0, Math.min(1, y)),
+              p
+            });
+          }
+          if (!points.length) continue;
+          cloned.push({ points });
+        }
+        return cloned;
+      }
+
+      function serializeMemoTabsForSave(tabs) {
+        const safeTabs = Array.isArray(tabs) ? tabs : [];
+        return safeTabs.map(function (tab) {
+          const safeTab = tab && typeof tab === "object" ? tab : {};
+          if (safeTab.type === "two_three") {
+            const twoThree = ensureTwoThreeData(safeTab) || {};
+            const words = Array.isArray(twoThree.words) ? twoThree.words.map(function (row) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return {
+                word: toSafeText(safeRow.word),
+                meaning: toSafeText(safeRow.meaning)
+              };
+            }) : [];
+            const sentences = Array.isArray(twoThree.sentences) ? twoThree.sentences.map(function (row) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return {
+                sentence: toSafeText(safeRow.sentence),
+                ink: cloneInkStrokes(safeRow.ink)
+              };
+            }) : [];
+            return {
+              type: "two_three",
+              words,
+              sentences
+            };
+          }
+          return {
+            type: "blank",
+            blankText: toSafeText(safeTab.blankText),
+            blankInk: cloneInkStrokes(safeTab.blankInk)
+          };
+        });
+      }
+
+      function getCurrentPreviewPageNumber() {
+        if (!previewPages.hidden) {
+          const wraps = previewPages.querySelectorAll(".pdf-page");
+          if (wraps && wraps.length) {
+            const scrollTop = Math.max(0, Number(previewPages.scrollTop) || 0);
+            let page = 1;
+            for (let i = 0; i < wraps.length; i += 1) {
+              const top = Math.max(0, Number(wraps[i].offsetTop) || 0);
+              if (top - 8 <= scrollTop) {
+                page = i + 1;
+              } else {
+                break;
+              }
+            }
+            return page;
+          }
+        }
+        if (!previewFrame.hidden) {
+          const src = String(previewFrame.getAttribute("src") || previewFrame.src || "");
+          const match = src.match(/[?#&]page=(\d+)/i);
+          return parsePositivePage(match ? match[1] : null);
+        }
+        return null;
+      }
+
+      function buildPayloadJsonForSave() {
+        syncActiveBlankTextFromEditor();
+        const tabs = serializeMemoTabsForSave(memoTabs);
+        const firstTwoThree = tabs.find(function (tab) {
+          return tab && tab.type === "two_three";
+        }) || null;
+        const page = getCurrentPreviewPageNumber() || parsePositivePage(selectedSessionTargetPage);
+        const payload = {
+          template: firstTwoThree ? "단어찾고번역" : "blank",
+          tabs,
+          activeTabIndex: activeMemoTabIndex,
+          overlaySide: overlaySide === "left" ? "left" : "right",
+          meta: {
+            source: "mock-exam-tool",
+            savedAt: new Date().toISOString()
+          }
+        };
+        if (page) {
+          payload.page = page;
+          payload.meta.page = page;
+        }
+        if (firstTwoThree) {
+          const words = Array.isArray(firstTwoThree.words)
+            ? firstTwoThree.words.filter(function (row) {
+              return !!(toSafeText(row && row.word) || toSafeText(row && row.meaning));
+            })
+            : [];
+          const sentences = Array.isArray(firstTwoThree.sentences)
+            ? firstTwoThree.sentences.filter(function (row) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return !!(toSafeText(safeRow.sentence) || (Array.isArray(safeRow.ink) && safeRow.ink.length));
+            })
+            : [];
+          if (words.length) {
+            payload.pairs = words;
+            payload.words = words;
+          }
+          if (sentences.length) {
+            payload.sentences = sentences;
+          }
+        } else {
+          const firstText = tabs.find(function (tab) {
+            return tab && tab.type === "blank" && toSafeText(tab.blankText).trim();
+          });
+          if (firstText) {
+            payload.text = toSafeText(firstText.blankText);
+          }
+        }
+        return payload;
+      }
+
+      function hasInkStrokeList(rawStrokes) {
+        if (!Array.isArray(rawStrokes) || !rawStrokes.length) return false;
+        return rawStrokes.some(function (stroke) {
+          return !!(stroke && Array.isArray(stroke.points) && stroke.points.length > 0);
+        });
+      }
+
+      function payloadHasAnyPenInk(payloadObj) {
+        const safe = payloadObj && typeof payloadObj === "object" ? payloadObj : {};
+        const tabs = Array.isArray(safe.tabs) ? safe.tabs : [];
+        for (let i = 0; i < tabs.length; i += 1) {
+          const tab = tabs[i] && typeof tabs[i] === "object" ? tabs[i] : {};
+          if (tab.type === "blank") {
+            if (hasInkStrokeList(tab.blankInk)) return true;
+            continue;
+          }
+          if (tab.type === "two_three") {
+            const sentenceRows = Array.isArray(tab.sentences)
+              ? tab.sentences
+              : (tab.twoThree && Array.isArray(tab.twoThree.sentences) ? tab.twoThree.sentences : []);
+            for (let j = 0; j < sentenceRows.length; j += 1) {
+              const row = sentenceRows[j] && typeof sentenceRows[j] === "object" ? sentenceRows[j] : {};
+              if (hasInkStrokeList(row.ink)) return true;
+            }
+          }
+        }
+        if (Array.isArray(safe.sentences)) {
+          for (let i = 0; i < safe.sentences.length; i += 1) {
+            const row = safe.sentences[i] && typeof safe.sentences[i] === "object" ? safe.sentences[i] : {};
+            if (hasInkStrokeList(row.ink)) return true;
+          }
+        }
+        if (hasInkStrokeList(safe.blankInk)) return true;
+        return false;
+      }
+
+      function parseQYearForSend(value) {
+        const text = toSafeText(value).trim();
+        if (!text) return Number.NaN;
+        const span = text.match(/^(\d{4})to(\d{4})$/i);
+        if (span) {
+          return Number(span[1]);
+        }
+        const numeric = Number(text);
+        if (Number.isFinite(numeric)) {
+          return Math.trunc(numeric);
+        }
+        return Number.NaN;
+      }
+
+      function examKeyToMonth(examKey) {
+        const map = {
+          march: 3,
+          april: 4,
+          june: 6,
+          july: 7,
+          september: 9,
+          october: 10,
+          november: 11
+        };
+        return map[String(examKey || "").trim().toLowerCase()] || Number.NaN;
+      }
+
+      function formatNowAsSqlDatetime(dateObj) {
+        const d = dateObj instanceof Date ? dateObj : new Date();
+        const pad = function (n) {
+          return String(Math.max(0, Math.trunc(n))).padStart(2, "0");
+        };
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      }
+
+      function findSelectedSessionByKey() {
+        if (!selectedSessionId || !Array.isArray(classSessions) || !classSessions.length) return null;
+        for (let idx = 0; idx < classSessions.length; idx += 1) {
+          const session = classSessions[idx];
+          const key = getSessionKey(session, idx);
+          if (key === selectedSessionId) {
+            return session;
+          }
+        }
+        return null;
+      }
+
+      function resolveSaveContext() {
+        const session = findSelectedSessionByKey();
+        const fallbackYear = session && session._row ? toSafeText(session._row.QYear) : "";
+        const fallbackMonth = session && session._row ? Number(session._row.QMonth) : Number.NaN;
+        const fallbackExamKey = session && session.mock ? session.mock.examKey : "";
+        const qYear = parseQYearForSend(yearSel.value || fallbackYear || (session && session.mock ? session.mock.year : ""));
+        const qMonthFromExam = examKeyToMonth(examSel.value || fallbackExamKey || monthToExamKey(fallbackMonth));
+        const qMonth = Number.isFinite(qMonthFromExam) ? Math.trunc(qMonthFromExam) : (Number.isFinite(fallbackMonth) ? Math.trunc(fallbackMonth) : Number.NaN);
+        const qLevel = normalizeStorageGrade(
+          gradeSel.value ||
+          (session && session.mock ? session.mock.grade : "") ||
+          (session && session._row ? session._row.QLevel : "")
+        );
+        const userId = toSafeText(FIXED_STUDENT_ID || (session && session._row ? session._row.UserId : "")).trim();
+
+        const issues = [];
+        if (!userId) issues.push("UserId");
+        if (!qLevel) issues.push("QLevel");
+        if (!Number.isFinite(qYear)) issues.push("QYear");
+        if (!Number.isFinite(qMonth)) issues.push("QMonth");
+
+        return {
+          ok: issues.length === 0,
+          issues,
+          userId,
+          qLevel: qLevel || DEFAULT_GRADE,
+          qYear,
+          qMonth
+        };
+      }
+
+      function setSaveButtonUi(state, label) {
+        saveToServerBtn.classList.remove("is-busy", "is-ok", "is-error");
+        if (state === "busy") saveToServerBtn.classList.add("is-busy");
+        if (state === "ok") saveToServerBtn.classList.add("is-ok");
+        if (state === "error") saveToServerBtn.classList.add("is-error");
+        saveToServerBtn.textContent = label || "저장";
+        const mustDisable = !FIXED_STUDENT_ID || state === "busy";
+        saveToServerBtn.disabled = mustDisable;
+        saveToServerBtn.title = !FIXED_STUDENT_ID
+          ? "URL에 ?id=UserId 가 필요합니다."
+          : "현재 내용 저장";
+      }
+
+      function queueSaveButtonUiReset(delayMs) {
+        if (saveButtonUiTimer) {
+          clearTimeout(saveButtonUiTimer);
+        }
+        saveButtonUiTimer = window.setTimeout(function () {
+          saveButtonUiTimer = null;
+          setSaveButtonUi("idle", "저장");
+        }, Math.max(240, Number(delayMs) || 1200));
+      }
+
+      async function sendCurrentSessionToServer() {
+        if (isSavingSessionToServer) return;
+
+        const context = resolveSaveContext();
+        if (!context.ok) {
+          trace("warn", "manual save blocked: required fields missing", context.issues);
+          setSaveButtonUi("error", "정보부족");
+          queueSaveButtonUiReset(1800);
+          return;
+        }
+
+        const payloadJson = buildPayloadJsonForSave();
+        const hasPenInk = payloadHasAnyPenInk(payloadJson);
+        const sessionNoForSave = hasPenInk ? 992 : 99;
+        if (!payloadJson.meta || typeof payloadJson.meta !== "object") {
+          payloadJson.meta = {};
+        }
+        payloadJson.meta.hasPenInk = !!hasPenInk;
+        payloadJson.meta.sessionNo = sessionNoForSave;
+
+        const requestBody = {
+          UserId: context.userId,
+          LiveSchedule: formatNowAsSqlDatetime(new Date()),
+          SessionNo: sessionNoForSave,
+          QLevel: context.qLevel,
+          QYear: context.qYear,
+          QMonth: context.qMonth,
+          PayloadJson: payloadJson
+        };
+
+        isSavingSessionToServer = true;
+        if (saveButtonUiTimer) {
+          clearTimeout(saveButtonUiTimer);
+          saveButtonUiTimer = null;
+        }
+        setSaveButtonUi("busy", "저장중");
+        saveLocalDraftNow("manual-save");
+
+        try {
+          const res = await fetch(LIVE_SEND_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody)
+          });
+          const rawText = await res.text();
+          let responsePayload = null;
+          try {
+            responsePayload = rawText ? JSON.parse(rawText) : null;
+          } catch (_err) {
+            responsePayload = null;
+          }
+
+          if (!res.ok) {
+            const message = responsePayload && responsePayload.message
+              ? responsePayload.message
+              : (rawText || `HTTP ${res.status}`);
+            throw new Error(message);
+          }
+
+          trace("info", "manual save success", {
+            status: res.status,
+            sessionNo: sessionNoForSave,
+            hasPenInk,
+            LSASId: responsePayload && responsePayload.LSASId ? responsePayload.LSASId : "",
+            ServedFileURL: responsePayload && responsePayload.ServedFileURL ? responsePayload.ServedFileURL : ""
+          });
+          clearLocalDraftStorage("server-saved");
+          setSaveButtonUi("ok", "저장완료");
+          queueSaveButtonUiReset(1500);
+          void fetchLiveSessions(true);
+        } catch (err) {
+          trace("error", "manual save failed", err);
+          setSaveButtonUi("error", "저장실패");
+          queueSaveButtonUiReset(2200);
+        } finally {
+          isSavingSessionToServer = false;
+          if (!saveButtonUiTimer) {
+            setSaveButtonUi("idle", "저장");
+          }
+        }
+      }
+
+      function buildLocalDraftSnapshot() {
+        syncActiveBlankTextFromEditor();
+        return {
+          version: 1,
+          savedAt: new Date().toISOString(),
+          selected: {
+            grade: gradeSel.value || "",
+            year: yearSel.value || "",
+            examKey: examSel.value || "",
+            typeLabel: typeSel.value || ""
+          },
+          selectedSessionId: selectedSessionId || "",
+          selectedSessionTitle: selectedSessionTitle || "",
+          selectedSessionTargetPage: parsePositivePage(selectedSessionTargetPage),
+          overlaySide: overlaySide === "left" ? "left" : "right",
+          activeTabIndex: activeMemoTabIndex,
+          tabs: serializeMemoTabsForSave(memoTabs)
+        };
+      }
+
+      function saveLocalDraftNow(reason) {
+        if (isApplyingLocalDraft) return;
+        clearLocalDraftSaveTimer();
+        try {
+          const snapshot = buildLocalDraftSnapshot();
+          localStorage.setItem(LOCAL_DRAFT_STORAGE_KEY, JSON.stringify(snapshot));
+          setLocalDraftState(true, true);
+          if (reason === "manual-save") {
+            trace("info", "local draft saved", {
+              key: LOCAL_DRAFT_STORAGE_KEY,
+              tabCount: Array.isArray(snapshot.tabs) ? snapshot.tabs.length : 0
+            });
+          }
+        } catch (err) {
+          trace("warn", "local draft save failed", err);
+        }
+      }
+
+      function restoreLocalDraftFromStorage() {
+        let raw = "";
+        try {
+          raw = localStorage.getItem(LOCAL_DRAFT_STORAGE_KEY) || "";
+        } catch (err) {
+          trace("warn", "local draft read failed", err);
+          setLocalDraftState(false, true);
+          return false;
+        }
+        if (!raw) {
+          setLocalDraftState(false, true);
+          return false;
+        }
+
+        let parsed = null;
+        try {
+          parsed = JSON.parse(raw);
+        } catch (err) {
+          trace("warn", "local draft parse failed", err);
+          clearLocalDraftStorage("invalid-json");
+          return false;
+        }
+        if (!parsed || typeof parsed !== "object") {
+          clearLocalDraftStorage("invalid-shape");
+          return false;
+        }
+
+        const selected = parsed.selected && typeof parsed.selected === "object" ? parsed.selected : {};
+        isApplyingLocalDraft = true;
+        try {
+          const savedGrade = normalizeStorageGrade(selected.grade || "");
+          if (savedGrade) {
+            ensureSelectValue(gradeSel, savedGrade, getGradeLabel(savedGrade));
+          }
+          refreshYearExamTypeOptions();
+          if (selected.year) {
+            ensureSelectValue(yearSel, toSafeText(selected.year), toSafeText(selected.year));
+          }
+          if (selected.examKey) {
+            const examKey = toSafeText(selected.examKey);
+            ensureSelectValue(examSel, examKey, getExamLabel(examKey, gradeSel.value || DEFAULT_GRADE));
+          }
+          if (selected.typeLabel) {
+            const typeLabel = toSafeText(selected.typeLabel);
+            ensureSelectValue(typeSel, typeLabel, typeLabel);
+          }
+
+          if (parsed.overlaySide === "left" || parsed.overlaySide === "right") {
+            overlaySide = parsed.overlaySide;
+          }
+          selectedSessionId = toSafeText(parsed.selectedSessionId);
+          selectedSessionTitle = toSafeText(parsed.selectedSessionTitle);
+          selectedSessionTargetPage = parsePositivePage(parsed.selectedSessionTargetPage);
+
+          const restoredTabs = normalizeSessionTabs(parsed.tabs);
+          if (restoredTabs.length) {
+            memoTabs.length = 0;
+            restoredTabs.forEach(function (tab) {
+              memoTabs.push(tab);
+            });
+          }
+          nextMemoTabId = memoTabs.length + 1;
+          const nextIndex = Number(parsed.activeTabIndex);
+          activeMemoTabIndex = Number.isFinite(nextIndex)
+            ? Math.min(Math.max(Math.trunc(nextIndex), 0), memoTabs.length - 1)
+            : 0;
+
+          applyOverlaySide();
+          renderActiveMemoPane();
+          renderMemoTabbar();
+          setLocalDraftState(true, true);
+          updateTopbarStatus();
+          trace("info", "local draft restored", {
+            key: LOCAL_DRAFT_STORAGE_KEY,
+            savedAt: toSafeText(parsed.savedAt),
+            tabCount: memoTabs.length
+          });
+          return true;
+        } catch (err) {
+          trace("warn", "local draft restore failed", err);
+          return false;
+        } finally {
+          isApplyingLocalDraft = false;
+        }
+      }
+
       function resetPdfPreviewToEmpty(message) {
         pdfRenderToken += 1;
         hideWordTooltip();
@@ -3174,11 +3863,17 @@
         newTabBtn.hidden = true;
       }
 
-      function showPdfWithIframeBlob(blob) {
+      function buildIframeBlobSrc(blobUrl, pageNumber) {
+        const p = parsePositivePage(pageNumber);
+        const pagePart = p ? `page=${p}&` : "";
+        return `${blobUrl}#${pagePart}toolbar=0&navpanes=0&statusbar=0&messages=0&view=FitH`;
+      }
+
+      function showPdfWithIframeBlob(blob, pageNumber) {
         hideWordTooltip();
         clearBlobUrl();
         lastBlobUrl = URL.createObjectURL(blob);
-        previewFrame.src = `${lastBlobUrl}#toolbar=0&navpanes=0&statusbar=0&messages=0&view=FitH`;
+        previewFrame.src = buildIframeBlobSrc(lastBlobUrl, pageNumber);
         showPanel(previewFrame);
         hidePanel(previewPages);
         hidePanel(previewEmpty);
@@ -3424,6 +4119,7 @@
           tab.blankText = next;
           overlayMemoText.value = next;
           overlayMemoText.scrollTop = overlayMemoText.scrollHeight;
+          markMemoDirty("word-append-blank");
           return true;
         }
 
@@ -3440,13 +4136,16 @@
           twoThree.words[nextSlot].word = cleanWord;
           rebuildWordMeaningMap();
           applyCapturedWordToTwoTView(nextSlot, cleanWord);
+          markMemoDirty("word-append-two-three");
           return true;
         }
 
         return false;
       }
 
-      async function renderPdfPagesWithTextLayer(blob) {
+      async function renderPdfPagesWithTextLayer(blob, options) {
+        const opts = options && typeof options === "object" ? options : {};
+        const preferredPage = parsePositivePage(opts.preferredPage);
         if (!window.pdfjsLib) {
           throw new Error("pdf.js is not loaded");
         }
@@ -3466,6 +4165,7 @@
         showPanel(previewPages);
         hidePanel(previewEmpty);
         lockPreviewViewportHeight("before-render");
+        let jumpedToPreferredDuringRender = false;
 
         for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum += 1) {
           if (myToken !== pdfRenderToken) return;
@@ -3501,6 +4201,13 @@
             renderContext.transform = [outputScale, 0, 0, outputScale, 0, 0];
           }
           await page.render(renderContext).promise;
+          if (preferredPage && !jumpedToPreferredDuringRender && pageNum === preferredPage) {
+            const moved = jumpToPreferredPage(preferredPage);
+            if (moved) {
+              jumpedToPreferredDuringRender = true;
+              trace("info", `session early page jump: p.${preferredPage}`);
+            }
+          }
 
           const indexPages = activeWordIndex && activeWordIndex.pages && typeof activeWordIndex.pages === "object"
             ? activeWordIndex.pages
@@ -3512,29 +4219,60 @@
           const scaleY = viewport.height / baseViewport.height;
           const wordHits = buildWordHitsFromIndexRows(indexRows, scaleX, scaleY, viewport.height);
           canvas.style.cursor = wordHits.length ? "pointer" : "default";
+          const pickWordHitByClientPoint = function (clientX, clientY) {
+            if (!wordHits.length) return "";
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left;
+            const py = clientY - rect.top;
+            return findWordHitAtPoint(wordHits, px, py);
+          };
+          const showMeaningByClientPoint = function (clientX, clientY) {
+            const found = pickWordHitByClientPoint(clientX, clientY);
+            if (!found) {
+              canvas.style.cursor = "default";
+              hideWordTooltip();
+              return;
+            }
+            const meaning = findMeaningForWord(found);
+            canvas.style.cursor = meaning ? "help" : "pointer";
+            if (meaning) {
+              showWordTooltip(meaning, clientX, clientY);
+            } else {
+              hideWordTooltip();
+            }
+          };
+          let lastPenTapAt = 0;
 
           if (wordHits.length) {
             canvas.addEventListener("mousemove", function (event) {
-              const rect = canvas.getBoundingClientRect();
-              const px = event.clientX - rect.left;
-              const py = event.clientY - rect.top;
-              const found = findWordHitAtPoint(wordHits, px, py);
-              if (!found) {
-                canvas.style.cursor = "default";
-                hideWordTooltip();
-                return;
-              }
-
-              const meaning = findMeaningForWord(found);
-              canvas.style.cursor = meaning ? "help" : "pointer";
-              if (meaning) {
-                showWordTooltip(meaning, event.clientX, event.clientY);
-              } else {
-                hideWordTooltip();
-              }
+              showMeaningByClientPoint(event.clientX, event.clientY);
+            }, { passive: true });
+            canvas.addEventListener("pointermove", function (event) {
+              if (event.pointerType === "touch") return;
+              showMeaningByClientPoint(event.clientX, event.clientY);
             }, { passive: true });
             canvas.addEventListener("mouseleave", function () {
               canvas.style.cursor = "default";
+              hideWordTooltip();
+            }, { passive: true });
+            canvas.addEventListener("pointerleave", function () {
+              canvas.style.cursor = "default";
+              hideWordTooltip();
+            }, { passive: true });
+            canvas.addEventListener("pointercancel", function () {
+              canvas.style.cursor = "default";
+              hideWordTooltip();
+            }, { passive: true });
+            canvas.addEventListener("pointerup", function (event) {
+              if (event.pointerType !== "pen") return;
+              if (Date.now() - lastPreviewScrollAt < 140) return;
+              const word = pickWordHitByClientPoint(event.clientX, event.clientY);
+              if (!word) return;
+              lastPenTapAt = Date.now();
+              const added = appendWordToActiveMemo(word);
+              if (added) {
+                trace("info", `memo append word (pen): ${word}`);
+              }
               hideWordTooltip();
             }, { passive: true });
           }
@@ -3558,13 +4296,10 @@
           }, { passive: false });
 
           canvas.addEventListener("click", function (event) {
+            if (Date.now() - lastPenTapAt < 120) return;
             if (Date.now() - lastPreviewScrollAt < 140) return;
             if (!wordHits.length) return;
-
-            const canvasRect = canvas.getBoundingClientRect();
-            const px = event.clientX - canvasRect.left;
-            const py = event.clientY - canvasRect.top;
-            const word = findWordHitAtPoint(wordHits, px, py);
+            const word = pickWordHitByClientPoint(event.clientX, event.clientY);
             if (!word) return;
             const added = appendWordToActiveMemo(word);
             if (added) {
@@ -3581,11 +4316,31 @@
           });
         }
         lockPreviewViewportHeight("after-render");
+        return {
+          jumpedToPreferredDuringRender
+        };
       }
 
-      function getExamLabel(examKey) {
+      function getExamLabel(examKey, gradeValue) {
+        const normalizedGrade = normalizeStorageGrade(gradeValue || DEFAULT_GRADE);
+        const effectiveGrade = EXAM_KEYS_BY_GRADE[normalizedGrade] ? normalizedGrade : DEFAULT_GRADE;
+        if (examKey === "november" && effectiveGrade === "High3") {
+          return "수능";
+        }
         const row = EXAM_META.find(item => item.key === examKey);
         return row ? row.label : "";
+      }
+
+      function getExamOptionsForGrade(gradeValue) {
+        const normalizedGrade = normalizeStorageGrade(gradeValue || DEFAULT_GRADE);
+        const effectiveGrade = EXAM_KEYS_BY_GRADE[normalizedGrade] ? normalizedGrade : DEFAULT_GRADE;
+        const keys = EXAM_KEYS_BY_GRADE[effectiveGrade] || [];
+        return keys.map(function (key) {
+          return {
+            value: key,
+            label: getExamLabel(key, effectiveGrade)
+          };
+        });
       }
 
       function getGradeLabel(gradeValue) {
@@ -3597,10 +4352,13 @@
 
       function getSessionDateLabel(session) {
         if (!session || typeof session !== "object") return "";
-        return String(session.date || session.scheduledAt || session.title || "").trim();
+        return String(session.date || session.scheduledAt || session.LiveSchedule || session.title || "").trim();
       }
 
       function getSessionKey(session, idx) {
+        if (session && session._row && session._row.LSASId != null) {
+          return `${FIXED_STUDENT_ID || "student"}::${String(session._row.LSASId)}`;
+        }
         const dateLabel = getSessionDateLabel(session) || `slot-${idx + 1}`;
         return `${FIXED_STUDENT_ID || "student"}::${dateLabel}::${idx}`;
       }
@@ -3625,14 +4383,20 @@
           const safeRaw = raw && typeof raw === "object" ? raw : {};
           const type = safeRaw.type === "two_three" ? "two_three" : "blank";
           if (type === "two_three") {
-            const words = Array.isArray(safeRaw.words) ? safeRaw.words.map(function (row) {
+            const sourceWords = Array.isArray(safeRaw.words)
+              ? safeRaw.words
+              : (safeRaw.twoThree && Array.isArray(safeRaw.twoThree.words) ? safeRaw.twoThree.words : []);
+            const sourceSentences = Array.isArray(safeRaw.sentences)
+              ? safeRaw.sentences
+              : (safeRaw.twoThree && Array.isArray(safeRaw.twoThree.sentences) ? safeRaw.twoThree.sentences : []);
+            const words = sourceWords.map(function (row) {
               const safeRow = row && typeof row === "object" ? row : {};
               return {
                 word: typeof safeRow.word === "string" ? safeRow.word : "",
                 meaning: typeof safeRow.meaning === "string" ? safeRow.meaning : ""
               };
-            }) : [];
-            const sentences = Array.isArray(safeRaw.sentences) ? safeRaw.sentences.map(function (row) {
+            });
+            const sentences = sourceSentences.map(function (row) {
               const safeRow = row && typeof row === "object" ? row : {};
               const sentenceCard = {
                 sentence: typeof safeRow.sentence === "string" ? safeRow.sentence : ""
@@ -3642,7 +4406,7 @@
               };
               ensureThreeSentenceInk(sentenceCard);
               return sentenceCard;
-            }) : [];
+            });
             return {
               id: idx + 1,
               type: "two_three",
@@ -3663,10 +4427,691 @@
         });
       }
 
+      function setSessionSubLabel(text) {
+        if (!sessionSub) return;
+        sessionSub.textContent = String(text || "");
+      }
+
+      function renderSessionListMessage(text) {
+        const msg = document.createElement("div");
+        msg.className = "session-item-note";
+        msg.style.padding = "10px 6px";
+        msg.textContent = String(text || "");
+        sessionList.appendChild(msg);
+      }
+
+      function normalizeMockYear(value) {
+        if (typeof value === "string" && /^\d{4}to\d{4}$/.test(value.trim())) {
+          return value.trim();
+        }
+        const n = Number(value);
+        if (!Number.isFinite(n)) return "";
+        const year = Math.trunc(n);
+        return `${year}to${year + 1}`;
+      }
+
+      function monthToExamKey(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return "";
+        const month = Math.trunc(n);
+        const map = {
+          3: "march",
+          4: "april",
+          6: "june",
+          7: "july",
+          9: "september",
+          10: "october",
+          11: "november"
+        };
+        return map[month] || "";
+      }
+
+      function normalizeStorageGrade(qLevelValue) {
+        const text = toSafeText(qLevelValue).trim();
+        if (!text) return DEFAULT_GRADE;
+        const ko = text.match(/^고\s*([1-3])$/);
+        if (ko) return `High${ko[1]}`;
+        const high = text.match(/^high\s*([1-3])$/i);
+        if (high) return `High${high[1]}`;
+        return text;
+      }
+
+      function parseReceiveRows(payload) {
+        if (Array.isArray(payload)) return payload;
+        if (payload && Array.isArray(payload.rows)) return payload.rows;
+        return [];
+      }
+
+      function toSafeText(value) {
+        if (value === null || value === undefined) return "";
+        if (typeof value === "string") return value;
+        if (typeof value === "number" || typeof value === "boolean") return String(value);
+        try {
+          if (typeof value.toISOString === "function") {
+            return String(value.toISOString());
+          }
+          if (typeof value.toString === "function") {
+            const text = String(value.toString());
+            if (text && text !== "[object Object]") {
+              return text;
+            }
+          }
+        } catch (_err) {
+          return "";
+        }
+        return "";
+      }
+
+      function trimForLog(value, maxLength) {
+        const text = toSafeText(value);
+        if (!text) return "";
+        const limit = Number.isFinite(Number(maxLength)) ? Math.max(0, Math.trunc(Number(maxLength))) : 240;
+        if (!limit || text.length <= limit) return text;
+        return `${text.slice(0, limit)}...`;
+      }
+
+      function makeLiveRowLogPreview(row, idx) {
+        const safeRow = row && typeof row === "object" ? row : {};
+        return {
+          idx: idx + 1,
+          LSASId: toSafeText(safeRow.LSASId),
+          LiveSchedule: toSafeText(safeRow.LiveSchedule),
+          UpdatedAt: toSafeText(safeRow.UpdatedAt),
+          QLevel: toSafeText(safeRow.QLevel),
+          QYear: toSafeText(safeRow.QYear),
+          QMonth: toSafeText(safeRow.QMonth),
+          SessionNo: toSafeText(safeRow.SessionNo),
+          ServedFileURL: trimForLog(safeRow.ServedFileURL, 180)
+        };
+      }
+
+      function formatMonthDayWeekKorean(year, month, day) {
+        const y = Number(year);
+        const m = Number(month);
+        const d = Number(day);
+        if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return "";
+        const date = new Date(y, m - 1, d);
+        if (
+          date.getFullYear() !== y ||
+          date.getMonth() !== (m - 1) ||
+          date.getDate() !== d
+        ) {
+          return "";
+        }
+        const weekdays = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+        return `${m}월${d}일 ${weekdays[date.getDay()]}`;
+      }
+
+      function formatLiveScheduleLabel(value) {
+        const text = toSafeText(value).trim();
+        if (!text) return "";
+
+        const match = text.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+        if (match) {
+          const formatted = formatMonthDayWeekKorean(match[1], match[2], match[3]);
+          if (formatted) return formatted;
+        }
+
+        const parsed = new Date(text);
+        if (Number.isNaN(parsed.getTime())) return "";
+        return formatMonthDayWeekKorean(
+          parsed.getFullYear(),
+          parsed.getMonth() + 1,
+          parsed.getDate()
+        );
+      }
+
+      function parseScheduleDate(value) {
+        if (value instanceof Date && !Number.isNaN(value.getTime())) {
+          return new Date(value.getTime());
+        }
+        const text = toSafeText(value).trim();
+        if (!text) return null;
+
+        const match = text.match(
+          /(\d{4})\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2}))?(?:\D+(\d{1,2}))?(?:\D+(\d{1,2}))?/
+        );
+        if (match) {
+          const y = Number(match[1]);
+          const m = Number(match[2]);
+          const d = Number(match[3]);
+          const h = Number(match[4] || 0);
+          const min = Number(match[5] || 0);
+          const sec = Number(match[6] || 0);
+          const date = new Date(y, m - 1, d, h, min, sec);
+          if (!Number.isNaN(date.getTime())) return date;
+        }
+
+        const parsed = new Date(text);
+        if (Number.isNaN(parsed.getTime())) return null;
+        return parsed;
+      }
+
+      function getThisWeekStartMs(baseDate) {
+        const d = new Date(baseDate);
+        d.setHours(0, 0, 0, 0);
+        const day = d.getDay();
+        const diffToMonday = (day + 6) % 7;
+        d.setDate(d.getDate() - diffToMonday);
+        return d.getTime();
+      }
+
+      function getVisibleSessionsByExpandStep(step) {
+        const normalizedStep = Math.min(Math.max(Number(step) || 0, 0), 3);
+        const weekStartMs = getThisWeekStartMs(new Date());
+        const twoWeeksStart = new Date(weekStartMs);
+        twoWeeksStart.setDate(twoWeeksStart.getDate() - 14);
+        const monthStart = new Date(weekStartMs);
+        monthStart.setMonth(monthStart.getMonth() - 1);
+
+        const minMsByStep = [
+          weekStartMs,
+          twoWeeksStart.getTime(),
+          monthStart.getTime(),
+          Number.NEGATIVE_INFINITY
+        ];
+        const minMs = minMsByStep[normalizedStep];
+
+        return classSessions.filter(function (session) {
+          const ms = Number(session && session.sessionDateMs);
+          if (!Number.isFinite(ms)) return normalizedStep >= 3;
+          return ms >= minMs;
+        });
+      }
+
+      function getNextSessionExpandStep(currentStep) {
+        const normalizedStep = Math.min(Math.max(Number(currentStep) || 0, 0), 3);
+        const currentCount = getVisibleSessionsByExpandStep(normalizedStep).length;
+        for (let nextStep = normalizedStep + 1; nextStep <= 3; nextStep += 1) {
+          const nextCount = getVisibleSessionsByExpandStep(nextStep).length;
+          if (nextCount > currentCount) return nextStep;
+        }
+        return null;
+      }
+
+      function getSessionLoadMoreLabel(nextStep) {
+        if (nextStep === 1) return "더보기 (지난 2주)";
+        if (nextStep === 2) return "더보기 (한달)";
+        if (nextStep === 3) return "더보기 (나머지)";
+        return "더보기";
+      }
+
+      function parsePositivePage(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return null;
+        const page = Math.trunc(n);
+        return page > 0 ? page : null;
+      }
+
+      function extractPreferredPageFromPayload(payloadObj) {
+        if (!payloadObj || typeof payloadObj !== "object") return null;
+
+        const metaObj = payloadObj.meta && typeof payloadObj.meta === "object" ? payloadObj.meta : null;
+        if (metaObj) {
+          const page = parsePositivePage(metaObj.page);
+          if (page) return page;
+        }
+
+        if (Array.isArray(payloadObj.pairs)) {
+          for (let i = 0; i < payloadObj.pairs.length; i += 1) {
+            const row = payloadObj.pairs[i] && typeof payloadObj.pairs[i] === "object" ? payloadObj.pairs[i] : null;
+            if (!row) continue;
+            const p1 = parsePositivePage(row.page);
+            if (p1) return p1;
+            const rowMeta = row.meta && typeof row.meta === "object" ? row.meta : null;
+            if (rowMeta) {
+              const p2 = parsePositivePage(rowMeta.page);
+              if (p2) return p2;
+            }
+          }
+        }
+
+        if (Array.isArray(payloadObj.words)) {
+          for (let i = 0; i < payloadObj.words.length; i += 1) {
+            const row = payloadObj.words[i] && typeof payloadObj.words[i] === "object" ? payloadObj.words[i] : null;
+            if (!row) continue;
+            const rowMeta = row.meta && typeof row.meta === "object" ? row.meta : null;
+            if (rowMeta) {
+              const p = parsePositivePage(rowMeta.page);
+              if (p) return p;
+            }
+          }
+        }
+
+        const directCandidates = [
+          payloadObj.current_page,
+          payloadObj.currentPage,
+          payloadObj.page,
+          payloadObj.source_page,
+          payloadObj.sourcePage
+        ];
+        for (let i = 0; i < directCandidates.length; i += 1) {
+          const page = parsePositivePage(directCandidates[i]);
+          if (page) return page;
+        }
+
+        return null;
+      }
+
+      function scrollPdfToPage(pageNumber) {
+        const page = parsePositivePage(pageNumber);
+        if (!page) return false;
+        if (previewPages.hidden) return false;
+
+        const wraps = previewPages.querySelectorAll(".pdf-page");
+        if (!wraps || !wraps.length) return false;
+
+        const idx = Math.min(page - 1, wraps.length - 1);
+        const target = wraps[idx];
+        if (!target) return false;
+
+        const top = Math.max(0, target.offsetTop - 8);
+        previewPages.scrollTo({ top, behavior: "auto" });
+        return true;
+      }
+
+      function jumpToPreferredPage(pageNumber) {
+        const page = parsePositivePage(pageNumber);
+        if (!page) return false;
+
+        if (!previewPages.hidden) {
+          const moved = scrollPdfToPage(page);
+          if (!moved) return false;
+          // 렌더 직후 레이아웃 지연 대비 1회 재시도
+          setTimeout(function () {
+            scrollPdfToPage(page);
+          }, 80);
+          return true;
+        }
+
+        if (!previewFrame.hidden && lastBlobUrl) {
+          const nextSrc = buildIframeBlobSrc(lastBlobUrl, page);
+          if (previewFrame.src !== nextSrc) {
+            previewFrame.src = nextSrc;
+          }
+          return true;
+        }
+        return false;
+      }
+
+      function buildTabsFromPayload(payloadObj) {
+        const safe = payloadObj && typeof payloadObj === "object" ? payloadObj : {};
+
+        if (Array.isArray(safe.tabs) && safe.tabs.length) {
+          return normalizeSessionTabs(safe.tabs);
+        }
+
+        const blankText = toSafeText(safe.text || safe.blankText);
+        if (String(safe.template || "").toLowerCase() === "blank" || blankText) {
+          return normalizeSessionTabs([{ type: "blank", blankText }]);
+        }
+
+        const pairWords = Array.isArray(safe.pairs) ? safe.pairs.map(function (row) {
+          const safeRow = row && typeof row === "object" ? row : {};
+          return {
+            word: toSafeText(safeRow.word),
+            meaning: toSafeText(safeRow.meaning)
+          };
+        }) : [];
+        const directWords = Array.isArray(safe.words) ? safe.words.map(function (row) {
+          const safeRow = row && typeof row === "object" ? row : {};
+          return {
+            word: toSafeText(safeRow.word),
+            meaning: toSafeText(safeRow.meaning)
+          };
+        }) : [];
+        const words = (pairWords.length ? pairWords : directWords).filter(function (row) {
+          return !!(row.word || row.meaning);
+        });
+        const sentences = Array.isArray(safe.sentences) ? safe.sentences.map(function (row) {
+          const safeRow = row && typeof row === "object" ? row : {};
+          return {
+            sentence: toSafeText(safeRow.sentence)
+          };
+        }).filter(function (row) {
+          return !!row.sentence;
+        }) : [];
+
+        if (words.length || sentences.length) {
+          return normalizeSessionTabs([{ type: "two_three", words, sentences }]);
+        }
+
+        return normalizeSessionTabs([{ type: "blank", blankText: "" }]);
+      }
+
+      function parseTemplateLabel(payloadObj) {
+        const safe = payloadObj && typeof payloadObj === "object" ? payloadObj : {};
+        const template = toSafeText(safe.template).trim();
+        if (!template) return "";
+        if (/^blank$/i.test(template)) return "1st Try ( Skim / Scan / Brainstorm )";
+        const compactTemplate = template.replace(/\s+/g, "");
+        if (compactTemplate === "단어찾고번역") return "2nd & 3rd Try ( Vocab + Translation)";
+        return "";
+      }
+
+      function buildTwoThreeTabSnapshot(tabs) {
+        const safeTabs = Array.isArray(tabs) ? tabs : [];
+        const typeList = safeTabs.map(function (tab) {
+          return tab && typeof tab === "object" ? String(tab.type || "") : "";
+        });
+        const twoThreeTab = safeTabs.find(function (tab) {
+          return tab && tab.type === "two_three";
+        });
+        if (!twoThreeTab || !twoThreeTab.twoThree || typeof twoThreeTab.twoThree !== "object") {
+          return {
+            tabTypes: typeList,
+            hasTwoThree: false
+          };
+        }
+
+        const words = Array.isArray(twoThreeTab.twoThree.words) ? twoThreeTab.twoThree.words : [];
+        const sentences = Array.isArray(twoThreeTab.twoThree.sentences) ? twoThreeTab.twoThree.sentences : [];
+        const wordPreview = words.slice(0, 10).map(function (row, idx) {
+          const safeRow = row && typeof row === "object" ? row : {};
+          return {
+            slot: idx + 1,
+            word: toSafeText(safeRow.word),
+            meaning: toSafeText(safeRow.meaning)
+          };
+        });
+        const sentencePreview = sentences.slice(0, 5).map(function (row, idx) {
+          const safeRow = row && typeof row === "object" ? row : {};
+          return {
+            slot: idx + 1,
+            sentence: toSafeText(safeRow.sentence)
+          };
+        });
+        return {
+          tabTypes: typeList,
+          hasTwoThree: true,
+          wordsCount: words.length,
+          sentencesCount: sentences.length,
+          wordPreview,
+          sentencePreview
+        };
+      }
+
+      function applyPayloadToSession(session, payloadObj) {
+        if (!session || !payloadObj || typeof payloadObj !== "object") return;
+
+        session.tabs = buildTabsFromPayload(payloadObj);
+        session.targetPage = extractPreferredPageFromPayload(payloadObj);
+        session.templateLabel = parseTemplateLabel(payloadObj);
+        session.note = session.templateLabel || "";
+
+        const activeIndex = Number(payloadObj.activeTabIndex);
+        if (Number.isFinite(activeIndex)) {
+          session.activeTabIndex = activeIndex;
+        }
+
+        if (payloadObj.overlaySide === "left" || payloadObj.overlaySide === "right") {
+          session.overlaySide = payloadObj.overlaySide;
+        }
+
+        if (DEBUG_LIVE_FETCH_LOG) {
+          trace("info", "session payload applied -> tab snapshot", {
+            sessionTitle: getSessionDateLabel(session),
+            template: toSafeText(payloadObj.template),
+            templateLabel: session.templateLabel,
+            snapshot: buildTwoThreeTabSnapshot(session.tabs)
+          });
+        }
+      }
+
+      function makeSessionFromRow(row, idx) {
+        const safeRow = row && typeof row === "object" ? row : {};
+        const qLevelRaw = toSafeText(safeRow.QLevel).trim();
+        const qLevelUpper = qLevelRaw.toUpperCase();
+        const grade = qLevelUpper && qLevelUpper !== "BLANK" ? normalizeStorageGrade(qLevelRaw) : DEFAULT_GRADE;
+        const year = normalizeMockYear(safeRow.QYear);
+        const examKey = monthToExamKey(safeRow.QMonth);
+        const scheduleDateObj = parseScheduleDate(safeRow.LiveSchedule) || parseScheduleDate(safeRow.UpdatedAt);
+        const liveScheduleLabel = formatLiveScheduleLabel(safeRow.LiveSchedule);
+        const updatedAtLabel = formatLiveScheduleLabel(safeRow.UpdatedAt);
+
+        return {
+          _row: safeRow,
+          date: liveScheduleLabel || updatedAtLabel || `LSAS #${toSafeText(safeRow.LSASId) || String(idx + 1)}`,
+          sessionDateMs: scheduleDateObj ? scheduleDateObj.getTime() : null,
+          note: "",
+          templateLabel: "",
+          mock: {
+            grade,
+            year,
+            examKey,
+            typeLabel: DEFAULT_TYPE_LABEL
+          },
+          overlaySide: "right",
+          openMemo: true,
+          activeTabIndex: 0,
+          tabs: [{ type: "blank", blankText: "" }],
+          targetPage: null,
+          servedFileURL: toSafeText(safeRow.ServedFileURL),
+          _payloadLoaded: false,
+          _payloadLoadingPromise: null
+        };
+      }
+
+      async function ensureSessionPayloadLoaded(session) {
+        if (!session) return;
+        if (session._payloadLoaded) return;
+        if (session._payloadLoadingPromise) {
+          await session._payloadLoadingPromise;
+          return;
+        }
+
+        const servedFileURL = toSafeText(session.servedFileURL).trim();
+        if (!servedFileURL) {
+          session._payloadLoaded = true;
+          return;
+        }
+
+        session._payloadLoadingPromise = (async function () {
+          try {
+            if (DEBUG_LIVE_FETCH_LOG) {
+              trace("info", "session payload request", {
+                url: servedFileURL,
+                sessionTitle: getSessionDateLabel(session)
+              });
+            }
+            const res = await fetch(servedFileURL, { cache: "no-store" });
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}`);
+            }
+            const payloadText = await res.text();
+            if (DEBUG_LIVE_FETCH_LOG) {
+              trace("info", "session payload response", {
+                status: res.status,
+                ok: res.ok,
+                url: servedFileURL,
+                rawLength: payloadText.length,
+                rawPreview: trimForLog(payloadText, 600)
+              });
+            }
+            if (payloadText) {
+              const payloadObj = JSON.parse(payloadText);
+              if (DEBUG_LIVE_FETCH_LOG) {
+                trace("info", "session payload parsed", {
+                  url: servedFileURL,
+                  keys: Object.keys(payloadObj || {}),
+                  template: toSafeText(payloadObj.template),
+                  tabs: Array.isArray(payloadObj && payloadObj.tabs) ? payloadObj.tabs.length : 0,
+                  pairs: Array.isArray(payloadObj && payloadObj.pairs) ? payloadObj.pairs.length : 0,
+                  words: Array.isArray(payloadObj && payloadObj.words) ? payloadObj.words.length : 0,
+                  sentences: Array.isArray(payloadObj && payloadObj.sentences) ? payloadObj.sentences.length : 0,
+                  targetPage: extractPreferredPageFromPayload(payloadObj),
+                  pairsPreview: Array.isArray(payloadObj && payloadObj.pairs)
+                    ? payloadObj.pairs.slice(0, 10).map(function (row, idx) {
+                      const safeRow = row && typeof row === "object" ? row : {};
+                      return {
+                        slot: idx + 1,
+                        word: toSafeText(safeRow.word),
+                        meaning: toSafeText(safeRow.meaning),
+                        page: safeRow.meta && typeof safeRow.meta === "object" ? toSafeText(safeRow.meta.page) : ""
+                      };
+                    })
+                    : [],
+                  wordsPreview: Array.isArray(payloadObj && payloadObj.words)
+                    ? payloadObj.words.slice(0, 10).map(function (row, idx) {
+                      const safeRow = row && typeof row === "object" ? row : {};
+                      return {
+                        slot: idx + 1,
+                        word: toSafeText(safeRow.word),
+                        meaning: toSafeText(safeRow.meaning)
+                      };
+                    })
+                    : []
+                });
+              }
+              applyPayloadToSession(session, payloadObj);
+            }
+            session._payloadLoaded = true;
+          } catch (err) {
+            session._payloadLoaded = false;
+            trace("warn", `payload load failed: ${servedFileURL}`, err);
+          } finally {
+            session._payloadLoadingPromise = null;
+          }
+        })();
+
+        await session._payloadLoadingPromise;
+      }
+
+      async function fetchLiveSessions(force) {
+        if (isSessionListLoading) return;
+        if (!force && sessionListLoadedOnce) return;
+
+        if (!FIXED_STUDENT_ID) {
+          classSessions = [];
+          sessionListError = "URL에 id(UserId) 파라미터가 필요합니다.";
+          sessionListLoadedOnce = true;
+          setSessionSubLabel("id required");
+          renderSessionList();
+          return;
+        }
+
+        isSessionListLoading = true;
+        sessionListError = "";
+        setSessionSubLabel("loading...");
+        renderSessionList();
+
+        const url = new URL(LIVE_RECEIVE_URL);
+        url.searchParams.set("userId", FIXED_STUDENT_ID);
+        url.searchParams.set("limit", String(LIVE_RECEIVE_LIMIT));
+
+        try {
+          if (DEBUG_LIVE_FETCH_LOG) {
+            trace("info", "live receive request", {
+              url: url.toString(),
+              userId: FIXED_STUDENT_ID,
+              limit: LIVE_RECEIVE_LIMIT
+            });
+          }
+          const res = await fetch(url.toString(), { cache: "no-store" });
+          const rawText = await res.text();
+          if (DEBUG_LIVE_FETCH_LOG) {
+            trace("info", "live receive response", {
+              status: res.status,
+              ok: res.ok,
+              rawLength: rawText.length,
+              rawPreview: trimForLog(rawText, 600)
+            });
+          }
+          let payload;
+          try {
+            payload = rawText ? JSON.parse(rawText) : [];
+          } catch (parseErr) {
+            payload = [];
+            if (DEBUG_LIVE_FETCH_LOG) {
+              trace("warn", "live receive parse failed", {
+                error: String(parseErr && parseErr.message ? parseErr.message : parseErr || "unknown parse error"),
+                rawPreview: trimForLog(rawText, 600)
+              });
+            }
+          }
+
+          if (!res.ok) {
+            const message = payload && typeof payload.message === "string"
+              ? payload.message
+              : (rawText || `HTTP ${res.status}`);
+            throw new Error(`HTTP ${res.status}: ${message}`);
+          }
+
+          const rows = parseReceiveRows(payload);
+          if (DEBUG_LIVE_FETCH_LOG) {
+            trace("info", `live receive rows parsed: ${rows.length}`, rows.slice(0, 10).map(makeLiveRowLogPreview));
+          }
+          sessionListExpandStep = 0;
+          classSessions = rows.map(makeSessionFromRow);
+          void hydrateSessionTemplateLabels(classSessions);
+          if (DEBUG_LIVE_FETCH_LOG) {
+            trace("info", "session mapped preview", classSessions.slice(0, 10).map(function (session, idx) {
+              const mockInfo = session && session.mock ? session.mock : {};
+              return {
+                idx: idx + 1,
+                title: getSessionDateLabel(session),
+                grade: mockInfo.grade || "",
+                year: mockInfo.year || "",
+                examKey: mockInfo.examKey || "",
+                note: trimForLog(session ? session.note : "", 120),
+                servedFileURL: trimForLog(session ? session.servedFileURL : "", 180)
+              };
+            }));
+          }
+          sessionListLoadedOnce = true;
+          sessionListError = "";
+          setSessionSubLabel(`live sessions (${classSessions.length})`);
+          trace("info", `session list loaded: ${classSessions.length}`);
+        } catch (err) {
+          classSessions = [];
+          sessionListError = String(err && err.message ? err.message : err || "unknown error");
+          sessionListLoadedOnce = true;
+          setSessionSubLabel("load failed");
+          trace("error", "session list load failed", err);
+        } finally {
+          isSessionListLoading = false;
+          renderSessionList();
+        }
+      }
+
+      async function hydrateSessionTemplateLabels(sessions) {
+        if (!Array.isArray(sessions) || !sessions.length) return;
+        for (let i = 0; i < sessions.length; i += 1) {
+          await ensureSessionPayloadLoaded(sessions[i]);
+          renderSessionList();
+        }
+      }
+
       function renderSessionList() {
         sessionList.innerHTML = "";
-        SAMPLE_CLASS_SESSIONS.forEach(function (session, idx) {
-          const sessionKey = getSessionKey(session, idx);
+
+        if (isSessionListLoading) {
+          renderSessionListMessage("수업 목록 불러오는 중...");
+          return;
+        }
+        if (sessionListError) {
+          renderSessionListMessage(`불러오기 실패: ${sessionListError}`);
+          return;
+        }
+        if (!classSessions.length) {
+          renderSessionListMessage(FIXED_STUDENT_ID ? "저장된 수업 세션이 없습니다." : "URL에 ?id=UserId 가 필요합니다.");
+          return;
+        }
+
+        const visibleSessions = getVisibleSessionsByExpandStep(sessionListExpandStep);
+        const nextExpandStep = getNextSessionExpandStep(sessionListExpandStep);
+
+        if (!visibleSessions.length) {
+          renderSessionListMessage(
+            sessionListExpandStep === 0
+              ? "이번주 수업 세션이 없습니다."
+              : "표시할 수업 세션이 없습니다."
+          );
+        }
+
+        visibleSessions.forEach(function (session) {
+          const originalIdx = classSessions.indexOf(session);
+          const sessionKey = getSessionKey(session, originalIdx >= 0 ? originalIdx : 0);
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "session-item-btn";
@@ -3679,42 +5124,91 @@
           title.textContent = getSessionDateLabel(session) || "수업 일정";
 
           const mockInfo = session.mock || {};
+          const metaParts = [];
+          const sessionNo = Number(session && session._row ? session._row.SessionNo : NaN);
+          const isDraftSessionNo = Number.isFinite(sessionNo) && (sessionNo === 99 || sessionNo === 992);
+          if (Number.isFinite(sessionNo) && sessionNo > 1 && !isDraftSessionNo) metaParts.push(`Session ${sessionNo}`);
+          if (mockInfo.grade) metaParts.push(getGradeLabel(mockInfo.grade));
+          if (mockInfo.year) metaParts.push(mockInfo.year);
+          if (mockInfo.examKey) metaParts.push(getExamLabel(mockInfo.examKey, mockInfo.grade));
+          if (mockInfo.typeLabel && mockInfo.typeLabel !== DEFAULT_TYPE_LABEL) metaParts.push(mockInfo.typeLabel);
           const meta = document.createElement("div");
           meta.className = "session-item-meta";
-          meta.textContent = [
-            getGradeLabel(mockInfo.grade || FOLDER),
-            mockInfo.year || "",
-            getExamLabel(mockInfo.examKey || "")
-          ].filter(Boolean).join(" · ");
+          meta.textContent = metaParts.filter(Boolean).join(" · ");
 
           const note = document.createElement("div");
           note.className = "session-item-note";
           note.textContent = session.note || "";
 
           btn.appendChild(title);
-          btn.appendChild(meta);
-          if (note.textContent) {
-            btn.appendChild(note);
+          if (meta.textContent) btn.appendChild(meta);
+          if (note.textContent) btn.appendChild(note);
+
+          if (Number.isFinite(sessionNo) && (sessionNo === 1 || sessionNo === 99 || sessionNo === 992)) {
+            const ribbon = document.createElement("span");
+            ribbon.className = "session-item-ribbon";
+            if (sessionNo === 99 || sessionNo === 992) {
+              ribbon.classList.add("is-solo");
+              ribbon.textContent = "나혼자!";
+            } else {
+              ribbon.classList.add("is-afterclass");
+              ribbon.textContent = "수업 후";
+            }
+            btn.classList.add("has-ribbon");
+            btn.appendChild(ribbon);
           }
+
           btn.addEventListener("click", function () {
             applySessionPreset(session, sessionKey);
           });
           sessionList.appendChild(btn);
         });
+
+        if (nextExpandStep !== null) {
+          const moreBtn = document.createElement("button");
+          moreBtn.type = "button";
+          moreBtn.className = "session-item-btn session-load-more-btn";
+          moreBtn.textContent = getSessionLoadMoreLabel(nextExpandStep);
+          moreBtn.addEventListener("click", function () {
+            sessionListExpandStep = nextExpandStep;
+            renderSessionList();
+          });
+          sessionList.appendChild(moreBtn);
+        }
       }
 
       async function applySessionPreset(session, sessionKey) {
-        if (!session || !session.mock) return;
-        const mockInfo = session.mock;
+        if (!session) return;
+        if (shouldAskDiscardDraftForSession(sessionKey)) {
+          const proceed = confirmDiscardWorkingDraft();
+          if (!proceed) {
+            trace("info", "session load canceled by user: local draft kept");
+            return;
+          }
+        }
+        await ensureSessionPayloadLoaded(session);
+
+        const mockInfo = session.mock || {};
+        selectedSessionTargetPage = parsePositivePage(session.targetPage);
         stopThreePenDrawing();
 
         selectedSessionId = sessionKey || "";
         selectedSessionTitle = getSessionDateLabel(session);
 
-        ensureSelectValue(gradeSel, mockInfo.grade || FOLDER, getGradeLabel(mockInfo.grade || FOLDER));
-        ensureSelectValue(yearSel, mockInfo.year, mockInfo.year);
-        ensureSelectValue(examSel, mockInfo.examKey, getExamLabel(mockInfo.examKey));
-        ensureSelectValue(typeSel, mockInfo.typeLabel || DEFAULT_TYPE_LABEL, mockInfo.typeLabel || DEFAULT_TYPE_LABEL);
+        const gradeValue = mockInfo.grade || DEFAULT_GRADE;
+        ensureSelectValue(gradeSel, gradeValue, getGradeLabel(gradeValue));
+        refreshYearExamTypeOptions();
+        if (mockInfo.year) {
+          ensureSelectValue(yearSel, mockInfo.year, mockInfo.year);
+        }
+        if (mockInfo.examKey) {
+          ensureSelectValue(examSel, mockInfo.examKey, getExamLabel(mockInfo.examKey, gradeValue));
+        }
+        ensureSelectValue(
+          typeSel,
+          mockInfo.typeLabel || DEFAULT_TYPE_LABEL,
+          mockInfo.typeLabel || DEFAULT_TYPE_LABEL
+        );
 
         overlaySide = session.overlaySide === "left" ? "left" : "right";
         applyOverlaySide();
@@ -3724,6 +5218,14 @@
         normalizedTabs.forEach(function (tab) {
           memoTabs.push(tab);
         });
+        if (DEBUG_LIVE_FETCH_LOG) {
+          trace("info", "applySessionPreset -> normalized tab snapshot", {
+            sessionTitle: getSessionDateLabel(session),
+            selectedSessionId,
+            servedFileURL: toSafeText(session.servedFileURL),
+            snapshot: buildTwoThreeTabSnapshot(memoTabs)
+          });
+        }
         nextMemoTabId = memoTabs.length + 1;
         const nextIndex = Number(session.activeTabIndex);
         activeMemoTabIndex = Number.isFinite(nextIndex)
@@ -3736,15 +5238,20 @@
         renderSessionList();
         updateTopbarStatus();
         closeSessionPopup();
+        markMemoDirty("session-preset");
 
-        const loaded = await tryLoadPdf();
-        if (session.openMemo && loaded) {
+        const canTryPdf = !!(mockInfo.year && mockInfo.examKey);
+        const loaded = canTryPdf ? await tryLoadPdf() : false;
+        if (session.openMemo && (loaded || !canTryPdf)) {
           toggleMemoOverlay(true);
         }
       }
 
       function updateTopbarStatus() {
         const parts = [];
+        if (hasLocalDraftSnapshot) {
+          parts.push("작성중");
+        }
         if (selectedSessionTitle) {
           parts.push(selectedSessionTitle);
         }
@@ -3753,15 +5260,19 @@
           : "";
         if (gradeLabel) parts.push(gradeLabel);
         if (yearSel.value) parts.push(yearSel.value);
-        if (examSel.value) parts.push(getExamLabel(examSel.value));
+        if (examSel.value) parts.push(getExamLabel(examSel.value, gradeSel.value));
         if (typeSel.value) parts.push(typeSel.value);
-        topbarStatus.textContent = parts.length ? parts.join(" · ") : "고3 · 연도 선택";
+        topbarStatus.classList.toggle("is-local-draft", hasLocalDraftSnapshot);
+        topbarStatus.textContent = parts.length
+          ? parts.join(" · ")
+          : (hasLocalDraftSnapshot ? "작성중 임시저장" : "학년 · 연도 선택");
       }
 
       function clearSessionSelection() {
         if (!selectedSessionId && !selectedSessionTitle) return;
         selectedSessionId = "";
         selectedSessionTitle = "";
+        selectedSessionTargetPage = null;
         renderSessionList();
       }
 
@@ -3776,8 +5287,9 @@
         selectEl.innerHTML = html.join("");
       }
 
-      function buildPublicUrl(filename) {
-        return `${SUPABASE_BASE}/${BUCKET}/${FOLDER}/${filename}`;
+      function buildPublicUrl(filename, gradeValue) {
+        const folder = normalizeStorageGrade(gradeValue || DEFAULT_GRADE);
+        return `${SUPABASE_BASE}/${BUCKET}/${folder}/${filename}`;
       }
 
       async function loadWordIndexForFile(fileInfo) {
@@ -3786,10 +5298,28 @@
         const indexName = String(fileInfo.filename).replace(/\.pdf$/i, ".words.json");
         if (!indexName || indexName === fileInfo.filename) return null;
 
-        const candidates = [
-          indexName,
-          buildPublicUrl(indexName)
-        ];
+        const candidates = [];
+        const pushCandidate = function (value) {
+          const next = String(value || "").trim();
+          if (!next) return;
+          if (!candidates.includes(next)) candidates.push(next);
+        };
+
+        // 1) current origin (local server)
+        pushCandidate(indexName);
+
+        // 2) same Supabase object path as the selected PDF (extension only swapped)
+        const pdfUrl = String(fileInfo.url || "").trim();
+        if (pdfUrl) {
+          if (/\.pdf($|[?#])/i.test(pdfUrl)) {
+            pushCandidate(pdfUrl.replace(/\.pdf(?=($|[?#]))/i, ".words.json"));
+          } else {
+            pushCandidate(`${pdfUrl}.words.json`);
+          }
+        }
+
+        // 3) fallback legacy candidate
+        pushCandidate(buildPublicUrl(indexName, fileInfo.grade));
 
         for (let i = 0; i < candidates.length; i += 1) {
           const url = candidates[i];
@@ -3830,7 +5360,7 @@
           yearSel.value = years.includes("2023to2024") ? "2023to2024" : (years[0] || "");
         }
 
-        const examOptions = EXAM_META.map(meta => ({ value: meta.key, label: meta.label }));
+        const examOptions = getExamOptionsForGrade(gradeSel.value || DEFAULT_GRADE);
         setSelectOptions(examSel, examOptions, "몇평 선택");
         if (!examSel.value || !examOptions.some(opt => opt.value === examSel.value)) {
           examSel.value = examOptions.some(opt => opt.value === "november")
@@ -3847,7 +5377,7 @@
 
       function initializeFileMap() {
         setSelectOptions(gradeSel, GRADE_OPTIONS, "학년 선택");
-        gradeSel.value = FOLDER;
+        gradeSel.value = DEFAULT_GRADE;
         refreshYearExamTypeOptions();
         openBtn.disabled = false;
         updateTopbarStatus();
@@ -3855,7 +5385,7 @@
       }
 
       function getSelectedFileInfo() {
-        const grade = gradeSel.value || FOLDER;
+        const grade = gradeSel.value || DEFAULT_GRADE;
         const year = yearSel.value;
         const examKey = examSel.value;
         const typeLabel = typeSel.value;
@@ -3869,7 +5399,7 @@
           examKey,
           typeLabel,
           filename,
-          url: buildPublicUrl(filename)
+          url: buildPublicUrl(filename, grade)
         };
       }
 
@@ -3901,15 +5431,18 @@
           const pdfBlob = await fetchPdfBlob(fileInfo.url);
           trace("info", `download ok: ${fileInfo.filename} (${Math.round(pdfBlob.size / 1024)}KB)`);
           const wordIndex = await loadWordIndexForFile(fileInfo);
+          let renderResult = null;
           if (wordIndex && window.pdfjsLib) {
             try {
-              await renderPdfPagesWithTextLayer(pdfBlob);
+              renderResult = await renderPdfPagesWithTextLayer(pdfBlob, {
+                preferredPage: selectedSessionTargetPage
+              });
             } catch (renderErr) {
               trace("warn", `word-index renderer failed -> iframe fallback: ${fileInfo.filename}`, renderErr);
-              showPdfWithIframeBlob(pdfBlob);
+              showPdfWithIframeBlob(pdfBlob, selectedSessionTargetPage);
             }
           } else {
-            showPdfWithIframeBlob(pdfBlob);
+            showPdfWithIframeBlob(pdfBlob, selectedSessionTargetPage);
           }
           if (DEBUG_SCROLL_DIAG) {
             trace("info", "diag/post-load", {
@@ -3920,6 +5453,14 @@
             });
           }
           newTabBtn.hidden = false;
+          if (selectedSessionTargetPage && !(renderResult && renderResult.jumpedToPreferredDuringRender)) {
+            requestAnimationFrame(function () {
+              const moved = jumpToPreferredPage(selectedSessionTargetPage);
+              if (moved) {
+                trace("info", `session page jump: p.${selectedSessionTargetPage}`);
+              }
+            });
+          }
           updateTopbarStatus();
           trace("info", `load success: ${fileInfo.filename}`);
           return true;
@@ -3944,28 +5485,31 @@
       yearSel.addEventListener("change", function () {
         clearSessionSelection();
         updateTopbarStatus();
+        markMemoDirty("select-year");
       });
 
       examSel.addEventListener("change", function () {
         clearSessionSelection();
         updateTopbarStatus();
+        markMemoDirty("select-exam");
       });
 
       gradeSel.addEventListener("change", function () {
         clearSessionSelection();
+        refreshYearExamTypeOptions();
         updateTopbarStatus();
+        markMemoDirty("select-grade");
       });
 
       typeSel.addEventListener("change", function () {
         clearSessionSelection();
         updateTopbarStatus();
+        markMemoDirty("select-type");
       });
 
       openBtn.addEventListener("click", async function () {
-        const loaded = await tryLoadPdf();
-        if (loaded) {
-          closePickerPopup();
-        }
+        closePickerPopup();
+        await tryLoadPdf();
       });
 
       pickerToggleBtn.addEventListener("click", togglePickerPopup);
@@ -3975,8 +5519,19 @@
         toggleSessionPopup();
       });
       sessionBackdrop.addEventListener("click", closeSessionPopup);
+      tabCloseConfirmBackdrop.addEventListener("click", closeTabCloseConfirm);
+      tabCloseCancelBtn.addEventListener("click", closeTabCloseConfirm);
+      tabCloseOkBtn.addEventListener("click", function () {
+        const targetIndex = Number(pendingCloseTabIndex);
+        closeTabCloseConfirm();
+        if (!Number.isFinite(targetIndex)) return;
+        closeMemoTabConfirmed(Math.trunc(targetIndex));
+      });
       memoToggleBtn.addEventListener("click", function () {
         toggleMemoOverlay();
+      });
+      saveToServerBtn.addEventListener("click", function () {
+        void sendCurrentSessionToServer();
       });
       overlayCloseBtn.addEventListener("click", function () {
         toggleMemoOverlay(false);
@@ -4059,6 +5614,9 @@
           redrawBlankCanvas();
         }
       });
+      window.addEventListener("beforeunload", function () {
+        saveLocalDraftNow("beforeunload");
+      });
 
       document.addEventListener("click", function (event) {
         const target = event.target;
@@ -4077,6 +5635,10 @@
 
       document.addEventListener("keydown", function (event) {
         if (event.key !== "Escape") return;
+        if (!tabCloseConfirmPopup.hidden) {
+          closeTabCloseConfirm();
+          return;
+        }
         if (!sessionPopup.hidden) {
           closeSessionPopup();
           return;
@@ -4099,11 +5661,22 @@
       });
 
       initializeFileMap();
+      setSaveButtonUi("idle", "저장");
+      const restoredLocalDraft = restoreLocalDraftFromStorage();
+      if (restoredLocalDraft) {
+        toggleMemoOverlay(true);
+        if (getSelectedFileInfo()) {
+          void tryLoadPdf();
+        } else {
+          trace("warn", "local draft restored but selected mock combo is incomplete");
+        }
+      }
       renderSessionList();
+      void fetchLiveSessions(true);
       applyMemoFontSize();
       applyDictZoom();
       applyOverlaySide();
-      switchMemoTab(0);
+      switchMemoTab(activeMemoTabIndex);
       renderMemoTabbar();
       updateTopbarStatus();
     })();
