@@ -117,6 +117,56 @@
       letter-spacing: 0.01em;
     }
 
+    .topbar-submit-wrap {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .topbar-submit-wrap .topbar-save-btn {
+      min-width: 74px;
+    }
+
+    .topbar-submit-menu {
+      position: absolute;
+      left: 0;
+      top: 50px;
+      z-index: 48;
+      background: #2e2b27;
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      border-radius: 8px;
+      padding: 6px;
+      display: grid;
+      gap: 6px;
+      min-width: 148px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
+    }
+
+    .topbar-submit-menu[hidden] {
+      display: none;
+    }
+
+    .topbar-submit-option {
+      border: none;
+      border-radius: 6px;
+      background: #4a463f;
+      color: #f0e6d2;
+      height: 32px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      padding: 0 10px;
+    }
+
+    .topbar-submit-option:hover {
+      background: #5c574e;
+    }
+
+    .topbar-submit-option:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
     .topbar-save-btn.is-busy {
       background: rgba(255, 236, 191, 0.5);
       color: #5a4621;
@@ -130,6 +180,14 @@
     .topbar-save-btn.is-error {
       background: rgba(255, 189, 189, 0.52);
       color: #6a2323;
+    }
+
+    .topbar-print-btn {
+      min-width: 45px;
+      width: 45px;
+      padding: 0;
+      font-size: 18px;
+      line-height: 1;
     }
 
     .topbar-status {
@@ -184,6 +242,28 @@
 
     .topbar-status.is-local-draft:hover {
       background: linear-gradient(180deg, #ffeb89 0%, #ffd568 100%);
+    }
+
+    .topbar-status-writing {
+      flex: 0 0 auto;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+
+    .topbar-status-sep {
+      flex: 0 0 auto;
+      margin: 0 4px;
+      opacity: 0.64;
+      font-weight: 700;
+    }
+
+    .topbar-status-main {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 11px;
+      font-weight: 500;
     }
 
     .topbar-spacer {
@@ -249,7 +329,7 @@
 
     .session-picker-head {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
       gap: 10px;
       padding: 10px 12px;
@@ -257,17 +337,46 @@
       background: linear-gradient(180deg, rgba(255, 238, 206, 0.95) 0%, rgba(255, 226, 177, 0.9) 100%);
     }
 
-    .session-picker-title {
-      color: #4d3b2b;
-      font-size: 13px;
+    .session-picker-tabs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .session-picker-tab {
+      height: 30px;
+      border: 1px solid rgba(117, 90, 58, 0.34);
+      border-radius: 9px;
+      background: rgba(255, 251, 241, 0.82);
+      color: rgba(64, 48, 33, 0.78);
+      font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.02em;
+      padding: 0 12px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .session-picker-tab:hover {
+      background: rgba(255, 248, 232, 0.98);
+      border-color: rgba(117, 90, 58, 0.48);
+    }
+
+    .session-picker-tab.is-active {
+      background: linear-gradient(180deg, #fff0cc 0%, #ffd98b 100%);
+      border-color: rgba(153, 108, 52, 0.72);
+      color: #4b321d;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62);
     }
 
     .session-picker-sub {
       color: rgba(77, 59, 43, 0.75);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
+      flex: 0 0 auto;
+      white-space: nowrap;
     }
 
     .session-picker-list {
@@ -294,7 +403,7 @@
     }
 
     .session-item-btn.has-ribbon {
-      padding-right: 76px;
+      padding-right: 132px;
     }
 
     .session-item-btn:hover {
@@ -308,6 +417,19 @@
       background:
         linear-gradient(180deg, rgba(255, 236, 210, 0.98) 0%, rgba(255, 226, 191, 0.98) 100%);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.66);
+    }
+
+    .session-item-btn.is-disabled {
+      cursor: default;
+      opacity: 0.72;
+      border-color: rgba(114, 97, 78, 0.18);
+      background: rgba(248, 243, 236, 0.86);
+    }
+
+    .session-item-btn.is-disabled:hover {
+      transform: none;
+      border-color: rgba(114, 97, 78, 0.18);
+      background: rgba(248, 243, 236, 0.86);
     }
 
     .session-item-title {
@@ -330,6 +452,40 @@
       color: rgba(64, 48, 33, 0.7);
       font-size: 10px;
       line-height: 1.3;
+    }
+
+    .session-item-qno {
+      position: absolute;
+      right: 138px;
+      top: 24px;
+      min-width: 56px;
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 3px;
+      text-align: right;
+      color: rgba(80, 54, 35, 0.92);
+      letter-spacing: 0.01em;
+      line-height: 1;
+      white-space: nowrap;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.48);
+      pointer-events: none;
+    }
+
+    .session-item-qno-prefix {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+
+    .session-item-qno-value {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .session-item-qno.is-empty {
+      color: rgba(93, 73, 55, 0.54);
     }
 
     .session-item-ribbon {
@@ -359,6 +515,17 @@
 
     .session-item-ribbon.is-solo {
       background: linear-gradient(180deg, #35b86f 0%, #1f9656 100%);
+    }
+
+    .session-item-ribbon.is-submitted {
+      background: linear-gradient(180deg, #35b86f 0%, #1f9656 100%);
+    }
+
+    .session-item-ribbon.is-secondary {
+      top: 30px;
+      right: -24px;
+      width: 104px;
+      opacity: 0.96;
     }
 
     .session-load-more-btn {
@@ -435,6 +602,60 @@
     .mini-confirm-btn--ok {
       background: linear-gradient(180deg, #dbc087 0%, #c49a59 100%);
       color: #2e2b27;
+    }
+
+    .submit-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%) translateY(10px) scale(0.96);
+      opacity: 0;
+      min-width: 168px;
+      max-width: min(92vw, 360px);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-sizing: border-box;
+      border: 1px solid rgba(171, 128, 61, 0.9);
+      background: linear-gradient(180deg, #fff4cf 0%, #ffd98f 100%);
+      color: #3f2f1c;
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+      box-shadow: 0 10px 18px rgba(24, 16, 8, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+      pointer-events: none;
+      z-index: 320;
+    }
+
+    .submit-toast::before {
+      content: "✦ ";
+      color: #8f6130;
+      font-weight: 900;
+    }
+
+    .submit-toast.is-show {
+      animation: submit-toast-in 0.22s ease-out forwards, submit-toast-out 0.28s ease-in forwards 1.6s;
+    }
+
+    @keyframes submit-toast-in {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+    }
+
+    @keyframes submit-toast-out {
+      from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.98);
+      }
     }
 
     .pdf-picker-wrap {
@@ -613,6 +834,8 @@
       background: #101722;
       position: absolute;
       inset: 0;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
     }
 
     .pdf-word-tooltip {
@@ -781,7 +1004,25 @@
       min-height: 0;
       background-color: #fdf3e7;
       display: flex;
+      flex-direction: column;
       position: relative;
+    }
+
+    .overlay-question-bar {
+      flex: 0 0 auto;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      box-sizing: border-box;
+      border-bottom: 1px solid rgba(42, 28, 20, 0.35);
+      background:
+        linear-gradient(180deg, rgba(114, 77, 54, 0.96) 0%, rgba(83, 56, 39, 0.96) 100%);
+      color: #f6ebdd;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.015em;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
     }
 
     .overlay-pane {
@@ -1631,7 +1872,19 @@
       <div class="exam-topbar">
         <button id="mock-topbar-picker-btn" class="topbar-icon-btn" type="button" title="PDF 불러오기">📂</button>
         <button id="mock-topbar-memo-btn" class="topbar-icon-btn" type="button" title="오버레이 메모">📝</button>
-        <button id="mock-topbar-save-btn" class="topbar-icon-btn topbar-save-btn" type="button" title="현재 내용 저장">저장</button>
+        <div class="topbar-submit-wrap">
+          <button id="mock-topbar-submit-btn" class="topbar-icon-btn topbar-save-btn" type="button" title="제출 메뉴">제출</button>
+          <div id="mock-topbar-submit-popup" class="topbar-submit-menu" hidden>
+            <button id="mock-topbar-submit-active-btn" class="topbar-submit-option" type="button">현재 페이지 보내기</button>
+            <button id="mock-topbar-submit-all-btn" class="topbar-submit-option" type="button">전체 페이지 보내기</button>
+          </div>
+        </div>
+        <div class="topbar-submit-wrap">
+          <button id="mock-topbar-print-btn" class="topbar-icon-btn topbar-save-btn topbar-print-btn" type="button" title="출력 메뉴">🖨</button>
+          <div id="mock-topbar-print-popup" class="topbar-submit-menu" hidden>
+            <button id="mock-topbar-print-ready-btn" class="topbar-submit-option" type="button">출력</button>
+          </div>
+        </div>
         <div class="topbar-spacer"></div>
         <button id="mock-topbar-status" class="topbar-status" type="button">학년 · 연도 선택</button>
         <button class="topbar-power-btn" type="button" title="전원">⏻</button>
@@ -1640,7 +1893,10 @@
       <div id="mock-session-popup" class="session-picker-popup" hidden>
         <div class="session-picker-card">
           <div class="session-picker-head">
-            <span class="session-picker-title">오늘 수업 리스트</span>
+            <div class="session-picker-tabs" role="tablist" aria-label="수업 세션 목록">
+              <button id="mock-session-tab-review" class="session-picker-tab is-active" type="button">수업 후 REVIEW</button>
+              <button id="mock-session-tab-submitted" class="session-picker-tab" type="button">제출됨</button>
+            </div>
             <span id="mock-session-sub" class="session-picker-sub">live sessions</span>
           </div>
           <div id="mock-session-list" class="session-picker-list"></div>
@@ -1680,6 +1936,7 @@
         </div>
         <button id="mock-overlay-two-flip-triangle" class="overlay-side-flip" type="button" aria-label="오버레이 좌우 전환" title="오버레이 좌우 전환"></button>
         <div class="overlay-memo-body">
+          <div id="mock-overlay-question-bar" class="overlay-question-bar">Question No. -</div>
           <div id="mock-overlay-blank-pane" class="overlay-pane overlay-blank-pane">
             <div class="overlay-blank-controls">
               <button id="mock-blank-pen-toggle" class="overlay-blank-tool-btn" type="button" aria-pressed="false" title="필기 모드">
@@ -1787,13 +2044,21 @@
     (function () {
       const pickerToggleBtn = document.getElementById("mock-topbar-picker-btn");
       const memoToggleBtn = document.getElementById("mock-topbar-memo-btn");
-      const saveToServerBtn = document.getElementById("mock-topbar-save-btn");
+      const submitMenuBtn = document.getElementById("mock-topbar-submit-btn");
+      const submitMenuPopup = document.getElementById("mock-topbar-submit-popup");
+      const submitActiveBtn = document.getElementById("mock-topbar-submit-active-btn");
+      const submitAllBtn = document.getElementById("mock-topbar-submit-all-btn");
+      const printMenuBtn = document.getElementById("mock-topbar-print-btn");
+      const printMenuPopup = document.getElementById("mock-topbar-print-popup");
+      const printReadyBtn = document.getElementById("mock-topbar-print-ready-btn");
       const pickerPopup = document.getElementById("mock-picker-popup");
       const pickerBackdrop = document.getElementById("mock-picker-backdrop");
       const sessionPopup = document.getElementById("mock-session-popup");
       const sessionBackdrop = document.getElementById("mock-session-backdrop");
       const sessionList = document.getElementById("mock-session-list");
       const sessionSub = document.getElementById("mock-session-sub");
+      const sessionTabReviewBtn = document.getElementById("mock-session-tab-review");
+      const sessionTabSubmittedBtn = document.getElementById("mock-session-tab-submitted");
       const tabCloseConfirmBackdrop = document.getElementById("mock-tab-close-confirm-backdrop");
       const tabCloseConfirmPopup = document.getElementById("mock-tab-close-confirm-popup");
       const tabCloseConfirmText = document.getElementById("mock-tab-close-confirm-text");
@@ -1809,6 +2074,7 @@
       const overlayBlankPane = document.getElementById("mock-overlay-blank-pane");
       const overlayTwoThreePane = document.getElementById("mock-overlay-two-three-pane");
       const overlayTwoFlipTriangleBtn = document.getElementById("mock-overlay-two-flip-triangle");
+      const overlayQuestionBar = document.getElementById("mock-overlay-question-bar");
       const overlayMemoText = document.getElementById("mock-overlay-memo-text");
       const blankPenToggleBtn = document.getElementById("mock-blank-pen-toggle");
       const blankPenClearBtn = document.getElementById("mock-blank-pen-clear");
@@ -1899,6 +2165,8 @@
       const DICT_ZOOM_MIN = 0.8;
       const DICT_ZOOM_MAX = 1.8;
       const DICT_ZOOM_STEP = 0.1;
+      const DEFAULT_PAYLOAD_QNO = 0;
+      const DEFAULT_PAYLOAD_LAP = "1.1";
 
       let lastBlobUrl = "";
       let lastPdfUrl = "";
@@ -1924,6 +2192,9 @@
       let sessionListLoadedOnce = false;
       let sessionListError = "";
       let sessionListExpandStep = 0;
+      let sessionListHydrationToken = 0;
+      const sessionListHydratedStepByTab = { review: -1, submitted: -1 };
+      let sessionViewTab = "review";
       let selectedSessionId = "";
       let selectedSessionTitle = "";
       let selectedSessionTargetPage = null;
@@ -1943,6 +2214,7 @@
       let saveButtonUiTimer = null;
       let isSavingSessionToServer = false;
       let isApplyingLocalDraft = false;
+      let submitToastTimer = null;
       const threePenState = {
         drawing: false,
         pointerId: null,
@@ -1962,12 +2234,20 @@
       if (
         !pickerToggleBtn ||
         !memoToggleBtn ||
-        !saveToServerBtn ||
+        !submitMenuBtn ||
+        !submitMenuPopup ||
+        !submitActiveBtn ||
+        !submitAllBtn ||
+        !printMenuBtn ||
+        !printMenuPopup ||
+        !printReadyBtn ||
         !pickerPopup ||
         !pickerBackdrop ||
         !sessionPopup ||
         !sessionBackdrop ||
         !sessionList ||
+        !sessionTabReviewBtn ||
+        !sessionTabSubmittedBtn ||
         !tabCloseConfirmBackdrop ||
         !tabCloseConfirmPopup ||
         !tabCloseConfirmText ||
@@ -1983,6 +2263,7 @@
         !overlayBlankPane ||
         !overlayTwoThreePane ||
         !overlayTwoFlipTriangleBtn ||
+        !overlayQuestionBar ||
         !overlayMemoText ||
         !blankPenToggleBtn ||
         !blankPenClearBtn ||
@@ -2041,6 +2322,8 @@
 
       function openPickerPopup() {
         closeSessionPopup();
+        closeSubmitPopup();
+        closePrintPopup();
         pickerPopup.hidden = false;
         pickerBackdrop.hidden = false;
         setBtnActive(pickerToggleBtn, true);
@@ -2054,19 +2337,156 @@
         }
       }
 
+      function closeSubmitPopup() {
+        submitMenuPopup.hidden = true;
+        setBtnActive(submitMenuBtn, false);
+      }
+
+      function openSubmitPopup() {
+        closeSessionPopup();
+        closePickerPopup();
+        closePrintPopup();
+        submitMenuPopup.hidden = false;
+        setBtnActive(submitMenuBtn, true);
+      }
+
+      function toggleSubmitPopup() {
+        if (submitMenuPopup.hidden) {
+          openSubmitPopup();
+        } else {
+          closeSubmitPopup();
+        }
+      }
+
+      function closePrintPopup() {
+        printMenuPopup.hidden = true;
+        setBtnActive(printMenuBtn, false);
+      }
+
+      function openPrintPopup() {
+        closeSessionPopup();
+        closePickerPopup();
+        closeSubmitPopup();
+        printMenuPopup.hidden = false;
+        setBtnActive(printMenuBtn, true);
+      }
+
+      function togglePrintPopup() {
+        if (printMenuPopup.hidden) {
+          openPrintPopup();
+        } else {
+          closePrintPopup();
+        }
+      }
+
       function closeSessionPopup() {
+        sessionListHydrationToken += 1;
         sessionPopup.hidden = true;
         sessionBackdrop.hidden = true;
         setBtnActive(topbarStatus, false);
       }
 
+      function resetSessionListHydrationState() {
+        sessionListHydrationToken += 1;
+        sessionListHydratedStepByTab.review = -1;
+        sessionListHydratedStepByTab.submitted = -1;
+      }
+
+      async function hydrateSessionListForCurrentScope(reason, tabOverride) {
+        if (sessionPopup.hidden) return;
+        if (!Array.isArray(classSessions) || !classSessions.length) return;
+
+        const tab = tabOverride === "submitted"
+          ? "submitted"
+          : (sessionViewTab === "submitted" ? "submitted" : "review");
+        const step = normalizeSessionExpandStep(sessionListExpandStep);
+        if (sessionListHydratedStepByTab[tab] >= step) return;
+
+        const token = ++sessionListHydrationToken;
+        const scope = getSessionScopeByTabAndStep(tab, step, classSessions);
+        const targets = Array.isArray(scope.visibleSessions) ? scope.visibleSessions.slice() : [];
+        let submittedScopeForReview = null;
+        if (tab === "review") {
+          // REVIEW 탭에서도 suppress 판정을 위해 같은 범위(step)의 제출본 메타를 같이 로드한다.
+          submittedScopeForReview = getSessionScopeByTabAndStep("submitted", step, classSessions);
+          const submittedVisible = Array.isArray(submittedScopeForReview.visibleSessions)
+            ? submittedScopeForReview.visibleSessions
+            : [];
+          submittedVisible.forEach(function (session) {
+            if (!session) return;
+            if (targets.indexOf(session) >= 0) return;
+            targets.push(session);
+          });
+        }
+        if (!targets.length) {
+          sessionListHydratedStepByTab[tab] = step;
+          if (tab === "review") {
+            sessionListHydratedStepByTab.submitted = Math.max(sessionListHydratedStepByTab.submitted, step);
+          }
+          return;
+        }
+
+        if (DEBUG_LIVE_FETCH_LOG) {
+          trace("info", `session scan start (${tab}, step ${step}, count ${targets.length})${reason ? `: ${reason}` : ""}`);
+        }
+
+        for (let i = 0; i < targets.length; i += 1) {
+          if (token !== sessionListHydrationToken) return;
+          const session = targets[i];
+          if (!session || session._payloadLoaded) continue;
+          await ensureSessionPayloadLoaded(session);
+          if (token !== sessionListHydrationToken) return;
+          renderSessionList();
+        }
+
+        if (token !== sessionListHydrationToken) return;
+        sessionListHydratedStepByTab[tab] = step;
+        if (tab === "review") {
+          const submittedScope = submittedScopeForReview || getSessionScopeByTabAndStep("submitted", step, classSessions);
+          const submittedVisible = Array.isArray(submittedScope.visibleSessions)
+            ? submittedScope.visibleSessions
+            : [];
+          const submittedLoaded = submittedVisible.every(function (session) {
+            if (!session) return true;
+            const url = toSafeText(session.servedFileURL).trim();
+            if (!url) return true;
+            return !!session._payloadLoaded;
+          });
+          if (submittedLoaded) {
+            sessionListHydratedStepByTab.submitted = Math.max(sessionListHydratedStepByTab.submitted, step);
+          }
+        }
+        renderSessionList();
+        if (DEBUG_LIVE_FETCH_LOG) {
+          trace("info", `session scan done (${tab}, step ${step})`);
+        }
+      }
+
+      function updateSessionTabUi() {
+        const isReview = sessionViewTab !== "submitted";
+        sessionTabReviewBtn.classList.toggle("is-active", isReview);
+        sessionTabSubmittedBtn.classList.toggle("is-active", !isReview);
+      }
+
+      function setSessionViewTab(nextTab) {
+        sessionViewTab = nextTab === "submitted" ? "submitted" : "review";
+        sessionListExpandStep = 0;
+        updateSessionTabUi();
+        renderSessionList();
+        void hydrateSessionListForCurrentScope("tab-switch", sessionViewTab);
+      }
+
       function openSessionPopup() {
         closePickerPopup();
+        closeSubmitPopup();
+        closePrintPopup();
         sessionPopup.hidden = false;
         sessionBackdrop.hidden = false;
         setBtnActive(topbarStatus, true);
         sessionListExpandStep = 0;
+        updateSessionTabUi();
         renderSessionList();
+        void hydrateSessionListForCurrentScope("popup-open");
         void fetchLiveSessions(true);
       }
 
@@ -2076,6 +2496,16 @@
         } else {
           closeSessionPopup();
         }
+      }
+
+      function eventPathIncludesNode(event, node) {
+        if (!event || !node) return false;
+        if (typeof event.composedPath === "function") {
+          const path = event.composedPath();
+          if (Array.isArray(path) && path.indexOf(node) >= 0) return true;
+        }
+        const target = event.target;
+        return target instanceof Node ? node.contains(target) : false;
       }
 
       function closeFontPopup() {
@@ -3014,6 +3444,7 @@
 
         if (!tab) {
           updateBlankPenUi();
+          updateOverlayQuestionNoBar();
           return;
         }
         if (isTwoThree) {
@@ -3025,6 +3456,7 @@
         }
         updateThreePenUi();
         updateBlankPenUi();
+        updateOverlayQuestionNoBar();
       }
 
       function renderMemoTabbar() {
@@ -3280,6 +3712,58 @@
         }, { passive: true });
       }
 
+      function bindTouchDragScrollBridge(targetEl) {
+        if (!targetEl || !previewPages) return;
+        let dragging = false;
+        let moved = false;
+        let startX = 0;
+        let startY = 0;
+        let startTop = 0;
+        let startLeft = 0;
+
+        targetEl.addEventListener("touchstart", function (event) {
+          if (!event.touches || event.touches.length !== 1) {
+            dragging = false;
+            moved = false;
+            return;
+          }
+          const t = event.touches[0];
+          dragging = true;
+          moved = false;
+          startX = t.clientX;
+          startY = t.clientY;
+          startTop = previewPages.scrollTop;
+          startLeft = previewPages.scrollLeft;
+        }, { passive: true });
+
+        targetEl.addEventListener("touchmove", function (event) {
+          if (!dragging || !event.touches || event.touches.length !== 1) return;
+          const t = event.touches[0];
+          const dx = t.clientX - startX;
+          const dy = t.clientY - startY;
+          if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+            moved = true;
+          }
+          previewPages.scrollTop = startTop - dy;
+          previewPages.scrollLeft = startLeft - dx;
+          if (moved) {
+            lastPreviewScrollAt = Date.now();
+            hideWordTooltip();
+            event.preventDefault();
+          }
+        }, { passive: false });
+
+        const stopDrag = function () {
+          dragging = false;
+          if (moved) {
+            lastPreviewScrollAt = Date.now();
+          }
+          moved = false;
+        };
+        targetEl.addEventListener("touchend", stopDrag, { passive: true });
+        targetEl.addEventListener("touchcancel", stopDrag, { passive: true });
+      }
+
       function clearBlobUrl() {
         if (!lastBlobUrl) return;
         try {
@@ -3304,6 +3788,7 @@
       function setLocalDraftState(next, skipStatusTextUpdate) {
         hasLocalDraftSnapshot = !!next;
         topbarStatus.classList.toggle("is-local-draft", hasLocalDraftSnapshot);
+        topbarStatus.classList.toggle("is-writing", hasLocalDraftSnapshot);
         if (!skipStatusTextUpdate) {
           updateTopbarStatus();
         }
@@ -3346,6 +3831,53 @@
         const ok = window.confirm("작성중인 임시저장 내용이 있습니다.\n버리고 새 세션을 불러올까요?");
         if (!ok) return false;
         clearLocalDraftStorage("discard-by-user");
+        return true;
+      }
+
+      function hasAnyWorkingMemoContent() {
+        if (hasLocalDraftSnapshot || hasStoredLocalDraftData()) return true;
+        try {
+          return snapshotHasMeaningfulContent(buildLocalDraftSnapshot());
+        } catch (_err) {
+          return false;
+        }
+      }
+
+      function resetMemoWorkspaceForNewLoad() {
+        stopThreePenDrawing();
+        setBlankPenMode(false);
+        isThreeTPenMode = false;
+        isDictModeOn = false;
+        lastCapturedWord = "";
+
+        clearSessionSelection();
+
+        memoTabs.length = 0;
+        memoTabs.push({
+          id: 1,
+          type: "blank",
+          blankText: "",
+          twoThree: null,
+          blankInk: []
+        });
+        nextMemoTabId = 2;
+        activeMemoTabIndex = 0;
+        renderActiveMemoPane();
+        renderMemoTabbar();
+
+        closeFontPopup();
+        closeTabTypePopup();
+        closeTabCloseConfirm();
+
+        clearLocalDraftStorage("discard-before-load");
+        updateTopbarStatus();
+      }
+
+      function confirmDiscardWorkingNotesForLoad() {
+        if (!hasAnyWorkingMemoContent()) return true;
+        const ok = window.confirm("작성중인 임시저장 내용이 있습니다.\n버리고 새 세션을 불러올까요?");
+        if (!ok) return false;
+        resetMemoWorkspaceForNewLoad();
         return true;
       }
 
@@ -3399,6 +3931,23 @@
         const safeTabs = Array.isArray(tabs) ? tabs : [];
         return safeTabs.map(function (tab) {
           const safeTab = tab && typeof tab === "object" ? tab : {};
+          const rawQNo = getRawQNoFromAny(safeTab);
+          const parsedQNo = parseQNoForPayload(rawQNo);
+          const rawLap = getRawLapFromAny(safeTab);
+          const hasRawLap = hasMeaningfulText(rawLap);
+          const normalizedLap = normalizeLapForPayload(rawLap);
+          const attachQuestionMeta = function (target) {
+            if (!target || typeof target !== "object") return target;
+            if (parsedQNo > 0) {
+              target.QNo = parsedQNo;
+              target.qNo = parsedQNo;
+            }
+            if (hasRawLap || normalizedLap !== DEFAULT_PAYLOAD_LAP) {
+              target.Lap = normalizedLap;
+              target.lap = normalizedLap;
+            }
+            return target;
+          };
           if (safeTab.type === "two_three") {
             const twoThree = ensureTwoThreeData(safeTab) || {};
             const words = Array.isArray(twoThree.words) ? twoThree.words.map(function (row) {
@@ -3415,17 +3964,17 @@
                 ink: cloneInkStrokes(safeRow.ink)
               };
             }) : [];
-            return {
+            return attachQuestionMeta({
               type: "two_three",
               words,
               sentences
-            };
+            });
           }
-          return {
+          return attachQuestionMeta({
             type: "blank",
             blankText: toSafeText(safeTab.blankText),
             blankInk: cloneInkStrokes(safeTab.blankInk)
-          };
+          });
         });
       }
 
@@ -3454,37 +4003,117 @@
         return null;
       }
 
-      function buildPayloadJsonForSave() {
+      function hasMeaningfulText(value) {
+        return !!toSafeText(value).trim();
+      }
+
+      function isTemplateTabFilled(tab) {
+        const safeTab = tab && typeof tab === "object" ? tab : {};
+        if (safeTab.type === "two_three") {
+          const words = Array.isArray(safeTab.words) ? safeTab.words : [];
+          for (let i = 0; i < words.length; i += 1) {
+            const row = words[i] && typeof words[i] === "object" ? words[i] : {};
+            if (hasMeaningfulText(row.word) || hasMeaningfulText(row.meaning)) return true;
+          }
+
+          const sentences = Array.isArray(safeTab.sentences) ? safeTab.sentences : [];
+          for (let i = 0; i < sentences.length; i += 1) {
+            const row = sentences[i] && typeof sentences[i] === "object" ? sentences[i] : {};
+            if (hasMeaningfulText(row.sentence) || hasInkStrokeList(row.ink)) return true;
+          }
+          return false;
+        }
+
+        if (hasMeaningfulText(safeTab.blankText)) return true;
+        return hasInkStrokeList(safeTab.blankInk);
+      }
+
+      function collectTemplateSubmitTargets(submitMode) {
         syncActiveBlankTextFromEditor();
         const tabs = serializeMemoTabsForSave(memoTabs);
-        const firstTwoThree = tabs.find(function (tab) {
-          return tab && tab.type === "two_three";
-        }) || null;
-        const page = getCurrentPreviewPageNumber() || parsePositivePage(selectedSessionTargetPage);
+        const mode = submitMode === "all" ? "all" : "active";
+
+        if (mode === "active") {
+          const idxNum = Number(activeMemoTabIndex);
+          const idx = Number.isFinite(idxNum) ? Math.trunc(idxNum) : -1;
+          if (idx < 0 || idx >= tabs.length) return [];
+          const tab = tabs[idx];
+          if (!isTemplateTabFilled(tab)) return [];
+          return [{
+            tab,
+            templatePage: idx + 1,
+            originalIndex: idx
+          }];
+        }
+
+        const targets = [];
+        for (let i = 0; i < tabs.length; i += 1) {
+          const tab = tabs[i];
+          if (!isTemplateTabFilled(tab)) continue;
+          targets.push({
+            tab,
+            templatePage: i + 1,
+            originalIndex: i
+          });
+        }
+        return targets;
+      }
+
+      function buildPayloadJsonForTemplatePage(tab, templatePage, submitMeta) {
+        const safeTab = tab && typeof tab === "object" ? tab : { type: "blank", blankText: "", blankInk: [] };
+        const tabType = safeTab.type === "two_three" ? "two_three" : "blank";
+        const page = Math.max(1, Math.trunc(Number(templatePage) || 1));
+        const mode = submitMeta && submitMeta.mode === "all" ? "all" : "active";
+        const order = Math.max(1, Math.trunc(Number(submitMeta && submitMeta.order) || 1));
+        const count = Math.max(1, Math.trunc(Number(submitMeta && submitMeta.count) || 1));
+        const tabIndex = Math.max(0, Math.trunc(Number(submitMeta && submitMeta.tabIndex) || 0));
+        const tabQNo = parseQNoForPayload(getRawQNoFromAny(safeTab));
+        const metaQNo = parseQNoForPayload(submitMeta && submitMeta.qNo !== undefined ? submitMeta.qNo : null);
+        const qNo = tabQNo > 0 ? tabQNo : (metaQNo > 0 ? metaQNo : DEFAULT_PAYLOAD_QNO);
+
+        const tabLapSource = getRawLapFromAny(safeTab);
+        const hasTabLap = hasMeaningfulText(tabLapSource);
+        const tabLap = normalizeLapForPayload(tabLapSource);
+        const hasMetaLap = !!(submitMeta && submitMeta.lap !== undefined && submitMeta.lap !== null && hasMeaningfulText(submitMeta.lap));
+        const metaLap = normalizeLapForPayload(submitMeta && submitMeta.lap !== undefined ? submitMeta.lap : null);
+        const forceMetaLap = !!(submitMeta && submitMeta.forceLap === true);
+        const lap = forceMetaLap && hasMetaLap
+          ? metaLap
+          : (hasTabLap ? tabLap : (hasMetaLap ? metaLap : DEFAULT_PAYLOAD_LAP));
+
         const payload = {
-          template: firstTwoThree ? "단어찾고번역" : "blank",
-          tabs,
-          activeTabIndex: activeMemoTabIndex,
+          template: tabType === "two_three" ? "단어찾고번역" : "blank",
+          tabs: [safeTab],
+          activeTabIndex: 0,
           overlaySide: overlaySide === "left" ? "left" : "right",
+          page,
+          QNo: qNo,
+          Lap: lap,
           meta: {
             source: "mock-exam-tool",
-            savedAt: new Date().toISOString()
+            savedAt: new Date().toISOString(),
+            page,
+            templatePage: page,
+            templateTabIndex: tabIndex,
+            submitMode: mode,
+            submitOrder: order,
+            submitCount: count,
+            QNo: qNo,
+            Lap: lap
           }
         };
-        if (page) {
-          payload.page = page;
-          payload.meta.page = page;
-        }
-        if (firstTwoThree) {
-          const words = Array.isArray(firstTwoThree.words)
-            ? firstTwoThree.words.filter(function (row) {
-              return !!(toSafeText(row && row.word) || toSafeText(row && row.meaning));
+
+        if (tabType === "two_three") {
+          const words = Array.isArray(safeTab.words)
+            ? safeTab.words.filter(function (row) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return !!(hasMeaningfulText(safeRow.word) || hasMeaningfulText(safeRow.meaning));
             })
             : [];
-          const sentences = Array.isArray(firstTwoThree.sentences)
-            ? firstTwoThree.sentences.filter(function (row) {
+          const sentences = Array.isArray(safeTab.sentences)
+            ? safeTab.sentences.filter(function (row) {
               const safeRow = row && typeof row === "object" ? row : {};
-              return !!(toSafeText(safeRow.sentence) || (Array.isArray(safeRow.ink) && safeRow.ink.length));
+              return !!(hasMeaningfulText(safeRow.sentence) || hasInkStrokeList(safeRow.ink));
             })
             : [];
           if (words.length) {
@@ -3495,13 +4124,12 @@
             payload.sentences = sentences;
           }
         } else {
-          const firstText = tabs.find(function (tab) {
-            return tab && tab.type === "blank" && toSafeText(tab.blankText).trim();
-          });
-          if (firstText) {
-            payload.text = toSafeText(firstText.blankText);
+          const text = toSafeText(safeTab.blankText).trim();
+          if (text) {
+            payload.text = text;
           }
         }
+
         return payload;
       }
 
@@ -3553,6 +4181,245 @@
           return Math.trunc(numeric);
         }
         return Number.NaN;
+      }
+
+      function parseQNoForPayload(value) {
+        const text = toSafeText(value).trim();
+        if (!text) return DEFAULT_PAYLOAD_QNO;
+        const numeric = Number(text);
+        if (Number.isFinite(numeric)) {
+          return Math.max(0, Math.trunc(numeric));
+        }
+        const digitMatch = text.match(/\d+/);
+        if (digitMatch) {
+          const parsed = Number(digitMatch[0]);
+          if (Number.isFinite(parsed)) {
+            return Math.max(0, Math.trunc(parsed));
+          }
+        }
+        return DEFAULT_PAYLOAD_QNO;
+      }
+
+      function getSessionNoFromAny(source) {
+        const safe = source && typeof source === "object" ? source : {};
+        const row = safe._row && typeof safe._row === "object" ? safe._row : safe;
+        const raw = getRawSessionNoFromAny(row);
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? Math.trunc(parsed) : Number.NaN;
+      }
+
+      function isReviewSessionNo(sessionNo) {
+        return Number(sessionNo) === 1;
+      }
+
+      function isSubmittedSessionNo(sessionNo) {
+        const n = Number(sessionNo);
+        return n === 99 || n === 992;
+      }
+
+      function formatQuestionNoLabel(rawValue) {
+        const qNo = parseQNoForPayload(rawValue);
+        return qNo > 0 ? String(qNo) : "-";
+      }
+
+      function getSessionQuestionNoLabel(session) {
+        const safeSession = session && typeof session === "object" ? session : null;
+        if (!safeSession) return "-";
+        return formatQuestionNoLabel(getSessionQNoFromAny(safeSession));
+      }
+
+      function getLapTurnFromAny(source) {
+        const safe = source && typeof source === "object" ? source : {};
+        const row = safe._row && typeof safe._row === "object" ? safe._row : safe;
+        const rawLap = safe.lap != null
+          ? safe.lap
+          : (row ? getRawLapFromAny(row) : null);
+        const normalized = normalizeLapForPayload(rawLap);
+        const match = normalized.match(/^(\d+)\.(\d+)$/);
+        if (!match) return 1;
+        const turn = Number(match[2]);
+        return Number.isFinite(turn) ? Math.max(1, Math.trunc(turn)) : 1;
+      }
+
+      function getLapMajorFromAny(source) {
+        const safe = source && typeof source === "object" ? source : {};
+        const row = safe._row && typeof safe._row === "object" ? safe._row : safe;
+        const rawLap = safe.lap != null
+          ? safe.lap
+          : (row ? getRawLapFromAny(row) : null);
+        const normalized = normalizeLapForPayload(rawLap);
+        const match = normalized.match(/^(\d+)\.(\d+)$/);
+        if (!match) return 1;
+        const major = Number(match[1]);
+        return Number.isFinite(major) ? Math.max(1, Math.trunc(major)) : 1;
+      }
+
+      function getSessionQNoFromAny(source) {
+        const safe = source && typeof source === "object" ? source : {};
+        const row = safe._row && typeof safe._row === "object" ? safe._row : safe;
+        const sessionQNo = parseQNoForPayload(safe.qNo);
+        if (sessionQNo > 0) return sessionQNo;
+        return parseQNoForPayload(row ? getRawQNoFromAny(row) : null);
+      }
+
+      function getSessionMockTrackKey(source) {
+        const safe = source && typeof source === "object" ? source : {};
+        const row = safe._row && typeof safe._row === "object" ? safe._row : safe;
+
+        const qLevelRaw = toSafeText(
+          row && row.QLevel != null
+            ? row.QLevel
+            : (safe.mock && safe.mock.grade ? safe.mock.grade : "")
+        ).trim();
+        const qLevel = normalizeStorageGrade(qLevelRaw || DEFAULT_GRADE);
+
+        const qYear = parseQYearForSend(
+          row && row.QYear != null
+            ? row.QYear
+            : (safe.mock && safe.mock.year ? safe.mock.year : "")
+        );
+
+        let qMonth = Number(row && row.QMonth != null ? row.QMonth : Number.NaN);
+        if (!Number.isFinite(qMonth) && safe.mock && safe.mock.examKey) {
+          qMonth = examKeyToMonth(safe.mock.examKey);
+        }
+
+        if (!qLevel || !Number.isFinite(qYear) || !Number.isFinite(qMonth)) return "";
+
+        const page = parsePositivePage(
+          safe.targetPage != null
+            ? safe.targetPage
+            : (row ? (row.Page != null ? row.Page : (row.page != null ? row.page : row.TemplatePage)) : null)
+        );
+
+        return `${qLevel}:${Math.trunc(qYear)}:${Math.trunc(qMonth)}:${page || 0}`;
+      }
+
+      function buildReviewTrackKey(source) {
+        const qNo = getSessionQNoFromAny(source);
+        const lapMajor = getLapMajorFromAny(source);
+        if (!lapMajor) return "";
+        if (qNo > 0) return `q:${qNo}:${lapMajor}`;
+        const mockKey = getSessionMockTrackKey(source);
+        if (!mockKey) return "";
+        return `m:${mockKey}:${lapMajor}`;
+      }
+
+      function isReviewSessionForList(session) {
+        if (!isReviewSessionNo(getSessionNoFromAny(session))) return false;
+        return getLapTurnFromAny(session) === 1;
+      }
+
+      function updateOverlayQuestionNoBar() {
+        if (!overlayQuestionBar) return;
+        const tab = getActiveMemoTab();
+        const tabRawQNo = tab && typeof tab === "object"
+          ? getRawQNoFromAny(tab)
+          : null;
+        let label = formatQuestionNoLabel(tabRawQNo);
+        if (label === "-") {
+          const selectedSession = findSelectedSessionByKey();
+          label = getSessionQuestionNoLabel(selectedSession);
+        }
+        overlayQuestionBar.textContent = `Question No. ${label}`;
+      }
+
+      function setActiveTabQuestionNoFromWordHit(rawQNo) {
+        const qNo = parseQNoForPayload(rawQNo);
+        if (qNo <= 0) return false;
+        const tab = getActiveMemoTab();
+        if (!tab || typeof tab !== "object") return false;
+        const prev = parseQNoForPayload(getRawQNoFromAny(tab));
+        if (prev === qNo) return false;
+        tab.QNo = qNo;
+        tab.qNo = qNo;
+        updateOverlayQuestionNoBar();
+        markMemoDirty("qno-from-word-hit");
+        trace("info", `active tab qno set from word-hit: Q${qNo}`);
+        return true;
+      }
+
+      function normalizeLapForPayload(value) {
+        const text = toSafeText(value).trim();
+        if (!text) return DEFAULT_PAYLOAD_LAP;
+
+        const dotMatch = text.match(/^(\d+)\.(\d+)$/);
+        if (dotMatch) {
+          const lap = Math.max(1, Math.trunc(Number(dotMatch[1]) || 0));
+          const turn = Math.max(1, Math.trunc(Number(dotMatch[2]) || 0));
+          return `${lap}.${turn}`;
+        }
+
+        const pairMatch = text.match(/(\d+)\D+(\d+)/);
+        if (pairMatch) {
+          const lap = Math.max(1, Math.trunc(Number(pairMatch[1]) || 0));
+          const turn = Math.max(1, Math.trunc(Number(pairMatch[2]) || 0));
+          return `${lap}.${turn}`;
+        }
+
+        const singleMatch = text.match(/^(\d+)$/);
+        if (singleMatch) {
+          const lap = Math.max(1, Math.trunc(Number(singleMatch[1]) || 0));
+          return `${lap}.1`;
+        }
+
+        return DEFAULT_PAYLOAD_LAP;
+      }
+
+      function incrementLapTurn(rawLap) {
+        const normalized = normalizeLapForPayload(rawLap);
+        const match = normalized.match(/^(\d+)\.(\d+)$/);
+        if (!match) return normalized;
+        const lap = Math.max(1, Math.trunc(Number(match[1]) || 0));
+        const turn = Math.max(1, Math.trunc(Number(match[2]) || 0)) + 1;
+        return `${lap}.${turn}`;
+      }
+
+      function resolveSubmitQuestionMeta() {
+        const session = findSelectedSessionByKey();
+        const sessionNo = getSessionNoFromAny(session);
+        const isReviewSubmit = isReviewSessionNo(sessionNo);
+        const row = session && session._row && typeof session._row === "object"
+          ? session._row
+          : null;
+        const qNoCandidates = [
+          session && session.qNo,
+          row && getRawQNoFromAny(row)
+        ];
+        const lapCandidates = [
+          session && session.lap,
+          row && getRawLapFromAny(row)
+        ];
+
+        let qNo = DEFAULT_PAYLOAD_QNO;
+        let hasQNo = false;
+        for (let i = 0; i < qNoCandidates.length; i += 1) {
+          const parsed = parseQNoForPayload(qNoCandidates[i]);
+          if (parsed > 0) {
+            qNo = parsed;
+            hasQNo = true;
+            break;
+          }
+        }
+
+        let lap = DEFAULT_PAYLOAD_LAP;
+        let hasLap = false;
+        for (let i = 0; i < lapCandidates.length; i += 1) {
+          const normalized = normalizeLapForPayload(lapCandidates[i]);
+          if (normalized !== DEFAULT_PAYLOAD_LAP || hasMeaningfulText(lapCandidates[i])) {
+            lap = normalized;
+            hasLap = true;
+            break;
+          }
+        }
+
+        // REVIEW(SessionNo=1)에서 다시 제출할 때는 왕복 회차를 0.1(=turn +1) 증가시킨다.
+        if (isReviewSubmit) {
+          lap = incrementLapTurn(lap);
+          hasLap = true;
+        }
+
+        return { qNo, lap, hasQNo, hasLap, forceLap: isReviewSubmit };
       }
 
       function examKeyToMonth(examKey) {
@@ -3619,107 +4486,265 @@
         };
       }
 
-      function setSaveButtonUi(state, label) {
-        saveToServerBtn.classList.remove("is-busy", "is-ok", "is-error");
-        if (state === "busy") saveToServerBtn.classList.add("is-busy");
-        if (state === "ok") saveToServerBtn.classList.add("is-ok");
-        if (state === "error") saveToServerBtn.classList.add("is-error");
-        saveToServerBtn.textContent = label || "저장";
+      function setSubmitButtonsUi(state, label) {
+        submitMenuBtn.classList.remove("is-busy", "is-ok", "is-error");
+        if (state === "busy") submitMenuBtn.classList.add("is-busy");
+        if (state === "ok") submitMenuBtn.classList.add("is-ok");
+        if (state === "error") submitMenuBtn.classList.add("is-error");
+        submitMenuBtn.textContent = label || "제출";
+
         const mustDisable = !FIXED_STUDENT_ID || state === "busy";
-        saveToServerBtn.disabled = mustDisable;
-        saveToServerBtn.title = !FIXED_STUDENT_ID
+        submitMenuBtn.disabled = mustDisable;
+        submitActiveBtn.disabled = mustDisable;
+        submitAllBtn.disabled = mustDisable;
+        submitMenuBtn.title = !FIXED_STUDENT_ID
           ? "URL에 ?id=UserId 가 필요합니다."
-          : "현재 내용 저장";
+          : "제출 메뉴";
+        if (mustDisable) {
+          closeSubmitPopup();
+        }
       }
 
-      function queueSaveButtonUiReset(delayMs) {
+      function queueSubmitButtonsUiReset(delayMs) {
         if (saveButtonUiTimer) {
           clearTimeout(saveButtonUiTimer);
         }
         saveButtonUiTimer = window.setTimeout(function () {
           saveButtonUiTimer = null;
-          setSaveButtonUi("idle", "저장");
+          setSubmitButtonsUi("idle", "제출");
         }, Math.max(240, Number(delayMs) || 1200));
       }
 
-      async function sendCurrentSessionToServer() {
-        if (isSavingSessionToServer) return;
-
-        const context = resolveSaveContext();
-        if (!context.ok) {
-          trace("warn", "manual save blocked: required fields missing", context.issues);
-          setSaveButtonUi("error", "정보부족");
-          queueSaveButtonUiReset(1800);
-          return;
+      function showSubmitToast(message) {
+        let toast = document.getElementById("mock-submit-toast");
+        if (!toast) {
+          toast = document.createElement("div");
+          toast.id = "mock-submit-toast";
+          toast.className = "submit-toast";
+          toast.setAttribute("role", "status");
+          toast.setAttribute("aria-live", "polite");
+          document.body.appendChild(toast);
         }
-
-        const payloadJson = buildPayloadJsonForSave();
-        const hasPenInk = payloadHasAnyPenInk(payloadJson);
-        const sessionNoForSave = hasPenInk ? 992 : 99;
-        if (!payloadJson.meta || typeof payloadJson.meta !== "object") {
-          payloadJson.meta = {};
+        if (submitToastTimer) {
+          clearTimeout(submitToastTimer);
+          submitToastTimer = null;
         }
-        payloadJson.meta.hasPenInk = !!hasPenInk;
-        payloadJson.meta.sessionNo = sessionNoForSave;
+        toast.textContent = String(message || "제출되었습니다!");
+        toast.classList.remove("is-show");
+        void toast.offsetWidth;
+        toast.classList.add("is-show");
+        submitToastTimer = window.setTimeout(function () {
+          toast.classList.remove("is-show");
+          submitToastTimer = null;
+        }, 1900);
+      }
 
-        const requestBody = {
+      function buildRequestBodyForSubmit(context, sessionNoForSave, payloadJson) {
+        const qNo = extractQNoFromPayload(payloadJson);
+        const lap = extractLapFromPayload(payloadJson);
+        return {
           UserId: context.userId,
           LiveSchedule: formatNowAsSqlDatetime(new Date()),
           SessionNo: sessionNoForSave,
           QLevel: context.qLevel,
           QYear: context.qYear,
           QMonth: context.qMonth,
+          QNo: qNo,
+          Lap: lap,
           PayloadJson: payloadJson
         };
+      }
+
+      async function postSessionPayload(requestBody) {
+        const res = await fetch(LIVE_SEND_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody)
+        });
+        const rawText = await res.text();
+        let responsePayload = null;
+        try {
+          responsePayload = rawText ? JSON.parse(rawText) : null;
+        } catch (_err) {
+          responsePayload = null;
+        }
+        if (!res.ok) {
+          const message = responsePayload && responsePayload.message
+            ? responsePayload.message
+            : (rawText || `HTTP ${res.status}`);
+          throw new Error(message);
+        }
+        return {
+          status: res.status,
+          payload: responsePayload
+        };
+      }
+
+      function resetWorkspaceAfterSubmit() {
+        stopThreePenDrawing();
+        setBlankPenMode(false);
+        isThreeTPenMode = false;
+        isDictModeOn = false;
+        lastCapturedWord = "";
+        dictZoom = 1;
+        applyDictZoom();
+
+        selectedSessionId = "";
+        selectedSessionTitle = "";
+        selectedSessionTargetPage = null;
+        renderSessionList();
+
+        gradeSel.value = DEFAULT_GRADE;
+        yearSel.value = "";
+        examSel.value = "";
+        typeSel.value = "";
+        refreshYearExamTypeOptions();
+
+        overlaySide = "right";
+        applyOverlaySide();
+
+        memoTabs.length = 0;
+        memoTabs.push({
+          id: 1,
+          type: "blank",
+          blankText: "",
+          twoThree: null,
+          blankInk: []
+        });
+        nextMemoTabId = 2;
+        activeMemoTabIndex = 0;
+        renderActiveMemoPane();
+        renderMemoTabbar();
+
+        closeSessionPopup();
+        closePickerPopup();
+        closeSubmitPopup();
+        closePrintPopup();
+        closeFontPopup();
+        closeTabTypePopup();
+        closeTabCloseConfirm();
+        if (isMemoOpen()) {
+          toggleMemoOverlay(false);
+        }
+
+        activeWordIndex = null;
+        wordMeaningMap = new Map();
+        lastPdfUrl = "";
+        resetPdfPreviewToEmpty("상단에서 시험 구성을 고른 뒤 PDF 불러오기를 눌러주세요.");
+        setLocalDraftState(false, true);
+        updateTopbarStatus();
+      }
+
+      async function sendCurrentSessionToServer(submitMode) {
+        if (isSavingSessionToServer) return;
+        const mode = submitMode === "all" ? "all" : "active";
+
+        const context = resolveSaveContext();
+        if (!context.ok) {
+          trace("warn", "manual submit blocked: required fields missing", context.issues);
+          setSubmitButtonsUi("error", "정보부족");
+          queueSubmitButtonsUiReset(1800);
+          return;
+        }
+
+        const submitTargets = collectTemplateSubmitTargets(mode);
+        if (!submitTargets.length) {
+          trace("info", `manual submit skipped: no writable template page (${mode})`);
+          if (mode === "all") {
+            setSubmitButtonsUi("error", "작성없음");
+            window.alert("작성된 템플릿 페이지가 없어 제출하지 않았습니다.");
+          } else {
+            setSubmitButtonsUi("error", "빈 페이지");
+            window.alert("현재 활성 페이지에 작성된 내용이 없어 제출하지 않았습니다.");
+          }
+          queueSubmitButtonsUiReset(1800);
+          return;
+        }
+
+        const confirmMessage = mode === "all"
+          ? `모두 제출하시겠습니까?\n작성된 ${submitTargets.length}페이지를 제출합니다.`
+          : `현재 페이지(${submitTargets[0].templatePage})를 제출하시겠습니까?`;
+        if (!window.confirm(confirmMessage)) return;
+
+        const submitQuestionMeta = resolveSubmitQuestionMeta();
 
         isSavingSessionToServer = true;
         if (saveButtonUiTimer) {
           clearTimeout(saveButtonUiTimer);
           saveButtonUiTimer = null;
         }
-        setSaveButtonUi("busy", "저장중");
+        setSubmitButtonsUi("busy", mode === "all" ? `모두 1/${submitTargets.length}` : "제출중");
         saveLocalDraftNow("manual-save");
 
         try {
-          const res = await fetch(LIVE_SEND_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody)
-          });
-          const rawText = await res.text();
-          let responsePayload = null;
-          try {
-            responsePayload = rawText ? JSON.parse(rawText) : null;
-          } catch (_err) {
-            responsePayload = null;
+          const submitResults = [];
+          for (let i = 0; i < submitTargets.length; i += 1) {
+            const target = submitTargets[i];
+            if (mode === "all") {
+              setSubmitButtonsUi("busy", `모두 ${i + 1}/${submitTargets.length}`);
+            }
+
+            const payloadJson = buildPayloadJsonForTemplatePage(
+              target.tab,
+              target.templatePage,
+              {
+                mode,
+                order: i + 1,
+                count: submitTargets.length,
+                tabIndex: target.originalIndex,
+                qNo: submitQuestionMeta.hasQNo ? submitQuestionMeta.qNo : undefined,
+                lap: submitQuestionMeta.hasLap ? submitQuestionMeta.lap : undefined,
+                forceLap: submitQuestionMeta.forceLap === true
+              }
+            );
+            const hasPenInk = payloadHasAnyPenInk(payloadJson);
+            const sessionNoForSave = hasPenInk ? 992 : 99;
+            if (!payloadJson.meta || typeof payloadJson.meta !== "object") {
+              payloadJson.meta = {};
+            }
+            payloadJson.meta.hasPenInk = !!hasPenInk;
+            payloadJson.meta.sessionNo = sessionNoForSave;
+
+            let posted = null;
+            try {
+              posted = await postSessionPayload(buildRequestBodyForSubmit(context, sessionNoForSave, payloadJson));
+            } catch (err) {
+              throw new Error(`template p.${target.templatePage} 제출 실패: ${err && err.message ? err.message : err}`);
+            }
+            submitResults.push({
+              templatePage: target.templatePage,
+              status: posted.status,
+              sessionNo: sessionNoForSave,
+              LSASId: posted.payload && posted.payload.LSASId ? posted.payload.LSASId : "",
+              ServedFileURL: posted.payload && posted.payload.ServedFileURL ? posted.payload.ServedFileURL : ""
+            });
           }
 
-          if (!res.ok) {
-            const message = responsePayload && responsePayload.message
-              ? responsePayload.message
-              : (rawText || `HTTP ${res.status}`);
-            throw new Error(message);
-          }
-
-          trace("info", "manual save success", {
-            status: res.status,
-            sessionNo: sessionNoForSave,
-            hasPenInk,
-            LSASId: responsePayload && responsePayload.LSASId ? responsePayload.LSASId : "",
-            ServedFileURL: responsePayload && responsePayload.ServedFileURL ? responsePayload.ServedFileURL : ""
+          trace("info", "manual submit success", {
+            mode,
+            count: submitResults.length,
+            templatePages: submitResults.map(function (item) { return item.templatePage; }),
+            statuses: submitResults.map(function (item) { return item.status; }),
+            sessionNos: submitResults.map(function (item) { return item.sessionNo; }),
+            qNo: submitQuestionMeta.qNo,
+            lap: submitQuestionMeta.lap,
+            lastLSASId: submitResults.length ? submitResults[submitResults.length - 1].LSASId : "",
+            lastServedFileURL: submitResults.length ? submitResults[submitResults.length - 1].ServedFileURL : ""
           });
           clearLocalDraftStorage("server-saved");
-          setSaveButtonUi("ok", "저장완료");
-          queueSaveButtonUiReset(1500);
+          resetWorkspaceAfterSubmit();
+          setSubmitButtonsUi("ok", "제출완료");
+          queueSubmitButtonsUiReset(1500);
+          showSubmitToast("제출되었습니다!");
           void fetchLiveSessions(true);
         } catch (err) {
-          trace("error", "manual save failed", err);
-          setSaveButtonUi("error", "저장실패");
-          queueSaveButtonUiReset(2200);
+          trace("error", "manual submit failed", err);
+          setSubmitButtonsUi("error", "제출실패");
+          queueSubmitButtonsUiReset(2200);
         } finally {
           isSavingSessionToServer = false;
           if (!saveButtonUiTimer) {
-            setSaveButtonUi("idle", "저장");
+            setSubmitButtonsUi("idle", "제출");
           }
         }
       }
@@ -3744,13 +4769,29 @@
         };
       }
 
+      function snapshotHasMeaningfulContent(snapshot) {
+        const safe = snapshot && typeof snapshot === "object" ? snapshot : {};
+        const tabs = Array.isArray(safe.tabs) ? safe.tabs : [];
+        for (let i = 0; i < tabs.length; i += 1) {
+          if (isTemplateTabFilled(tabs[i])) return true;
+        }
+        return false;
+      }
+
       function saveLocalDraftNow(reason) {
         if (isApplyingLocalDraft) return;
         clearLocalDraftSaveTimer();
         try {
           const snapshot = buildLocalDraftSnapshot();
+          if (!snapshotHasMeaningfulContent(snapshot)) {
+            try {
+              localStorage.removeItem(LOCAL_DRAFT_STORAGE_KEY);
+            } catch (_err) {}
+            setLocalDraftState(false);
+            return;
+          }
           localStorage.setItem(LOCAL_DRAFT_STORAGE_KEY, JSON.stringify(snapshot));
-          setLocalDraftState(true, true);
+          setLocalDraftState(true);
           if (reason === "manual-save") {
             trace("info", "local draft saved", {
               key: LOCAL_DRAFT_STORAGE_KEY,
@@ -4030,14 +5071,14 @@
       }
 
       function findWordHitAtPoint(hits, x, y) {
-        if (!Array.isArray(hits) || !hits.length) return "";
+        if (!Array.isArray(hits) || !hits.length) return null;
         for (let idx = 0; idx < hits.length; idx += 1) {
           const hit = hits[idx];
           if (x >= hit.x1 && x <= hit.x2 && y >= hit.y1 && y <= hit.y2) {
-            return hit.word || "";
+            return hit || null;
           }
         }
-        return "";
+        return null;
       }
 
       function buildWordHitsFromIndexRows(rows, scaleX, scaleY, pageHeightPx) {
@@ -4060,7 +5101,12 @@
           const rx = Math.max(x0, x1);
           const ty = Math.min(y0, y1);
           const by = Math.max(y0, y1);
-          hits.push({ word: text, x1: lx, y1: ty, x2: rx, y2: by });
+          const qNo = getWordIndexQNoFromObject(row);
+          const hit = { word: text, x1: lx, y1: ty, x2: rx, y2: by };
+          if (qNo > 0) {
+            hit.qNo = qNo;
+          }
+          hits.push(hit);
         }
         return hits;
       }
@@ -4189,6 +5235,7 @@
           canvas.height = Math.floor(viewport.height * outputScale);
           canvas.style.width = `${viewport.width}px`;
           canvas.style.height = `${viewport.height}px`;
+          bindTouchDragScrollBridge(canvas);
 
           pageWrap.appendChild(canvas);
           previewPages.appendChild(pageWrap);
@@ -4220,19 +5267,20 @@
           const wordHits = buildWordHitsFromIndexRows(indexRows, scaleX, scaleY, viewport.height);
           canvas.style.cursor = wordHits.length ? "pointer" : "default";
           const pickWordHitByClientPoint = function (clientX, clientY) {
-            if (!wordHits.length) return "";
+            if (!wordHits.length) return null;
             const rect = canvas.getBoundingClientRect();
             const px = clientX - rect.left;
             const py = clientY - rect.top;
             return findWordHitAtPoint(wordHits, px, py);
           };
           const showMeaningByClientPoint = function (clientX, clientY) {
-            const found = pickWordHitByClientPoint(clientX, clientY);
-            if (!found) {
+            const foundHit = pickWordHitByClientPoint(clientX, clientY);
+            if (!foundHit || !foundHit.word) {
               canvas.style.cursor = "default";
               hideWordTooltip();
               return;
             }
+            const found = foundHit.word;
             const meaning = findMeaningForWord(found);
             canvas.style.cursor = meaning ? "help" : "pointer";
             if (meaning) {
@@ -4266,12 +5314,13 @@
             canvas.addEventListener("pointerup", function (event) {
               if (event.pointerType !== "pen") return;
               if (Date.now() - lastPreviewScrollAt < 140) return;
-              const word = pickWordHitByClientPoint(event.clientX, event.clientY);
-              if (!word) return;
+              const hit = pickWordHitByClientPoint(event.clientX, event.clientY);
+              if (!hit || !hit.word) return;
               lastPenTapAt = Date.now();
-              const added = appendWordToActiveMemo(word);
-              if (added) {
-                trace("info", `memo append word (pen): ${word}`);
+              const qNoUpdated = setActiveTabQuestionNoFromWordHit(hit.qNo);
+              const added = appendWordToActiveMemo(hit.word);
+              if (added || qNoUpdated) {
+                trace("info", `memo append word (pen): ${hit.word}${hit.qNo ? ` / Q${hit.qNo}` : ""}`);
               }
               hideWordTooltip();
             }, { passive: true });
@@ -4299,11 +5348,12 @@
             if (Date.now() - lastPenTapAt < 120) return;
             if (Date.now() - lastPreviewScrollAt < 140) return;
             if (!wordHits.length) return;
-            const word = pickWordHitByClientPoint(event.clientX, event.clientY);
-            if (!word) return;
-            const added = appendWordToActiveMemo(word);
-            if (added) {
-              trace("info", `memo append word: ${word}`);
+            const hit = pickWordHitByClientPoint(event.clientX, event.clientY);
+            if (!hit || !hit.word) return;
+            const qNoUpdated = setActiveTabQuestionNoFromWordHit(hit.qNo);
+            const added = appendWordToActiveMemo(hit.word);
+            if (added || qNoUpdated) {
+              trace("info", `memo append word: ${hit.word}${hit.qNo ? ` / Q${hit.qNo}` : ""}`);
             }
             hideWordTooltip();
           });
@@ -4382,6 +5432,22 @@
         return sourceTabs.map(function (raw, idx) {
           const safeRaw = raw && typeof raw === "object" ? raw : {};
           const type = safeRaw.type === "two_three" ? "two_three" : "blank";
+          const parsedQNo = parseQNoForPayload(getRawQNoFromAny(safeRaw));
+          const rawLap = getRawLapFromAny(safeRaw);
+          const hasRawLap = hasMeaningfulText(rawLap);
+          const normalizedLap = normalizeLapForPayload(rawLap);
+          const applyTabMeta = function (target) {
+            if (!target || typeof target !== "object") return target;
+            if (parsedQNo > 0) {
+              target.QNo = parsedQNo;
+              target.qNo = parsedQNo;
+            }
+            if (hasRawLap || normalizedLap !== DEFAULT_PAYLOAD_LAP) {
+              target.Lap = normalizedLap;
+              target.lap = normalizedLap;
+            }
+            return target;
+          };
           if (type === "two_three") {
             const sourceWords = Array.isArray(safeRaw.words)
               ? safeRaw.words
@@ -4407,13 +5473,13 @@
               ensureThreeSentenceInk(sentenceCard);
               return sentenceCard;
             });
-            return {
+            return applyTabMeta({
               id: idx + 1,
               type: "two_three",
               blankText: "",
               blankInk: [],
               twoThree: { words, sentences }
-            };
+            });
           }
           const blankTab = {
             id: idx + 1,
@@ -4423,7 +5489,7 @@
             twoThree: null
           };
           ensureBlankInk(blankTab);
-          return blankTab;
+          return applyTabMeta(blankTab);
         });
       }
 
@@ -4502,6 +5568,161 @@
         return "";
       }
 
+      function normalizeLooseKeyName(value) {
+        return toSafeText(value).replace(/[^a-z0-9]/gi, "").toLowerCase();
+      }
+
+      function findObjectValueByAliases(source, aliases) {
+        const safeSource = source && typeof source === "object" ? source : null;
+        if (!safeSource) return null;
+        const aliasList = Array.isArray(aliases) ? aliases : [];
+        for (let i = 0; i < aliasList.length; i += 1) {
+          const alias = aliasList[i];
+          if (!alias) continue;
+          if (Object.prototype.hasOwnProperty.call(safeSource, alias) && safeSource[alias] != null) {
+            return { key: alias, value: safeSource[alias] };
+          }
+        }
+        if (!aliasList.length) return null;
+
+        const normalizedAliases = [];
+        for (let i = 0; i < aliasList.length; i += 1) {
+          const normalized = normalizeLooseKeyName(aliasList[i]);
+          if (!normalized) continue;
+          if (normalizedAliases.indexOf(normalized) < 0) {
+            normalizedAliases.push(normalized);
+          }
+        }
+        if (!normalizedAliases.length) return null;
+
+        const keys = Object.keys(safeSource);
+        for (let i = 0; i < keys.length; i += 1) {
+          const key = keys[i];
+          const value = safeSource[key];
+          if (value == null) continue;
+          if (normalizedAliases.indexOf(normalizeLooseKeyName(key)) >= 0) {
+            return { key, value };
+          }
+        }
+        return null;
+      }
+
+      function getObjectValueByAliases(source, aliases) {
+        const found = findObjectValueByAliases(source, aliases);
+        return found ? found.value : undefined;
+      }
+
+      function getRawQNoFromAny(source) {
+        return getObjectValueByAliases(source, [
+          "QNo",
+          "qNo",
+          "question_no",
+          "questionNo",
+          "q_no",
+          "problem_number",
+          "problemNo",
+          "problem_no"
+        ]);
+      }
+
+      function getRawLapFromAny(source) {
+        return getObjectValueByAliases(source, [
+          "Lap",
+          "lap",
+          "lap_no",
+          "lapNo",
+          "LapNo",
+          "LAP"
+        ]);
+      }
+
+      function getRawSessionNoFromAny(source) {
+        return getObjectValueByAliases(source, [
+          "SessionNo",
+          "sessionNo",
+          "session_no",
+          "sessionno",
+          "SESSIONNO"
+        ]);
+      }
+
+      function getPayloadFieldFromReceiveRow(row) {
+        const safeRow = row && typeof row === "object" ? row : {};
+        const direct = findObjectValueByAliases(safeRow, [
+          "PayloadJson",
+          "payloadJson",
+          "PayloadJSON",
+          "payload_json",
+          "payloadjson",
+          "Payload",
+          "payload"
+        ]);
+        if (direct && direct.value != null) return direct;
+
+        const keys = Object.keys(safeRow);
+        for (let i = 0; i < keys.length; i += 1) {
+          const key = keys[i];
+          const value = safeRow[key];
+          if (value == null) continue;
+          const normalizedKey = normalizeLooseKeyName(key);
+          if (
+            normalizedKey.indexOf("payloadjson") >= 0 ||
+            normalizedKey === "payload" ||
+            /payload$/.test(normalizedKey)
+          ) {
+            return { key, value };
+          }
+        }
+        return null;
+      }
+
+      function parsePayloadObjectLoose(value) {
+        if (!value) return null;
+        if (value && typeof value === "object") return value;
+        const text = toSafeText(value).trim();
+        if (!text) return null;
+        try {
+          const parsed = JSON.parse(text);
+          return parsed && typeof parsed === "object" ? parsed : null;
+        } catch (_err) {
+          return null;
+        }
+      }
+
+      function extractPayloadFromReceiveRow(row) {
+        const safeRow = row && typeof row === "object" ? row : {};
+        const foundPayloadField = getPayloadFieldFromReceiveRow(safeRow);
+        const candidates = [];
+        if (foundPayloadField && foundPayloadField.value != null) {
+          candidates.push(foundPayloadField.value);
+        }
+
+        const nestedContainerCandidates = [
+          getObjectValueByAliases(safeRow, ["data", "Data", "row", "Row", "record", "Record"]),
+          getObjectValueByAliases(safeRow, ["result", "Result", "item", "Item"])
+        ];
+        for (let i = 0; i < nestedContainerCandidates.length; i += 1) {
+          const nested = nestedContainerCandidates[i];
+          if (!nested || typeof nested !== "object") continue;
+          const nestedField = getPayloadFieldFromReceiveRow(nested);
+          if (nestedField && nestedField.value != null) {
+            candidates.push(nestedField.value);
+          }
+        }
+
+        for (let i = 0; i < candidates.length; i += 1) {
+          const parsed = parsePayloadObjectLoose(candidates[i]);
+          if (!parsed) continue;
+          const nestedPayloadField = getPayloadFieldFromReceiveRow(parsed);
+          if (nestedPayloadField && nestedPayloadField.value != null) {
+            const nestedParsed = parsePayloadObjectLoose(nestedPayloadField.value);
+            if (nestedParsed) return nestedParsed;
+          }
+          return parsed;
+        }
+        return null;
+      }
+
       function trimForLog(value, maxLength) {
         const text = toSafeText(value);
         if (!text) return "";
@@ -4510,8 +5731,424 @@
         return `${text.slice(0, limit)}...`;
       }
 
+      function normalizeWordIndexPage(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return null;
+        const page = Math.trunc(n);
+        return page > 0 ? page : null;
+      }
+
+      function normalizeWordIndexIdx(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return null;
+        const idx = Math.trunc(n);
+        return idx >= 0 ? idx : null;
+      }
+
+      function normalizeWordIndexBBox(value) {
+        if (!Array.isArray(value) || value.length < 4) return null;
+        const x0 = Number(value[0]);
+        const y0 = Number(value[1]);
+        const x1 = Number(value[2]);
+        const y1 = Number(value[3]);
+        if (![x0, y0, x1, y1].every(Number.isFinite)) return null;
+        return [x0, y0, x1, y1];
+      }
+
+      function parseWordIndexQNo(value) {
+        const parsed = parseQNoForPayload(value);
+        return parsed > 0 ? parsed : 0;
+      }
+
+      function parseWordIndexTupleRef(value) {
+        if (Array.isArray(value) && value.length >= 2) {
+          const a = Number(value[0]);
+          const b = Number(value[1]);
+          if (Number.isFinite(a) && Number.isFinite(b)) {
+            return [Math.trunc(a), Math.trunc(b)];
+          }
+          return null;
+        }
+        const text = toSafeText(value).trim();
+        if (!text) return null;
+        const nums = text.match(/-?\d+/g);
+        if (!nums || nums.length < 2) return null;
+        const a = Number(nums[0]);
+        const b = Number(nums[1]);
+        if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+        return [Math.trunc(a), Math.trunc(b)];
+      }
+
+      function parseWordIndexLineRef(value) {
+        if (Array.isArray(value) && value.length >= 2) {
+          const col = Number(value[0]);
+          const line = Number(value[1]);
+          if (Number.isFinite(col) && Number.isFinite(line)) {
+            return [Math.trunc(col), Math.trunc(line)];
+          }
+          return null;
+        }
+        if (value && typeof value === "object") {
+          const col = Number(getObjectValueByAliases(value, ["col", "column", "c"]));
+          const line = Number(getObjectValueByAliases(value, ["line_id", "lineId", "line", "id"]));
+          if (Number.isFinite(col) && Number.isFinite(line)) {
+            return [Math.trunc(col), Math.trunc(line)];
+          }
+        }
+        return parseWordIndexTupleRef(value);
+      }
+
+      function getWordIndexQNoFromObject(source) {
+        const safe = source && typeof source === "object" ? source : null;
+        if (!safe) return 0;
+        const direct = getObjectValueByAliases(safe, [
+          "problem_number",
+          "problemNumber",
+          "problem_no",
+          "problemNo",
+          "problem",
+          "QNo",
+          "qNo",
+          "question_no",
+          "questionNo",
+          "q_no",
+          "pno",
+          "no"
+        ]);
+        const directParsed = parseWordIndexQNo(direct);
+        if (directParsed > 0) return directParsed;
+        const meta = safe.meta && typeof safe.meta === "object" ? safe.meta : null;
+        if (meta) {
+          const metaValue = getObjectValueByAliases(meta, [
+            "problem_number",
+            "problemNumber",
+            "problem_no",
+            "problemNo",
+            "problem",
+            "QNo",
+            "qNo",
+            "question_no",
+            "questionNo",
+            "q_no",
+            "pno",
+            "no"
+          ]);
+          const metaParsed = parseWordIndexQNo(metaValue);
+          if (metaParsed > 0) return metaParsed;
+        }
+        return 0;
+      }
+
+      function parseWordIndexRow(value, fallbackPage) {
+        const pageFallback = normalizeWordIndexPage(fallbackPage);
+        if (value && typeof value === "object") {
+          const text = normalizeCapturedWord(value.text != null ? value.text : value.word);
+          const bbox = normalizeWordIndexBBox(value.bbox);
+          const page = normalizeWordIndexPage(value.page != null ? value.page : pageFallback);
+          const idx = normalizeWordIndexIdx(getObjectValueByAliases(value, [
+            "idx",
+            "word_index",
+            "wordIndex",
+            "word_idx",
+            "wordIdx",
+            "index"
+          ]));
+          const qNo = getWordIndexQNoFromObject(value);
+          if (text && bbox && page) {
+            return { text, bbox, page, idx, qNo };
+          }
+        }
+        if (Array.isArray(value) && value.length >= 5) {
+          const bbox = normalizeWordIndexBBox(value.slice(0, 4));
+          const text = normalizeCapturedWord(value[4]);
+          const page = pageFallback;
+          const qNo = parseWordIndexQNo(value.length >= 6 ? value[5] : null);
+          const idx = normalizeWordIndexIdx(value.length >= 7 ? value[6] : null);
+          if (text && bbox && page) {
+            return { text, bbox, page, idx, qNo };
+          }
+        }
+        return null;
+      }
+
+      function extractWordIndexObjects(root) {
+        const out = [];
+        const push = function (value) {
+          if (!value || typeof value !== "object") return;
+          if (out.indexOf(value) < 0) out.push(value);
+        };
+        push(root);
+        if (!root || typeof root !== "object") return out;
+        push(root.ix);
+        push(root.data);
+        push(root.payload);
+        push(root.index);
+        return out;
+      }
+
+      function normalizeWordIndexData(rawData) {
+        const objects = extractWordIndexObjects(rawData);
+        const pages = {};
+        const dedupe = new Set();
+        const dedupeRowByKey = new Map();
+
+        const makeWordRefKey = function (page, idx) {
+          const pageNum = normalizeWordIndexPage(page);
+          const idxNum = normalizeWordIndexIdx(idx);
+          if (!pageNum || idxNum == null) return "";
+          return `${pageNum}:${idxNum}`;
+        };
+
+        const makeLineRefKey = function (col, lineId) {
+          const colNum = normalizeWordIndexIdx(col);
+          const lineNum = normalizeWordIndexIdx(lineId);
+          if (colNum == null || lineNum == null) return "";
+          return `${colNum}:${lineNum}`;
+        };
+
+        const buildWordIndexLookup = function (obj) {
+          const safeObj = obj && typeof obj === "object" ? obj : {};
+          const wordToProblem = new Map();
+          const wordToLine = new Map();
+          const lineToProblem = new Map();
+
+          const addWordToProblemMap = function (mapValue) {
+            if (!mapValue || typeof mapValue !== "object") return;
+            const keys = Object.keys(mapValue);
+            for (let i = 0; i < keys.length; i += 1) {
+              const key = keys[i];
+              const pair = parseWordIndexTupleRef(key);
+              if (!pair) continue;
+              const wordKey = makeWordRefKey(pair[0], pair[1]);
+              if (!wordKey) continue;
+              const qNo = parseWordIndexQNo(mapValue[key]);
+              wordToProblem.set(wordKey, qNo > 0 ? qNo : 0);
+            }
+          };
+
+          const addWordToLineMap = function (mapValue) {
+            if (!mapValue || typeof mapValue !== "object") return;
+            const keys = Object.keys(mapValue);
+            for (let i = 0; i < keys.length; i += 1) {
+              const key = keys[i];
+              const pair = parseWordIndexTupleRef(key);
+              if (!pair) continue;
+              const wordKey = makeWordRefKey(pair[0], pair[1]);
+              if (!wordKey) continue;
+              const lineRef = parseWordIndexLineRef(mapValue[key]);
+              if (!lineRef) continue;
+              const lineKey = makeLineRefKey(lineRef[0], lineRef[1]);
+              if (!lineKey) continue;
+              wordToLine.set(wordKey, lineKey);
+            }
+          };
+
+          const addLineToProblemMap = function (mapValue) {
+            if (!mapValue || typeof mapValue !== "object") return;
+            const keys = Object.keys(mapValue);
+            for (let i = 0; i < keys.length; i += 1) {
+              const key = keys[i];
+              const lineRef = parseWordIndexLineRef(key);
+              if (!lineRef) continue;
+              const lineKey = makeLineRefKey(lineRef[0], lineRef[1]);
+              if (!lineKey) continue;
+              const qNo = parseWordIndexQNo(mapValue[key]);
+              lineToProblem.set(lineKey, qNo > 0 ? qNo : 0);
+            }
+          };
+
+          addWordToProblemMap(safeObj.word_to_problem);
+          addWordToProblemMap(safeObj.wordToProblem);
+          addWordToLineMap(safeObj.word_to_line);
+          addWordToLineMap(safeObj.wordToLine);
+          addLineToProblemMap(safeObj.line_to_problem);
+          addLineToProblemMap(safeObj.lineToProblem);
+
+          return {
+            wordToProblem,
+            wordToLine,
+            lineToProblem
+          };
+        };
+
+        const getWordQNoFromLookup = function (rowObj, lookup) {
+          if (!rowObj || !lookup) return 0;
+          const wordKey = makeWordRefKey(rowObj.page, rowObj.idx);
+          if (!wordKey) return 0;
+          const direct = parseWordIndexQNo(lookup.wordToProblem.get(wordKey));
+          if (direct > 0) return direct;
+          const lineKey = lookup.wordToLine.get(wordKey);
+          if (!lineKey) return 0;
+          return parseWordIndexQNo(lookup.lineToProblem.get(lineKey));
+        };
+
+        const addParsedRow = function (rowObj) {
+          if (!rowObj) return;
+          const page = normalizeWordIndexPage(rowObj.page);
+          if (!page) return;
+          const text = normalizeCapturedWord(rowObj.text);
+          const bbox = normalizeWordIndexBBox(rowObj.bbox);
+          const qNo = parseWordIndexQNo(rowObj.qNo);
+          if (!text || !bbox) return;
+          const key = `${page}|${text.toLowerCase()}|${bbox.map(function (v) { return Number(v).toFixed(3); }).join(",")}`;
+          if (dedupe.has(key)) {
+            if (qNo > 0) {
+              const existingRow = dedupeRowByKey.get(key);
+              if (existingRow && parseWordIndexQNo(existingRow.qNo) <= 0) {
+                existingRow.qNo = qNo;
+              }
+            }
+            return;
+          }
+          dedupe.add(key);
+          const pageKey = String(page);
+          if (!Array.isArray(pages[pageKey])) pages[pageKey] = [];
+          const row = { text, bbox };
+          if (qNo > 0) row.qNo = qNo;
+          pages[pageKey].push(row);
+          dedupeRowByKey.set(key, row);
+        };
+
+        const addRowsFromCollection = function (rows, fallbackPage, options) {
+          const opts = options && typeof options === "object" ? options : {};
+          const lookup = opts.lookup || null;
+          const fallbackQNo = parseWordIndexQNo(opts.fallbackQNo);
+          if (!Array.isArray(rows)) return;
+          for (let i = 0; i < rows.length; i += 1) {
+            const parsed = parseWordIndexRow(rows[i], fallbackPage);
+            if (!parsed) continue;
+            let qNo = parseWordIndexQNo(parsed.qNo);
+            if (qNo <= 0 && fallbackQNo > 0) {
+              qNo = fallbackQNo;
+            }
+            if (qNo <= 0 && lookup) {
+              qNo = getWordQNoFromLookup(parsed, lookup);
+            }
+            if (qNo > 0) {
+              parsed.qNo = qNo;
+            }
+            addParsedRow(parsed);
+          }
+        };
+
+        const addPageMap = function (pageMap, lookup) {
+          if (!pageMap || typeof pageMap !== "object") return;
+          const keys = Object.keys(pageMap);
+          for (let i = 0; i < keys.length; i += 1) {
+            const key = keys[i];
+            const page = normalizeWordIndexPage(key);
+            if (!page) continue;
+            addRowsFromCollection(pageMap[key], page, { lookup });
+          }
+        };
+
+        const addCardRows = function (cardList, options) {
+          const opts = options && typeof options === "object" ? options : {};
+          const fallbackQNo = parseWordIndexQNo(opts.fallbackQNo);
+          const lookup = opts.lookup || null;
+          if (!Array.isArray(cardList)) return;
+          for (let i = 0; i < cardList.length; i += 1) {
+            const card = cardList[i] && typeof cardList[i] === "object" ? cardList[i] : null;
+            if (!card) continue;
+            const cardPage = normalizeWordIndexPage(card.page);
+            const cardOwnQNo = parseWordIndexQNo(getWordIndexQNoFromObject(card));
+            const cardQNo = cardOwnQNo > 0 ? cardOwnQNo : fallbackQNo;
+            addRowsFromCollection(card.tokens, cardPage, {
+              fallbackQNo: cardQNo,
+              lookup
+            });
+
+            const lineText = normalizeCapturedWord(
+              card.text != null
+                ? card.text
+                : (card.sentence != null ? card.sentence : "")
+            );
+            const lineBBox = normalizeWordIndexBBox(card.bbox);
+            if (lineText && lineBBox && cardPage) {
+              addParsedRow({
+                text: lineText,
+                bbox: lineBBox,
+                page: cardPage,
+                qNo: cardQNo
+              });
+            }
+          }
+        };
+
+        const addProblemPayloads = function (value, lookup) {
+          if (!value) return;
+          const list = [];
+          if (Array.isArray(value)) {
+            for (let i = 0; i < value.length; i += 1) list.push({ key: "", item: value[i] });
+          } else if (typeof value === "object") {
+            const keys = Object.keys(value);
+            for (let i = 0; i < keys.length; i += 1) {
+              list.push({ key: keys[i], item: value[keys[i]] });
+            }
+          }
+
+          for (let i = 0; i < list.length; i += 1) {
+            const entry = list[i] && typeof list[i] === "object" ? list[i] : null;
+            const item = entry && entry.item && typeof entry.item === "object" ? entry.item : null;
+            if (!item) continue;
+            const fromItem = parseWordIndexQNo(getWordIndexQNoFromObject(item));
+            const fromKey = entry ? parseWordIndexQNo(entry.key) : 0;
+            const payloadQNo = fromItem > 0 ? fromItem : fromKey;
+            addCardRows(item.sentence_cards, { fallbackQNo: payloadQNo, lookup });
+            addCardRows(item.choice_cards, { fallbackQNo: payloadQNo, lookup });
+            addCardRows(item.paragraph_cards, { fallbackQNo: payloadQNo, lookup });
+            addCardRows(item.cards, { fallbackQNo: payloadQNo, lookup });
+            addRowsFromCollection(item.tokens, normalizeWordIndexPage(item.page), {
+              fallbackQNo: payloadQNo,
+              lookup
+            });
+          }
+        };
+
+        for (let i = 0; i < objects.length; i += 1) {
+          const obj = objects[i];
+          const lookup = buildWordIndexLookup(obj);
+          const beforePageMapRows = dedupe.size;
+          addPageMap(obj.pages, lookup);
+          addPageMap(obj.page_words, lookup);
+          addPageMap(obj.pageWords, lookup);
+          const hasWordMapLookup = lookup.wordToProblem.size > 0 || lookup.wordToLine.size > 0;
+          if (dedupe.size > beforePageMapRows && hasWordMapLookup) {
+            continue;
+          }
+          addRowsFromCollection(obj.words, null, { lookup });
+          addCardRows(obj.sentence_cards, { lookup });
+          addCardRows(obj.choice_cards, { lookup });
+          addCardRows(obj.paragraph_cards, { lookup });
+          addProblemPayloads(obj.problems, lookup);
+          addProblemPayloads(obj.problem_payloads, lookup);
+          addProblemPayloads(obj.problemPayloads, lookup);
+        }
+
+        const pageKeys = Object.keys(pages);
+        for (let i = 0; i < pageKeys.length; i += 1) {
+          const key = pageKeys[i];
+          pages[key].sort(function (a, b) {
+            const ay = Number(a && a.bbox ? a.bbox[1] : Number.POSITIVE_INFINITY);
+            const by = Number(b && b.bbox ? b.bbox[1] : Number.POSITIVE_INFINITY);
+            if (ay !== by) return ay - by;
+            const ax = Number(a && a.bbox ? a.bbox[0] : Number.POSITIVE_INFINITY);
+            const bx = Number(b && b.bbox ? b.bbox[0] : Number.POSITIVE_INFINITY);
+            return ax - bx;
+          });
+        }
+
+        return {
+          raw: rawData,
+          pages
+        };
+      }
+
       function makeLiveRowLogPreview(row, idx) {
         const safeRow = row && typeof row === "object" ? row : {};
+        const payloadField = getPayloadFieldFromReceiveRow(safeRow);
+        const payloadRaw = payloadField ? payloadField.value : "";
+        const payloadText = toSafeText(payloadRaw);
         return {
           idx: idx + 1,
           LSASId: toSafeText(safeRow.LSASId),
@@ -4520,7 +6157,12 @@
           QLevel: toSafeText(safeRow.QLevel),
           QYear: toSafeText(safeRow.QYear),
           QMonth: toSafeText(safeRow.QMonth),
-          SessionNo: toSafeText(safeRow.SessionNo),
+          QNo: toSafeText(getRawQNoFromAny(safeRow)),
+          Lap: toSafeText(getRawLapFromAny(safeRow)),
+          SessionNo: toSafeText(getRawSessionNoFromAny(safeRow)),
+          PayloadFieldKey: payloadField ? payloadField.key : "",
+          HasPayloadJson: !!payloadText,
+          PayloadJsonLen: payloadText.length,
           ServedFileURL: trimForLog(safeRow.ServedFileURL, 180)
         };
       }
@@ -4596,8 +6238,13 @@
         return d.getTime();
       }
 
-      function getVisibleSessionsByExpandStep(step) {
-        const normalizedStep = Math.min(Math.max(Number(step) || 0, 0), 3);
+      function normalizeSessionExpandStep(step) {
+        return Math.min(Math.max(Number(step) || 0, 0), 2);
+      }
+
+      function getVisibleSessionsByExpandStep(step, sessions) {
+        const normalizedStep = normalizeSessionExpandStep(step);
+        const sourceSessions = Array.isArray(sessions) ? sessions : classSessions;
         const weekStartMs = getThisWeekStartMs(new Date());
         const twoWeeksStart = new Date(weekStartMs);
         twoWeeksStart.setDate(twoWeeksStart.getDate() - 14);
@@ -4607,32 +6254,75 @@
         const minMsByStep = [
           weekStartMs,
           twoWeeksStart.getTime(),
-          monthStart.getTime(),
-          Number.NEGATIVE_INFINITY
+          monthStart.getTime()
         ];
         const minMs = minMsByStep[normalizedStep];
 
-        return classSessions.filter(function (session) {
+        return sourceSessions.filter(function (session) {
           const ms = Number(session && session.sessionDateMs);
-          if (!Number.isFinite(ms)) return normalizedStep >= 3;
+          if (!Number.isFinite(ms)) return normalizedStep >= 2;
           return ms >= minMs;
         });
       }
 
-      function getNextSessionExpandStep(currentStep) {
-        const normalizedStep = Math.min(Math.max(Number(currentStep) || 0, 0), 3);
-        const currentCount = getVisibleSessionsByExpandStep(normalizedStep).length;
-        for (let nextStep = normalizedStep + 1; nextStep <= 3; nextStep += 1) {
-          const nextCount = getVisibleSessionsByExpandStep(nextStep).length;
+      function getNextSessionExpandStep(currentStep, sessions) {
+        const normalizedStep = normalizeSessionExpandStep(currentStep);
+        const currentCount = getVisibleSessionsByExpandStep(normalizedStep, sessions).length;
+        for (let nextStep = normalizedStep + 1; nextStep <= 2; nextStep += 1) {
+          const nextCount = getVisibleSessionsByExpandStep(nextStep, sessions).length;
           if (nextCount > currentCount) return nextStep;
         }
         return null;
       }
 
+      function buildSessionBuckets(sessions) {
+        const source = Array.isArray(sessions) ? sessions : classSessions;
+        const reviewSessions = [];
+        const submittedSessions = [];
+        const submittedTrackKeySet = new Set();
+
+        source.forEach(function (session) {
+          if (!isSubmittedSessionNo(getSessionNoFromAny(session))) return;
+          if (getLapTurnFromAny(session) <= 1) return;
+          const key = buildReviewTrackKey(session);
+          if (key) submittedTrackKeySet.add(key);
+        });
+
+        source.forEach(function (session) {
+          if (isReviewSessionForList(session)) {
+            const key = buildReviewTrackKey(session);
+            if (key && submittedTrackKeySet.has(key)) return;
+            reviewSessions.push(session);
+            return;
+          }
+          if (isSubmittedSessionNo(getSessionNoFromAny(session))) {
+            submittedSessions.push(session);
+          }
+        });
+
+        return { reviewSessions, submittedSessions };
+      }
+
+      function getSessionScopeByTabAndStep(tab, step, sessions) {
+        const tabKey = tab === "submitted" ? "submitted" : "review";
+        const normalizedStep = normalizeSessionExpandStep(step);
+        const buckets = buildSessionBuckets(sessions);
+        const activeSessions = tabKey === "submitted" ? buckets.submittedSessions : buckets.reviewSessions;
+        const visibleSessions = getVisibleSessionsByExpandStep(normalizedStep, activeSessions);
+        const nextExpandStep = getNextSessionExpandStep(normalizedStep, activeSessions);
+        return {
+          tab: tabKey,
+          step: normalizedStep,
+          buckets,
+          activeSessions,
+          visibleSessions,
+          nextExpandStep
+        };
+      }
+
       function getSessionLoadMoreLabel(nextStep) {
         if (nextStep === 1) return "더보기 (지난 2주)";
         if (nextStep === 2) return "더보기 (한달)";
-        if (nextStep === 3) return "더보기 (나머지)";
         return "더보기";
       }
 
@@ -4641,6 +6331,34 @@
         if (!Number.isFinite(n)) return null;
         const page = Math.trunc(n);
         return page > 0 ? page : null;
+      }
+
+      function extractQNoFromPayload(payloadObj) {
+        if (!payloadObj || typeof payloadObj !== "object") return DEFAULT_PAYLOAD_QNO;
+        const metaObj = payloadObj.meta && typeof payloadObj.meta === "object" ? payloadObj.meta : null;
+        const candidates = [
+          getRawQNoFromAny(payloadObj),
+          metaObj && getRawQNoFromAny(metaObj)
+        ];
+        for (let i = 0; i < candidates.length; i += 1) {
+          const parsed = parseQNoForPayload(candidates[i]);
+          if (parsed > 0) return parsed;
+        }
+        return DEFAULT_PAYLOAD_QNO;
+      }
+
+      function extractLapFromPayload(payloadObj) {
+        if (!payloadObj || typeof payloadObj !== "object") return DEFAULT_PAYLOAD_LAP;
+        const metaObj = payloadObj.meta && typeof payloadObj.meta === "object" ? payloadObj.meta : null;
+        const candidates = [
+          getRawLapFromAny(payloadObj),
+          metaObj && getRawLapFromAny(metaObj)
+        ];
+        for (let i = 0; i < candidates.length; i += 1) {
+          if (!hasMeaningfulText(candidates[i])) continue;
+          return normalizeLapForPayload(candidates[i]);
+        }
+        return DEFAULT_PAYLOAD_LAP;
       }
 
       function extractPreferredPageFromPayload(payloadObj) {
@@ -4837,6 +6555,8 @@
         session.tabs = buildTabsFromPayload(payloadObj);
         session.targetPage = extractPreferredPageFromPayload(payloadObj);
         session.templateLabel = parseTemplateLabel(payloadObj);
+        session.qNo = extractQNoFromPayload(payloadObj);
+        session.lap = extractLapFromPayload(payloadObj);
         session.note = session.templateLabel || "";
 
         const activeIndex = Number(payloadObj.activeTabIndex);
@@ -4869,12 +6589,14 @@
         const liveScheduleLabel = formatLiveScheduleLabel(safeRow.LiveSchedule);
         const updatedAtLabel = formatLiveScheduleLabel(safeRow.UpdatedAt);
 
-        return {
+        const session = {
           _row: safeRow,
           date: liveScheduleLabel || updatedAtLabel || `LSAS #${toSafeText(safeRow.LSASId) || String(idx + 1)}`,
           sessionDateMs: scheduleDateObj ? scheduleDateObj.getTime() : null,
           note: "",
           templateLabel: "",
+          qNo: parseQNoForPayload(getRawQNoFromAny(safeRow)),
+          lap: normalizeLapForPayload(getRawLapFromAny(safeRow)),
           mock: {
             grade,
             year,
@@ -4890,6 +6612,14 @@
           _payloadLoaded: false,
           _payloadLoadingPromise: null
         };
+
+        const inlinePayload = extractPayloadFromReceiveRow(safeRow);
+        if (inlinePayload) {
+          applyPayloadToSession(session, inlinePayload);
+          session._payloadLoaded = true;
+        }
+
+        return session;
       }
 
       async function ensureSessionPayloadLoaded(session) {
@@ -4983,6 +6713,7 @@
 
         if (!FIXED_STUDENT_ID) {
           classSessions = [];
+          resetSessionListHydrationState();
           sessionListError = "URL에 id(UserId) 파라미터가 필요합니다.";
           sessionListLoadedOnce = true;
           setSessionSubLabel("id required");
@@ -5038,12 +6769,27 @@
           }
 
           const rows = parseReceiveRows(payload);
+          const rowsForStudent = rows.filter(function (row) {
+            const sessionNo = getSessionNoFromAny(row);
+            return isReviewSessionNo(sessionNo) || isSubmittedSessionNo(sessionNo);
+          });
+          const mappedSessions = rowsForStudent.map(makeSessionFromRow);
+          const reviewCount = mappedSessions.filter(function (session) {
+            return isReviewSessionForList(session);
+          }).length;
+          const submittedCount = mappedSessions.filter(function (session) {
+            return isSubmittedSessionNo(getSessionNoFromAny(session));
+          }).length;
           if (DEBUG_LIVE_FETCH_LOG) {
-            trace("info", `live receive rows parsed: ${rows.length}`, rows.slice(0, 10).map(makeLiveRowLogPreview));
+            trace(
+              "info",
+              `live receive rows parsed: ${rows.length} (review: ${reviewCount}, submitted: ${submittedCount})`,
+              rows.slice(0, 10).map(makeLiveRowLogPreview)
+            );
           }
           sessionListExpandStep = 0;
-          classSessions = rows.map(makeSessionFromRow);
-          void hydrateSessionTemplateLabels(classSessions);
+          classSessions = mappedSessions;
+          resetSessionListHydrationState();
           if (DEBUG_LIVE_FETCH_LOG) {
             trace("info", "session mapped preview", classSessions.slice(0, 10).map(function (session, idx) {
               const mockInfo = session && session.mock ? session.mock : {};
@@ -5060,10 +6806,11 @@
           }
           sessionListLoadedOnce = true;
           sessionListError = "";
-          setSessionSubLabel(`live sessions (${classSessions.length})`);
+          setSessionSubLabel(`review ${reviewCount} · submitted ${submittedCount}`);
           trace("info", `session list loaded: ${classSessions.length}`);
         } catch (err) {
           classSessions = [];
+          resetSessionListHydrationState();
           sessionListError = String(err && err.message ? err.message : err || "unknown error");
           sessionListLoadedOnce = true;
           setSessionSubLabel("load failed");
@@ -5071,14 +6818,8 @@
         } finally {
           isSessionListLoading = false;
           renderSessionList();
-        }
-      }
-
-      async function hydrateSessionTemplateLabels(sessions) {
-        if (!Array.isArray(sessions) || !sessions.length) return;
-        for (let i = 0; i < sessions.length; i += 1) {
-          await ensureSessionPayloadLoaded(sessions[i]);
-          renderSessionList();
+          void hydrateSessionListForCurrentScope("fetch");
+          updateOverlayQuestionNoBar();
         }
       }
 
@@ -5094,28 +6835,36 @@
           return;
         }
         if (!classSessions.length) {
+          if (FIXED_STUDENT_ID) {
+            setSessionSubLabel("review 0 · submitted 0");
+          }
           renderSessionListMessage(FIXED_STUDENT_ID ? "저장된 수업 세션이 없습니다." : "URL에 ?id=UserId 가 필요합니다.");
           return;
         }
 
-        const visibleSessions = getVisibleSessionsByExpandStep(sessionListExpandStep);
-        const nextExpandStep = getNextSessionExpandStep(sessionListExpandStep);
+        const buckets = buildSessionBuckets(classSessions);
+        const reviewSessions = buckets.reviewSessions;
+        const submittedSessions = buckets.submittedSessions;
 
-        if (!visibleSessions.length) {
-          renderSessionListMessage(
-            sessionListExpandStep === 0
-              ? "이번주 수업 세션이 없습니다."
-              : "표시할 수업 세션이 없습니다."
-          );
+        if (!reviewSessions.length && !submittedSessions.length) {
+          setSessionSubLabel("review 0 · submitted 0");
+          renderSessionListMessage("표시할 수업 세션이 없습니다.");
+          return;
         }
+        setSessionSubLabel(`review ${reviewSessions.length} · submitted ${submittedSessions.length}`);
 
-        visibleSessions.forEach(function (session) {
+        function appendSessionItem(session, options) {
+          const opts = options && typeof options === "object" ? options : {};
+          const isDisabled = !!opts.disabled;
           const originalIdx = classSessions.indexOf(session);
           const sessionKey = getSessionKey(session, originalIdx >= 0 ? originalIdx : 0);
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "session-item-btn";
-          if (sessionKey === selectedSessionId) {
+          if (isDisabled) {
+            btn.classList.add("is-disabled");
+            btn.disabled = true;
+          } else if (sessionKey === selectedSessionId) {
             btn.classList.add("is-selected");
           }
 
@@ -5125,9 +6874,10 @@
 
           const mockInfo = session.mock || {};
           const metaParts = [];
-          const sessionNo = Number(session && session._row ? session._row.SessionNo : NaN);
-          const isDraftSessionNo = Number.isFinite(sessionNo) && (sessionNo === 99 || sessionNo === 992);
-          if (Number.isFinite(sessionNo) && sessionNo > 1 && !isDraftSessionNo) metaParts.push(`Session ${sessionNo}`);
+          const sessionNo = getSessionNoFromAny(session);
+          if (Number.isFinite(sessionNo) && sessionNo > 1 && !isSubmittedSessionNo(sessionNo)) {
+            metaParts.push(`Session ${sessionNo}`);
+          }
           if (mockInfo.grade) metaParts.push(getGradeLabel(mockInfo.grade));
           if (mockInfo.year) metaParts.push(mockInfo.year);
           if (mockInfo.examKey) metaParts.push(getExamLabel(mockInfo.examKey, mockInfo.grade));
@@ -5144,24 +6894,80 @@
           if (meta.textContent) btn.appendChild(meta);
           if (note.textContent) btn.appendChild(note);
 
-          if (Number.isFinite(sessionNo) && (sessionNo === 1 || sessionNo === 99 || sessionNo === 992)) {
-            const ribbon = document.createElement("span");
-            ribbon.className = "session-item-ribbon";
-            if (sessionNo === 99 || sessionNo === 992) {
-              ribbon.classList.add("is-solo");
-              ribbon.textContent = "나혼자!";
-            } else {
-              ribbon.classList.add("is-afterclass");
-              ribbon.textContent = "수업 후";
-            }
+          const qNoLabel = getSessionQuestionNoLabel(session);
+          const qNoEl = document.createElement("div");
+          qNoEl.className = "session-item-qno";
+          if (qNoLabel === "-") qNoEl.classList.add("is-empty");
+          const qNoPrefixEl = document.createElement("span");
+          qNoPrefixEl.className = "session-item-qno-prefix";
+          qNoPrefixEl.textContent = "Q.";
+          const qNoValueEl = document.createElement("span");
+          qNoValueEl.className = "session-item-qno-value";
+          qNoValueEl.textContent = qNoLabel;
+          qNoEl.appendChild(qNoPrefixEl);
+          qNoEl.appendChild(qNoValueEl);
+          btn.appendChild(qNoEl);
+
+          const ribbons = Array.isArray(opts.ribbons)
+            ? opts.ribbons
+            : (opts.ribbonText ? [{ text: opts.ribbonText, className: opts.ribbonClass || "" }] : []);
+          if (ribbons.length) {
             btn.classList.add("has-ribbon");
-            btn.appendChild(ribbon);
+            for (let rIdx = 0; rIdx < ribbons.length; rIdx += 1) {
+              const ribbonSpec = ribbons[rIdx] && typeof ribbons[rIdx] === "object" ? ribbons[rIdx] : {};
+              const ribbon = document.createElement("span");
+              ribbon.className = "session-item-ribbon";
+              if (ribbonSpec.className) ribbon.classList.add(ribbonSpec.className);
+              if (ribbonSpec.secondary) ribbon.classList.add("is-secondary");
+              ribbon.textContent = toSafeText(ribbonSpec.text) || "";
+              btn.appendChild(ribbon);
+            }
           }
 
-          btn.addEventListener("click", function () {
-            applySessionPreset(session, sessionKey);
-          });
+          if (!isDisabled) {
+            btn.addEventListener("click", function () {
+              applySessionPreset(session, sessionKey);
+            });
+          }
           sessionList.appendChild(btn);
+        }
+
+        const isSubmittedTab = sessionViewTab === "submitted";
+        const activeSessions = isSubmittedTab ? submittedSessions : reviewSessions;
+        const visibleSessions = getVisibleSessionsByExpandStep(sessionListExpandStep, activeSessions);
+        const nextExpandStep = getNextSessionExpandStep(sessionListExpandStep, activeSessions);
+        if (!activeSessions.length) {
+          renderSessionListMessage(
+            isSubmittedTab
+              ? "제출 기록이 없습니다."
+              : "REVIEW 세션이 없습니다."
+          );
+          return;
+        }
+
+        if (!visibleSessions.length) {
+          renderSessionListMessage(
+            sessionListExpandStep === 0
+              ? (isSubmittedTab ? "이번 주 제출 기록이 없습니다." : "이번 주 REVIEW 세션이 없습니다.")
+              : "표시할 수업 세션이 없습니다."
+          );
+        }
+
+        visibleSessions.forEach(function (session) {
+          const isSubmitted = isSubmittedTab;
+          const lapTurn = getLapTurnFromAny(session);
+          const ribbonSpecs = isSubmitted
+            ? (lapTurn > 1
+              ? [
+                { className: "is-afterclass", text: "수업 후" },
+                { className: "is-submitted", text: "제출완료", secondary: true }
+              ]
+              : [{ className: "is-submitted", text: "제출완료" }])
+            : [{ className: "is-afterclass", text: "수업 후" }];
+          appendSessionItem(session, {
+            disabled: isSubmitted,
+            ribbons: ribbonSpecs
+          });
         });
 
         if (nextExpandStep !== null) {
@@ -5169,9 +6975,12 @@
           moreBtn.type = "button";
           moreBtn.className = "session-item-btn session-load-more-btn";
           moreBtn.textContent = getSessionLoadMoreLabel(nextExpandStep);
-          moreBtn.addEventListener("click", function () {
+          moreBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
             sessionListExpandStep = nextExpandStep;
             renderSessionList();
+            void hydrateSessionListForCurrentScope("load-more");
           });
           sessionList.appendChild(moreBtn);
         }
@@ -5249,9 +7058,6 @@
 
       function updateTopbarStatus() {
         const parts = [];
-        if (hasLocalDraftSnapshot) {
-          parts.push("작성중");
-        }
         if (selectedSessionTitle) {
           parts.push(selectedSessionTitle);
         }
@@ -5261,11 +7067,34 @@
         if (gradeLabel) parts.push(gradeLabel);
         if (yearSel.value) parts.push(yearSel.value);
         if (examSel.value) parts.push(getExamLabel(examSel.value, gradeSel.value));
-        if (typeSel.value) parts.push(typeSel.value);
         topbarStatus.classList.toggle("is-local-draft", hasLocalDraftSnapshot);
-        topbarStatus.textContent = parts.length
-          ? parts.join(" · ")
-          : (hasLocalDraftSnapshot ? "작성중 임시저장" : "학년 · 연도 선택");
+        topbarStatus.classList.toggle("is-writing", hasLocalDraftSnapshot);
+        topbarStatus.innerHTML = "";
+
+        if (!hasLocalDraftSnapshot && !parts.length) {
+          topbarStatus.textContent = "학년 · 연도 선택";
+          return;
+        }
+
+        if (hasLocalDraftSnapshot) {
+          const writing = document.createElement("span");
+          writing.className = "topbar-status-writing";
+          writing.textContent = "[작성중]";
+          topbarStatus.appendChild(writing);
+        }
+
+        if (parts.length) {
+          if (hasLocalDraftSnapshot) {
+            const sep = document.createElement("span");
+            sep.className = "topbar-status-sep";
+            sep.textContent = "·";
+            topbarStatus.appendChild(sep);
+          }
+          const main = document.createElement("span");
+          main.className = "topbar-status-main";
+          main.textContent = parts.join(" · ");
+          topbarStatus.appendChild(main);
+        }
       }
 
       function clearSessionSelection() {
@@ -5274,6 +7103,7 @@
         selectedSessionTitle = "";
         selectedSessionTargetPage = null;
         renderSessionList();
+        updateOverlayQuestionNoBar();
       }
 
       function setSelectOptions(selectEl, options, placeholderLabel) {
@@ -5295,8 +7125,13 @@
       async function loadWordIndexForFile(fileInfo) {
         activeWordIndex = null;
         if (!fileInfo || !fileInfo.filename) return null;
-        const indexName = String(fileInfo.filename).replace(/\.pdf$/i, ".words.json");
-        if (!indexName || indexName === fileInfo.filename) return null;
+        const pdfFilename = String(fileInfo.filename);
+        const stem = pdfFilename.replace(/\.pdf$/i, "");
+        if (!stem || stem === pdfFilename) return null;
+        const indexName = `${stem}_wordsx.json`;
+        const legacyIndexName = `${stem}_words.json`;
+        const dotIndexName = `${stem}.wordsx.json`;
+        const legacyDotIndexName = `${stem}.words.json`;
 
         const candidates = [];
         const pushCandidate = function (value) {
@@ -5307,19 +7142,33 @@
 
         // 1) current origin (local server)
         pushCandidate(indexName);
+        pushCandidate(dotIndexName);
+        pushCandidate(legacyIndexName);
+        pushCandidate(legacyDotIndexName);
 
         // 2) same Supabase object path as the selected PDF (extension only swapped)
         const pdfUrl = String(fileInfo.url || "").trim();
+        const pushUrlIndexCandidates = function (baseUrl) {
+          const base = String(baseUrl || "").trim();
+          if (!base) return;
+          pushCandidate(`${base}_wordsx.json`);
+          pushCandidate(`${base}.wordsx.json`);
+          pushCandidate(`${base}_words.json`);
+          pushCandidate(`${base}.words.json`);
+        };
         if (pdfUrl) {
           if (/\.pdf($|[?#])/i.test(pdfUrl)) {
-            pushCandidate(pdfUrl.replace(/\.pdf(?=($|[?#]))/i, ".words.json"));
+            pushUrlIndexCandidates(pdfUrl.replace(/\.pdf(?=($|[?#]))/i, ""));
           } else {
-            pushCandidate(`${pdfUrl}.words.json`);
+            pushUrlIndexCandidates(pdfUrl);
           }
         }
 
-        // 3) fallback legacy candidate
+        // 3) explicit public-url candidates
         pushCandidate(buildPublicUrl(indexName, fileInfo.grade));
+        pushCandidate(buildPublicUrl(dotIndexName, fileInfo.grade));
+        pushCandidate(buildPublicUrl(legacyIndexName, fileInfo.grade));
+        pushCandidate(buildPublicUrl(legacyDotIndexName, fileInfo.grade));
 
         for (let i = 0; i < candidates.length; i += 1) {
           const url = candidates[i];
@@ -5327,18 +7176,25 @@
             const res = await fetch(url);
             if (!res.ok) continue;
             const data = await res.json();
-            const pages = data && data.pages && typeof data.pages === "object"
-              ? Object.keys(data.pages).length
-              : 0;
-            activeWordIndex = data;
-            trace("info", `word-index loaded: ${indexName} (${pages}p) from ${url}`);
-            return data;
+            const normalized = normalizeWordIndexData(data);
+            const normalizedPages = normalized && normalized.pages && typeof normalized.pages === "object"
+              ? normalized.pages
+              : {};
+            const pageCount = Object.keys(normalizedPages).length;
+            if (!pageCount) continue;
+            const rowCount = Object.keys(normalizedPages).reduce(function (acc, key) {
+              const rows = Array.isArray(normalizedPages[key]) ? normalizedPages[key].length : 0;
+              return acc + rows;
+            }, 0);
+            activeWordIndex = normalized;
+            trace("info", `word-index loaded: ${url} (${pageCount}p / ${rowCount} rows)`);
+            return normalized;
           } catch (_err) {
             // try next candidate
           }
         }
 
-        trace("warn", `word-index not found: ${indexName}`);
+        trace("warn", `word-index not found: ${indexName} (fallback: ${dotIndexName}, ${legacyIndexName}, ${legacyDotIndexName})`);
         return null;
       }
 
@@ -5508,6 +7364,8 @@
       });
 
       openBtn.addEventListener("click", async function () {
+        const proceed = confirmDiscardWorkingNotesForLoad();
+        if (!proceed) return;
         closePickerPopup();
         await tryLoadPdf();
       });
@@ -5519,6 +7377,14 @@
         toggleSessionPopup();
       });
       sessionBackdrop.addEventListener("click", closeSessionPopup);
+      sessionTabReviewBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        setSessionViewTab("review");
+      });
+      sessionTabSubmittedBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        setSessionViewTab("submitted");
+      });
       tabCloseConfirmBackdrop.addEventListener("click", closeTabCloseConfirm);
       tabCloseCancelBtn.addEventListener("click", closeTabCloseConfirm);
       tabCloseOkBtn.addEventListener("click", function () {
@@ -5530,8 +7396,25 @@
       memoToggleBtn.addEventListener("click", function () {
         toggleMemoOverlay();
       });
-      saveToServerBtn.addEventListener("click", function () {
-        void sendCurrentSessionToServer();
+      submitMenuBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        toggleSubmitPopup();
+      });
+      submitActiveBtn.addEventListener("click", function () {
+        closeSubmitPopup();
+        void sendCurrentSessionToServer("active");
+      });
+      submitAllBtn.addEventListener("click", function () {
+        closeSubmitPopup();
+        void sendCurrentSessionToServer("all");
+      });
+      printMenuBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        togglePrintPopup();
+      });
+      printReadyBtn.addEventListener("click", function () {
+        closePrintPopup();
+        window.alert("준비중입니다.");
       });
       overlayCloseBtn.addEventListener("click", function () {
         toggleMemoOverlay(false);
@@ -5628,7 +7511,15 @@
         if (!overlayTabTypePopup.hidden && !overlayTabTypePopup.contains(target) && target !== overlayAddTabBtn) {
           closeTabTypePopup();
         }
-        if (!sessionPopup.hidden && !sessionPopup.contains(target) && target !== topbarStatus) {
+        if (!submitMenuPopup.hidden && !submitMenuPopup.contains(target) && target !== submitMenuBtn) {
+          closeSubmitPopup();
+        }
+        if (!printMenuPopup.hidden && !printMenuPopup.contains(target) && target !== printMenuBtn) {
+          closePrintPopup();
+        }
+        const clickedInsideSessionPopup = eventPathIncludesNode(event, sessionPopup);
+        const clickedSessionToggle = eventPathIncludesNode(event, topbarStatus);
+        if (!sessionPopup.hidden && !clickedInsideSessionPopup && !clickedSessionToggle) {
           closeSessionPopup();
         }
       });
@@ -5637,6 +7528,14 @@
         if (event.key !== "Escape") return;
         if (!tabCloseConfirmPopup.hidden) {
           closeTabCloseConfirm();
+          return;
+        }
+        if (!submitMenuPopup.hidden) {
+          closeSubmitPopup();
+          return;
+        }
+        if (!printMenuPopup.hidden) {
+          closePrintPopup();
           return;
         }
         if (!sessionPopup.hidden) {
@@ -5661,7 +7560,8 @@
       });
 
       initializeFileMap();
-      setSaveButtonUi("idle", "저장");
+      setSubmitButtonsUi("idle", "제출");
+      updateSessionTabUi();
       const restoredLocalDraft = restoreLocalDraftFromStorage();
       if (restoredLocalDraft) {
         toggleMemoOverlay(true);
