@@ -117,6 +117,7 @@
   // - path (optional): fixed page path (ex: dish-learn.html)
   // - folder/filePrefix: route = {folder}/{filePrefix}-l{book}e{exercise}.html
   // - episodesPerBook: day 1..N -> 1-1, 1-2 ... (N+1 -> 2-1)
+  // - dayPathMap (optional): explicit Day -> page path mapping for irregular modules
   const LESSON_PAGE_DEFINITIONS = {
     "단어": {
       "A1": {
@@ -156,7 +157,33 @@
         filePrefix: "herma",
         startBook: 1,
         startExercise: 1,
-        episodesPerBook: 50
+        episodesPerBook: 50,
+        dayPathMap: {
+          1: "herma/herma-l1e1.html",
+          2: "herma/herma-l1e2.html",
+          3: "herma/herma-l1e3.html",
+          4: "herma/herma-l1e4.html",
+          5: "herma/herma-l2e1.html",
+          6: "herma/herma-l2e2.html",
+          7: "herma/herma-l2e3.html",
+          8: "herma/herma-l2e4.html",
+          9: "herma/herma-l3e1.html",
+          10: "herma/herma-l3e2.html",
+          11: "herma/herma-l3e3.html",
+          12: "herma/herma-l3e4.html",
+          13: "herma/herma-l3e5.html",
+          14: "herma/herma-l3e6.html",
+          15: "herma/herma-l4e1.html",
+          16: "herma/herma-l4e2.html",
+          17: "herma/herma-l4e3.html",
+          18: "herma/herma-l5e1.html",
+          19: "herma/herma-l5e2.html",
+          20: "herma/herma-l6e1.html",
+          21: "herma/herma-l6e2.html",
+          22: "herma/herma-l6e3.html",
+          23: "herma/herma-l6e4.html",
+          24: "herma/herma-l6e5.html"
+        }
       },
       "pleks": {
         folder: "pleks",
@@ -367,19 +394,48 @@
       if (!allowed.includes(day)) return null;
     }
 
-    const dayOffset = day - 1;
-    const book = startBook + Math.floor(dayOffset / episodesPerBook);
-    const exercise = startExercise + (dayOffset % episodesPerBook);
-
     const fixedPath = String(def.path || "").trim();
-    let path = fixedPath;
-    if (!path) {
-      const folder = String(def.folder || "").trim();
-      const filePrefix = String(def.filePrefix || "").trim();
-      if (!folder || !filePrefix) return null;
-      path = `${folder}/${filePrefix}-l${book}e${exercise}.html`;
+    const explicitDayPathMap =
+      def.dayPathMap && typeof def.dayPathMap === "object" ? def.dayPathMap : null;
+    const explicitPathRaw = explicitDayPathMap
+      ? (explicitDayPathMap[day] || explicitDayPathMap[String(day)] || "")
+      : "";
+
+    let book = null;
+    let exercise = null;
+    let lessonTag = "";
+    let path = "";
+
+    if (typeof explicitPathRaw === "string" && explicitPathRaw.trim()) {
+      path = explicitPathRaw.trim();
+
+      const m = path.match(/-l(\d+)e(\d+[a-z]?)\.html$/i);
+      if (m) {
+        const parsedBook = Number(m[1]);
+        const exerciseRaw = String(m[2]);
+        const parsedExercise = Number(exerciseRaw.replace(/[^0-9]/g, ""));
+
+        if (isPositiveInt(parsedBook)) book = parsedBook;
+        if (isPositiveInt(parsedExercise)) exercise = parsedExercise;
+        if (isPositiveInt(parsedBook)) lessonTag = `${parsedBook}-${exerciseRaw}`;
+      }
+
+      if (!lessonTag) lessonTag = `Day ${day}`;
+    } else {
+      const dayOffset = day - 1;
+      book = startBook + Math.floor(dayOffset / episodesPerBook);
+      exercise = startExercise + (dayOffset % episodesPerBook);
+
+      path = fixedPath;
+      if (!path) {
+        const folder = String(def.folder || "").trim();
+        const filePrefix = String(def.filePrefix || "").trim();
+        if (!folder || !filePrefix) return null;
+        path = `${folder}/${filePrefix}-l${book}e${exercise}.html`;
+      }
+      lessonTag = `${book}-${exercise}`;
     }
-    const lessonTag = `${book}-${exercise}`;
+
     const subToken = getSubcategoryToken(canonicalSub) || canonicalSub;
     const quizKey = `quiz_${subToken}_${levelName}_Day${day}`;
 
