@@ -526,7 +526,9 @@ window.showDishPopup = function (item) {
 
   popup.querySelector("#upload-btn")?.addEventListener("click", () => {
     const isWord = item.label === "단어";
-    const hwType = isWord ? "doneinweb" : "pdf사진";
+    const levelKey = String(item.Level || "").trim().toLowerCase();
+    const isWebGrammarModule = levelKey === "herma" || levelKey === "pleks";
+    const hwType = (isWord || isWebGrammarModule) ? "doneinweb" : "pdf사진";
 
     console.log("✅ [제출] 라벨:", item.label);
     console.log("✅ [제출] Subcategory:", item.Subcategory);
