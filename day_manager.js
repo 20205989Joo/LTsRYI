@@ -373,6 +373,40 @@
     return null;
   }
 
+  function getPositiveIntKeys(obj) {
+    if (!obj || typeof obj !== "object") return [];
+    const out = [];
+    for (const key of Object.keys(obj)) {
+      const n = Number(key);
+      if (isPositiveInt(n)) out.push(n);
+    }
+    return out.sort((a, b) => a - b);
+  }
+
+  function getLessonPageDayCap(subcategory, level) {
+    const def = getLessonPageDefinition(subcategory, level);
+    if (!def) return null;
+
+    let cap = null;
+
+    if (Array.isArray(def.availableDays) && def.availableDays.length > 0) {
+      const allowed = def.availableDays.map(Number).filter(isPositiveInt);
+      if (allowed.length > 0) {
+        cap = Math.max(...allowed);
+      }
+    }
+
+    if (def.dayPathMap && typeof def.dayPathMap === "object") {
+      const keys = getPositiveIntKeys(def.dayPathMap);
+      if (keys.length > 0) {
+        const mapCap = keys[keys.length - 1];
+        cap = cap == null ? mapCap : Math.min(cap, mapCap);
+      }
+    }
+
+    return isPositiveInt(cap) ? cap : null;
+  }
+
   function getLessonPageRoute(subcategory, level, lessonNo) {
     const def = getLessonPageDefinition(subcategory, level);
     if (!def) return null;
@@ -405,6 +439,10 @@
     let exercise = null;
     let lessonTag = "";
     let path = "";
+
+    if (explicitDayPathMap && Object.keys(explicitDayPathMap).length > 0 && !String(explicitPathRaw || "").trim()) {
+      return null;
+    }
 
     if (typeof explicitPathRaw === "string" && explicitPathRaw.trim()) {
       path = explicitPathRaw.trim();
@@ -478,7 +516,11 @@
 
   function getTotalDays(subcategory, level) {
     const range = getRange(subcategory, level);
-    return range ? range.end - range.start + 1 : null;
+    if (!range) return null;
+    const rangeTotal = range.end - range.start + 1;
+    const cap = getLessonPageDayCap(subcategory, level);
+    if (!isPositiveInt(cap)) return rangeTotal;
+    return Math.min(rangeTotal, cap);
   }
 
   function getDay(subcategory, level, lessonNo) {
@@ -493,6 +535,8 @@
   function getLessonNo(subcategory, level, day) {
     const dayNum = Number(day);
     if (!isPositiveInt(dayNum)) return null;
+    const dayCap = getLessonPageDayCap(subcategory, level);
+    if (isPositiveInt(dayCap) && dayNum > dayCap) return null;
     const range = getRange(subcategory, level);
     if (!range) return null;
     const lessonNo = range.start + dayNum - 1;

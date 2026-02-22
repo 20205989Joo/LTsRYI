@@ -339,7 +339,12 @@ function renderLessonOptions(temp) {
     : null;
   if (!range) return;
   const { start, end } = range;
-  const total = end - start + 1;
+  const totalFromManager = dm && typeof dm.getTotalDays === 'function'
+    ? dm.getTotalDays(sub, temp.Level)
+    : null;
+  const total = Number.isInteger(totalFromManager) && totalFromManager > 0
+    ? totalFromManager
+    : (end - start + 1);
 
   section.innerHTML = `
     <div class="sub-section-header sub-section-header--day">
