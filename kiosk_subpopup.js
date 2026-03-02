@@ -26,10 +26,38 @@ function getLevelVisual(subcategory, level) {
   if (canonicalSub !== '문법') return null;
 
   const normalized = String(level || '').trim().toLowerCase();
-  if (normalized === 'basic') return { variant: 'basic', rank: '1' };
-  if (normalized === 'herma') return { variant: 'herma', rank: '2' };
-  if (normalized === 'pleks') return { variant: 'pleks', rank: '3' };
+  if (normalized === 'aisth' || normalized === 'basic') return { variant: 'basic', rank: '1', order: 1 };
+  if (normalized === 'herma') return { variant: 'herma', rank: '2', order: 2 };
+  if (normalized === 'pleks') return { variant: 'pleks', rank: '3', order: 3 };
   return null;
+}
+
+function getLevelDisplayName(level) {
+  const normalized = String(level || '').trim().toLowerCase();
+  if (normalized === 'aisth' || normalized === 'basic') return 'AISTH';
+  if (normalized === 'herma') return 'HERMA';
+  if (normalized === 'pleks') return 'PLEKS';
+  return String(level || '');
+}
+function sortLevelsForDisplay(subcategory, levels) {
+  if (!Array.isArray(levels)) return [];
+
+  const canonicalSub = resolveSubcategoryName(subcategory);
+  if (canonicalSub !== '문법') return [...levels];
+
+  return [...levels].sort((a, b) => {
+    const aVisual = getLevelVisual(canonicalSub, a);
+    const bVisual = getLevelVisual(canonicalSub, b);
+
+    const aOrder = aVisual?.order ?? Number.MAX_SAFE_INTEGER;
+    const bOrder = bVisual?.order ?? Number.MAX_SAFE_INTEGER;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+
+    return String(a).localeCompare(String(b), undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    });
+  });
 }
 
 function setAddButtonEnabled(enabled) {
@@ -270,10 +298,11 @@ function renderLevelOptions(temp) {
 
   const dm = getDayManager();
   const sub = resolveSubcategoryName(temp.Subcategory);
-  const levels =
+  const levelsRaw =
     dm && typeof dm.listLevels === 'function'
       ? dm.listLevels(sub)
       : [];
+  const levels = sortLevelsForDisplay(sub, levelsRaw);
 
   if (!levels || levels.length === 0) {
     temp.Level = null;
@@ -315,7 +344,7 @@ function renderLevelOptions(temp) {
 
     const levelName = document.createElement('span');
     levelName.className = 'level-name';
-    levelName.textContent = level;
+    levelName.textContent = getLevelDisplayName(level);
     btn.appendChild(levelName);
 
     btn.onclick = () => {

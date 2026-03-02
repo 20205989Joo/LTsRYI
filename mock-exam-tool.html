@@ -2158,6 +2158,10 @@
       const FIXED_STUDENT_ID = new URLSearchParams(window.location.search).get("id") || "";
       const LOCAL_DRAFT_STORAGE_KEY = `mock-exam-tool:draft:${FIXED_STUDENT_ID || "guest"}`;
       const PDFJS_WORKER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+      const USER_AGENT = window.navigator.userAgent || "";
+      const NAV_PLATFORM = window.navigator.platform || "";
+      const IS_IOS_WEBKIT = /iPad|iPhone|iPod/i.test(USER_AGENT)
+        || (NAV_PLATFORM === "MacIntel" && window.navigator.maxTouchPoints > 1);
       const RENDER_QUALITY_BOOST = 1.35;
       const THREE_PEN_COLOR = "#f3e8d2";
       const THREE_PEN_WIDTH_SCALE = 0.72;
@@ -3714,33 +3718,29 @@
 
       function bindTouchDragScrollBridge(targetEl) {
         if (!targetEl || !previewPages) return;
+        if (IS_IOS_WEBKIT) return;
         let dragging = false;
         let moved = false;
         let startX = 0;
         let startY = 0;
         let startTop = 0;
         let startLeft = 0;
+        let pointerId = null;
 
-        targetEl.addEventListener("touchstart", function (event) {
-          if (!event.touches || event.touches.length !== 1) {
-            dragging = false;
-            moved = false;
-            return;
-          }
-          const t = event.touches[0];
+        const beginDrag = function (x, y, nextPointerId) {
           dragging = true;
           moved = false;
-          startX = t.clientX;
-          startY = t.clientY;
+          pointerId = Number.isFinite(nextPointerId) ? nextPointerId : null;
+          startX = x;
+          startY = y;
           startTop = previewPages.scrollTop;
           startLeft = previewPages.scrollLeft;
-        }, { passive: true });
+        };
 
-        targetEl.addEventListener("touchmove", function (event) {
-          if (!dragging || !event.touches || event.touches.length !== 1) return;
-          const t = event.touches[0];
-          const dx = t.clientX - startX;
-          const dy = t.clientY - startY;
+        const moveDrag = function (x, y, eventLike) {
+          if (!dragging) return;
+          const dx = x - startX;
+          const dy = y - startY;
           if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
             moved = true;
           }
@@ -3749,19 +3749,60 @@
           if (moved) {
             lastPreviewScrollAt = Date.now();
             hideWordTooltip();
-            event.preventDefault();
+            if (eventLike && typeof eventLike.preventDefault === "function") {
+              eventLike.preventDefault();
+            }
           }
-        }, { passive: false });
+        };
 
         const stopDrag = function () {
           dragging = false;
+          pointerId = null;
           if (moved) {
             lastPreviewScrollAt = Date.now();
           }
           moved = false;
         };
+
+        targetEl.addEventListener("touchstart", function (event) {
+          if (!event.touches || event.touches.length !== 1) {
+            stopDrag();
+            return;
+          }
+          const t = event.touches[0];
+          beginDrag(t.clientX, t.clientY, null);
+        }, { passive: true });
+
+        targetEl.addEventListener("touchmove", function (event) {
+          if (!dragging || !event.touches || event.touches.length !== 1) return;
+          const t = event.touches[0];
+          moveDrag(t.clientX, t.clientY, event);
+        }, { passive: false });
+
         targetEl.addEventListener("touchend", stopDrag, { passive: true });
         targetEl.addEventListener("touchcancel", stopDrag, { passive: true });
+
+        targetEl.addEventListener("pointerdown", function (event) {
+          if (event.pointerType !== "touch") return;
+          beginDrag(event.clientX, event.clientY, event.pointerId);
+        }, { passive: true });
+
+        targetEl.addEventListener("pointermove", function (event) {
+          if (event.pointerType !== "touch") return;
+          if (!dragging) return;
+          if (pointerId !== null && event.pointerId !== pointerId) return;
+          moveDrag(event.clientX, event.clientY, event);
+        }, { passive: false });
+
+        targetEl.addEventListener("pointerup", function (event) {
+          if (pointerId !== null && event.pointerId !== pointerId) return;
+          stopDrag();
+        }, { passive: true });
+
+        targetEl.addEventListener("pointercancel", function (event) {
+          if (pointerId !== null && event.pointerId !== pointerId) return;
+          stopDrag();
+        }, { passive: true });
       }
 
       function clearBlobUrl() {
@@ -5219,10 +5260,13 @@
           const baseViewport = page.getViewport({ scale: 1 });
           const hostWidth = (previewPages.parentElement && previewPages.parentElement.clientWidth) || previewPages.clientWidth;
           const usableWidth = Math.max(320, hostWidth - 24);
-          const scale = Math.max(1, Math.min(2.7, usableWidth / baseViewport.width));
+          const maxViewportScale = IS_IOS_WEBKIT ? 2.2 : 2.7;
+          const scale = Math.max(1, Math.min(maxViewportScale, usableWidth / baseViewport.width));
           const viewport = page.getViewport({ scale });
           const deviceScale = Math.max(1, window.devicePixelRatio || 1);
-          const outputScale = Math.min(4, Math.max(1, deviceScale * RENDER_QUALITY_BOOST));
+          const renderBoost = IS_IOS_WEBKIT ? 1 : RENDER_QUALITY_BOOST;
+          const maxOutputScale = IS_IOS_WEBKIT ? 2.5 : 4;
+          const outputScale = Math.min(maxOutputScale, Math.max(1, deviceScale * renderBoost));
 
           const pageWrap = document.createElement("div");
           pageWrap.className = "pdf-page";
@@ -5235,7 +5279,11 @@
           canvas.height = Math.floor(viewport.height * outputScale);
           canvas.style.width = `${viewport.width}px`;
           canvas.style.height = `${viewport.height}px`;
-          bindTouchDragScrollBridge(canvas);
+          if (IS_IOS_WEBKIT) {
+            canvas.style.touchAction = "auto";
+          } else {
+            bindTouchDragScrollBridge(canvas);
+          }
 
           pageWrap.appendChild(canvas);
           previewPages.appendChild(pageWrap);
