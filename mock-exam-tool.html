@@ -7629,5 +7629,25 @@
       updateTopbarStatus();
     })();
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>
+    eruda.init();
+    (function keepErudaBottomRight() {
+      const margin = 16;
+      const buttonSize = 56;
+      function placeEruda() {
+        eruda.position({
+          x: Math.max(0, window.innerWidth - buttonSize - margin),
+          y: Math.max(0, window.innerHeight - buttonSize - margin)
+        });
+      }
+      placeEruda();
+      requestAnimationFrame(placeEruda);
+      window.addEventListener("resize", placeEruda);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", placeEruda);
+      }
+    })();
+  </script>
 </body>
 </html>
