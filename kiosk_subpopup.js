@@ -750,6 +750,41 @@ function renderSubPopup(label) {
     return;
   }
 
+  if (label === 'EBS 전용도구') {
+    const container = document.querySelector('.sub-popup-inner');
+    const subPopup = document.getElementById('sub-popup');
+    if (!container || !subPopup) return;
+
+    subPopup.classList.remove('hidden');
+    container.innerHTML = `
+      <div style="position: relative; min-height: 220px; padding-bottom: 70px;">
+        <div style="margin: 18px 0 14px; font-size: 14px; text-align:center;">
+          EBS 전용 도구를 상차림에 담습니다.
+        </div>
+        <div style="font-size:12px; color:#666; text-align:center;">
+          담은 뒤 테이블에서 바로 사용할 수 있어요.
+        </div>
+        <div class="sub-footer" style="position:absolute; bottom:16px; width:100%; text-align:center;">
+          <button class="order-btn confirm-btn" id="subPopupAddBtn">🛒 담기</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('subPopupCloseBtn').onclick = () => {
+      subPopup.classList.add('hidden');
+    };
+
+    document.getElementById('subPopupAddBtn').onclick = () => {
+      const duplicate = selectedItems.some(item => item.label === label);
+      if (!duplicate) {
+        selectedItems.push({ label });
+        updateSelectedDisplay();
+      }
+      subPopup.classList.add('hidden');
+    };
+    return;
+  }
+
   const container = document.querySelector('.sub-popup-inner');
   const subPopup = document.getElementById('sub-popup');
   if (!container || !subPopup) return;
