@@ -47,12 +47,19 @@
   <script>
     (function () {
       const DEFAULT_REDIRECT_TARGET = "pleks/pleks-l1e1.html";
-      const IMSI_REDIRECT_TARGET = "imsi_user_custom_hw_2.html";
+      const IMSI_REDIRECT_TARGET = "imsi_user_custom_hw_2_softpath.html";
+      const BITNALEE_REDIRECT_TARGET = "imsi_bitnalee_hw_1.html";
 
       const currentUrl = new URL(window.location.href);
       const userId = (currentUrl.searchParams.get("id") || "").trim().toLowerCase();
-      const useImsiTarget = userId === "080530hn" || userId === "tester";
-      const redirectTarget = useImsiTarget ? IMSI_REDIRECT_TARGET : DEFAULT_REDIRECT_TARGET;
+      let redirectTarget = DEFAULT_REDIRECT_TARGET;
+
+      if (userId === "bitnalee") {
+        redirectTarget = BITNALEE_REDIRECT_TARGET;
+      } else if (userId === "080530hn" || userId === "tester") {
+        redirectTarget = IMSI_REDIRECT_TARGET;
+      }
+
       const targetUrl = new URL(redirectTarget, window.location.href);
 
       // alpha_test.html로 들어온 쿼리 파라미터를 타겟으로 전달
