@@ -23,6 +23,7 @@
       --tile-a: linear-gradient(135deg, #4d8070, #82baa6);
       --tile-b: linear-gradient(135deg, #6a76b8, #8e98db);
       --tile-c: linear-gradient(135deg, #c97b46, #ebb07d);
+      --tile-d: linear-gradient(135deg, #8b5fbf, #c58ee8);
       --modal-bg: rgba(12, 18, 13, 0.36);
       --danger: #a74633;
     }
@@ -127,7 +128,7 @@
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 132px));
+      grid-template-columns: repeat(4, minmax(0, 132px));
       gap: 18px;
       align-content: start;
       padding: 28px;
@@ -187,6 +188,10 @@
 
     .app-icon--c {
       background: var(--tile-c);
+    }
+
+    .app-icon--d {
+      background: var(--tile-d);
     }
 
     .app-name {
@@ -578,6 +583,12 @@
             <span class="app-tile-card">
               <span class="app-icon app-icon--c">FR</span>
               <span class="app-name">fragments</span>
+            </span>
+          </button>
+          <button class="app-tile" type="button" data-app-id="focus" aria-label="Focus Timer" title="Focus Timer">
+            <span class="app-tile-card">
+              <span class="app-icon app-icon--d">TM</span>
+              <span class="app-name">Focus Timer</span>
             </span>
           </button>
         </div>

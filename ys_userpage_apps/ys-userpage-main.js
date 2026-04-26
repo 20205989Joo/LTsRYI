@@ -21,6 +21,11 @@
       name: "fragments",
       subtitle: "Fragments workspace",
       script: "ys_userpage_apps/ys-s-1-fragments.js"
+    },
+    focus: {
+      name: "Focus Timer",
+      subtitle: "Lightweight timer popup",
+      script: "ys_userpage_apps/ys-app-focus.js"
     }
   };
 

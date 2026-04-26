@@ -3,466 +3,215 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pattern Skeleton Workbook</title>
+  <title>간접의문문 짜보기</title>
   <style>
-    :root {
-      --bg: #f6f1e8;
-      --paper: #fbf8f2;
-      --ink: #2f2923;
-      --muted: #7b6f62;
-      --line: #ddd2c5;
-      --accent: #8b6b4a;
-      --accent-2: #b08c66;
-      --mark: #efe3b7;
-      --ok: #496b48;
-      --shadow: 0 10px 30px rgba(60, 43, 24, 0.08);
-      --radius: 18px;
-    }
-
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-      background: linear-gradient(180deg, #f8f3ea 0%, #f2ece1 100%);
-      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif;
+      background: #f4efe7;
+      color: #20242c;
     }
 
     .wrap {
-      max-width: 980px;
+      max-width: 1540px;
       margin: 0 auto;
-      padding: 28px 16px 48px;
-      position: relative;
+      padding: 24px 18px 30px;
     }
 
-    .top {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 10px 14px;
-      box-shadow: var(--shadow);
-      margin-bottom: 12px;
+    .head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
     }
 
     h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
-      line-height: 1.2;
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: -0.06em;
+      font-weight: 950;
     }
 
-    .sub {
-      color: var(--muted);
+    .count {
       font-size: 14px;
-      line-height: 1.6;
+      font-weight: 900;
+      color: #6c7280;
+      white-space: nowrap;
+      padding-bottom: 3px;
     }
 
-    .meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 0;
-    }
-
-    .meta-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .meta-nav {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .mode-switch {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-left: 6px;
-    }
-
-    .counter {
-      font-weight: 700;
-      font-size: 13px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: #f7efe4;
-      border: 1px solid #decebc;
-    }
-
-    .progress-wrap {
-      width: 180px;
-      max-width: 100%;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background: #ece4d8;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid #e2d7c8;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      transition: width 0.25s ease;
-    }
-
-    .toolbar {
-      display: none;
-    }
-
-    button {
-      border: 1px solid #ccbda9;
-      background: #fffaf3;
-      color: var(--ink);
-      border-radius: 14px;
-      padding: 10px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
-    }
-
-    button:hover {
-      background: #fff4e7;
-      border-color: #c4a886;
-    }
-
-    button:active {
-      transform: translateY(1px);
-    }
-
-    .primary {
-      background: #f3e5d5;
-      border-color: #c7a989;
-      font-weight: 700;
-    }
-
-    .mode-btn.active {
-      background: #e8d7c4;
-      border-color: #ba976f;
-      font-weight: 800;
-    }
-
-    .card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 28px;
-      padding: 24px;
-      box-shadow: var(--shadow);
-    }
-
-    .chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 16px;
-      align-items: center;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: #f6ede1;
-      border: 1px solid #dbc9b4;
-      font-size: 13px;
-      color: #5d4a37;
-    }
-
-    .chip strong {
-      color: var(--ink);
-      font-size: 13px;
-    }
-
-    .sentence {
-      font-size: 26px;
-      line-height: 1.7;
-      letter-spacing: -0.01em;
-      background: #fffdf9;
-      border: 1px solid #e7ddd1;
-      border-radius: 22px;
-      padding: 22px;
-      margin-bottom: 18px;
-      word-break: keep-all;
-    }
-
-    mark {
-      background: var(--mark);
-      color: inherit;
-      padding: 0 0.18em;
-      border-radius: 8px;
-      box-decoration-break: clone;
-      -webkit-box-decoration-break: clone;
-    }
-
-    .grid {
+    .stage-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 18px;
+      grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) 34px minmax(0, 1fr) 34px minmax(0, 1fr) 34px minmax(0, 1fr);
+      gap: 8px;
+      align-items: stretch;
+      width: 100%;
     }
 
     .panel {
-      border: 1px solid #e4d8ca;
-      background: #fffaf4;
-      border-radius: 20px;
-      padding: 16px;
+      background: #fffdf8;
+      border: 1px solid #ded8ce;
+      border-radius: 22px;
+      padding: 16px 15px;
+      min-height: 330px;
+      box-shadow: 0 9px 22px rgba(24, 31, 42, 0.065);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
     }
 
-    .label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
+    .panel.base {
+      background: linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
+      border-color: #cbd8e8;
     }
 
-    .value {
+    .panel.hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .stage {
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 950;
+      color: #687181;
+      letter-spacing: -0.045em;
+    }
+
+    .ko {
+      margin-bottom: 12px;
       font-size: 18px;
-      line-height: 1.6;
-      font-weight: 700;
+      line-height: 1.35;
+      font-weight: 850;
+      letter-spacing: -0.05em;
+      word-break: keep-all;
+      color: #303744;
     }
 
-    .meaning {
-      font-size: 18px;
-      line-height: 1.7;
+    .en, .blank-line {
+      border: 1px solid #ebe3d8;
+      border-radius: 16px;
+      background: #f8f6f1;
+      padding: 12px 12px;
+      min-height: 112px;
     }
 
-    textarea {
-      width: 100%;
-      min-height: 110px;
-      border-radius: 18px;
-      border: 1px solid #d9cbb9;
-      background: #fffdf9;
-      padding: 14px;
-      font: inherit;
-      font-size: 15px;
-      color: var(--ink);
-      resize: vertical;
-      outline: none;
+    .en {
+      font-size: 21px;
+      line-height: 1.35;
+      font-weight: 900;
+      letter-spacing: -0.045em;
+      word-break: keep-all;
+      color: #111827;
     }
 
-    textarea:focus {
-      border-color: #b48c63;
-      box-shadow: 0 0 0 3px rgba(180, 140, 99, 0.12);
-    }
-
-    .bottom-row {
-      margin-top: 12px;
+    .blank-line {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
+      align-content: flex-start;
       align-items: center;
+      gap: 8px 6px;
+    }
+
+    .arrow-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+    }
+
+    .arrow-cell.hidden { visibility: hidden; }
+
+    button {
+      border: 1px solid #1f2937;
+      background: #1f2937;
+      color: white;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 15px;
+      font-weight: 950;
+      letter-spacing: -0.045em;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button:disabled {
+      opacity: 0.58;
+      cursor: default;
+    }
+
+    .arrow-btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      line-height: 1;
+      background: #263241;
+      border-color: #263241;
+      box-shadow: 0 7px 15px rgba(31, 41, 55, 0.14);
+    }
+
+    .arrow-static {
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 950;
+      color: #969eaa;
+    }
+
+    .solo-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .solo-btn {
+      padding: 12px 22px;
+      font-size: 17px;
+      background: #111827;
+      border-color: #111827;
+    }
+
+    .skip-btn {
+      min-width: 130px;
+      background: #ffffff;
+      color: #1f2937;
+      border-color: #cfd5df;
+    }
+
+    .review-btn {
+      min-width: 130px;
+      background: #ffffff;
+      color: #1f2937;
+      border-color: #cfd5df;
+    }
+
+    .bottom-bar {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
     }
 
     .status {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .status.ok {
-      color: var(--ok);
-      font-weight: 700;
-    }
-
-    .footer-note {
-      margin-top: 16px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    .top > h1,
-    .top > .sub,
-    #progressText,
-    .chip-row,
-    #randomBtn,
-    #markBtn,
-    #clearNoteBtn,
-    #saveBtn,
-    #saveStatus,
-    .footer-note,
-    .bottom-row,
-    .grid,
-    .note-panel {
-      display: none;
-    }
-
-    .study-layout {
-      display: grid;
-      grid-template-columns: 190px minmax(0, 1fr);
-      gap: 16px;
-      align-items: start;
-    }
-
-    .study-main {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .word-panel {
-      border: 1px solid #e0d2c1;
-      background: #fffdfa;
-      border-radius: 22px;
-      padding: 14px;
-    }
-
-    .word-panel-title {
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.01em;
-      margin-bottom: 10px;
-    }
-
-    .word-bank {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .word-card {
-      border: 1px solid #ddd0bf;
-      border-radius: 16px;
-      background: #fff;
-      padding: 10px 12px;
-    }
-
-    .word-en {
-      font-size: 13px;
-      line-height: 1.45;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    .word-ko {
-      margin-top: 5px;
-      font-size: 12px;
-      line-height: 1.45;
-      color: var(--muted);
-    }
-
-    .order-panel {
-      border: 1px solid #e0d2c1;
-      background: #fffdfa;
-      border-radius: 22px;
-      padding: 14px;
-    }
-
-    .order-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-
-    .order-title {
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.01em;
-    }
-
-    .order-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .order-stage,
-    .bank-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(132px, 132px));
-      justify-content: start;
-      gap: 10px;
-    }
-
-    .order-stage {
-      min-height: 76px;
-      margin-bottom: 12px;
-      padding: 12px;
-      border: 1px dashed #d3c0ad;
-      border-radius: 18px;
-      background: #f9f4ee;
-    }
-
-    .order-placeholder {
-      grid-column: 1 / -1;
-      align-self: center;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .bank-tile {
-      width: 132px;
-      min-height: 54px;
-      text-align: left;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid #d7c4b1;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      justify-content: center;
-    }
-
-    .bank-tile.selected {
-      background: #f4eadf;
-      border-color: #c9a884;
-    }
-
-    .bank-en {
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.45;
-      color: var(--ink);
-    }
-
-    .bank-ko {
-      font-size: 13px;
-      line-height: 1.5;
-      color: var(--muted);
-    }
-
-    .scramble-ko {
-      font-size: 13px;
-      line-height: 1.35;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    .order-status {
-      margin-top: 12px;
       min-height: 20px;
-    }
-
-    .pattern-set-box {
-      display: none;
-      border: 1px solid #e0d2c1;
-      background: #fffdfa;
-      border-radius: 22px;
-      padding: 14px;
-    }
-
-    .pattern-set-box.active {
-      display: block;
+      font-size: 13px;
+      font-weight: 900;
+      color: #6c7280;
+      text-align: center;
     }
 
     .done-panel {
       display: none;
+      margin-top: 16px;
     }
 
     .done-panel.active {
@@ -470,1205 +219,481 @@
     }
 
     .done-card {
-      border: 1px solid #dfcfbd;
+      border: 1px solid #ded8ce;
       border-radius: 22px;
-      background: #fffdfa;
-      padding: 42px 20px;
+      background: #fffdf8;
+      padding: 20px 18px;
       text-align: center;
-      font-size: 30px;
-      line-height: 1.4;
-      font-weight: 900;
-      color: var(--ink);
-    }
-
-    .pattern-set-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .pattern-set-card {
-      border: 1px solid #dfcfbd;
-      border-radius: 16px;
-      background: #fff;
-      padding: 12px 14px;
-    }
-
-    .pattern-set-head {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .pattern-set-label {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #efe3b7;
-      font-weight: 800;
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .pattern-set-gloss {
-      font-size: 12px;
-      color: #8b6b4a;
-      font-weight: 700;
-      line-height: 1.35;
-    }
-
-    .pattern-set-scope {
-      margin-top: 8px;
-      font-size: 14px;
-      line-height: 1.5;
-      color: var(--ink);
-    }
-
-    .pattern-set-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .pattern-set-count {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .pattern-set-focus {
       font-size: 24px;
-      line-height: 1.8;
-      letter-spacing: -0.01em;
-      word-break: keep-all;
+      font-weight: 950;
+      letter-spacing: -0.045em;
+      color: #111827;
+      box-shadow: 0 9px 22px rgba(24, 31, 42, 0.065);
     }
 
-    .pattern-token,
-    mark.glossed {
-      position: relative;
-      cursor: default;
-      padding: 0 0.14em;
-      border-radius: 8px;
-      box-decoration-break: clone;
-      -webkit-box-decoration-break: clone;
+    .word-blank {
+      height: 36px;
+      min-width: 44px;
+      max-width: 126px;
+      border: none;
+      border-bottom: 3px solid #aeb8c5;
+      border-radius: 9px 9px 5px 5px;
+      background: #ffffff;
+      padding: 3px 6px 1px;
+      outline: none;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-align: center;
+      color: #111827;
+      transition: background .12s ease, border-color .12s ease, box-shadow .12s ease;
     }
 
-    .pattern-token[data-pidx="1"],
-    mark.glossed[data-pidx="1"] { background: #efe3b7; }
-    .pattern-token[data-pidx="2"],
-    mark.glossed[data-pidx="2"] { background: #dfead6; }
-    .pattern-token[data-pidx="3"],
-    mark.glossed[data-pidx="3"] { background: #dce9f7; }
-    .pattern-token[data-pidx="4"],
-    mark.glossed[data-pidx="4"] { background: #f3dfd4; }
-    .pattern-token[data-pidx="5"],
-    mark.glossed[data-pidx="5"] { background: #ece2f5; }
-    .pattern-token[data-pidx="6"],
-    mark.glossed[data-pidx="6"] { background: #f6e8cc; }
-    .pattern-token[data-pidx="7"],
-    mark.glossed[data-pidx="7"] { background: #dceee9; }
-
-    .slot-token {
-      text-decoration-line: underline;
-      text-decoration-thickness: 2px;
-      text-underline-offset: 0.16em;
-      text-decoration-color: #8b6b4a;
+    .word-blank:focus {
+      border-bottom-color: #64748b;
+      box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.13);
     }
 
-    .slot-token[data-sidx="2"] { text-decoration-color: #6f8d55; }
-    .slot-token[data-sidx="3"] { text-decoration-color: #5f7fa5; }
-    .slot-token[data-sidx="4"] { text-decoration-color: #b17653; }
-    .slot-token[data-sidx="5"] { text-decoration-color: #8a67a4; }
+    .word-blank.wh { background: #fff1a8; border-bottom-color: #d8a700; }
+    .word-blank.subj { background: #dff0ff; border-bottom-color: #4c94d9; }
+    .word-blank.verb { background: #ffe1e6; border-bottom-color: #e07180; }
+    .word-blank.wh-soft { background: #fffdf2; border-bottom-color: #eadb93; }
+    .word-blank.aux-soft { background: #fff8f8; border-bottom-color: #ecc1c7; }
 
-    .pattern-token::after,
-    mark.glossed::after {
-      content: none;
+    .word-blank.correct {
+      background: #e7f8ed !important;
+      border-bottom-color: #1f9d55 !important;
+      box-shadow: 0 0 0 3px rgba(31, 157, 85, 0.12);
     }
 
-    .pattern-token[data-gloss]::after,
-    mark.glossed[data-gloss]::after {
-      content: attr(data-gloss);
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 1px);
-      transform: translateX(-50%);
-      padding: 0;
-      border-radius: 0;
-      background: transparent;
-      color: #8b6b4a;
-      font-size: 10px;
-      line-height: 1.2;
-      font-weight: 700;
-      white-space: nowrap;
-      opacity: 1;
-      pointer-events: none;
-      z-index: 20;
+    .word-blank.wrong {
+      background: #fff0ef !important;
+      border-bottom-color: #e05243 !important;
+      box-shadow: 0 0 0 3px rgba(224, 82, 67, 0.13);
     }
 
-    @media (max-width: 760px) {
-      .sentence {
-        font-size: 21px;
-        padding: 18px;
+    .punc {
+      margin-left: -5px;
+      font-size: 23px;
+      font-weight: 950;
+      color: #1f2937;
+      align-self: flex-end;
+      padding-bottom: 4px;
+    }
+
+    .mark {
+      display: inline;
+      padding: 0 0.015em;
+      border-radius: 0.15em;
+      background-repeat: no-repeat;
+      background-size: 100% 0.52em;
+      background-position: 0 88%;
+    }
+
+    .mark.wh { background-image: linear-gradient(transparent 24%, #f0c72a 24%); }
+    .mark.subj { background-image: linear-gradient(transparent 28%, #9ed0ff 28%); }
+    .mark.verb { background-image: linear-gradient(transparent 30%, #ff9aaa 30%); }
+    .mark.wh-soft { background-image: linear-gradient(transparent 78%, rgba(240, 199, 42, 0.18) 78%); }
+    .mark.aux-soft { background-image: linear-gradient(transparent 80%, rgba(255, 154, 170, 0.16) 80%); }
+
+    @media (max-width: 1180px) {
+      .wrap { max-width: 980px; }
+      .panel { min-height: 300px; }
+      .en { font-size: 19px; }
+      .ko { font-size: 17px; }
+      .word-blank { font-size: 16px; }
+    }
+
+    @media (max-width: 960px) {
+      .stage-grid { grid-template-columns: 1fr; }
+      .panel.hidden { display: none; }
+      .arrow-cell {
+        min-height: 34px;
       }
-      .study-layout {
-        grid-template-columns: 1fr;
+      .arrow-btn,
+      .arrow-static {
+        transform: rotate(90deg);
       }
-      .meta-row {
-        align-items: stretch;
+      .arrow-cell.hidden {
+        display: none;
       }
-      .meta-left {
-        width: 100%;
-        justify-content: space-between;
+      .head { flex-direction: column; align-items: flex-start; }
+      .panel { min-height: auto; }
+      .solo-row {
+        justify-content: stretch;
       }
-      .progress-wrap {
-        width: 100%;
-      }
-      .grid {
-        grid-template-columns: 1fr;
-      }
-      .card {
-        padding: 18px;
-      }
-      h1 {
-        font-size: 24px;
+      .solo-row button {
+        flex: 1 1 220px;
       }
     }
   </style>
 </head>
 <body>
   <div class="wrap" id="cafe_int">
-    <section class="top">
-      <h1>Pattern Skeleton Workbook</h1>
-      <div class="sub">
-        문장의 뼈대를 잡는 pattern만 간단히 모아둔 카드형 HTML입니다.  
-        각 카드에는 <strong>대표 pattern 1개 + 뜻 + 원문 문장 + 추가 메모칸</strong>이 들어 있습니다.
-      </div>
-      <div class="meta-row">
-        <div class="meta-left">
-          <div class="counter" id="counter">1 / 30</div>
-          <div class="meta-nav">
-            <div class="mode-switch">
-              <button id="stage12Btn" class="mode-btn active" type="button">1단계/2단계</button>
-              <button id="stage3Btn" class="mode-btn" type="button">3단계</button>
-            </div>
-          </div>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-          <div class="sub" id="progressText" style="margin-top:6px; font-size:12px;">암기 체크 0 / 30</div>
-        </div>
-      </div>
-    </section>
-
-    <div class="toolbar">
-      <button id="randomBtn">랜덤</button>
-      <button id="markBtn" class="primary">암기 체크</button>
-      <button id="clearNoteBtn">현재 메모 비우기</button>
+    <div class="head">
+      <h1>간접의문문 짜보기</h1>
+      <div class="count" id="count"></div>
     </div>
 
-    <section class="card">
-      <div class="chip-row">
-        <div class="chip"><strong>번호</strong> <span id="itemNo">1</span></div>
-        <div class="chip"><strong>대표 pattern</strong> <span id="patternChip">due to</span></div>
-      </div>
+    <div id="main"></div>
 
-      <div class="study-layout" id="studyLayout">
-        <aside class="word-panel">
-          <div class="word-panel-title">Word Bank</div>
-          <div class="word-bank" id="wordBank"></div>
-        </aside>
+    <div class="bottom-bar" id="bottomBar">
+      <div class="status" id="saveStatus"></div>
+      <div class="solo-row" id="bottomRow"></div>
+    </div>
 
-        <div class="study-main">
-          <div class="sentence" id="sentenceBox"></div>
-          <div class="pattern-set-box" id="patternSetBox"></div>
-
-          <div class="panel note-panel" id="notePanel">
-            <div class="label" id="noteLabel">추가 패턴 메모</div>
-            <textarea id="noteBox" placeholder="이 문장 안에 더 넣고 싶은 pattern이나 해석 포인트를 적어두세요."></textarea>
-            <div class="bottom-row" id="saveRow">
-              <div class="status" id="saveStatus">메모는 브라우저에 저장됩니다.</div>
-              <button id="saveBtn">메모 저장</button>
-            </div>
-          </div>
-
-          <div class="order-panel" id="orderPanel">
-            <div class="order-head">
-              <div class="order-title">Korean Scramble</div>
-              <div class="order-actions">
-                <button id="checkOrderBtn" class="primary" type="button">정답 확인</button>
-              </div>
-            </div>
-            <div class="order-stage" id="selectedBank"></div>
-            <div class="bank-grid" id="bankGrid"></div>
-            <div class="status order-status" id="orderStatus"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="done-panel" id="donePanel">
-        <div class="done-card">오늘 숙제 끝!</div>
-      </div>
-
-      <div class="grid">
-        <div class="panel">
-          <div class="label">PATTERN</div>
-          <div class="value" id="patternText"></div>
-        </div>
-        <div class="panel">
-          <div class="label">뜻</div>
-          <div class="meaning" id="meaningText"></div>
-        </div>
-      </div>
-
-      <div class="footer-note">
-        같은 문장에 pattern이 여러 개 들어 있는 경우가 있습니다. 지금은 대표 pattern만 넣어두었고, 나머지는 메모칸에 직접 추가할 수 있게 해두었습니다.
-      </div>
-    </section>
+    <div class="done-panel" id="donePanel">
+      <div class="done-card">오늘 숙제 끝!</div>
+    </div>
   </div>
 
   <script src="toast_imsi.js"></script>
   <script>
-    const items = [
+    const data = [
       {
-        pattern: "due to",
-        meaning: "~ 때문에",
-        sentence: "<span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"~ 때문에\">Due to</span> the writer’s recent health problems, the column will <span class=\"pattern-token\" data-pidx=\"2\" data-gloss=\"휴식을 취하다\">take</span> a one-month <span class=\"pattern-token\" data-pidx=\"2\">break</span>."
+            "baseEn": "You want something.",
+            "baseKo": "너는 무언가를 원한다.",
+            "yesnoEn": "Do you want something?",
+            "yesnoKo": "너는 무언가를 원하니?",
+            "qEn": "What do you want?",
+            "qKo": "너는 무엇을 원하니?",
+            "clauseEn": "what you want",
+            "clauseKo": "네가 무엇을 원하는지",
+            "indirectEn": "I know what you want.",
+            "indirectKo": "나는 네가 무엇을 원하는지 안다."
       },
       {
-        pattern: "set aside",
-        meaning: "따로 마련하다 / 할애하다",
-        sentence: "This time has been <span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"따로 마련하다 / 할애하다\">set aside</span> to <span class=\"pattern-token\" data-pidx=\"2\" data-gloss=\"A가 V하도록 하다\">allow</span> <span class=\"slot-token\" data-sidx=\"2\">the writer</span> <span class=\"pattern-token\" data-pidx=\"2\">to</span> <span class=\"slot-token\" data-sidx=\"2\">recover</span>."
+            "baseEn": "He lives somewhere.",
+            "baseKo": "그는 어딘가에 산다.",
+            "yesnoEn": "Does he live somewhere?",
+            "yesnoKo": "그는 어딘가에 사니?",
+            "qEn": "Where does he live?",
+            "qKo": "그는 어디에 사니?",
+            "clauseEn": "where he lives",
+            "clauseKo": "그가 어디에 사는지",
+            "indirectEn": "I know where he lives.",
+            "indirectKo": "나는 그가 어디에 사는지 안다."
       },
       {
-        pattern: "as if S V",
-        meaning: "마치 ~인 것처럼",
-        sentence: "It felt <span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"마치 ~인 것처럼\">as if</span> <span class=\"slot-token\" data-sidx=\"1\">no one knew I was there</span>."
+            "baseEn": "She left for a reason.",
+            "baseKo": "그녀는 어떤 이유로 떠났다.",
+            "yesnoEn": "Did she leave for a reason?",
+            "yesnoKo": "그녀는 어떤 이유로 떠났니?",
+            "qEn": "Why did she leave?",
+            "qKo": "그녀는 왜 떠났니?",
+            "clauseEn": "why she left",
+            "clauseKo": "그녀가 왜 떠났는지",
+            "indirectEn": "I wonder why she left.",
+            "indirectKo": "나는 그녀가 왜 떠났는지 궁금하다."
       },
       {
-        pattern: "in order to V",
-        meaning: "~하기 위해",
-        sentence: "<span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"~하기 위해\">In order to</span> <span class=\"pattern-token\" data-pidx=\"2\" data-gloss=\"A를 화살로 맞추다\">hit the target with</span> <span class=\"slot-token\" data-sidx=\"2\">my bow and arrow</span>, I <span class=\"pattern-token\" data-pidx=\"3\" data-gloss=\"V할 필요가 있다\">need to</span> <span class=\"slot-token\" data-sidx=\"3\">do something</span>, to <span class=\"pattern-token\" data-pidx=\"4\" data-gloss=\"조준하다\">take aim</span> and concentrate."
+            "baseEn": "They need something.",
+            "baseKo": "그들은 무언가를 필요로 한다.",
+            "yesnoEn": "Do they need something?",
+            "yesnoKo": "그들은 무언가를 필요로 하니?",
+            "qEn": "What do they need?",
+            "qKo": "그들은 무엇을 필요로 하니?",
+            "clauseEn": "what they need",
+            "clauseKo": "그들이 무엇을 필요로 하는지",
+            "indirectEn": "Can you tell me what they need?",
+            "indirectKo": "그들이 무엇을 필요로 하는지 말해줄 수 있니?"
       },
       {
-        pattern: "the fact that",
-        meaning: "~라는 사실",
-        sentence: "<span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"~라는 사실\">The fact that</span> I am a being <span class=\"pattern-token\" data-pidx=\"3\" data-gloss=\"몸을 지닌\">with a body</span>, <span class=\"pattern-token\" data-pidx=\"4\" data-gloss=\"A에 놓여있는\">embedded in</span> <span class=\"slot-token\" data-sidx=\"4\">a culturally rich situation</span>, <span class=\"pattern-token\" data-pidx=\"5\" data-gloss=\"A에 장애가 되지 않는다\">is no obstacle to</span> <span class=\"slot-token\" data-sidx=\"5\">my sometimes succeeding</span>."
+            "baseEn": "He trusts someone.",
+            "baseKo": "그는 누군가를 믿는다.",
+            "yesnoEn": "Does he trust someone?",
+            "yesnoKo": "그는 누군가를 믿니?",
+            "qEn": "Who does he trust?",
+            "qKo": "그는 누구를 믿니?",
+            "clauseEn": "who he trusts",
+            "clauseKo": "그가 누구를 믿는지",
+            "indirectEn": "I don't know who he trusts.",
+            "indirectKo": "나는 그가 누구를 믿는지 모른다."
       },
       {
-        pattern: "in fact",
-        meaning: "사실은 / 실제로는",
-        sentence: "<span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"사실은 / 실제로는\">In fact</span>, <span class=\"pattern-token\" data-pidx=\"2\" data-gloss=\"A가 바로 ~한 그것이다\">it is</span> <span class=\"slot-token\" data-sidx=\"2\">that embedding</span> <span class=\"pattern-token\" data-pidx=\"2\">that</span> <span class=\"pattern-token\" data-pidx=\"3\" data-gloss=\"A를 제공하다\">supplies me</span> <span class=\"pattern-token\" data-pidx=\"4\" data-gloss=\"A 뿐만 아니라 B를 제공하다\">not only</span> <span class=\"pattern-token\" data-pidx=\"3\">with</span> the physical means — the bow and the arrow, and the training — <span class=\"pattern-token\" data-pidx=\"4\">but also</span> <span class=\"pattern-token\" data-pidx=\"3\">with</span> the <span class=\"pattern-token\" data-pidx=\"6\" data-gloss=\"V할 동기\">motivation to</span> <span class=\"slot-token\" data-sidx=\"6\">hit the target</span> <span class=\"pattern-token\" data-pidx=\"7\" data-gloss=\"처음부터\">in the first place</span>."
+            "baseEn": "The accident happened in some way.",
+            "baseKo": "그 사고는 어떤 방식으로 일어났다.",
+            "yesnoEn": "Did the accident happen in some way?",
+            "yesnoKo": "그 사고는 어떤 방식으로 일어났니?",
+            "qEn": "How did the accident happen?",
+            "qKo": "그 사고는 어떻게 일어났니?",
+            "clauseEn": "how the accident happened",
+            "clauseKo": "그 사고가 어떻게 일어났는지",
+            "indirectEn": "We need to understand how the accident happened.",
+            "indirectKo": "우리는 그 사고가 어떻게 일어났는지 이해해야 한다."
       },
       {
-        pattern: "not only A but also B",
-        meaning: "A뿐만 아니라 B도",
-        sentence: "In fact, it is that embedding that supplies me <mark>not only</mark> with the physical means — the bow and the arrow, and the training — <mark>but also</mark> with the motivation to hit the target in the first place."
+            "baseEn": "Someone broke the window.",
+            "baseKo": "누군가가 창문을 깼다.",
+            "yesnoEn": "Did someone break the window?",
+            "yesnoKo": "누군가가 창문을 깼니?",
+            "qEn": "Who broke the window?",
+            "qKo": "누가 창문을 깼니?",
+            "clauseEn": "who broke the window",
+            "clauseKo": "누가 창문을 깼는지",
+            "indirectEn": "I know who broke the window.",
+            "indirectKo": "나는 누가 창문을 깼는지 안다."
       },
       {
-        pattern: "instead of ~ing",
-        meaning: "~하는 대신에",
-        sentence: "<mark>Instead of</mark> commanding you to find my keys, I might ask you where they are."
+            "baseEn": "Something makes a hero.",
+            "baseKo": "무언가가 영웅을 만든다.",
+            "yesnoEn": "Does something make a hero?",
+            "yesnoKo": "무언가가 영웅을 만드니?",
+            "qEn": "What makes a hero?",
+            "qKo": "무엇이 영웅을 만드는가?",
+            "clauseEn": "what makes a hero",
+            "clauseKo": "무엇이 영웅을 만드는지",
+            "indirectEn": "I wonder what makes a hero.",
+            "indirectKo": "나는 무엇이 영웅을 만드는지 궁금하다."
       },
       {
-        pattern: "whether or not",
-        meaning: "~인지 아닌지 / ~여부",
-        sentence: "<mark>Whether or not</mark> it is a good reply is a function of <mark>whether or not</mark> it solves the problem."
+            "baseEn": "Something caused the problem.",
+            "baseKo": "무언가가 그 문제를 일으켰다.",
+            "yesnoEn": "Did something cause the problem?",
+            "yesnoKo": "무언가가 그 문제를 일으켰니?",
+            "qEn": "What caused the problem?",
+            "qKo": "무엇이 그 문제를 일으켰니?",
+            "clauseEn": "what caused the problem",
+            "clauseKo": "무엇이 그 문제를 일으켰는지",
+            "indirectEn": "We should find out what caused the problem.",
+            "indirectKo": "우리는 무엇이 그 문제를 일으켰는지 알아내야 한다."
       },
       {
-        pattern: "as long as S V",
-        meaning: "~하기만 하면 / ~인 한",
-        sentence: "A good reply doesn’t need to offer an answer to the question, ‘Where are my keys?’ <mark>as long as</mark> it resolves the problem of not being able to leave the house."
+            "baseEn": "Someone can solve this problem.",
+            "baseKo": "누군가가 이 문제를 해결할 수 있다.",
+            "yesnoEn": "Can someone solve this problem?",
+            "yesnoKo": "누군가가 이 문제를 해결할 수 있니?",
+            "qEn": "Who can solve this problem?",
+            "qKo": "누가 이 문제를 해결할 수 있니?",
+            "clauseEn": "who can solve this problem",
+            "clauseKo": "누가 이 문제를 해결할 수 있는지",
+            "indirectEn": "I don't know who can solve this problem.",
+            "indirectKo": "나는 누가 이 문제를 해결할 수 있는지 모른다."
       },
       {
-        pattern: "give rise to",
-        meaning: "~을 낳다 / 야기하다",
-        sentence: "While AI has the potential to automate certain jobs, it is also <mark>giving rise to</mark> new career opportunities and demands."
+            "baseEn": "She is angry for a reason.",
+            "baseKo": "그녀는 어떤 이유로 화가 나 있다.",
+            "yesnoEn": "Is she angry for a reason?",
+            "yesnoKo": "그녀는 어떤 이유로 화가 나 있니?",
+            "qEn": "Why is she angry?",
+            "qKo": "그녀는 왜 화가 나 있니?",
+            "clauseEn": "why she is angry",
+            "clauseKo": "그녀가 왜 화가 나 있는지",
+            "indirectEn": "I want to know why she is angry.",
+            "indirectKo": "나는 그녀가 왜 화가 나 있는지 알고 싶다."
       },
       {
-        pattern: "lead to",
-        meaning: "~로 이어지다",
-        sentence: "The increasing application of AI technology has <mark>led to</mark> a sudden increase in the need for professionals who can effectively manage and get the most out of AI systems."
+            "baseEn": "The book is somewhere.",
+            "baseKo": "그 책은 어딘가에 있다.",
+            "yesnoEn": "Is the book somewhere?",
+            "yesnoKo": "그 책은 어딘가에 있니?",
+            "qEn": "Where is the book?",
+            "qKo": "그 책은 어디에 있니?",
+            "clauseEn": "where the book is",
+            "clauseKo": "그 책이 어디에 있는지",
+            "indirectEn": "Tell me where the book is.",
+            "indirectKo": "그 책이 어디에 있는지 말해줘."
       },
       {
-        pattern: "get the most out of",
-        meaning: "~을 최대한 활용하다",
-        sentence: "The increasing application of AI technology has led to a sudden increase in the need for professionals who can effectively manage and <mark>get the most out of</mark> AI systems."
+            "baseEn": "He bought something.",
+            "baseKo": "그는 무언가를 샀다.",
+            "yesnoEn": "Did he buy something?",
+            "yesnoKo": "그는 무언가를 샀니?",
+            "qEn": "What did he buy?",
+            "qKo": "그는 무엇을 샀니?",
+            "clauseEn": "what he bought",
+            "clauseKo": "그가 무엇을 샀는지",
+            "indirectEn": "I know what he bought.",
+            "indirectKo": "나는 그가 무엇을 샀는지 안다."
       },
       {
-        pattern: "adapt to",
-        meaning: "~에 적응하다",
-        sentence: "The ever-evolving technological landscape necessitates employees to consistently update their skills, acquire new knowledge, and <mark>adapt to</mark> the dynamic changes in the work environment."
+            "baseEn": "The meeting starts at some time.",
+            "baseKo": "회의는 어떤 시간에 시작한다.",
+            "yesnoEn": "Does the meeting start at some time?",
+            "yesnoKo": "회의는 어떤 시간에 시작하니?",
+            "qEn": "When does the meeting start?",
+            "qKo": "회의는 언제 시작하니?",
+            "clauseEn": "when the meeting starts",
+            "clauseKo": "회의가 언제 시작하는지",
+            "indirectEn": "Do you know when the meeting starts?",
+            "indirectKo": "회의가 언제 시작하는지 아니?"
       },
       {
-        pattern: "up to",
-        meaning: "최대 ~까지",
-        sentence: "All participants must register as a team of <mark>up to</mark> four members."
+            "baseEn": "Someone opened the door.",
+            "baseKo": "누군가가 문을 열었다.",
+            "yesnoEn": "Did someone open the door?",
+            "yesnoKo": "누군가가 문을 열었니?",
+            "qEn": "Who opened the door?",
+            "qKo": "누가 문을 열었니?",
+            "clauseEn": "who opened the door",
+            "clauseKo": "누가 문을 열었는지",
+            "indirectEn": "I don't know who opened the door.",
+            "indirectKo": "나는 누가 문을 열었는지 모른다."
       },
       {
-        pattern: "at first",
-        meaning: "처음에는",
-        sentence: "In 1842, Houghton was elected as Mayor of Detroit, a position he was <mark>at first</mark> reluctant to accept."
+            "baseEn": "Something changed his mind.",
+            "baseKo": "무언가가 그의 마음을 바꾸었다.",
+            "yesnoEn": "Did something change his mind?",
+            "yesnoKo": "무언가가 그의 마음을 바꾸었니?",
+            "qEn": "What changed his mind?",
+            "qKo": "무엇이 그의 마음을 바꾸었니?",
+            "clauseEn": "what changed his mind",
+            "clauseKo": "무엇이 그의 마음을 바꾸었는지",
+            "indirectEn": "I wonder what changed his mind.",
+            "indirectKo": "나는 무엇이 그의 마음을 바꾸었는지 궁금하다."
       },
       {
-        pattern: "impact on",
-        meaning: "~에 대한 영향",
-        sentence: "His contributions to science and public service left a lasting <mark>impact on</mark> Michigan’s development."
+            "baseEn": "She chose someone.",
+            "baseKo": "그녀는 누군가를 선택했다.",
+            "yesnoEn": "Did she choose someone?",
+            "yesnoKo": "그녀는 누군가를 선택했니?",
+            "qEn": "Who did she choose?",
+            "qKo": "그녀는 누구를 선택했니?",
+            "clauseEn": "who she chose",
+            "clauseKo": "그녀가 누구를 선택했는지",
+            "indirectEn": "I know who she chose.",
+            "indirectKo": "나는 그녀가 누구를 선택했는지 안다."
       },
       {
-        pattern: "regardless of",
-        meaning: "~와 상관없이",
-        sentence: "Darwin understood that since inheritance is conservative, it is in the nature of the organism to impose itself on the surroundings, producing many highly similar but variable offspring <mark>regardless of</mark> the nature of the conditions."
+            "baseEn": "He was late for a reason.",
+            "baseKo": "그는 어떤 이유로 늦었다.",
+            "yesnoEn": "Was he late for a reason?",
+            "yesnoKo": "그는 어떤 이유로 늦었니?",
+            "qEn": "Why was he late?",
+            "qKo": "그는 왜 늦었니?",
+            "clauseEn": "why he was late",
+            "clauseKo": "그가 왜 늦었는지",
+            "indirectEn": "Can you explain why he was late?",
+            "indirectKo": "그가 왜 늦었는지 설명해줄 수 있니?"
       },
       {
-        pattern: "in response to",
-        meaning: "~에 반응하여 / ~에 대응하여",
-        sentence: "While it is true that organisms can express some amount of flexibility in their form and function <mark>in response to</mark> their immediate surroundings, these adjustments are minor compared to the constraints of inheritance."
+            "baseEn": "The machine works in some way.",
+            "baseKo": "그 기계는 어떤 방식으로 작동한다.",
+            "yesnoEn": "Does the machine work in some way?",
+            "yesnoKo": "그 기계는 어떤 방식으로 작동하니?",
+            "qEn": "How does the machine work?",
+            "qKo": "그 기계는 어떻게 작동하니?",
+            "clauseEn": "how the machine works",
+            "clauseKo": "그 기계가 어떻게 작동하는지",
+            "indirectEn": "I want to understand how the machine works.",
+            "indirectKo": "나는 그 기계가 어떻게 작동하는지 이해하고 싶다."
       },
       {
-        pattern: "as a result",
-        meaning: "그 결과",
-        sentence: "<mark>As a result</mark>, not every living thing can live everywhere."
-      },
-      {
-        pattern: "make use of",
-        meaning: "~을 활용하다",
-        sentence: "Disciplined historical argument is not the same as informal hearing and telling of stories; it requires familiarity with abstract generalizations, familiarity with prior scholarly discourse and an ability to <mark>make use of</mark> evidence, styles of argument and analytic structures in order to substantiate claims."
-      },
-      {
-        pattern: "on behalf of",
-        meaning: "~을 대신하여",
-        sentence: "While designing a house, the designer lives, uses and feels the non-existent house in his imagination <mark>on behalf of</mark> the future dweller."
-      },
-      {
-        pattern: "suggest that S V",
-        meaning: "~라고 시사하다 / 보여주다",
-        sentence: "Together, these studies <mark>suggest that</mark> both goal alignment and a positive self-perception are crucial for enhancing motivation and overall well-being in later life."
-      },
-      {
-        pattern: "in contrast to",
-        meaning: "~와 대조적으로",
-        sentence: "<mark>In contrast to</mark> our inflating balloon or, say, a pipe leak that causes gas to spread into a room that exists in its own right, our expanding Universe is not spilling into another separate entity, nor even another dimension."
-      },
-      {
-        pattern: "in terms of",
-        meaning: "~의 관점에서 / ~면에서",
-        sentence: "This tightly integrated pairing of language and gesture enables speakers to conceptualize and formulate their thoughts <mark>in terms of</mark> both the ‘categorical’ requirements of language, and the ‘imagistic’ possibilities of gesture."
-      },
-      {
-        pattern: "once S V",
-        meaning: "일단 ~하면 / ~하자마자",
-        sentence: "<mark>Once</mark> the claim is accepted then there is no need or room for seeking further justification."
-      },
-      {
-        pattern: "even if S V",
-        meaning: "비록 ~일지라도",
-        sentence: "The action mustn’t be done, <mark>even if</mark> it is tempting, and that’s all there is to it."
-      },
-      {
-        pattern: "afford to V",
-        meaning: "~할 여유가 있다 / 감당할 수 있다",
-        sentence: "Knowing that the wait for a donor could take months, they worried about how they could <mark>afford to stay</mark> in the area as their home was four hours away from the hospital."
-      },
-      {
-        pattern: "in case of",
-        meaning: "~의 경우에 / ~에 대비하여",
-        sentence: "The doctors managed to get her stable but wanted her to remain close to the hospital <mark>in case of</mark> any complications and to await a donor."
-      },
-      {
-        pattern: "it is true that S V",
-        meaning: "~라는 것은 사실이다",
-        sentence: "While <mark>it is true that</mark> organisms can express some amount of flexibility in their form and function in response to their immediate surroundings, these adjustments are minor compared to the constraints of inheritance."
+            "baseEn": "Something is missing.",
+            "baseKo": "무언가가 사라져 있다.",
+            "yesnoEn": "Is something missing?",
+            "yesnoKo": "무언가가 사라져 있니?",
+            "qEn": "What is missing?",
+            "qKo": "무엇이 사라져 있니?",
+            "clauseEn": "what is missing",
+            "clauseKo": "무엇이 사라져 있는지",
+            "indirectEn": "I don't know what is missing.",
+            "indirectKo": "나는 무엇이 사라져 있는지 모른다."
       }
+];
+
+    const stageDefs = [
+      { title: "1. 평서문", keyEn: "baseEn", keyKo: "baseKo" },
+      { title: "2. 1차 의문문", keyEn: "yesnoEn", keyKo: "yesnoKo" },
+      { title: "3. 의문사 의문문", keyEn: "qEn", keyKo: "qKo" },
+      { title: "4. 의문사절", keyEn: "clauseEn", keyKo: "clauseKo" },
+      { title: "5. 간접의문문", keyEn: "indirectEn", keyKo: "indirectKo", indirect: true }
     ];
 
-    const activeItems = items.slice(0, 6); // Temporary: only use items 1-6 on this page.
+    const strongWhWords = ["what", "where", "why", "who", "how", "when"];
+    const weakWhPhrases = ["for a reason", "in some way", "at some time", "something", "somewhere", "someone"];
+    const subjectPhrases = ["the accident", "the meeting", "the machine", "the book", "they", "she", "you", "he"];
+    const softAuxWords = ["does", "did", "do"];
+    const verbPhrases = [
+      "can solve", "is angry", "was late", "is missing",
+      "bought", "changed", "caused", "opened", "happened", "trusts", "starts", "works", "lives", "makes", "chose", "broke", "left",
+      "want", "need", "trust", "happen", "break", "make", "cause", "solve", "buy", "start", "open", "change", "choose", "work", "live", "leave", "is", "was"
+    ];
 
-    const orderBanks = {
-      "due to": [
-        { en: "Due to the writer’s recent health problems,", ko: "작가의 최근 건강 문제 때문에," },
-        { en: "the column", ko: "이 칼럼은" },
-        { en: "will take a one-month break.", ko: "한 달간 쉬게 됩니다." }
-      ],
-      "set aside": [
-        { en: "This time", ko: "이 시간은" },
-        { en: "has been set aside", ko: "따로 마련되었습니다" },
-        { en: "to allow the writer to recover.", ko: "작가가 회복할 수 있도록." }
-      ],
-      "as if S V": [
-        { en: "It felt", ko: "그것은 느껴졌다" },
-        { en: "as if", ko: "마치" },
-        { en: "no one knew", ko: "아무도 모르는 것처럼" },
-        { en: "I was there.", ko: "내가 거기 있었다는 것을." }
-      ],
-      "in order to V": [
-        { en: "In order to hit the target", ko: "과녁을 맞히기 위해" },
-        { en: "with my bow and arrow,", ko: "내 활과 화살로," },
-        { en: "I need to take aim", ko: "나는 조준해야 한다" },
-        { en: "and concentrate.", ko: "그리고 집중해야 한다." }
-      ],
-      "the fact that": [
-        { en: "The fact that I am a being with a body,", ko: "내가 몸을 지닌 존재라는 사실은," },
-        { en: "embedded in a culturally rich situation,", ko: "문화적으로 풍부한 상황에 놓여 있는," },
-        { en: "is no obstacle", ko: "아무 장애가 되지 않는다" },
-        { en: "to my sometimes succeeding.", ko: "내가 때때로 성공하는 데." }
-      ],
-      "in fact": [
-        { en: "In fact,", ko: "사실," },
-        { en: "it is that embedding", ko: "바로 그 맥락이" },
-        { en: "that supplies me", ko: "나에게 제공한다" },
-        { en: "with the means and the motivation in the first place.", ko: "처음부터 수단과 동기를." }
-      ],
-      "not only A but also B": [
-        { en: "it is that embedding", ko: "바로 그 맥락이" },
-        { en: "that supplies me", ko: "나에게 제공한다" },
-        { en: "not only with the physical means", ko: "물리적 수단뿐 아니라" },
-        { en: "but also with the motivation to hit the target.", ko: "과녁을 맞히려는 동기도." }
-      ],
-      "instead of ~ing": [
-        { en: "Instead of commanding you", ko: "너에게 명령하는 대신" },
-        { en: "to find my keys,", ko: "내 열쇠를 찾으라고," },
-        { en: "I might ask you", ko: "나는 너에게 물을 수도 있다" },
-        { en: "where they are.", ko: "그것들이 어디에 있는지." }
-      ],
-      "whether or not": [
-        { en: "Whether or not it is a good reply", ko: "그것이 좋은 대답인지 아닌지는" },
-        { en: "depends on", ko: "달려 있다" },
-        { en: "whether or not", ko: "~인지 아닌지에" },
-        { en: "it solves the problem.", ko: "그것이 문제를 해결하는지." }
-      ],
-      "as long as S V": [
-        { en: "A good reply", ko: "좋은 대답은" },
-        { en: "doesn’t need to answer the question", ko: "그 질문에 답할 필요가 없다" },
-        { en: "as long as", ko: "~하기만 하면" },
-        { en: "it resolves the problem of not being able to leave the house.", ko: "집을 떠날 수 없는 문제를 해결하면." }
-      ],
-      "give rise to": [
-        { en: "While AI has the potential", ko: "AI가 잠재력을 지니고 있지만" },
-        { en: "to automate certain jobs,", ko: "일부 일자리를 자동화할," },
-        { en: "it is also giving rise to", ko: "그것은 또한 낳고 있다" },
-        { en: "new career opportunities and demands.", ko: "새로운 진로 기회와 수요를." }
-      ],
-      "lead to": [
-        { en: "The increasing application of AI technology", ko: "AI 기술의 활용 증가는" },
-        { en: "has led to a sudden increase", ko: "갑작스러운 증가로 이어졌다" },
-        { en: "in the need for professionals", ko: "전문가 수요의" },
-        { en: "who can effectively manage AI systems.", ko: "AI 시스템을 효과적으로 관리할 수 있는." }
-      ],
-      "get the most out of": [
-        { en: "professionals", ko: "전문가들" },
-        { en: "who can effectively manage", ko: "효과적으로 관리하고" },
-        { en: "and get the most out of", ko: "최대한 활용할 수 있는" },
-        { en: "AI systems.", ko: "AI 시스템을." }
-      ],
-      "adapt to": [
-        { en: "The ever-evolving technological landscape", ko: "끊임없이 진화하는 기술 환경은" },
-        { en: "necessitates employees", ko: "직원들에게 요구한다" },
-        { en: "to update their skills", ko: "기술을 업데이트하도록" },
-        { en: "and adapt to the dynamic changes in the work environment.", ko: "그리고 업무 환경의 역동적 변화에 적응하도록." }
-      ],
-      "up to": [
-        { en: "All participants", ko: "모든 참가자는" },
-        { en: "must register", ko: "등록해야 한다" },
-        { en: "as a team of", ko: "한 팀으로" },
-        { en: "up to four members.", ko: "최대 네 명의 구성원으로." }
-      ],
-      "at first": [
-        { en: "In 1842,", ko: "1842년에," },
-        { en: "Houghton was elected", ko: "Houghton은 선출되었다" },
-        { en: "as Mayor of Detroit,", ko: "디트로이트 시장으로," },
-        { en: "a position he was at first reluctant to accept.", ko: "처음에는 받아들이기 꺼렸던 자리로." }
-      ],
-      "impact on": [
-        { en: "His contributions to science and public service", ko: "과학과 공공 봉사에 대한 그의 공헌은" },
-        { en: "left", ko: "남겼다" },
-        { en: "a lasting impact on", ko: "지속적인 영향을" },
-        { en: "Michigan’s development.", ko: "미시간의 발전에." }
-      ],
-      "regardless of": [
-        { en: "Darwin understood", ko: "다윈은 이해했다" },
-        { en: "that organisms produce many similar but variable offspring", ko: "유기체가 비슷하지만 다양한 자손을 많이 낳는다는 것을" },
-        { en: "regardless of", ko: "~와 상관없이" },
-        { en: "the nature of the conditions.", ko: "조건의 성격과." }
-      ],
-      "in response to": [
-        { en: "organisms can express", ko: "유기체는 표현할 수 있다" },
-        { en: "some amount of flexibility", ko: "어느 정도의 유연성을" },
-        { en: "in response to", ko: "~에 반응하여" },
-        { en: "their immediate surroundings.", ko: "직접적인 주변 환경에." }
-      ],
-      "as a result": [
-        { en: "As a result,", ko: "그 결과," },
-        { en: "not every living thing", ko: "모든 생물이 다" },
-        { en: "can live", ko: "살 수 있는 것은 아니다" },
-        { en: "everywhere.", ko: "모든 곳에서." }
-      ],
-      "make use of": [
-        { en: "Disciplined historical argument", ko: "엄밀한 역사적 논증은" },
-        { en: "requires familiarity with prior scholarly discourse", ko: "이전의 학술 담론에 대한 친숙함을 요구한다" },
-        { en: "and an ability to make use of", ko: "그리고 활용하는 능력을" },
-        { en: "evidence, styles of argument and analytic structures.", ko: "증거와 논증 방식, 분석 구조를." }
-      ],
-      "on behalf of": [
-        { en: "While designing a house,", ko: "집을 설계하는 동안," },
-        { en: "the designer lives, uses and feels", ko: "설계자는 살고 사용하고 느낀다" },
-        { en: "the non-existent house", ko: "아직 존재하지 않는 집을" },
-        { en: "on behalf of the future dweller.", ko: "미래의 거주자를 대신하여." }
-      ],
-      "suggest that S V": [
-        { en: "Together,", ko: "종합해 보면," },
-        { en: "these studies suggest that", ko: "이러한 연구들은 시사한다" },
-        { en: "both goal alignment and a positive self-perception", ko: "목표의 일치와 긍정적 자기 인식이 모두" },
-        { en: "are crucial for enhancing motivation and well-being.", ko: "동기와 안녕감 향상에 중요하다고." }
-      ],
-      "in contrast to": [
-        { en: "In contrast to", ko: "~와 대조적으로" },
-        { en: "a pipe leak that causes gas to spread into a room,", ko: "방 안으로 가스를 퍼지게 하는 파이프 누출과는," },
-        { en: "our expanding Universe", ko: "우리의 팽창하는 우주는" },
-        { en: "is not spilling into another separate entity.", ko: "다른 별개의 실체로 흘러들어 가는 것이 아니다." }
-      ],
-      "in terms of": [
-        { en: "This tightly integrated pairing", ko: "이 긴밀하게 통합된 결합은" },
-        { en: "of language and gesture", ko: "언어와 제스처의" },
-        { en: "enables speakers to formulate their thoughts", ko: "화자들이 생각을 구성하게 한다" },
-        { en: "in terms of both the categorical and the imagistic.", ko: "범주적 측면과 이미지적 측면 모두의 관점에서." }
-      ],
-      "once S V": [
-        { en: "Once the claim is accepted", ko: "일단 그 주장이 받아들여지면" },
-        { en: "there is", ko: "더 이상 없다" },
-        { en: "no need or room", ko: "필요도 여지도" },
-        { en: "for seeking further justification.", ko: "추가 정당화를 찾을." }
-      ],
-      "even if S V": [
-        { en: "The action", ko: "그 행동은" },
-        { en: "mustn’t be done,", ko: "해서는 안 된다," },
-        { en: "even if", ko: "비록" },
-        { en: "it is tempting.", ko: "그것이 유혹적일지라도." }
-      ],
-      "afford to V": [
-        { en: "Knowing that the wait for a donor", ko: "기증자를 기다리는 일이" },
-        { en: "could take months,", ko: "몇 달이 걸릴 수 있다는 것을 알고," },
-        { en: "they worried about how they could afford to stay", ko: "그들은 어떻게 머무를 수 있을지 걱정했다" },
-        { en: "in the area.", ko: "그 지역에." }
-      ],
-      "in case of": [
-        { en: "The doctors managed", ko: "의사들은 해냈다" },
-        { en: "to get her stable", ko: "그녀를 안정시키는 것을" },
-        { en: "but wanted her to remain close to the hospital", ko: "그러나 그녀가 병원 가까이에 머물길 원했다" },
-        { en: "in case of any complications.", ko: "어떤 합병증에 대비하여." }
-      ],
-      "it is true that S V": [
-        { en: "While it is true that", ko: "유기체가 어느 정도의 유연성을 보일 수 있다는 것이 사실이지만" },
-        { en: "organisms can express some amount of flexibility", ko: "유기체는 어느 정도의 유연성을 표현할 수 있다" },
-        { en: "in response to their immediate surroundings,", ko: "직접적인 주변 환경에 반응하여," },
-        { en: "these adjustments are minor.", ko: "이러한 조정은 사소한 편이다." }
-      ]
-    };
-
-    const vocabBanks = {
-      "due to": [
-        { en: "column", ko: "칼럼" },
-        { en: "recent", ko: "최근의" },
-        { en: "health", ko: "건강" },
-        { en: "break", ko: "휴지기" }
-      ],
-      "set aside": [
-        { en: "recover", ko: "회복하다" },
-        { en: "writer", ko: "글쓴이" },
-        { en: "allow", ko: "허용하다" }
-      ],
-      "as if S V": [
-        { en: "felt", ko: "느껴졌다" },
-        { en: "knew", ko: "알고 있었다" },
-        { en: "there", ko: "거기에" }
-      ],
-      "in order to V": [
-        { en: "target", ko: "과녁" },
-        { en: "bow", ko: "활" },
-        { en: "arrow", ko: "화살" },
-        { en: "concentrate", ko: "집중하다" }
-      ],
-      "the fact that": [
-        { en: "being", ko: "존재" },
-        { en: "culturally", ko: "문화적으로" },
-        { en: "obstacle", ko: "장애물" },
-        { en: "succeeding", ko: "성공하는 것" }
-      ],
-      "in fact": [
-        { en: "embedding", ko: "맥락" },
-        { en: "supplies", ko: "제공한다" },
-        { en: "means", ko: "수단" },
-        { en: "motivation", ko: "동기" }
-      ],
-      "not only A but also B": [
-        { en: "physical", ko: "물리적인" },
-        { en: "training", ko: "훈련" },
-        { en: "motivation", ko: "동기" }
-      ],
-      "instead of ~ing": [
-        { en: "commanding", ko: "명령하는 것" },
-        { en: "keys", ko: "열쇠" },
-        { en: "ask", ko: "묻다" }
-      ],
-      "whether or not": [
-        { en: "reply", ko: "대답" },
-        { en: "function", ko: "기능 / 좌우되는 것" },
-        { en: "solves", ko: "해결한다" },
-        { en: "problem", ko: "문제" }
-      ],
-      "as long as S V": [
-        { en: "offer", ko: "제공하다" },
-        { en: "resolves", ko: "해결한다" },
-        { en: "leave", ko: "떠나다" }
-      ],
-      "give rise to": [
-        { en: "automate", ko: "자동화하다" },
-        { en: "career", ko: "진로" },
-        { en: "opportunities", ko: "기회들" },
-        { en: "demands", ko: "수요" }
-      ],
-      "lead to": [
-        { en: "increasing", ko: "증가하는" },
-        { en: "professionals", ko: "전문가들" },
-        { en: "effectively", ko: "효과적으로" }
-      ],
-      "get the most out of": [
-        { en: "manage", ko: "관리하다" },
-        { en: "systems", ko: "시스템들" },
-        { en: "effectively", ko: "효과적으로" }
-      ],
-      "adapt to": [
-        { en: "evolving", ko: "진화하는" },
-        { en: "landscape", ko: "환경" },
-        { en: "dynamic", ko: "역동적인" }
-      ],
-      "up to": [
-        { en: "participants", ko: "참가자들" },
-        { en: "register", ko: "등록하다" },
-        { en: "members", ko: "구성원들" }
-      ],
-      "at first": [
-        { en: "elected", ko: "선출된" },
-        { en: "reluctant", ko: "꺼리는" },
-        { en: "accept", ko: "받아들이다" }
-      ],
-      "impact on": [
-        { en: "contributions", ko: "공헌" },
-        { en: "lasting", ko: "지속적인" },
-        { en: "development", ko: "발전" }
-      ],
-      "regardless of": [
-        { en: "inheritance", ko: "유전" },
-        { en: "surroundings", ko: "주변 환경" },
-        { en: "offspring", ko: "자손" }
-      ],
-      "in response to": [
-        { en: "flexibility", ko: "유연성" },
-        { en: "adjustments", ko: "조정" },
-        { en: "constraints", ko: "제약" }
-      ],
-      "as a result": [
-        { en: "result", ko: "결과" },
-        { en: "living", ko: "살아 있는" },
-        { en: "everywhere", ko: "모든 곳에서" }
-      ],
-      "make use of": [
-        { en: "evidence", ko: "증거" },
-        { en: "scholarly", ko: "학술적인" },
-        { en: "substantiate", ko: "입증하다" },
-        { en: "claims", ko: "주장들" }
-      ],
-      "on behalf of": [
-        { en: "designer", ko: "설계자" },
-        { en: "non-existent", ko: "존재하지 않는" },
-        { en: "imagination", ko: "상상" },
-        { en: "dweller", ko: "거주자" }
-      ],
-      "suggest that S V": [
-        { en: "alignment", ko: "정렬 / 일치" },
-        { en: "perception", ko: "인식" },
-        { en: "crucial", ko: "중요한" },
-        { en: "well-being", ko: "안녕감" }
-      ],
-      "in contrast to": [
-        { en: "inflating", ko: "부풀어 오르는" },
-        { en: "expanding", ko: "팽창하는" },
-        { en: "entity", ko: "실체" },
-        { en: "dimension", ko: "차원" }
-      ],
-      "in terms of": [
-        { en: "integrated", ko: "통합된" },
-        { en: "categorical", ko: "범주적인" },
-        { en: "imagistic", ko: "심상적인" }
-      ],
-      "once S V": [
-        { en: "claim", ko: "주장" },
-        { en: "accepted", ko: "받아들여진" },
-        { en: "further", ko: "추가의" },
-        { en: "justification", ko: "정당화" }
-      ],
-      "even if S V": [
-        { en: "action", ko: "행동" },
-        { en: "tempting", ko: "유혹적인" },
-        { en: "done", ko: "행해진" }
-      ],
-      "afford to V": [
-        { en: "donor", ko: "기증자" },
-        { en: "worried", ko: "걱정했다" },
-        { en: "area", ko: "지역" },
-        { en: "hospital", ko: "병원" }
-      ],
-      "in case of": [
-        { en: "stable", ko: "안정된" },
-        { en: "complications", ko: "합병증" },
-        { en: "remain", ko: "머무르다" },
-        { en: "await", ko: "기다리다" }
-      ],
-      "it is true that S V": [
-        { en: "flexibility", ko: "유연성" },
-        { en: "immediate", ko: "직접적인" },
-        { en: "inheritance", ko: "유전" },
-        { en: "constraints", ko: "제약" }
-      ]
-    };
-
-    const stage2Units = {
-      "due to": [
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"~ 때문에\">Due to</span> <span class=\"slot-token\" data-sidx=\"1\">the writer’s recent health problems</span>",
-          chunks: ["작가의", "최근", "건강 문제", "때문에"],
-          accepted: ["작가의 최근 건강 문제 때문에"]
-        },
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"2\" data-gloss=\"휴식을 취하다\">take</span> <span class=\"slot-token\" data-sidx=\"2\">a one-month</span> <span class=\"pattern-token\" data-pidx=\"2\">break</span>",
-          chunks: ["한달동안", "쉽니다."],
-          accepted: ["한달동안 쉽니다.", "한 달 동안 쉽니다."]
-        }
-      ],
-      "set aside": [
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"2\" data-gloss=\"A가 V하도록 하다\">allow</span> <span class=\"slot-token\" data-sidx=\"2\">the writer</span> <span class=\"pattern-token\" data-pidx=\"2\">to</span> <span class=\"slot-token\" data-sidx=\"2\">recover</span>",
-          chunks: ["작가가", "회복", "할 수 있도록"],
-          accepted: ["작가가 회복 할 수 있도록", "작가가 회복할 수 있도록"]
-        }
-      ],
-      "as if S V": [
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"마치 ~인 것처럼\">as if</span> <span class=\"slot-token\" data-sidx=\"1\">no one knew I was there</span>",
-          chunks: ["마치", "아무도", "내가 거기에 있었다는 것을", "모르는 것처럼"],
-          accepted: [
-            "마치 아무도 내가 거기에 있었다는 것을 모르는 것처럼",
-            "마치 내가 거기에 있었다는 것을 아무도 모르는 것처럼"
-          ]
-        }
-      ],
-      "in order to V": [
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"1\" data-gloss=\"~하기 위해\">In order to</span> <span class=\"slot-token\" data-sidx=\"1\">hit the target with my bow and arrow</span>",
-          chunks: ["활과 화살로", "과녁을 맞추기 위해서는"],
-          accepted: ["활과 화살로 과녁을 맞추기 위해서는"]
-        },
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"2\" data-gloss=\"A를 화살로 맞추다\">hit the target with</span> <span class=\"slot-token\" data-sidx=\"2\">my bow and arrow</span>",
-          chunks: ["활과 화살로", "과녁을 맞추다"],
-          accepted: ["활과 화살로 과녁을 맞추다"]
-        },
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"3\" data-gloss=\"V할 필요가 있다\">need to</span> <span class=\"slot-token\" data-sidx=\"3\">do something</span>",
-          chunks: ["뭔가", "할 필요가 있다"],
-          accepted: ["뭔가 할 필요가 있다"]
-        }
-      ],
-      "the fact that": [
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"4\" data-gloss=\"A에 놓여있는\">embedded in</span> <span class=\"slot-token\" data-sidx=\"4\">a culturally rich situation</span>",
-          chunks: ["문화적으로", "풍부한", "상황 속에", "놓여있는"],
-          accepted: ["문화적으로 풍부한 상황 속에 놓여있는"]
-        },
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"5\" data-gloss=\"A에 장애가 되지 않는다\">is no obstacle to</span> <span class=\"slot-token\" data-sidx=\"5\">my sometimes succeeding</span>",
-          chunks: ["내가 종종 성공하는 데", "장애가 되지 않는다."],
-          accepted: ["내가 종종 성공하는 데 장애가 되지 않는다."]
-        }
-      ],
-      "in fact": [
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"2\" data-gloss=\"A가 바로 ~한 그것이다\">it is</span> <span class=\"slot-token\" data-sidx=\"2\">that embedding</span> <span class=\"pattern-token\" data-pidx=\"2\">that</span>",
-          chunks: ["바로", "그러한 놓여있음이"],
-          accepted: ["바로 그러한 놓여있음이"]
-        },
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"3\" data-gloss=\"A를 제공하다\">supplies me</span> <span class=\"pattern-token\" data-pidx=\"3\">with</span> <span class=\"slot-token\" data-sidx=\"3\">the physical means — the bow and the arrow, and the training —</span>",
-          chunks: ["나에게", "물리적 수단(활, 화살, 훈련)을", "제공한다"],
-          accepted: ["나에게 물리적 수단(활, 화살, 훈련)을 제공한다"]
-        },
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"4\" data-gloss=\"A뿐만 아니라 B도\">not only</span> <span class=\"slot-token\" data-sidx=\"4\">the physical means</span> <span class=\"pattern-token\" data-pidx=\"4\">but also</span> <span class=\"slot-token\" data-sidx=\"5\">the motivation to hit the target</span>",
-          chunks: ["물리적 수단뿐 아니라", "또한 과녁을 맞출 동기까지"],
-          accepted: ["물리적 수단뿐 아니라 또한 과녁을 맞출 동기까지"]
-        },
-        {
-          html: "<span class=\"pattern-token\" data-pidx=\"6\" data-gloss=\"V할 동기\">motivation to</span> <span class=\"slot-token\" data-sidx=\"6\">hit the target</span>",
-          chunks: ["과녁을 맞출", "동기"],
-          accepted: ["과녁을 맞출 동기"]
-        }
-      ]
-    };
-
-    const correctedOrderBanks = {
-      "due to": {
-        chunks: [
-          "작가의",
-          "최근",
-          "건강 문제",
-          "때문에",
-          "이 칼럼은",
-          "한달동안",
-          "쉽니다."
-        ],
-        accepted: [
-          "작가의 최근 건강 문제 때문에 이 칼럼은 한달동안 쉽니다.",
-          "이 칼럼은 작가의 최근 건강 문제 때문에 한달동안 쉽니다."
-        ]
-      },
-      "set aside": {
-        chunks: [
-          "이 시간은",
-          "작가가",
-          "회복",
-          "할 수 있도록",
-          "따로 마련되었습니다."
-        ],
-        accepted: [
-          "이 시간은 작가가 회복 할 수 있도록 따로 마련되었습니다.",
-          "작가가 회복 할 수 있도록 이 시간은 따로 마련되었습니다.",
-          "이 시간은 작가가 회복할 수 있도록 따로 마련되었습니다."
-        ]
-      },
-      "as if S V": {
-        chunks: [
-          "그것은",
-          "내가",
-          "거기에 있었다는 것을",
-          "마치 아무도 모르는 것처럼",
-          "느껴졌다"
-        ],
-        accepted: [
-          "그것은 내가 거기에 있었다는 것을 마치 아무도 모르는 것처럼 느껴졌다",
-          "그것은 마치 아무도 내가 거기에 있었다는 것을 모르는 것처럼 느껴졌다",
-          "그것은 마치 내가 거기에 있었다는 것을 아무도 모르는 것처럼 느껴졌다"
-        ]
-      },
-      "in order to V": {
-        chunks: [
-          "활과 화살로",
-          "과녁을 맞추",
-          "기 위해서는",
-          "나는",
-          "뭔가 할 필요가 있다",
-          "조준하고",
-          "집중하는 것 말이지."
-        ],
-        accepted: [
-          "활과 화살로 과녁을 맞추 기 위해서는 나는 뭔가 할 필요가 있다 조준하고 집중하는 것 말이지.",
-          "활과 화살로 과녁을 맞추기 위해서는 나는 뭔가 할 필요가 있다 조준하고 집중하는 것 말이지."
-        ]
-      },
-      "the fact that": {
-        chunks: [
-          "내가",
-          "몸을 지닌 존재이며",
-          "문화적으로",
-          "풍부한",
-          "상황 속에 놓여있다는 사실은",
-          "나의 종종 있는 성공에 장애가 되지 않는다."
-        ],
-        accepted: [
-          "내가 몸을 지닌 존재이며 문화적으로 풍부한 상황 속에 놓여있다는 사실은 나의 종종 있는 성공에 장애가 되지 않는다."
-        ]
-      },
-      "in fact": {
-        chunks: [
-          "사실 애초에(처음부터)",
-          "바로 그러한 놓여있음이",
-          "나에게 물리적 수단(활, 화살, 훈련)을 제공했을 뿐 아니라",
-          "또한 과녁을 맞출 동기까지 제공한다."
-        ],
-        accepted: [
-          "사실 애초에(처음부터) 바로 그러한 놓여있음이 나에게 물리적 수단(활, 화살, 훈련)을 제공했을 뿐 아니라 또한 과녁을 맞출 동기까지 제공한다."
-        ]
-      },
-      "not only A but also B": {
-        chunks: [
-          "그 맥락은",
-          "나에게",
-          "물리적 수단뿐 아니라",
-          "과녁을 맞히려는 동기까지 제공한다."
-        ]
-      },
-      "instead of ~ing": {
-        chunks: [
-          "내 열쇠를 찾으라고 너에게 명령하는 대신,",
-          "나는",
-          "그것들이 어디에 있는지",
-          "물을 수도 있다."
-        ]
-      },
-      "whether or not": {
-        chunks: [
-          "그것이 좋은 대답인지 아닌지는",
-          "그것이 문제를 해결하는지 여부에",
-          "달려 있다."
-        ]
-      },
-      "as long as S V": {
-        chunks: [
-          "좋은 대답은,",
-          "집을 나갈 수 없는 문제만 해결한다면,",
-          "'내 열쇠가 어디 있지?'라는 질문에",
-          "직접 답할 필요는 없다."
-        ]
-      },
-      "give rise to": {
-        chunks: [
-          "AI는 일부 일자리를 자동화할 가능성이 있지만,",
-          "동시에",
-          "새로운 진로 기회와 수요도",
-          "낳고 있다."
-        ],
-        accepted: [
-          "AI는 일부 일자리를 자동화할 가능성이 있지만, 동시에 새로운 진로 기회와 수요도 낳고 있다.",
-          "AI는 일부 일자리를 자동화할 가능성이 있지만, 새로운 진로 기회와 수요도 동시에 낳고 있다."
-        ]
-      },
-      "lead to": {
-        chunks: [
-          "AI 기술의 활용 증가는",
-          "AI 시스템을 효과적으로 관리할 수 있는",
-          "전문가 수요의 급증으로",
-          "이어졌다."
-        ]
-      },
-      "get the most out of": {
-        chunks: [
-          "전문가들은",
-          "AI 시스템을",
-          "효과적으로 관리하고 최대한 활용할 수",
-          "있어야 한다."
-        ]
-      },
-      "adapt to": {
-        chunks: [
-          "끊임없이 변화하는 기술 환경은",
-          "직원들이 기술을 꾸준히 갱신하고",
-          "새로운 지식을 익히며,",
-          "업무 환경의 역동적인 변화에 적응하도록 요구한다."
-        ]
-      },
-      "up to": {
-        chunks: [
-          "모든 참가자는",
-          "최대 네 명으로 이루어진",
-          "한 팀으로",
-          "등록해야 한다."
-        ]
-      },
-      "at first": {
-        chunks: [
-          "1842년에 Houghton은",
-          "디트로이트 시장으로 선출되었는데,",
-          "그는 처음에는",
-          "그 자리를 받아들이기를 꺼렸다."
-        ]
-      },
-      "impact on": {
-        chunks: [
-          "과학과 공공 봉사에 대한 그의 공헌은",
-          "미시간의 발전에",
-          "지속적인 영향을",
-          "남겼다."
-        ]
-      },
-      "regardless of": {
-        chunks: [
-          "다윈은, 유전이 보수적이기 때문에,",
-          "유기체가",
-          "환경의 성격과 상관없이",
-          "매우 비슷하면서도 변이가 있는 자손을 많이 만들어 낸다는 점을 이해했다."
-        ]
-      },
-      "in response to": {
-        chunks: [
-          "유기체는",
-          "직접적인 주변 환경에 반응하여",
-          "형태와 기능에서 어느 정도의 유연성을 보일 수 있지만,",
-          "이러한 조정은 유전의 제약에 비하면 사소하다."
-        ]
-      },
-      "as a result": {
-        chunks: [
-          "그 결과,",
-          "모든 생물이",
-          "모든 곳에서 살 수 있는 것은",
-          "아니다."
-        ]
-      },
-      "make use of": {
-        chunks: [
-          "엄밀한 역사적 논증을 하려면",
-          "이전의 학술 담론에 익숙해야 할 뿐 아니라,",
-          "증거와 논증 방식, 분석 구조를",
-          "활용할 수 있는 능력도 필요하다."
-        ]
-      },
-      "on behalf of": {
-        chunks: [
-          "집을 설계하는 동안 설계자는",
-          "미래의 거주자를 대신하여,",
-          "아직 존재하지 않는 그 집을",
-          "상상 속에서 살고 사용하고 느낀다."
-        ]
-      },
-      "suggest that S V": {
-        chunks: [
-          "종합해 보면,",
-          "이러한 연구들은",
-          "목표의 일치와 긍정적인 자기 인식이",
-          "노년기의 동기와 전반적인 안녕감을 높이는 데 중요하다는 점을 시사한다."
-        ]
-      },
-      "in contrast to": {
-        chunks: [
-          "부풀어 오르는 풍선이나,",
-          "독립적으로 존재하는 방 안에 가스를 퍼뜨리는 파이프 누출과는 달리,",
-          "팽창하는 우주는",
-          "다른 별개의 실체나 차원으로 흘러들어 가는 것이 아니다."
-        ]
-      },
-      "in terms of": {
-        chunks: [
-          "언어와 몸짓의 이 긴밀한 결합은",
-          "화자들이",
-          "언어의 범주적 요구와 몸짓의 심상적 가능성이라는 두 측면에서",
-          "생각을 개념화하고 구성하게 해 준다."
-        ]
-      },
-      "once S V": {
-        chunks: [
-          "그 주장이",
-          "일단 받아들여지고 나면,",
-          "더 이상의 정당화를 구할",
-          "필요도 여지도 없다."
-        ]
-      },
-      "even if S V": {
-        chunks: [
-          "그 행동은",
-          "비록 유혹적일지라도",
-          "해서는 안 되며,",
-          "그게 전부다."
-        ],
-        accepted: [
-          "그 행동은 비록 유혹적일지라도 해서는 안 되며, 그게 전부다.",
-          "비록 유혹적일지라도 그 행동은 해서는 안 되며, 그게 전부다."
-        ]
-      },
-      "afford to V": {
-        chunks: [
-          "기증자를 기다리는 데 몇 달이 걸릴 수 있다는 것을 알고,",
-          "그들은 집이 병원에서 네 시간 거리였기 때문에",
-          "그 지역에 머물 비용을",
-          "어떻게 감당할지 걱정했다."
-        ]
-      },
-      "in case of": {
-        chunks: [
-          "의사들은 그녀의 상태를 안정시키는 데는 성공했지만,",
-          "어떤 합병증에 대비하고",
-          "기증자를 기다리기 위해",
-          "그녀가 병원 가까이에 머물기를 원했다."
-        ]
-      },
-      "it is true that S V": {
-        chunks: [
-          "유기체가 직접적인 주변 환경에 반응해",
-          "형태와 기능에서 어느 정도의 유연성을 보일 수 있다는 것은 사실이지만,",
-          "이러한 조정은",
-          "유전의 제약에 비하면 사소하다."
-        ]
-      }
-    };
-
-    const STORAGE_KEY = "pattern_skeleton_workbook_v1";
-    const CURRENT_KEY = "pattern_skeleton_current_index_v1";
-    const MODE_KEY = "pattern_skeleton_stage_mode_v1";
-    const SUBMIT_MARKER_KEY = "imsi_user_custom_hw_submit_marker_v1";
+    const STORAGE_KEY = "imsi_user_custom_hw_indirect_state_v1";
+    const CURRENT_KEY = "imsi_user_custom_hw_indirect_current_v1";
+    const REVEAL_KEY = "imsi_user_custom_hw_indirect_reveal_v1";
+    const PRACTICE_KEY = "imsi_user_custom_hw_indirect_practice_v1";
+    const SUBMIT_MARKER_KEY = "imsi_user_custom_hw_indirect_submit_marker_v1";
     const HWPLUS_API_URL = "https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWPlus";
     const DIRECT_SUBCATEGORY = "공사중";
     const DIRECT_HWTYPE = "doneinweb";
-    const DIRECT_COMMENT = "imsi_user_custom_hw stage3 answers";
+    const DIRECT_COMMENT = "imsi_user_custom_hw indirect question answers";
+    const BLANK_STAGE_INDEXES = [1, 2, 3, 4];
 
-    const el = {
-      counter: document.getElementById("counter"),
-      itemNo: document.getElementById("itemNo"),
-      patternChip: document.getElementById("patternChip"),
-      studyLayout: document.getElementById("studyLayout"),
-      donePanel: document.getElementById("donePanel"),
-      sentenceBox: document.getElementById("sentenceBox"),
-      patternSetBox: document.getElementById("patternSetBox"),
-      orderPanel: document.getElementById("orderPanel"),
-      notePanel: document.getElementById("notePanel"),
-      noteLabel: document.getElementById("noteLabel"),
-      patternText: document.getElementById("patternText"),
-      meaningText: document.getElementById("meaningText"),
-      noteBox: document.getElementById("noteBox"),
-      saveStatus: document.getElementById("saveStatus"),
-      saveRow: document.getElementById("saveRow"),
-      progressFill: document.getElementById("progressFill"),
-      progressText: document.getElementById("progressText"),
-      wordBank: document.getElementById("wordBank"),
-      selectedBank: document.getElementById("selectedBank"),
-      bankGrid: document.getElementById("bankGrid"),
-      orderStatus: document.getElementById("orderStatus"),
-      stage12Btn: document.getElementById("stage12Btn"),
-      stage3Btn: document.getElementById("stage3Btn"),
-      randomBtn: document.getElementById("randomBtn"),
-      markBtn: document.getElementById("markBtn"),
-      saveBtn: document.getElementById("saveBtn"),
-      clearNoteBtn: document.getElementById("clearNoteBtn"),
-      checkOrderBtn: document.getElementById("checkOrderBtn")
-    };
+    const mainEl = document.getElementById("main");
+    const countEl = document.getElementById("count");
+    const bottomBarEl = document.getElementById("bottomBar");
+    const bottomRow = document.getElementById("bottomRow");
+    const saveStatusEl = document.getElementById("saveStatus");
+    const donePanelEl = document.getElementById("donePanel");
 
-    const savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    let current = Number(localStorage.getItem(CURRENT_KEY) || 0);
-    if (!Number.isInteger(current) || current < 0 || current >= activeItems.length) current = 0;
-    let currentBankSource = [];
-    let currentBankPool = [];
-    let currentBankSelected = [];
-    let currentAcceptedSentences = [];
-    let stageMode = localStorage.getItem(MODE_KEY) || "stage1";
-    if (!["stage1", "stage2", "stage3"].includes(stageMode)) stageMode = "stage1";
-    const stage2UnitState = {};
-    let advanceTimer = null;
-    let isSubmittingStage3 = false;
+    function createDefaultItemState() {
+      return {
+        answers: {
+          1: [],
+          2: [],
+          3: [],
+          4: []
+        }
+      };
+    }
+
+    function normalizeItemState(raw) {
+      const itemState = createDefaultItemState();
+      if (!raw || typeof raw !== "object") return itemState;
+      BLANK_STAGE_INDEXES.forEach((stageIndex) => {
+        const stageAnswers = raw.answers && Array.isArray(raw.answers[stageIndex]) ? raw.answers[stageIndex] : [];
+        itemState.answers[stageIndex] = stageAnswers.map((value) => typeof value === "string" ? value : "");
+      });
+      return itemState;
+    }
+
+    function loadSavedState() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        const source = Array.isArray(parsed) ? parsed : [];
+        return data.map((_, index) => normalizeItemState(source[index]));
+      } catch (_) {
+        return data.map(() => createDefaultItemState());
+      }
+    }
+
+    function readStoredNumber(key, fallback) {
+      const value = Number(localStorage.getItem(key));
+      return Number.isInteger(value) ? value : fallback;
+    }
+
+    let savedState = loadSavedState();
+    let cardIndex = readStoredNumber(CURRENT_KEY, 0);
+    if (cardIndex < 0 || cardIndex >= data.length) cardIndex = 0;
+
+    let revealLevel = readStoredNumber(REVEAL_KEY, 1);
+    if (revealLevel < 1 || revealLevel > 5) revealLevel = 1;
+
+    let practiceMode = localStorage.getItem(PRACTICE_KEY) === "1";
     let submittedToday = false;
+    let isSubmitting = false;
+    let advanceTimer = null;
 
     function getItemState(index) {
-      if (!savedState[index]) {
-        savedState[index] = { note: "", checked: false, answer: "" };
-      }
-      if (typeof savedState[index].answer !== "string") {
-        savedState[index].answer = typeof savedState[index].note === "string" ? savedState[index].note : "";
-      }
+      if (!savedState[index]) savedState[index] = createDefaultItemState();
       return savedState[index];
     }
 
     function saveAll() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
-      localStorage.setItem(CURRENT_KEY, String(current));
-      localStorage.setItem(MODE_KEY, stageMode);
+      localStorage.setItem(CURRENT_KEY, String(cardIndex));
+      localStorage.setItem(REVEAL_KEY, String(revealLevel));
+      localStorage.setItem(PRACTICE_KEY, practiceMode ? "1" : "0");
+    }
+
+    function resetWorkbookState() {
+      savedState = data.map(() => createDefaultItemState());
+      cardIndex = 0;
+      revealLevel = 1;
+      practiceMode = false;
     }
 
     function initToast() {
@@ -1684,9 +709,12 @@
       }
     }
 
-    function getKstTodayString() {
-      const kstNow = new Date(Date.now() + (9 * 60 * 60 * 1000));
-      return kstNow.toISOString().slice(0, 10);
+    function scheduleAdvance(callback, delay) {
+      clearTimeout(advanceTimer);
+      advanceTimer = setTimeout(() => {
+        advanceTimer = null;
+        callback();
+      }, delay);
     }
 
     function getCurrentUserId() {
@@ -1695,6 +723,11 @@
       } catch (_) {
         return "";
       }
+    }
+
+    function getKstTodayString() {
+      const now = new Date(Date.now() + (9 * 60 * 60 * 1000));
+      return now.toISOString().slice(0, 10);
     }
 
     function readSubmitMarker() {
@@ -1715,38 +748,69 @@
       }));
     }
 
+    function clearSubmitMarker() {
+      localStorage.removeItem(SUBMIT_MARKER_KEY);
+    }
+
     function hasLocalSubmittedToday(userId) {
       const marker = readSubmitMarker();
       if (!marker) return false;
       return String(marker.userId || "") === String(userId || "") && String(marker.date || "") === getKstTodayString();
     }
 
+    async function fetchSubmittedTodayFromServer(userId) {
+      const res = await fetch(`${HWPLUS_API_URL.replace("/saveHWPlus", "/getHWPlus")}?userId=${encodeURIComponent(userId)}`);
+      if (!res.ok) throw new Error(String(res.status));
+
+      const response = await res.json();
+      if (!Array.isArray(response)) return false;
+
+      const todayStr = getKstTodayString();
+      return response.some((item) => {
+        const timestamp = String(item.Timestamp || item.timestamp || "");
+        const subcategory = String(item.Subcategory || item.subcategory || "").trim();
+        const hwType = String(item.HWType || item.hwtype || "").trim();
+        const comment = String(item.Comment || item.comment || "").trim();
+        return (
+          timestamp.startsWith(todayStr) &&
+          subcategory === DIRECT_SUBCATEGORY &&
+          hwType === DIRECT_HWTYPE &&
+          comment === DIRECT_COMMENT
+        );
+      });
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function waitForServerSubmission(userId, attempts = 4, delayMs = 450) {
+      for (let i = 0; i < attempts; i += 1) {
+        try {
+          if (await fetchSubmittedTodayFromServer(userId)) return true;
+        } catch (_) {
+        }
+
+        if (i < attempts - 1) await wait(delayMs);
+      }
+      return false;
+    }
+
     async function checkSubmittedToday() {
       const userId = getCurrentUserId();
       if (!userId) return false;
-      if (hasLocalSubmittedToday(userId)) return true;
 
+      const hasLocalMarker = hasLocalSubmittedToday(userId);
       try {
-        const res = await fetch(`${HWPLUS_API_URL.replace("/saveHWPlus", "/getHWPlus")}?userId=${encodeURIComponent(userId)}`);
-        if (!res.ok) return false;
-        const data = await res.json();
-        if (!Array.isArray(data)) return false;
-
-        const todayStr = getKstTodayString();
-        return data.some((item) => {
-          const timestamp = String(item.Timestamp || item.timestamp || "");
-          const subcategory = String(item.Subcategory || item.subcategory || "").trim();
-          const hwType = String(item.HWType || item.hwtype || "").trim();
-          const comment = String(item.Comment || item.comment || "").trim();
-          return (
-            timestamp.startsWith(todayStr) &&
-            subcategory === DIRECT_SUBCATEGORY &&
-            hwType === DIRECT_HWTYPE &&
-            comment === DIRECT_COMMENT
-          );
-        });
-      } catch (_) {
+        const hasServerRecord = await fetchSubmittedTodayFromServer(userId);
+        if (hasServerRecord) {
+          if (!hasLocalMarker) writeSubmitMarker(userId, getKstTodayString());
+          return true;
+        }
+        if (hasLocalMarker) clearSubmitMarker();
         return false;
+      } catch (_) {
+        return hasLocalMarker;
       }
     }
 
@@ -1757,61 +821,347 @@
       return target.toString();
     }
 
+    function escapeHTML(text) {
+      return String(text).replace(/[&<>'"]/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      }[char]));
+    }
+
+    function isWordChar(char) {
+      return /[A-Za-z']/.test(char || "");
+    }
+
+    function collectRanges(text, phrases, className, ranges) {
+      const lower = text.toLowerCase();
+      const sorted = [...phrases].sort((a, b) => b.length - a.length);
+      sorted.forEach(phrase => {
+        const target = phrase.toLowerCase();
+        let pos = 0;
+        while ((pos = lower.indexOf(target, pos)) !== -1) {
+          const end = pos + target.length;
+          const leftOK = !isWordChar(text[pos - 1]);
+          const rightOK = !isWordChar(text[end]);
+          const overlaps = ranges.some(r => pos < r.end && end > r.start);
+          if (leftOK && rightOK && !overlaps) ranges.push({ start: pos, end, className });
+          pos = end;
+        }
+      });
+    }
+
+    function getRanges(text) {
+      const ranges = [];
+      collectRanges(text, strongWhWords, "wh", ranges);
+      collectRanges(text, weakWhPhrases, "wh-soft", ranges);
+      collectRanges(text, subjectPhrases, "subj", ranges);
+      collectRanges(text, softAuxWords, "aux-soft", ranges);
+      collectRanges(text, verbPhrases, "verb", ranges);
+      return ranges.sort((a, b) => a.start - b.start);
+    }
+
+    function highlightEnglish(text) {
+      const ranges = getRanges(text);
+      let html = "";
+      let cursor = 0;
+      ranges.forEach(range => {
+        html += escapeHTML(text.slice(cursor, range.start));
+        html += `<span class="mark ${range.className}">${escapeHTML(text.slice(range.start, range.end))}</span>`;
+        cursor = range.end;
+      });
+      html += escapeHTML(text.slice(cursor));
+      return html;
+    }
+
+    function highlightIndirect(text, clause) {
+      const lowerText = text.toLowerCase();
+      const lowerClause = clause.toLowerCase();
+      const start = lowerText.indexOf(lowerClause);
+      if (start === -1) return highlightEnglish(text);
+      const end = start + clause.length;
+      return escapeHTML(text.slice(0, start)) + highlightEnglish(text.slice(start, end)) + escapeHTML(text.slice(end));
+    }
+
+    function stageEnglishHtml(item, index) {
+      const def = stageDefs[index];
+      if (def.indirect) return highlightIndirect(item.indirectEn, item.clauseEn);
+      return highlightEnglish(item[def.keyEn]);
+    }
+
+    function getSavedAnswer(itemIndex, stageIndex, wordIndex) {
+      const answers = getItemState(itemIndex).answers[stageIndex] || [];
+      return typeof answers[wordIndex] === "string" ? answers[wordIndex] : "";
+    }
+
+    function setSavedAnswer(itemIndex, stageIndex, wordIndex, value) {
+      getItemState(itemIndex).answers[stageIndex][wordIndex] = String(value || "");
+      saveAll();
+    }
+
+    function renderPanelLearn(item, index, visible) {
+      const def = stageDefs[index];
+      return `
+        <section class="panel ${index === 0 ? "base" : ""} ${visible ? "" : "hidden"}">
+          <div>
+            <div class="stage">${def.title}</div>
+            <div class="ko">${escapeHTML(item[def.keyKo])}</div>
+            <div class="en">${stageEnglishHtml(item, index)}</div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderPanelPractice(item, index) {
+      const def = stageDefs[index];
+      if (index === 0) {
+        return `
+          <section class="panel base">
+            <div>
+              <div class="stage">${def.title}</div>
+              <div class="ko">${escapeHTML(item[def.keyKo])}</div>
+              <div class="en">${stageEnglishHtml(item, index)}</div>
+            </div>
+          </section>
+        `;
+      }
+      return `
+        <section class="panel">
+          <div>
+            <div class="stage">${def.title}</div>
+            <div class="ko">${escapeHTML(item[def.keyKo])}</div>
+            <div class="blank-line">${renderBlankLine(item[def.keyEn], index)}</div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderArrow(index, learnMode) {
+      if (!learnMode) return `<div class="arrow-cell"><span class="arrow-static">→</span></div>`;
+      if (index < revealLevel - 1) return `<div class="arrow-cell"><span class="arrow-static">→</span></div>`;
+      if (index === revealLevel - 1 && revealLevel < 5) return `<div class="arrow-cell"><button class="arrow-btn" onclick="revealNext()">→</button></div>`;
+      return `<div class="arrow-cell hidden"><span class="arrow-static">→</span></div>`;
+    }
+
+    function renderGrid(panelRenderer, learnMode) {
+      const item = data[cardIndex];
+      let html = `<div class="stage-grid">`;
+      for (let i = 0; i < 5; i++) {
+        html += panelRenderer(item, i, i < revealLevel);
+        if (i < 4) html += renderArrow(i, learnMode);
+      }
+      html += `</div>`;
+      return html;
+    }
+
+    function tokenizeForBlanks(text) {
+      const tokens = [];
+      const re = /[A-Za-z]+(?:'[A-Za-z]+)?|[.,?!]/g;
+      let match;
+      while ((match = re.exec(text)) !== null) {
+        tokens.push({
+          type: /[.,?!]/.test(match[0]) ? "punc" : "word",
+          value: match[0],
+          start: match.index,
+          end: match.index + match[0].length
+        });
+      }
+      return tokens;
+    }
+
+    function roleClassForToken(token, text) {
+      const ranges = getRanges(text);
+      const matched = ranges.find(r => token.start >= r.start && token.end <= r.end);
+      return matched ? matched.className : "";
+    }
+
+    function blankWidth(token) {
+      return Math.max(42, Math.min(118, token.length * 11 + 22));
+    }
+
+    function renderBlankLine(text, stageIndex) {
+      const tokens = tokenizeForBlanks(text);
+      let wordIndex = 0;
+      return tokens.map((token) => {
+        if (token.type === "punc") return `<span class="punc">${escapeHTML(token.value)}</span>`;
+        const role = roleClassForToken(token, text);
+        const value = getSavedAnswer(cardIndex, stageIndex, wordIndex);
+        const html = `<input class="word-blank ${role}" style="width:${blankWidth(token.value)}px" data-stage="${stageIndex}" data-word-index="${wordIndex}" data-expected="${escapeHTML(token.value)}" value="${escapeHTML(value)}" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="handleBlankInput(this)" />`;
+        wordIndex += 1;
+        return html;
+      }).join("");
+    }
+
+    function normalizeWord(value) {
+      return String(value)
+        .trim()
+        .toLowerCase()
+        .replace(/[’‘]/g, "'")
+        .replace(/[^a-z']/g, "")
+        .replace(/'/g, "");
+    }
+
+    function gradeStage(stageIndex) {
+      const inputs = Array.from(document.querySelectorAll(`.word-blank[data-stage="${stageIndex}"]`));
+      const allFilled = inputs.length > 0 && inputs.every(input => input.value.trim().length > 0);
+      if (!allFilled) {
+        inputs.forEach(input => input.classList.remove("correct", "wrong"));
+        return;
+      }
+      inputs.forEach(input => {
+        const expected = normalizeWord(input.dataset.expected);
+        const actual = normalizeWord(input.value);
+        input.classList.toggle("correct", actual === expected);
+        input.classList.toggle("wrong", actual !== expected);
+      });
+    }
+
+    function gradeAllStages() {
+      BLANK_STAGE_INDEXES.forEach((stageIndex) => gradeStage(stageIndex));
+    }
+
+    function handleBlankInput(input) {
+      const stageIndex = Number(input.dataset.stage);
+      const wordIndex = Number(input.dataset.wordIndex);
+      setSavedAnswer(cardIndex, stageIndex, wordIndex, input.value);
+      gradeStage(stageIndex);
+      if (saveStatusEl) {
+        saveStatusEl.style.display = "block";
+        saveStatusEl.textContent = isSubmitting ? "제출 중..." : "답안은 브라우저에 자동 저장됩니다.";
+      }
+    }
+
+    function countWordTokens(itemIndex, stageIndex) {
+      return tokenizeForBlanks(data[itemIndex][stageDefs[stageIndex].keyEn]).filter((token) => token.type === "word").length;
+    }
+
+    function focusFirstBlank() {
+      const inputs = Array.from(document.querySelectorAll(".word-blank"));
+      const firstEmpty = inputs.find((input) => !input.value.trim());
+      const target = firstEmpty || inputs[0];
+      if (target) target.focus();
+    }
+
+    function validateCurrentPractice() {
+      const state = getItemState(cardIndex);
+      const hasMissing = BLANK_STAGE_INDEXES.some((stageIndex) => {
+        const wordCount = countWordTokens(cardIndex, stageIndex);
+        for (let i = 0; i < wordCount; i += 1) {
+          if (!String(state.answers[stageIndex][i] || "").trim()) return true;
+        }
+        return false;
+      });
+
+      if (!hasMissing) return true;
+      focusFirstBlank();
+      showToast("no", "빈칸을 다 채워주세요.");
+      return false;
+    }
+
+    function buildStageAnswerText(itemIndex, stageIndex) {
+      const tokens = tokenizeForBlanks(data[itemIndex][stageDefs[stageIndex].keyEn]);
+      let wordIndex = 0;
+      let text = "";
+
+      tokens.forEach((token) => {
+        if (token.type === "punc") {
+          text = `${text.trimEnd()}${token.value}`;
+          return;
+        }
+
+        const answer = String(getSavedAnswer(itemIndex, stageIndex, wordIndex) || "").trim();
+        if (answer) text += `${text ? " " : ""}${answer}`;
+        wordIndex += 1;
+      });
+
+      return text.trim();
+    }
+
+    function buildSubmissionText() {
+      return data.map((_, index) => [
+        `[item ${index + 1}]`,
+        `stage2: ${buildStageAnswerText(index, 1)}`,
+        `stage3: ${buildStageAnswerText(index, 2)}`,
+        `stage4: ${buildStageAnswerText(index, 3)}`,
+        `stage5: ${buildStageAnswerText(index, 4)}`
+      ].join("\n")).join("\n\n");
+    }
+
     function renderDoneState() {
-      if (el.studyLayout) el.studyLayout.style.display = "none";
-      if (el.donePanel) el.donePanel.classList.add("active");
-      if (el.counter) el.counter.textContent = "오늘 숙제 끝!";
-      if (el.stage12Btn) el.stage12Btn.style.display = "none";
-      if (el.stage3Btn) el.stage3Btn.style.display = "none";
-      if (el.progressFill) el.progressFill.style.width = "100%";
-      if (el.progressText) el.progressText.textContent = "";
+      countEl.textContent = "오늘 숙제 끝!";
+      mainEl.style.display = "none";
+      bottomBarEl.style.display = "none";
+      donePanelEl.classList.add("active");
     }
 
     function clearDoneState() {
-      if (el.studyLayout) el.studyLayout.style.display = "";
-      if (el.donePanel) el.donePanel.classList.remove("active");
-      if (el.stage12Btn) el.stage12Btn.style.display = "";
-      if (el.stage3Btn) el.stage3Btn.style.display = "";
+      mainEl.style.display = "";
+      bottomBarEl.style.display = "";
+      donePanelEl.classList.remove("active");
     }
 
-    function shuffleArray(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
+    function renderLearn() {
+      mainEl.innerHTML = renderGrid(renderPanelLearn, true);
+      saveStatusEl.style.display = "none";
+      saveStatusEl.textContent = "";
+      bottomRow.innerHTML = revealLevel >= 5
+        ? `<button class="solo-btn" type="button" onclick="startPractice()">혼자 해보세요</button>`
+        : "";
+    }
+
+    function renderPractice() {
+      mainEl.innerHTML = renderGrid(renderPanelPractice, false);
+      saveStatusEl.style.display = "block";
+      saveStatusEl.textContent = isSubmitting ? "제출 중..." : "답안은 브라우저에 자동 저장됩니다.";
+      bottomRow.innerHTML = `
+        <button class="review-btn" type="button" onclick="returnToLearn()">다시 보기</button>
+        <button class="solo-btn" type="button" onclick="saveAndAdvance()">${cardIndex >= data.length - 1 ? "저장하고 제출" : "저장하고 다음"}</button>
+      `;
+      if (isSubmitting) {
+        document.querySelectorAll("#bottomRow button").forEach((button) => {
+          button.disabled = true;
+        });
       }
-      return copy;
+      setTimeout(() => {
+        gradeAllStages();
+        focusFirstBlank();
+      }, 0);
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+    function render() {
+      initToast();
+      if (submittedToday) {
+        renderDoneState();
+        return;
+      }
+
+      clearDoneState();
+      countEl.textContent = `${cardIndex + 1} / ${data.length}`;
+      if (practiceMode) renderPractice();
+      else renderLearn();
+      saveAll();
     }
 
-    function stripMarkup(html) {
-      return String(html).replace(/<[^>]+>/g, "");
+    function revealNext() {
+      revealLevel = Math.min(5, revealLevel + 1);
+      render();
     }
 
-    function buildStage3SubmissionText() {
-      return activeItems.map((item, index) => {
-        const state = getItemState(index);
-        const answer = String(state.answer || "").trim();
-        const sentence = stripMarkup(item.sentence).replace(/\s+/g, " ").trim();
-        return [
-          `번호: ${index + 1}`,
-          `pattern: ${item.pattern}`,
-          `sentence: ${sentence}`,
-          `answer: ${answer || "(blank)"}`
-        ].join("\n");
-      }).join("\n\n");
+    function startPractice() {
+      revealLevel = 5;
+      practiceMode = true;
+      render();
     }
 
-    async function submitStage3Answers() {
-      if (isSubmittingStage3) return;
+    function returnToLearn() {
+      practiceMode = false;
+      revealLevel = 5;
+      render();
+    }
+
+    async function submitAllAnswers() {
+      if (isSubmitting) return;
+      if (submittedToday) {
+        showToast("no", "오늘은 이미 제출했습니다.");
+        return;
+      }
 
       const userId = getCurrentUserId();
       if (!userId) {
@@ -1819,11 +1169,11 @@
         return;
       }
 
-      isSubmittingStage3 = true;
-      if (el.saveBtn) el.saveBtn.disabled = true;
+      isSubmitting = true;
+      render();
 
       try {
-        const txtContent = buildStage3SubmissionText();
+        const txtContent = buildSubmissionText();
         const file = new File(
           [txtContent],
           `imsi_user_custom_hw_${userId}.txt`,
@@ -1848,483 +1198,55 @@
           throw new Error(result && result.message ? String(result.message) : String(res.status));
         }
 
-        submittedToday = true;
-        current = 0;
-        stageMode = "stage1";
-        writeSubmitMarker(userId, getKstTodayString());
-        saveAll();
-        showToast("ok", "제출 완료!");
-        scheduleAdvance(() => {
-          window.location.replace(buildTrayUrl());
-        }, 520);
-      } catch (err) {
-        console.error(err);
-        showToast("no", "제출 실패");
-      } finally {
-        isSubmittingStage3 = false;
-        if (el.saveBtn) el.saveBtn.disabled = false;
-      }
-    }
-
-    function makeFallbackBank(item) {
-      return stripMarkup(item.sentence)
-        .split(/,\s+|;\s+|\.\s+/)
-        .map(part => part.trim())
-        .filter(Boolean)
-        .map((part, index, arr) => ({
-          en: index < arr.length - 1 && !/[.!?]$/.test(part) ? `${part}.` : part,
-          ko: item.meaning
-        }));
-    }
-
-    function getActiveBank(item) {
-      const source = orderBanks[item.pattern] || makeFallbackBank(item);
-      return source.map((chunk, idx) => ({
-        id: `${current}-${idx}`,
-        seq: idx,
-        en: chunk.en,
-        ko: chunk.ko
-      }));
-    }
-
-    function getActiveScrambleConfig(item) {
-      if (stageMode === "stage2") {
-        const stage2Unit = getActiveStage2Unit(item);
-        if (stage2Unit) return stage2Unit;
-      }
-
-      const configured = correctedOrderBanks[item.pattern];
-      if (configured) return configured;
-
-      const fallback = getActiveBank(item);
-      return {
-        chunks: fallback.map(chunk => chunk.ko)
-      };
-    }
-
-    function normalizeScrambleText(text) {
-      return String(text)
-        .replace(/\s+/g, " ")
-        .replace(/\s+([,.;!?])/g, "$1")
-        .replace(/[“”]/g, "\"")
-        .replace(/[‘’]/g, "'")
-        .trim();
-    }
-
-    function getActiveVocabBank(item) {
-      return vocabBanks[item.pattern] || [];
-    }
-
-    function getStage2Units(item) {
-      return stage2Units[item.pattern] || [];
-    }
-
-    function getStage2UnitIndex(item) {
-      const units = getStage2Units(item);
-      if (!units.length) return 0;
-
-      const key = item.pattern;
-      if (!Number.isInteger(stage2UnitState[key])) {
-        stage2UnitState[key] = 0;
-      }
-      if (stage2UnitState[key] < 0 || stage2UnitState[key] >= units.length) {
-        stage2UnitState[key] = 0;
-      }
-      return stage2UnitState[key];
-    }
-
-    function getActiveStage2Unit(item) {
-      const units = getStage2Units(item);
-      if (!units.length) return null;
-      return units[getStage2UnitIndex(item)];
-    }
-
-    function shiftStage2Unit(item, delta) {
-      const units = getStage2Units(item);
-      if (!units.length) return;
-
-      const key = item.pattern;
-      const unitIndex = getStage2UnitIndex(item);
-      stage2UnitState[key] = (unitIndex + delta + units.length) % units.length;
-    }
-
-    function scheduleAdvance(callback, delay = 520) {
-      clearTimeout(advanceTimer);
-      advanceTimer = setTimeout(() => {
-        advanceTimer = null;
-        callback();
-      }, delay);
-    }
-
-    function getStageLabel() {
-      if (stageMode === "stage2") return "2단계";
-      if (stageMode === "stage3") return "3단계";
-      return "1단계";
-    }
-
-    function goToNextItem(nextMode) {
-      if (current >= activeItems.length - 1) return false;
-      current += 1;
-      if (nextMode) stageMode = nextMode;
-      render();
-      return true;
-    }
-
-    function advanceAfterCorrect() {
-      const item = activeItems[current];
-
-      if (stageMode === "stage1") {
-        stageMode = "stage2";
-        stage2UnitState[item.pattern] = 0;
-        scheduleAdvance(() => {
+        const confirmed = await waitForServerSubmission(userId);
+        if (!confirmed) {
+          clearSubmitMarker();
+          submittedToday = false;
+          isSubmitting = false;
           render();
-        });
-        return;
-      }
-
-      const units = getStage2Units(item);
-      const unitIndex = getStage2UnitIndex(item);
-
-      if (unitIndex < units.length - 1) {
-        stage2UnitState[item.pattern] = unitIndex + 1;
-        scheduleAdvance(() => {
-          render();
-        });
-        return;
-      }
-
-      scheduleAdvance(() => {
-        if (current >= activeItems.length - 1) {
-          current = 0;
-          stageMode = "stage3";
-          render();
-          showToast("ok", "3단계 시작!");
+          showToast("no", "제출 실패");
           return;
         }
 
-        const moved = goToNextItem("stage1");
-        if (!moved && el.orderStatus) {
-          el.orderStatus.textContent = "";
-          el.orderStatus.className = "status order-status";
-        }
-      });
-    }
-
-    function buildGlossedSentence(item) {
-      if (item.sentence.includes("pattern-token") || item.sentence.includes("slot-token")) {
-        return item.sentence;
-      }
-
-      const template = document.createElement("template");
-      template.innerHTML = item.sentence;
-      template.content.querySelectorAll("mark").forEach((markEl) => {
-        const customGloss = markEl.getAttribute("data-gloss");
-        markEl.classList.add("glossed");
-        markEl.setAttribute("data-gloss", customGloss || item.meaning);
-        markEl.setAttribute("tabindex", "0");
-      });
-      return template.innerHTML;
-    }
-
-    function renderWordBank(item) {
-      if (!el.wordBank) return;
-      const vocab = getActiveVocabBank(item);
-      el.wordBank.innerHTML = vocab
-        .map(chunk => `
-          <div class="word-card">
-            <div class="word-en">${escapeHtml(chunk.en)}</div>
-            <div class="word-ko">${escapeHtml(chunk.ko)}</div>
-          </div>
-        `)
-        .join("");
-    }
-
-    function renderStagePanel(item) {
-      if (!el.sentenceBox || !el.patternSetBox) return;
-
-      if (stageMode === "stage2") {
-        const units = getStage2Units(item);
-        const unitIndex = getStage2UnitIndex(item);
-        const unit = units[unitIndex];
-        el.sentenceBox.style.display = "none";
-        el.patternSetBox.classList.add("active");
-        if (!unit) {
-          el.patternSetBox.innerHTML = `
-            <div class="pattern-set-card">
-              <div class="pattern-set-focus">표시할 세트가 없습니다.</div>
-            </div>
-          `;
-        } else {
-          el.patternSetBox.innerHTML = `
-            <div class="pattern-set-toolbar">
-              <div class="pattern-set-count">${unitIndex + 1} / ${units.length}</div>
-            </div>
-            <div class="pattern-set-card">
-              <div class="pattern-set-focus">${unit.html}</div>
-            </div>
-          `;
-        }
-      } else {
-        el.sentenceBox.style.display = "";
-        el.patternSetBox.classList.remove("active");
-        el.patternSetBox.innerHTML = "";
-      }
-    }
-
-    function renderStage3Panel(item, state) {
-      if (!el.notePanel || !el.noteBox || !el.noteLabel || !el.saveRow || !el.saveBtn || !el.saveStatus || !el.orderPanel) return;
-
-      if (stageMode === "stage3") {
-        el.orderPanel.style.display = "none";
-        el.notePanel.style.display = "block";
-        el.saveRow.style.display = "flex";
-        el.saveRow.style.justifyContent = "flex-end";
-        el.saveBtn.style.display = "inline-flex";
-        el.saveStatus.style.display = "none";
-        el.noteLabel.textContent = "답안 입력";
-        el.noteBox.placeholder = "3단계는 직접 타이핑해보세요, 저장하고 제출하게 됩니다!";
-        el.noteBox.value = state.answer || "";
-        el.saveBtn.textContent = current >= activeItems.length - 1 ? "저장하고 제출" : "저장하고 다음";
-        el.saveStatus.textContent = "";
-        el.saveStatus.className = "status";
-        return;
-      }
-
-      el.orderPanel.style.display = "";
-      el.notePanel.style.display = "none";
-      el.saveRow.style.display = "";
-      el.saveRow.style.justifyContent = "";
-      el.saveBtn.style.display = "";
-      el.saveStatus.style.display = "";
-      el.noteBox.value = "";
-    }
-
-    function renderOrderBank() {
-      if (!el.selectedBank || !el.bankGrid) return;
-
-      if (!currentBankSelected.length) {
-        el.selectedBank.innerHTML = '<div class="order-placeholder">순서대로 눌러보세요. 다시 누르면 취소됩니다</div>';
-      } else {
-        el.selectedBank.innerHTML = currentBankSelected
-          .map(id => {
-            const chunk = currentBankSource.find(item => item.id === id);
-            if (!chunk) return "";
-            return `
-              <button class="bank-tile selected" type="button" data-bank-id="${escapeHtml(chunk.id)}" data-bank-source="selected">
-                <span class="scramble-ko">${escapeHtml(chunk.ko)}</span>
-              </button>
-            `;
-          })
-          .join("");
-      }
-
-      el.bankGrid.innerHTML = currentBankPool
-        .map(id => {
-          const chunk = currentBankSource.find(item => item.id === id);
-          if (!chunk) return "";
-          return `
-            <button class="bank-tile" type="button" data-bank-id="${escapeHtml(chunk.id)}" data-bank-source="pool">
-              <span class="scramble-ko">${escapeHtml(chunk.ko)}</span>
-            </button>
-          `;
-        })
-        .join("");
-    }
-
-    function resetOrderBank() {
-      const item = activeItems[current];
-      const config = getActiveScrambleConfig(item);
-      currentBankSource = config.chunks.map((chunk, idx) => ({
-        id: `${current}-${idx}`,
-        seq: idx,
-        ko: chunk
-      }));
-      currentAcceptedSentences = (config.accepted && config.accepted.length
-        ? config.accepted
-        : [config.chunks.join(" ")]
-      ).map(normalizeScrambleText);
-      currentBankSelected = [];
-      currentBankPool = shuffleArray(currentBankSource.map(chunk => chunk.id));
-      if (el.orderStatus) {
-        el.orderStatus.textContent = "";
-        el.orderStatus.className = "status order-status";
-      }
-      renderOrderBank();
-    }
-
-    function moveBankTile(id, source) {
-      if (advanceTimer) return;
-
-      if (source === "pool") {
-        currentBankPool = currentBankPool.filter(chunkId => chunkId !== id);
-        currentBankSelected = [...currentBankSelected, id];
-      } else {
-        currentBankSelected = currentBankSelected.filter(chunkId => chunkId !== id);
-        currentBankPool = [...currentBankPool, id];
-      }
-      if (el.orderStatus) {
-        el.orderStatus.textContent = "";
-        el.orderStatus.className = "status order-status";
-      }
-      renderOrderBank();
-    }
-
-    function updateProgress() {
-      const pct = ((current + 1) / activeItems.length) * 100;
-      el.progressFill.style.width = pct + "%";
-      el.progressText.textContent = "";
-    }
-
-    function render() {
-      const item = activeItems[current];
-      const state = getItemState(current);
-
-      initToast();
-
-      if (submittedToday) {
-        renderDoneState();
+        writeSubmitMarker(userId, getKstTodayString());
+        resetWorkbookState();
         saveAll();
-        return;
+        submittedToday = true;
+        isSubmitting = false;
+        render();
+        showToast("ok", "제출 완료!");
+        scheduleAdvance(() => {
+          window.location.replace(buildTrayUrl());
+        }, 620);
+      } catch (err) {
+        console.error(err);
+        isSubmitting = false;
+        render();
+        showToast("no", "제출 실패");
       }
-
-      clearDoneState();
-
-      el.counter.textContent = `${getStageLabel()} ${current + 1} / ${activeItems.length}`;
-      el.itemNo.textContent = current + 1;
-      el.patternChip.textContent = item.pattern;
-      el.patternText.textContent = item.pattern;
-      el.meaningText.textContent = item.meaning;
-      el.sentenceBox.innerHTML = buildGlossedSentence(item);
-      el.noteBox.value = stageMode === "stage3" ? (state.answer || "") : "";
-      if (el.stage12Btn) el.stage12Btn.classList.toggle("active", stageMode !== "stage3");
-      if (el.stage3Btn) el.stage3Btn.classList.toggle("active", stageMode === "stage3");
-      el.markBtn.textContent = state.checked ? "암기 체크 해제" : "암기 체크";
-      el.markBtn.classList.toggle("primary", !state.checked);
-      renderWordBank(item);
-      renderStagePanel(item);
-      renderStage3Panel(item, state);
-      if (stageMode !== "stage3") {
-        resetOrderBank();
-      } else if (el.orderStatus) {
-        el.orderStatus.textContent = "";
-        el.orderStatus.className = "status order-status";
-      }
-      updateProgress();
-      saveAll();
     }
 
-    el.randomBtn.addEventListener("click", () => {
-      if (activeItems.length <= 1) return;
-      let next = current;
-      while (next === current) {
-        next = Math.floor(Math.random() * activeItems.length);
-      }
-      current = next;
-      render();
-    });
+    function saveAndAdvance() {
+      if (advanceTimer || isSubmitting) return;
+      if (!validateCurrentPractice()) return;
 
-    el.stage12Btn.addEventListener("click", () => {
-      if (advanceTimer) return;
-      stageMode = "stage1";
-      render();
-    });
-
-    el.stage3Btn.addEventListener("click", () => {
-      if (advanceTimer) return;
-      stageMode = "stage3";
-      render();
-    });
-
-    el.markBtn.addEventListener("click", () => {
-      const state = getItemState(current);
-      state.checked = !state.checked;
       saveAll();
-      render();
-    });
-
-    el.noteBox.addEventListener("input", () => {
-      const state = getItemState(current);
-      state.answer = el.noteBox.value;
-      saveAll();
-    });
-
-    el.saveBtn.addEventListener("click", () => {
-      if (stageMode !== "stage3") return;
-
-      const state = getItemState(current);
-      state.answer = el.noteBox.value;
-      saveAll();
-
-      if (current >= activeItems.length - 1) {
-        submitStage3Answers();
+      if (cardIndex >= data.length - 1) {
+        submitAllAnswers();
         return;
       }
 
       showToast("ok", "저장 완료!");
       scheduleAdvance(() => {
-        goToNextItem("stage3");
-      }, 360);
-    });
+        cardIndex += 1;
+        revealLevel = 1;
+        practiceMode = false;
+        render();
+      }, 240);
+    }
 
-    el.clearNoteBtn.addEventListener("click", () => {
-      if (!confirm("현재 카드의 메모를 비울까요?")) return;
-      const state = getItemState(current);
-      state.note = "";
-      saveAll();
-      render();
-    });
-
-    el.bankGrid.addEventListener("click", (e) => {
-      const button = e.target.closest("[data-bank-id]");
-      if (!button) return;
-      moveBankTile(button.dataset.bankId, button.dataset.bankSource);
-    });
-
-    el.selectedBank.addEventListener("click", (e) => {
-      const button = e.target.closest("[data-bank-id]");
-      if (!button) return;
-      moveBankTile(button.dataset.bankId, button.dataset.bankSource);
-    });
-
-    el.checkOrderBtn.addEventListener("click", () => {
-      if (advanceTimer) return;
-
-      const isComplete = currentBankSelected.length === currentBankSource.length;
-      const selectedText = normalizeScrambleText(
-        currentBankSelected
-          .map(id => currentBankSource.find(chunk => chunk.id === id)?.ko || "")
-          .join(" ")
-      );
-      const isCorrect = isComplete && currentAcceptedSentences.includes(selectedText);
-      if (isCorrect) {
-        const item = activeItems[current];
-        const units = getStage2Units(item);
-        const isLastStage2Unit = stageMode === "stage2" && getStage2UnitIndex(item) >= units.length - 1;
-
-        if (stageMode === "stage1") {
-          showToast("ok", "1단계 완료!");
-        } else if (isLastStage2Unit) {
-          showToast("ok", current >= activeItems.length - 1 ? "모든 문제 완료!" : "2단계 완료!");
-        } else {
-          showToast("ok", "정답!");
-        }
-
-        el.orderStatus.textContent = "순서가 맞습니다.";
-        el.orderStatus.className = "status order-status ok";
-        advanceAfterCorrect();
-        return;
-      }
-      showToast("no", isComplete ? "오답…" : "끝까지 눌러보세요.");
-      el.orderStatus.textContent = isComplete ? "순서를 다시 보세요." : "끝까지 눌러보세요.";
-      el.orderStatus.className = "status order-status";
-    });
-
-    (async function boot() {
+    (async function init() {
       submittedToday = await checkSubmittedToday();
-      if (submittedToday) {
-        current = 0;
-        stageMode = "stage1";
-      }
       render();
     })();
   </script>
