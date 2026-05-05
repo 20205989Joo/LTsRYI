@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-1 내신 대비!</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #f3eee4;
+      color: #2e241a;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 760px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 26px;
+      letter-spacing: -0.04em;
+      text-align: center;
+    }
+
+    .topbar {
+      margin-bottom: 18px;
+      padding: 13px 16px;
+      border-radius: 16px;
+      background: rgba(255, 250, 240, 0.95);
+      border: 1.5px solid #d7bb8c;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .progress,
+    .score {
+      font-size: 15px;
+      font-weight: 900;
+      color: #5f442d;
+    }
+
+    .score {
+      color: #15977f;
+    }
+
+    .card {
+      background: #fffaf0;
+      border: 2px solid #d7bb8c;
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 10px 22px rgba(80, 55, 24, 0.1);
+    }
+
+    .head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: #3fc5aa;
+      color: white;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .type {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #4b3827;
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .question {
+      margin: 10px 0 18px;
+      font-size: 19px;
+      line-height: 1.65;
+      font-weight: 900;
+      color: #332519;
+      white-space: pre-line;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 13px 14px;
+      border: 1.5px solid #d6bd94;
+      border-radius: 15px;
+      background: white;
+      cursor: pointer;
+      transition: 0.15s;
+      line-height: 1.55;
+      font-size: 15.5px;
+    }
+
+    .option:hover {
+      background: #fbf1df;
+    }
+
+    .option.disabled {
+      cursor: default;
+    }
+
+    .option.disabled:hover {
+      background: white;
+    }
+
+    .option input {
+      margin-top: 4px;
+      flex: 0 0 auto;
+    }
+
+    .option.correct-choice {
+      background: #dff7ee;
+      border-color: #3fc5aa;
+      box-shadow: inset 0 0 0 1px #3fc5aa;
+    }
+
+    .option.wrong-choice {
+      background: #ffe1dc;
+      border-color: #e36b5d;
+    }
+
+    .option.correct-answer {
+      border-color: #3fc5aa;
+      box-shadow: inset 0 0 0 1px #3fc5aa;
+    }
+
+    .feedback {
+      display: none;
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 15px;
+      background: #f2e5cf;
+      border: 1px solid #d9bd8c;
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: #4d3927;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.correct {
+      background: #e4f7ef;
+      border-color: #70cdb5;
+    }
+
+    .feedback.wrong {
+      background: #ffe5df;
+      border-color: #e58b7d;
+    }
+
+    .result-word {
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .result-word.correct {
+      color: #15977f;
+    }
+
+    .result-word.wrong {
+      color: #d95448;
+    }
+
+    .bottom {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      background: #4b3827;
+      color: white;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .finish-card {
+      text-align: center;
+      padding: 34px 24px;
+    }
+
+    .finish-title {
+      font-size: 25px;
+      font-weight: 900;
+      margin-bottom: 14px;
+      color: #332519;
+    }
+
+    .finish-score {
+      font-size: 22px;
+      font-weight: 900;
+      color: #15977f;
+      margin-bottom: 12px;
+    }
+
+    .finish-comment {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #6b5138;
+    }
+
+    .submit-status {
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #4b3827;
+      min-height: 20px;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 12mm;
+        display: block;
+      }
+
+      .wrap {
+        max-width: none;
+      }
+
+      .topbar,
+      .bottom {
+        display: none;
+      }
+
+      .card {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="cafe_int">
+    <h1>1-1 내신 대비!</h1>
+
+    <div class="topbar">
+      <div class="progress" id="progress">1 / 40</div>
+      <div class="score" id="score">점수: 0</div>
+    </div>
+
+    <div id="quiz"></div>
+  </div>
+
+  <script src="toast_imsi.js"></script>
+  <script>
+    const questions = [
+      {
+        type: "종합 빈칸",
+        q: "I want to know what made you _____ your mind.",
+        options: [
+          "to change",
+          "changed",
+          "changing",
+          "change",
+          "to changing"
+        ],
+        answer: 3,
+        exp: "what made you change your mind 구조입니다. made는 사역동사이므로 목적어 you 뒤에 동사원형 change가 옵니다."
+      },
+      {
+        type: "어순",
+        q: "Can you tell me where _____?",
+        options: [
+          "is my phone",
+          "does my phone",
+          "my phone is",
+          "my phone does",
+          "my phone be"
+        ],
+        answer: 2,
+        exp: "Can you tell me 뒤에는 간접의문문이 옵니다. where my phone is처럼 주어 + 동사 어순입니다."
+      },
+      {
+        type: "빈칸",
+        q: "The teacher made us _____ our answers again.",
+        options: [
+          "check",
+          "to check",
+          "checking",
+          "checked",
+          "to checking"
+        ],
+        answer: 0,
+        exp: "make + 목적어 + 동사원형 구조입니다. made us check가 맞습니다."
+      },
+      {
+        type: "수동 사역",
+        q: "I was made _____ my answers again.",
+        options: [
+          "check",
+          "checking",
+          "checked",
+          "to checking",
+          "to check"
+        ],
+        answer: 4,
+        exp: "make가 수동태가 되면 be made to V입니다. was made to check가 맞습니다."
+      },
+      {
+        type: "한→영",
+        q: "“나는 네가 왜 거짓말을 했는지 알고 싶다.”",
+        options: [
+          "I want to know why did you lie.",
+          "I want to know why you lie.",
+          "I want to know why do you lie.",
+          "I want to know why you lied.",
+          "I want to know why lied you."
+        ],
+        answer: 3,
+        exp: "want to know 뒤에는 간접의문문이 옵니다. why you lied처럼 평서문 어순입니다."
+      },
+      {
+        type: "빈칸",
+        q: "She asked me _____ the window.",
+        options: [
+          "open",
+          "to open",
+          "opening",
+          "opened",
+          "to opening"
+        ],
+        answer: 1,
+        exp: "ask + 목적어 + to V 구조입니다. asked me to open이 맞습니다."
+      },
+      {
+        type: "빈칸",
+        q: "This chair is too small for me _____ on.",
+        options: [
+          "to sit",
+          "sit",
+          "sitting",
+          "sat",
+          "to sitting"
+        ],
+        answer: 0,
+        exp: "too 형용사 for 목적어 to V 구조입니다. sit on의 on이 남아 있어야 자연스럽습니다."
+      },
+      {
+        type: "종합 빈칸",
+        q: "I don't know what he wants me _____.",
+        options: [
+          "do",
+          "doing",
+          "done",
+          "to doing",
+          "to do"
+        ],
+        answer: 4,
+        exp: "what he wants me to do 구조입니다. 간접의문문 안에 want + 목적어 + to V가 들어간 형태입니다."
+      },
+      {
+        type: "어법 선택",
+        q: "His words made me _____ about my dream again.",
+        options: [
+          "to think",
+          "thinking",
+          "think",
+          "thought",
+          "to thinking"
+        ],
+        answer: 2,
+        exp: "make + 목적어 + 동사원형입니다. made me think가 맞습니다."
+      },
+      {
+        type: "빈칸",
+        q: "Could you show me how _____ this app?",
+        options: [
+          "use",
+          "to use",
+          "using",
+          "used",
+          "to using"
+        ],
+        answer: 1,
+        exp: "how to V는 ‘어떻게 ~하는지’라는 뜻입니다. how to use this app이 맞습니다."
+      },
+      {
+        type: "부정형",
+        q: "My mom told me not _____ the door unlocked.",
+        options: [
+          "leave",
+          "leaving",
+          "left",
+          "to leave",
+          "to leaving"
+        ],
+        answer: 3,
+        exp: "tell + 목적어 + not to V 구조입니다. told me not to leave가 맞습니다."
+      },
+      {
+        type: "어순",
+        q: "Do you know who _____ this note?",
+        options: [
+          "wrote",
+          "did write",
+          "write",
+          "writing",
+          "was wrote"
+        ],
+        answer: 0,
+        exp: "who가 주어 역할을 하는 의문문입니다. who wrote this note가 맞고 did를 넣지 않습니다."
+      },
+      {
+        type: "문장 선택",
+        q: "“나는 머리를 더 짧게 자르고 싶다.”의 가장 자연스러운 문장은?",
+        options: [
+          "I want my hair to cut shorter.",
+          "I want my hair cutting shorter.",
+          "I want that my hair cut shorter.",
+          "I want my hair to cutting shorter.",
+          "I want my hair cut shorter."
+        ],
+        answer: 4,
+        exp: "want + 목적어 + p.p. 구조입니다. 머리가 스스로 자르는 것이 아니라 잘리는 것이므로 my hair cut이 맞습니다."
+      },
+      {
+        type: "빈칸",
+        q: "It was kind _____ you _____ me with my homework.",
+        options: [
+          "for / help",
+          "for / to helping",
+          "of / to help",
+          "of / help",
+          "to / helping"
+        ],
+        answer: 2,
+        exp: "kind는 사람의 성격이나 태도를 평가하는 형용사이므로 of + 사람 + to V 구조가 자연스럽습니다."
+      },
+      {
+        type: "빈칸",
+        q: "He ran to the bus stop _____ the bus.",
+        options: [
+          "catch",
+          "to catch",
+          "catching",
+          "caught",
+          "to catching"
+        ],
+        answer: 1,
+        exp: "목적을 나타내는 to부정사입니다. ‘버스를 잡기 위해’라는 뜻입니다."
+      },
+      {
+        type: "간접의문문",
+        q: "I wonder if Mina _____ to the party tomorrow.",
+        options: [
+          "comes",
+          "does come",
+          "to come",
+          "will come",
+          "came"
+        ],
+        answer: 3,
+        exp: "tomorrow가 있으므로 will come이 자연스럽습니다. if Mina will come은 간접의문문 어순입니다."
+      },
+      {
+        type: "어법 선택",
+        q: "The book was easy enough for the students _____.",
+        options: [
+          "to understand",
+          "understand",
+          "understanding",
+          "understood",
+          "to understand it"
+        ],
+        answer: 0,
+        exp: "easy enough for A to V 구조입니다. The book이 understand의 목적어 역할을 하므로 it을 다시 쓰지 않습니다."
+      },
+      {
+        type: "빈칸",
+        q: "My parents don't allow me _____ games after midnight.",
+        options: [
+          "play",
+          "played",
+          "playing",
+          "to playing",
+          "to play"
+        ],
+        answer: 4,
+        exp: "allow + 목적어 + to V 구조입니다. allow me to play가 맞습니다."
+      },
+      {
+        type: "종합 빈칸",
+        q: "What made him _____ so angry?",
+        options: [
+          "to become",
+          "becoming",
+          "become",
+          "became",
+          "to becoming"
+        ],
+        answer: 2,
+        exp: "what made him become so angry 구조입니다. made는 사역동사이므로 목적어 뒤에 동사원형이 옵니다."
+      },
+      {
+        type: "어순",
+        q: "Tell me why you _____ late yesterday.",
+        options: [
+          "were",
+          "are",
+          "did be",
+          "to be",
+          "being"
+        ],
+        answer: 0,
+        exp: "yesterday가 있으므로 were가 맞습니다. Tell me why you were late처럼 간접의문문 어순입니다."
+      },
+      {
+        type: "빈칸",
+        q: "I have no one _____ after school.",
+        options: [
+          "talk with",
+          "talking with",
+          "to talk with",
+          "talked with",
+          "to talking with"
+        ],
+        answer: 2,
+        exp: "no one을 뒤에서 꾸미는 to부정사입니다. talk with의 with가 필요합니다."
+      },
+      {
+        type: "수동 사역",
+        q: "The boy was made _____ sorry to his sister.",
+        options: [
+          "say",
+          "saying",
+          "said",
+          "to say",
+          "to saying"
+        ],
+        answer: 3,
+        exp: "be made to V 구조입니다. was made to say가 맞습니다."
+      },
+      {
+        type: "종합 빈칸",
+        q: "She wanted me _____ her where I put the key.",
+        options: [
+          "tell",
+          "to tell",
+          "telling",
+          "told",
+          "to telling"
+        ],
+        answer: 1,
+        exp: "wanted me to tell her where I put the key 구조입니다. want + 목적어 + to V와 간접의문문이 함께 들어갔습니다."
+      },
+      {
+        type: "문장 선택",
+        q: "다음 중 어법상 올바른 문장은?",
+        options: [
+          "Do you know what does he like?",
+          "Do you know what he like?",
+          "Do you know what likes he?",
+          "Do you know what is he like?",
+          "Do you know what he likes?"
+        ],
+        answer: 4,
+        exp: "간접의문문은 what he likes입니다. he가 3인칭 단수이므로 likes가 필요합니다."
+      },
+      {
+        type: "어법 선택",
+        q: "The math problem made it hard for me _____ the test.",
+        options: [
+          "to finish",
+          "finish",
+          "finishing",
+          "finished",
+          "to finishing"
+        ],
+        answer: 0,
+        exp: "make it hard for 목적어 to V 구조입니다. made it hard for me to finish가 맞습니다."
+      },
+      {
+        type: "빈칸",
+        q: "The teacher had us _____ our phones on the desk.",
+        options: [
+          "to put",
+          "putting",
+          "put",
+          "putted",
+          "to putting"
+        ],
+        answer: 2,
+        exp: "have + 목적어 + 동사원형 구조입니다. had us put이 맞습니다."
+      },
+      {
+        type: "빈칸",
+        q: "I need something cold _____.",
+        options: [
+          "drink",
+          "to drink",
+          "drinking",
+          "drank",
+          "to drinking"
+        ],
+        answer: 1,
+        exp: "something cold를 뒤에서 꾸미는 to부정사입니다. something cold to drink가 맞습니다."
+      },
+      {
+        type: "빈칸",
+        q: "I expected Tom _____ on time, but he was late.",
+        options: [
+          "arrive",
+          "arriving",
+          "arrived",
+          "to arriving",
+          "to arrive"
+        ],
+        answer: 4,
+        exp: "expect + 목적어 + to V 구조입니다. expected Tom to arrive가 맞습니다."
+      },
+      {
+        type: "간접의문문",
+        q: "I don't remember when I _____ this picture.",
+        options: [
+          "take",
+          "did take",
+          "to take",
+          "took",
+          "taking"
+        ],
+        answer: 3,
+        exp: "when I took this picture처럼 간접의문문은 주어 + 동사 어순입니다."
+      },
+      {
+        type: "어법 선택",
+        q: "The baby made everyone _____ at the table.",
+        options: [
+          "to smile",
+          "smile",
+          "smiling",
+          "smiled",
+          "to smiling"
+        ],
+        answer: 1,
+        exp: "make + 목적어 + 동사원형입니다. made everyone smile이 맞습니다."
+      },
+      {
+        type: "어순",
+        q: "The teacher explained how we _____ the answer.",
+        options: [
+          "find",
+          "did find",
+          "could find",
+          "finding",
+          "to find"
+        ],
+        answer: 2,
+        exp: "how we could find the answer처럼 간접의문문은 주어 + 조동사 + 동사원형 어순입니다."
+      },
+      {
+        type: "수동형",
+        q: "She was asked _____ her name on the paper.",
+        options: [
+          "to write",
+          "write",
+          "writing",
+          "wrote",
+          "to writing"
+        ],
+        answer: 0,
+        exp: "ask는 ask + 목적어 + to V이고, 수동태에서는 be asked to V가 됩니다."
+      },
+      {
+        type: "빈칸",
+        q: "They got me _____ the heavy box.",
+        options: [
+          "carry",
+          "carrying",
+          "carried",
+          "to carry",
+          "to carrying"
+        ],
+        answer: 3,
+        exp: "get + 목적어 + to V 구조입니다. get은 make/have/let과 달리 목적어 뒤에 to부정사를 씁니다."
+      },
+      {
+        type: "한→영",
+        q: "“그는 내가 그에게 전화하기를 원했다.”",
+        options: [
+          "He wanted me call him.",
+          "He wanted that I call him.",
+          "He wanted me to call him.",
+          "He wanted me calling him.",
+          "He wanted to me call him."
+        ],
+        answer: 2,
+        exp: "want + 목적어 + to V 구조입니다. wanted me to call him이 맞습니다."
+      },
+      {
+        type: "간접의문문",
+        q: "I don't know whether this answer _____.",
+        options: [
+          "does right",
+          "be right",
+          "to be right",
+          "being right",
+          "is right"
+        ],
+        answer: 4,
+        exp: "whether this answer is right처럼 whether 뒤에도 주어 + 동사 어순을 씁니다."
+      },
+      {
+        type: "빈칸",
+        q: "There was nothing to do but _____.",
+        options: [
+          "to wait",
+          "wait",
+          "waiting",
+          "waited",
+          "to waiting"
+        ],
+        answer: 1,
+        exp: "nothing to do but V 구조에서는 but 뒤에 동사원형이 옵니다. 앞에 do가 있기 때문입니다."
+      },
+      {
+        type: "어순",
+        q: "Please tell me which bus I should _____.",
+        options: [
+          "take",
+          "to take",
+          "taking",
+          "took",
+          "to taking"
+        ],
+        answer: 0,
+        exp: "which bus I should take 구조입니다. should 뒤에는 동사원형이 옵니다."
+      },
+      {
+        type: "어법 선택",
+        q: "The long walk made us _____ tired.",
+        options: [
+          "to feel",
+          "feeling",
+          "felt",
+          "feel",
+          "to feeling"
+        ],
+        answer: 3,
+        exp: "make + 목적어 + 동사원형입니다. made us feel tired가 맞습니다."
+      },
+      {
+        type: "빈칸",
+        q: "The room was too dark for me _____ anything.",
+        options: [
+          "see",
+          "seeing",
+          "to see",
+          "saw",
+          "to seeing"
+        ],
+        answer: 2,
+        exp: "too 형용사 for 목적어 to V 구조입니다. too dark for me to see가 맞습니다."
+      },
+      {
+        type: "오류 찾기",
+        q: "다음 중 어법상 어색한 문장은?",
+        options: [
+          "I don't know where he lives.",
+          "She made me clean the room.",
+          "He told me to wait.",
+          "This is a book to read.",
+          "I want you be honest."
+        ],
+        answer: 4,
+        exp: "want + 목적어 + to V 구조이므로 I want you to be honest가 되어야 합니다."
+      }
+    ];
+
+    const HWPLUS_API_URL = "https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWPlus";
+    const SUBMIT_MARKER_KEY = "imsi_bitnalee_hw_2_submit_marker_v1";
+    const DIRECT_SUBCATEGORY = "\uACF5\uC0AC\uC911";
+    const DIRECT_HWTYPE = "doneinweb";
+    const DIRECT_COMMENT = "imsi_bitnalee_hw_2 multiple choice answers";
+
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    let submittedToday = false;
+    let isSubmitting = false;
+    let submitStatus = "";
+    let advanceTimer = null;
+    const answerLog = questions.map(() => null);
+
+    const quiz = document.getElementById("quiz");
+    const progressEl = document.getElementById("progress");
+    const scoreEl = document.getElementById("score");
+
+    function initToast() {
+      if (!window.ImsiToastFX || typeof window.ImsiToastFX.init !== "function") return;
+      if (initToast.ready) return;
+      window.ImsiToastFX.init({ hostId: "cafe_int", top: 10 });
+      initToast.ready = true;
+    }
+
+    function showToast(kind, message, options) {
+      if (window.ImsiToastFX && typeof window.ImsiToastFX.show === "function") {
+        window.ImsiToastFX.show(kind, message, options);
+      }
+    }
+
+    function getCurrentUserId() {
+      try {
+        return String(new URLSearchParams(window.location.search || "").get("id") || "").trim();
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function getKstTodayString() {
+      const now = new Date(Date.now() + (9 * 60 * 60 * 1000));
+      return now.toISOString().slice(0, 10);
+    }
+
+    function readSubmitMarker() {
+      try {
+        const raw = localStorage.getItem(SUBMIT_MARKER_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === "object" ? parsed : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function writeSubmitMarker(userId, dateStr) {
+      localStorage.setItem(SUBMIT_MARKER_KEY, JSON.stringify({
+        userId: String(userId || ""),
+        date: String(dateStr || "")
+      }));
+    }
+
+    function clearSubmitMarker() {
+      localStorage.removeItem(SUBMIT_MARKER_KEY);
+    }
+
+    function hasLocalSubmittedToday(userId) {
+      const marker = readSubmitMarker();
+      if (!marker) return false;
+      return String(marker.userId || "") === String(userId || "") && String(marker.date || "") === getKstTodayString();
+    }
+
+    async function fetchSubmittedTodayFromServer(userId) {
+      const res = await fetch(`${HWPLUS_API_URL.replace("/saveHWPlus", "/getHWPlus")}?userId=${encodeURIComponent(userId)}`);
+      if (!res.ok) throw new Error(String(res.status));
+
+      const data = await res.json();
+      if (!Array.isArray(data)) return false;
+
+      const todayStr = getKstTodayString();
+      return data.some((item) => {
+        const timestamp = String(item.Timestamp || item.timestamp || "");
+        const subcategory = String(item.Subcategory || item.subcategory || "").trim();
+        const hwType = String(item.HWType || item.hwtype || "").trim();
+        const comment = String(item.Comment || item.comment || "").trim();
+        return (
+          timestamp.startsWith(todayStr) &&
+          subcategory === DIRECT_SUBCATEGORY &&
+          hwType === DIRECT_HWTYPE &&
+          comment === DIRECT_COMMENT
+        );
+      });
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function waitForServerSubmission(userId, attempts = 4, delayMs = 450) {
+      for (let i = 0; i < attempts; i += 1) {
+        try {
+          if (await fetchSubmittedTodayFromServer(userId)) return true;
+        } catch (_) {
+        }
+
+        if (i < attempts - 1) await wait(delayMs);
+      }
+      return false;
+    }
+
+    async function checkSubmittedToday() {
+      const userId = getCurrentUserId();
+      if (!userId) return false;
+
+      const hasLocalMarker = hasLocalSubmittedToday(userId);
+      try {
+        const hasServerRecord = await fetchSubmittedTodayFromServer(userId);
+        if (hasServerRecord) {
+          if (!hasLocalMarker) writeSubmitMarker(userId, getKstTodayString());
+          return true;
+        }
+        if (hasLocalMarker) clearSubmitMarker();
+        return false;
+      } catch (_) {
+        return hasLocalMarker;
+      }
+    }
+
+    function scheduleAdvance(callback, delay) {
+      clearTimeout(advanceTimer);
+      advanceTimer = setTimeout(() => {
+        advanceTimer = null;
+        callback();
+      }, delay);
+    }
+
+    function buildTrayUrl() {
+      const userId = getCurrentUserId();
+      const target = new URL("homework-tray_v1.html", window.location.href);
+      if (userId) target.searchParams.set("id", userId);
+      return target.toString();
+    }
+
+    function escapeHTML(text) {
+      return String(text).replace(/[&<>'"]/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      }[char]));
+    }
+
+    function optionLabel(item, optionIndex) {
+      if (!Number.isInteger(optionIndex) || optionIndex < 0 || optionIndex >= item.options.length) {
+        return "not answered";
+      }
+      return `${optionIndex + 1}. ${item.options[optionIndex]}`;
+    }
+
+    function buildSubmissionText(userId) {
+      const lines = [
+        `userId: ${userId}`,
+        `date: ${getKstTodayString()}`,
+        `score: ${score} / ${questions.length}`,
+        ""
+      ];
+
+      questions.forEach((item, index) => {
+        const saved = answerLog[index];
+        const selected = saved && Number.isInteger(saved.selected) ? saved.selected : null;
+        const isCorrect = selected === item.answer;
+
+        lines.push(`[item ${index + 1}]`);
+        lines.push(`\uBB38\uC81C: ${item.q}`);
+        lines.push(`\uC815\uB2F5\uC9C0: ${optionLabel(item, item.answer)}`);
+        lines.push(`selected: ${optionLabel(item, selected)}`);
+        lines.push(`\uC815\uC624\uB2F5\uC5EC\uBD80: ${isCorrect ? "\uC815\uB2F5" : "\uC624\uB2F5"}`);
+        lines.push("");
+      });
+
+      return lines.join("\n");
+    }
+
+    function renderSubmitStatus() {
+      const statusEl = document.getElementById("submitStatus");
+      if (statusEl) statusEl.textContent = submitStatus;
+    }
+
+    function renderDoneState() {
+      progressEl.textContent = "\uC644\uB8CC";
+      scoreEl.textContent = "";
+      quiz.innerHTML = `
+        <div class="card finish-card">
+          <div class="finish-title">\uC624\uB298 \uC219\uC81C \uB05D!</div>
+          <div class="finish-comment">\uC81C\uCD9C\uC774 \uC644\uB8CC\uB41C \uAE30\uB85D\uC774 \uC788\uC2B5\uB2C8\uB2E4.</div>
+        </div>
+      `;
+    }
+
+    function renderQuestion() {
+      answered = false;
+
+      const item = questions[currentIndex];
+
+      progressEl.textContent = `${currentIndex + 1} / ${questions.length}`;
+      scoreEl.textContent = `점수: ${score}`;
+
+      quiz.innerHTML = `
+        <div class="card">
+          <div class="head">
+            <div class="num">${currentIndex + 1}</div>
+            <div class="type">${item.type}</div>
+          </div>
+
+          <div class="question">${item.q}</div>
+
+          <div class="options">
+            ${item.options.map((opt, i) => `
+              <label class="option" data-option="${i}">
+                <input type="radio" name="answer" value="${i}" />
+                <span>${i + 1}. ${opt}</span>
+              </label>
+            `).join("")}
+          </div>
+
+          <div class="feedback" id="feedback"></div>
+
+          <div class="bottom">
+            <button id="nextBtn" disabled>
+              ${currentIndex === questions.length - 1 ? "결과 보기" : "다음 문제"}
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.querySelectorAll(".option").forEach(optionEl => {
+        optionEl.addEventListener("click", () => {
+          if (answered) return;
+          const selected = Number(optionEl.dataset.option);
+          grade(selected);
+        });
+      });
+
+      document.getElementById("nextBtn").addEventListener("click", goNext);
+    }
+
+    function grade(selected) {
+      answered = true;
+
+      const item = questions[currentIndex];
+      const isCorrect = selected === item.answer;
+      answerLog[currentIndex] = {
+        selected,
+        answer: item.answer,
+        isCorrect
+      };
+
+      if (isCorrect) score++;
+
+      const optionEls = document.querySelectorAll(".option");
+      const inputs = document.querySelectorAll("input[name='answer']");
+
+      inputs.forEach(input => {
+        input.disabled = true;
+      });
+
+      optionEls.forEach((el, i) => {
+        el.classList.add("disabled");
+
+        if (i === item.answer) {
+          el.classList.add("correct-answer");
+        }
+
+        if (i === selected && isCorrect) {
+          el.classList.add("correct-choice");
+        }
+
+        if (i === selected && !isCorrect) {
+          el.classList.add("wrong-choice");
+        }
+      });
+
+      const feedback = document.getElementById("feedback");
+      feedback.className = `feedback show ${isCorrect ? "correct" : "wrong"}`;
+      feedback.innerHTML = `
+        <div class="result-word ${isCorrect ? "correct" : "wrong"}">
+          ${isCorrect ? "정답입니다." : "오답입니다."}
+        </div>
+        <div><b>정답:</b> ${item.answer + 1}. ${item.options[item.answer]}</div>
+        <div>${item.exp}</div>
+      `;
+
+      document.getElementById("nextBtn").disabled = false;
+      scoreEl.textContent = `점수: ${score}`;
+    }
+
+    function goNext() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        renderResult();
+      }
+    }
+
+    async function submitAllAnswers() {
+      if (isSubmitting) return;
+      if (submittedToday) {
+        submitStatus = "\uC624\uB298\uC740 \uC774\uBBF8 \uC81C\uCD9C\uD588\uC2B5\uB2C8\uB2E4.";
+        renderSubmitStatus();
+        showToast("no", submitStatus);
+        return;
+      }
+
+      const userId = getCurrentUserId();
+      if (!userId) {
+        submitStatus = "id\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.";
+        renderSubmitStatus();
+        showToast("no", submitStatus);
+        return;
+      }
+
+      isSubmitting = true;
+      submitStatus = "\uC81C\uCD9C \uC911...";
+      renderSubmitStatus();
+
+      try {
+        const txtContent = buildSubmissionText(userId);
+        const file = new File(
+          [txtContent],
+          `imsi_bitnalee_hw_2_${userId}.txt`,
+          { type: "text/plain" }
+        );
+
+        const formData = new FormData();
+        formData.append("UserId", userId);
+        formData.append("Subcategory", DIRECT_SUBCATEGORY);
+        formData.append("HWType", DIRECT_HWTYPE);
+        formData.append("LessonNo", 0);
+        formData.append("Comment", DIRECT_COMMENT);
+        formData.append("HWImage", file);
+
+        const res = await fetch(HWPLUS_API_URL, {
+          method: "POST",
+          body: formData
+        });
+        const result = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(result && result.message ? String(result.message) : String(res.status));
+        }
+
+        submitStatus = "\uC81C\uCD9C \uD655\uC778 \uC911...";
+        renderSubmitStatus();
+
+        const confirmed = await waitForServerSubmission(userId);
+        if (!confirmed) {
+          clearSubmitMarker();
+          submittedToday = false;
+          submitStatus = "\uC81C\uCD9C \uC2E4\uD328";
+          renderSubmitStatus();
+          showToast("no", submitStatus);
+          return;
+        }
+
+        writeSubmitMarker(userId, getKstTodayString());
+        submittedToday = true;
+        submitStatus = "\uC81C\uCD9C \uC644\uB8CC!";
+        renderSubmitStatus();
+        showToast("ok", submitStatus);
+        scheduleAdvance(() => {
+          window.location.replace(buildTrayUrl());
+        }, 620);
+      } catch (err) {
+        console.error(err);
+        submitStatus = "\uC81C\uCD9C \uC2E4\uD328";
+        renderSubmitStatus();
+        showToast("no", submitStatus);
+      } finally {
+        isSubmitting = false;
+      }
+    }
+
+    function renderResult() {
+      progressEl.textContent = `완료`;
+      scoreEl.textContent = `점수: ${score} / ${questions.length}`;
+
+      const percent = Math.round((score / questions.length) * 100);
+
+      let comment = "";
+
+      if (percent >= 90) {
+        comment = "상위권 내신 문법 감각이 꽤 안정적입니다. 헷갈린 문항만 다시 보면 됩니다.";
+      } else if (percent >= 75) {
+        comment = "기본기는 좋습니다. 간접의문문과 목적어 to부정사가 섞인 문장에서 실수가 나오는지 확인하세요.";
+      } else if (percent >= 60) {
+        comment = "구조를 아예 모르는 수준은 아니지만, 보기끼리 비슷할 때 흔들릴 가능성이 있습니다.";
+      } else {
+        comment = "문법 이름보다 문장 안에서 주어·동사·목적어 위치를 다시 잡는 연습이 필요합니다.";
+      }
+
+      quiz.innerHTML = `
+        <div class="card finish-card">
+          <div class="finish-title">완료!</div>
+          <div class="finish-score">${score} / ${questions.length}점</div>
+          <div class="finish-comment">${comment}</div>
+          <div class="submit-status" id="submitStatus">${escapeHTML(submitStatus)}</div>
+        </div>
+      `;
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      submitAllAnswers();
+    }
+
+    (async function init() {
+      initToast();
+      submittedToday = await checkSubmittedToday();
+      if (submittedToday) {
+        renderDoneState();
+        return;
+      }
+      renderQuestion();
+    })();
+  </script>
+</body>
+</html>
