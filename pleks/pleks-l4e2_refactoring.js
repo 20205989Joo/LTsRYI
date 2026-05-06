@@ -1,4 +1,5 @@
-const EXCEL_FILE = "LTRYI-pleks-l4e2-questions.xlsx";
+const EXCEL_FILE = "hleks_allq_chwi.xlsx";
+const EXCEL_SHEET = "l4e2_questions";
 const TARGET_LESSON = 4;
 const TARGET_EXERCISE = 2;
 const MAX_QUESTIONS = 0;
@@ -38,7 +39,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   wireBackButton();
 
   try {
-    const rows = await loadExcelRows(EXCEL_FILE);
+    const rows = await loadExcelRows(EXCEL_FILE, EXCEL_SHEET);
     questions = buildQuestions(rows);
   } catch (err) {
     console.error(err);
@@ -83,6 +84,24 @@ function buildLessonMeta() {
 function renderIntro() {
   const mount = getMount();
   if (!mount) return;
+
+  if (window.PleksIntroFronts && typeof window.PleksIntroFronts.render === "function") {
+    try {
+      const introExercise = typeof TARGET_EXERCISE !== "undefined"
+        ? TARGET_EXERCISE
+        : (typeof EXERCISE_ORDER !== "undefined" && Array.isArray(EXERCISE_ORDER) ? EXERCISE_ORDER[0] : "");
+      if (window.PleksIntroFronts.render(mount, {
+        lesson: TARGET_LESSON,
+        exercise: introExercise,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("PleksIntroFronts render failed:", err);
+    }
+  }
+
   mount.innerHTML = `
     <div class="box">
       <div style="font-size:18px; font-weight:900; color:#7e3106; margin-bottom:10px;">Pleks L4-E2 (Draft)</div>
@@ -141,7 +160,7 @@ function showToast(type, text) {
   console.log(type, text);
 }
 
-async function loadExcelRows(filename) {
+async function loadExcelRows(filename, sheetName) {
   const bust = `v=${Date.now()}`;
   const url = filename.includes("?") ? `${filename}&${bust}` : `${filename}?${bust}`;
   const res = await fetch(url, { cache: "no-store" });
@@ -149,7 +168,7 @@ async function loadExcelRows(filename) {
 
   const buf = await res.arrayBuffer();
   const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const sheet = wb.Sheets[sheetName] || wb.Sheets[wb.SheetNames[0]];
   return XLSX.utils.sheet_to_json(sheet, { defval: "" });
 }
 

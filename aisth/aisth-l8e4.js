@@ -447,6 +447,23 @@ function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
 
+  if (window.AisthIntroFronts && typeof window.AisthIntroFronts.render === "function") {
+    try {
+      if (window.AisthIntroFronts.render(area, {
+        pageLabel: PAGE_LABEL,
+        lesson: TARGET_LESSON,
+        exercise: TARGET_EXERCISE,
+        questions,
+        startLabel: TEXT.START,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("AisthIntroFronts render failed:", err);
+    }
+  }
+
   const total = questions.length;
   const title = questions[0]?.title || PAGE_LABEL;
   const firstInst = stripEmphasisMarkers(questions[0]?.instruction || DEFAULT_INSTRUCTION);
@@ -491,6 +508,7 @@ function startQuiz() {
 function renderQuestion() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
+
 
   const q = questions[currentIndex];
   if (!q) {

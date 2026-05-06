@@ -11,7 +11,8 @@
   var INPUT_REQUIRED_MSG = "\uB2E8\uC5B4\uB97C \uC785\uB825\uD558\uC138\uC694.";
 
   var DEFAULTS = {
-    excelFile: "LTRYI-herma-round2-master.xlsx",
+    excelFile: "herma_allq_chwi.xlsx",
+    excelSheet: "round2_master",
     lesson: 4,
     exercise: 3,
     round: 2,
@@ -310,7 +311,8 @@
       })
       .then(function (buf) {
         var wb = global.XLSX.read(buf, { type: "array" });
-        var sheet = wb.Sheets[wb.SheetNames[0]];
+        var sheetName = state.config.excelSheet || wb.SheetNames[0];
+        var sheet = wb.Sheets[sheetName] || wb.Sheets[wb.SheetNames[0]];
         var rows = global.XLSX.utils.sheet_to_json(sheet, { defval: "" });
         return rows.filter(function (r) { return !isRowAllEmpty(r); });
       });

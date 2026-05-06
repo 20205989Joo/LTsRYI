@@ -8,12 +8,13 @@
 //   동사를 슬롯에 넣은 뒤, 그 단어를 한 번 더 누르면 p.p로 변환 + shake.
 // - 아래 문장에는 head noun(예: sushi)와 (that/that was/that were) 같은 괄호구간을 흐리게 고정(던져둠).
 //
-// 데이터: /LTRYI-herma-lesson-questions.xlsx
+// 데이터: /herma_allq_chwi.xlsx
 // Lesson 5 / Exercise 1
 // Answer 예: "the sushi (that) Kevin ate – 케빈이 먹은 초밥"
 // ------------------------------------------------------------
 
-const EXCEL_FILE = "LTRYI-herma-lesson-questions.xlsx";
+const EXCEL_FILE = "herma_allq_chwi.xlsx";
+const EXCEL_SHEET = "round1_questions";
 const TARGET_LESSON = 5;
 const TARGET_EXERCISE = 1;
 
@@ -647,7 +648,7 @@ async function loadExcelRows(filename) {
   const buf = await res.arrayBuffer();
 
   const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const sheet = wb.Sheets[EXCEL_SHEET] || wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
   return rows.filter((r) => !isRowAllEmpty(r));
 }
@@ -707,6 +708,21 @@ function splitEnglishAndKoreanByDash(answerRaw) {
 function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
+
+  if (window.HermaIntroFronts && typeof window.HermaIntroFronts.render === "function") {
+    try {
+      if (window.HermaIntroFronts.render(area, {
+        lesson: TARGET_LESSON,
+        exercise: TARGET_EXERCISE,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("HermaIntroFronts render failed:", err);
+    }
+  }
+
 
   const title = questions[0]?.title || "Herma L5-E1";
   const instruction =

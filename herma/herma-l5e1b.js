@@ -2,7 +2,8 @@
 (function(){
 'use strict';
 
-const EXCEL_FILE='LTRYI-herma-lesson-questions.xlsx';
+const EXCEL_FILE='herma_allq_chwi.xlsx';
+const EXCEL_SHEET='round1_questions';
 const TARGET_LESSON=5;
 const TARGET_EXERCISE='1b';
 const UI={
@@ -80,7 +81,7 @@ function injectStyles(){
 async function loadExcelRows(filename){
   const bust='v='+Date.now(); const url=filename+(filename.includes('?')?'&':'?')+bust;
   const res=await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error('fetch failed: '+res.status);
-  const buf=await res.arrayBuffer(); const wb=XLSX.read(buf,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+  const buf=await res.arrayBuffer(); const wb=XLSX.read(buf,{type:'array'}); const ws=wb.Sheets[EXCEL_SHEET] || wb.Sheets[wb.SheetNames[0]];
   return XLSX.utils.sheet_to_json(ws,{defval:''}).filter(function(r){ return !Object.keys(r||{}).every(function(k){ return String(r[k]??'').trim()===''; }); });
 }
 
@@ -95,6 +96,21 @@ function buildQuestionsFromRows(){
 function parseTransforms(s){ const o={}; String(s||'').split(';').forEach(function(part){ const t=String(part||'').trim(); if(!t) return; const i=t.indexOf('='); if(i<0) return; o[t.slice(0,i).trim()]=t.slice(i+1).trim(); }); return o; }
 function renderIntro(){
   const area=byId('quiz-area'); if(!area) return;
+
+  if (window.HermaIntroFronts && typeof window.HermaIntroFronts.render === "function") {
+    try {
+      if (window.HermaIntroFronts.render(area, {
+        lesson: TARGET_LESSON,
+        exercise: TARGET_EXERCISE,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("HermaIntroFronts render failed:", err);
+    }
+  }
+
   area.innerHTML=`<div class="box">
     <div style="font-size:18px;font-weight:900;color:#7e3106;margin-bottom:10px;">📘 ${esc(UI.introTitle)}</div>
     <div style="margin-bottom:10px;"><span class="pill">Lesson ${TARGET_LESSON}</span><span class="pill">Exercise ${esc(TARGET_EXERCISE)}</span><span class="pill">Prototype</span></div>

@@ -1,4 +1,5 @@
-const EXCEL_FILE = "LTRYI-pleks-lesson-questions.xlsx";
+const EXCEL_FILE = "hleks_allq_chwi.xlsx";
+const EXCEL_SHEET = "lesson_questions";
 const TARGET_LESSON = 5;
 const EXERCISE_ORDER = [3, 32, 33];
 
@@ -25,7 +26,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const rows = await loadExcelRows(EXCEL_FILE);
+    const rows = await loadExcelRows(EXCEL_FILE, EXCEL_SHEET);
     sequence = buildSequence(rows);
   } catch (e) {
     console.error(e);
@@ -78,14 +79,14 @@ function toastNo(msg) {
   if (window.PleksToastFX?.show) window.PleksToastFX.show("no", String(msg || ""));
 }
 
-async function loadExcelRows(filename) {
+async function loadExcelRows(filename, sheetName) {
   const bust = `v=${Date.now()}`;
   const url = filename.includes("?") ? `${filename}&${bust}` : `${filename}?${bust}`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
   const buf = await res.arrayBuffer();
   const wb = XLSX.read(buf, { type: "array" });
-  const ws = wb.Sheets[wb.SheetNames[0]];
+  const ws = wb.Sheets[sheetName] || wb.Sheets[wb.SheetNames[0]];
   return XLSX.utils.sheet_to_json(ws, { defval: "" });
 }
 
@@ -512,6 +513,24 @@ function buildSequence(rows) {
 function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
+
+  if (window.PleksIntroFronts && typeof window.PleksIntroFronts.render === "function") {
+    try {
+      const introExercise = typeof TARGET_EXERCISE !== "undefined"
+        ? TARGET_EXERCISE
+        : (typeof EXERCISE_ORDER !== "undefined" && Array.isArray(EXERCISE_ORDER) ? EXERCISE_ORDER[0] : "");
+      if (window.PleksIntroFronts.render(area, {
+        lesson: TARGET_LESSON,
+        exercise: introExercise,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("PleksIntroFronts render failed:", err);
+    }
+  }
+
   area.innerHTML = `
     <div class="box">
       <div style="font-size:18px; font-weight:900; color:#7e3106; margin-bottom:10px;">Pleks L5-E3</div>

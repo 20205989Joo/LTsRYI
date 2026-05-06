@@ -2,26 +2,36 @@
 // Same structure and wording as dish-quiz.js result popup.
 
 (function () {
-  const FLOW_STORAGE_KEY = "HermaRound2FlowMap";
-  const FULL_TOUR_STORAGE_KEY = "HermaFullTourState";
+  const FLOW_STORAGE_KEY = "PleksRound2FlowMap";
+  const FULL_TOUR_STORAGE_KEY = "PleksFullTourState";
   const RELEARN_MIN_COUNT = 6;
   const ROUND2_PASS_SCORE = 80;
-  const HERMA_ROUND2_SLUGS = new Set([
-    "l1e2", "l1e3", "l1e4",
-    "l2e1", "l2e2", "l2e3", "l2e4",
-    "l3e1", "l3e2", "l3e3", "l3e4", "l3e6",
-    "l4e1", "l4e2", "l4e3",
-    "l5e1", "l5e2",
-    "l6e1", "l6e2", "l6e3"
-  ]);
+  const PLEKS_ROUND2_SLUGS = new Set([]);
   const FULL_TOUR_SEQUENCE = [
-    "l1e1", "l1e2", "l1e3", "l1e4",
-    "l2e1", "l2e2", "l2e3", "l2e4",
-    "l3e1", "l3e2", "l3e3", "l3e4", "l3e5", "l3e6",
+    "l1e1", "l1e2",
+    "l2e1", "l2e2", "l2e3",
+    "l3e1", "l3e2", "l3e3", "l3e4",
     "l4e1", "l4e2", "l4e3",
-    "l5e1", "l5e1b", "l5e2",
-    "l6e1", "l6e2", "l6e3", "l6e4", "l6e5"
+    "l5e1", "l5e2", "l5e3", "l5e4"
   ];
+  const PAGE_BY_SLUG = {
+    l1e1: "pleks-l1e1.html",
+    l1e2: "pleks-l1e2.html",
+    l2e1: "pleks-l2e1.html",
+    l2e2: "pleks-l2e2.html",
+    l2e3: "pleks-l2e3.html",
+    l3e1: "pleks-l3e1.html",
+    l3e2: "pleks-l3e2.html",
+    l3e3: "pleks-l3e3.html",
+    l3e4: "pleks-l3e4_refactoring.html",
+    l4e1: "pleks-l4e1_refactoring.html",
+    l4e2: "pleks-l4e2_refactoring.html",
+    l4e3: "pleks-l4e3_refactoring.html",
+    l5e1: "pleks-l5e1.html",
+    l5e2: "pleks-l5e2.html",
+    l5e3: "pleks-l5e3.html",
+    l5e4: "pleks-l5e4.html"
+  };
 
   function readQuizResultsMap() {
     try {
@@ -134,14 +144,14 @@
   function getCurrentPageSlug() {
     const path = String(window.location.pathname || "");
     const file = path.split("/").pop() || "";
-    const m = file.match(/^herma-(l\d+e\d+[a-z]*)\.html$/i);
+    const m = file.match(/^pleks-(l\d+e\d+[a-z]*)(?:_refactoring)?\.html$/i);
     return m ? String(m[1]).toLowerCase() : "";
   }
 
   function hasRound2ForSlug(slug) {
     const s = String(slug || "").toLowerCase();
     if (!s) return false;
-    return HERMA_ROUND2_SLUGS.has(s);
+    return PLEKS_ROUND2_SLUGS.has(s);
   }
 
   function hasRound2ForCurrentPage() {
@@ -151,7 +161,7 @@
   function getRound2ScriptForSlug(slug) {
     const s = String(slug || "").toLowerCase();
     if (!s || !hasRound2ForSlug(s)) return "";
-    return `herma-${s}_round2.js`;
+    return `pleks-${s}_round2.js`;
   }
 
   function getRound2ScriptForCurrentPage() {
@@ -202,7 +212,7 @@
   function buildPageUrlBySlug(slug, nextParams) {
     const s = String(slug || "").toLowerCase();
     if (!s) return "";
-    const target = new URL(`herma-${s}.html`, window.location.href);
+    const target = new URL(PAGE_BY_SLUG[s] || `pleks-${s}.html`, window.location.href);
     const params = nextParams || {};
     Object.keys(params).forEach((k) => {
       const v = params[k];
@@ -242,7 +252,7 @@
     clearFullTourState();
     const params = getCurrentParamsSafe();
     const userId = String(params.get("id") || "").trim();
-    const target = new URL("herma-round1_leveljump.html", window.location.href);
+    const target = new URL("pleks-round1_leveljump.html", window.location.href);
     if (userId) target.searchParams.set("id", userId);
     window.location.replace(target.toString());
     return true;

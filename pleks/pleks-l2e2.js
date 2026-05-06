@@ -1,8 +1,10 @@
 // pleks-l2e2.js
 // L2-E2: overlap + weld fragments
 
-const EXCEL_FILE = "LTRYI-pleks-lesson-questions.xlsx";
-const DESC_FILE = "LTRYI-pleks-lesson-desc.xlsx";
+const EXCEL_FILE = "hleks_allq_chwi.xlsx";
+const EXCEL_SHEET = "lesson_questions";
+const DESC_FILE = "hleks_allq_chwi.xlsx";
+const DESC_SHEET = "lesson_desc";
 
 const TARGET_LESSON = 2;
 const TARGET_EXERCISE = 2;
@@ -82,8 +84,8 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const [qRows, dRows] = await Promise.all([
-      loadExcelRows(EXCEL_FILE),
-      loadExcelRows(DESC_FILE).catch(() => []),
+      loadExcelRows(EXCEL_FILE, EXCEL_SHEET),
+      loadExcelRows(DESC_FILE, DESC_SHEET).catch(() => []),
     ]);
     rawRows = qRows;
     descRows = dRows;
@@ -124,7 +126,7 @@ function wireBackButton() {
   backBtn.addEventListener("click", () => history.back());
 }
 
-async function loadExcelRows(filename) {
+async function loadExcelRows(filename, sheetName) {
   const bust = `v=${Date.now()}`;
   const url = filename.includes("?") ? `${filename}&${bust}` : `${filename}?${bust}`;
 
@@ -133,7 +135,7 @@ async function loadExcelRows(filename) {
   const buf = await res.arrayBuffer();
 
   const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const sheet = wb.Sheets[sheetName] || wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
   return rows.filter((row) => !isRowAllEmpty(row));
 }
@@ -201,6 +203,24 @@ function parseBlocksQuestion(raw) {
 function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
+
+  if (window.PleksIntroFronts && typeof window.PleksIntroFronts.render === "function") {
+    try {
+      const introExercise = typeof TARGET_EXERCISE !== "undefined"
+        ? TARGET_EXERCISE
+        : (typeof EXERCISE_ORDER !== "undefined" && Array.isArray(EXERCISE_ORDER) ? EXERCISE_ORDER[0] : "");
+      if (window.PleksIntroFronts.render(area, {
+        lesson: TARGET_LESSON,
+        exercise: introExercise,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("PleksIntroFronts render failed:", err);
+    }
+  }
+
 
   const total = questions.length;
   const qTitle = questions[0]?.title || "Overlap Weld";

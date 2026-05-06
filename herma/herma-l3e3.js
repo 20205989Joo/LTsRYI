@@ -8,7 +8,8 @@
 //   3) 해석 순서: 섞인 한국어 조각을 순서대로 눌러 해석 완성
 // ------------------------------------------------------------
 
-const EXCEL_FILE = "LTRYI-herma-lesson-questions.xlsx";
+const EXCEL_FILE = "herma_allq_chwi.xlsx";
+const EXCEL_SHEET = "round1_questions";
 const TARGET_LESSON = 3;
 const TARGET_EXERCISE = 3;
 const TARGET_EXERCISE_LABEL = "3";
@@ -303,7 +304,7 @@ async function loadExcelRows(filename) {
   const buf = await res.arrayBuffer();
 
   const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const sheet = wb.Sheets[EXCEL_SHEET] || wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
   return rows.filter((r) => !isRowAllEmpty(r));
 }
@@ -488,6 +489,21 @@ function renderConfiguredFinalSentenceForE33(parts) {
 function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
+
+  if (window.HermaIntroFronts && typeof window.HermaIntroFronts.render === "function") {
+    try {
+      if (window.HermaIntroFronts.render(area, {
+        lesson: TARGET_LESSON,
+        exercise: TARGET_EXERCISE,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("HermaIntroFronts render failed:", err);
+    }
+  }
+
 
   const title = questions[0]?.title || "Herma L3-E3";
   const instruction = SIMPLE_INSTRUCTION;

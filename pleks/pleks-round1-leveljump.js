@@ -4,40 +4,49 @@
   var FULL_TOUR_STORAGE_KEY = "PleksFullTourState";
   var FLOW_STORAGE_KEY = "PleksRound2FlowMap";
   var FULL_TOUR_SEQUENCE = [
-    "l1e1", "l1e2", "l1e3", "l1e4",
-    "l2e1", "l2e2", "l2e3", "l2e4",
-    "l3e1", "l3e2", "l3e3", "l3e4", "l3e5", "l3e6",
+    "l1e1", "l1e2",
+    "l2e1", "l2e2", "l2e3",
+    "l3e1", "l3e2", "l3e3", "l3e4",
     "l4e1", "l4e2", "l4e3",
-    "l5e1", "l5e1b", "l5e2",
-    "l6e1", "l6e2", "l6e3", "l6e4", "l6e5"
+    "l5e1", "l5e2", "l5e3", "l5e4"
   ];
 
+  var PAGE_BY_SLUG = {
+    l1e1: "pleks-l1e1.html",
+    l1e2: "pleks-l1e2.html",
+    l2e1: "pleks-l2e1.html",
+    l2e2: "pleks-l2e2.html",
+    l2e3: "pleks-l2e3.html",
+    l3e1: "pleks-l3e1.html",
+    l3e2: "pleks-l3e2.html",
+    l3e3: "pleks-l3e3.html",
+    l3e4: "pleks-l3e4_refactoring.html",
+    l4e1: "pleks-l4e1_refactoring.html",
+    l4e2: "pleks-l4e2_refactoring.html",
+    l4e3: "pleks-l4e3_refactoring.html",
+    l5e1: "pleks-l5e1.html",
+    l5e2: "pleks-l5e2.html",
+    l5e3: "pleks-l5e3.html",
+    l5e4: "pleks-l5e4.html"
+  };
+
   var LESSON_CHOICES = [
-    { id: "l1e1", short: "1-1", label: "L1-E1", page: "pleks-l1e1.html" },
-    { id: "l1e2", short: "1-2", label: "L1-E2", page: "pleks-l1e2.html" },
-    { id: "l1e3", short: "1-3", label: "L1-E3", page: "pleks-l1e3.html" },
-    { id: "l1e4", short: "1-4", label: "L1-E4", page: "pleks-l1e4.html" },
-    { id: "l2e1", short: "2-1", label: "L2-E1", page: "pleks-l2e1.html" },
-    { id: "l2e2", short: "2-2", label: "L2-E2", page: "pleks-l2e2.html" },
-    { id: "l2e3", short: "2-3", label: "L2-E3", page: "pleks-l2e3.html" },
-    { id: "l2e4", short: "2-4", label: "L2-E4", page: "pleks-l2e4.html" },
-    { id: "l3e1", short: "3-1", label: "L3-E1", page: "pleks-l3e1.html" },
-    { id: "l3e2", short: "3-2", label: "L3-E2", page: "pleks-l3e2.html" },
-    { id: "l3e3", short: "3-3", label: "L3-E3", page: "pleks-l3e3.html" },
-    { id: "l3e4", short: "3-4", label: "L3-E4", page: "pleks-l3e4.html" },
-    { id: "l3e5", short: "3-5", label: "L3-E5", page: "pleks-l3e5.html" },
-    { id: "l3e6", short: "3-6", label: "L3-E6", page: "pleks-l3e6.html" },
-    { id: "l4e1", short: "4-1", label: "L4-E1", page: "pleks-l4e1.html" },
-    { id: "l4e2", short: "4-2", label: "L4-E2", page: "pleks-l4e2.html" },
-    { id: "l4e3", short: "4-3", label: "L4-E3", page: "pleks-l4e3.html" },
-    { id: "l5e1", short: "5-1", label: "L5-E1", page: "pleks-l5e1.html" },
-    { id: "l5e1b", short: "5-1b", label: "L5-E1B", page: "pleks-l5e1b.html" },
-    { id: "l5e2", short: "5-2", label: "L5-E2", page: "pleks-l5e2.html" },
-    { id: "l6e1", short: "6-1", label: "L6-E1", page: "pleks-l6e1.html" },
-    { id: "l6e2", short: "6-2", label: "L6-E2", page: "pleks-l6e2.html" },
-    { id: "l6e3", short: "6-3", label: "L6-E3", page: "pleks-l6e3.html" },
-    { id: "l6e4", short: "6-4", label: "L6-E4", page: "pleks-l6e4.html" },
-    { id: "l6e5", short: "6-5", label: "L6-E5", page: "pleks-l6e5.html" }
+    { id: "l1e1", short: "1-1", label: "L1-E1", page: PAGE_BY_SLUG.l1e1 },
+    { id: "l1e2", short: "1-2", label: "L1-E2", page: PAGE_BY_SLUG.l1e2 },
+    { id: "l2e1", short: "2-1", label: "L2-E1", page: PAGE_BY_SLUG.l2e1 },
+    { id: "l2e2", short: "2-2", label: "L2-E2", page: PAGE_BY_SLUG.l2e2 },
+    { id: "l2e3", short: "2-3", label: "L2-E3", page: PAGE_BY_SLUG.l2e3 },
+    { id: "l3e1", short: "3-1", label: "L3-E1", page: PAGE_BY_SLUG.l3e1 },
+    { id: "l3e2", short: "3-2", label: "L3-E2", page: PAGE_BY_SLUG.l3e2 },
+    { id: "l3e3", short: "3-3", label: "L3-E3", page: PAGE_BY_SLUG.l3e3 },
+    { id: "l3e4", short: "3-4", label: "L3-E4", page: PAGE_BY_SLUG.l3e4 },
+    { id: "l4e1", short: "4-1", label: "L4-E1", page: PAGE_BY_SLUG.l4e1 },
+    { id: "l4e2", short: "4-2", label: "L4-E2", page: PAGE_BY_SLUG.l4e2 },
+    { id: "l4e3", short: "4-3", label: "L4-E3", page: PAGE_BY_SLUG.l4e3 },
+    { id: "l5e1", short: "5-1", label: "L5-E1", page: PAGE_BY_SLUG.l5e1 },
+    { id: "l5e2", short: "5-2", label: "L5-E2", page: PAGE_BY_SLUG.l5e2 },
+    { id: "l5e3", short: "5-3", label: "L5-E3", page: PAGE_BY_SLUG.l5e3 },
+    { id: "l5e4", short: "5-4", label: "L5-E4", page: PAGE_BY_SLUG.l5e4 }
   ];
 
   var state = {
@@ -145,7 +154,7 @@
   function buildTourStartUrl(startSlug) {
     var slug = String(startSlug || "").trim().toLowerCase();
     if (!slug) slug = FULL_TOUR_SEQUENCE[0];
-    var target = new URL("pleks-" + slug + ".html", window.location.href);
+    var target = new URL(PAGE_BY_SLUG[slug] || ("pleks-" + slug + ".html"), window.location.href);
     var params = readParams();
     var userId = String(params.get("id") || "").trim();
     var qcap = readDefaultTourQCap();

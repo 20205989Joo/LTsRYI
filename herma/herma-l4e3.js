@@ -1,7 +1,8 @@
 // ver1.1_26.02.22
 // herma-l4e3.js (L4-E3: 숨은 말 채우기 - A 클릭 순간 하이라이트 + 같은답(2괄호) 동시채움 + no popups)
 // ------------------------------------------------------------
-const EXCEL_FILE = "LTRYI-herma-lesson-questions.xlsx";
+const EXCEL_FILE = "herma_allq_chwi.xlsx";
+const EXCEL_SHEET = "round1_questions";
 const TARGET_LESSON = 4;
 const TARGET_EXERCISE = 3;
 
@@ -167,7 +168,7 @@ async function loadExcelRows(filename) {
   const buf = await res.arrayBuffer();
 
   const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const sheet = wb.Sheets[EXCEL_SHEET] || wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
   return rows.filter((r) => !isRowAllEmpty(r));
 }
@@ -366,6 +367,21 @@ function uniqKeep(arr) {
 function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
+
+  if (window.HermaIntroFronts && typeof window.HermaIntroFronts.render === "function") {
+    try {
+      if (window.HermaIntroFronts.render(area, {
+        lesson: TARGET_LESSON,
+        exercise: TARGET_EXERCISE,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("HermaIntroFronts render failed:", err);
+    }
+  }
+
 
   const title = questions[0]?.title || "Herma L4-E3";
   const instruction =

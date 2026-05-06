@@ -1,7 +1,8 @@
 ﻿// ver1.1_26.02.22
 // herma-l6e5.js (L5-E3: 4개씩 스위치로 문장/조각 구분)
 // - A/B/C/D 라벨을 '버튼 같은 박스'로 만들지 않음: 아주 얇은 텍스트 마커만 사용
-const EXCEL_FILE = "LTRYI-herma-lesson-questions.xlsx";
+const EXCEL_FILE = "herma_allq_chwi.xlsx";
+const EXCEL_SHEET = "round1_questions";
 const TARGET_LESSON = 6;
 const TARGET_EXERCISE = 5;
 
@@ -194,7 +195,7 @@ async function loadExcelRows(filename) {
   const buf = await res.arrayBuffer();
 
   const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const sheet = wb.Sheets[EXCEL_SHEET] || wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
   return rows.filter((r) => !isRowAllEmpty(r));
 }
@@ -359,6 +360,21 @@ function buildQuizQuestions(items, qCount, perQ) {
 function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
+
+  if (window.HermaIntroFronts && typeof window.HermaIntroFronts.render === "function") {
+    try {
+      if (window.HermaIntroFronts.render(area, {
+        lesson: TARGET_LESSON,
+        exercise: TARGET_EXERCISE,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("HermaIntroFronts render failed:", err);
+    }
+  }
+
 
   area.innerHTML = `
     <div class="box">

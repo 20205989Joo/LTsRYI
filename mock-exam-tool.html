@@ -782,6 +782,7 @@
       margin: 0 auto 12px;
       background: #fff;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+      overflow: hidden;
     }
 
     .pdf-page canvas {
@@ -792,6 +793,39 @@
       touch-action: pan-y;
       cursor: default;
       image-rendering: auto;
+    }
+
+    .pdf-page .mock-page-ink-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 7;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      pointer-events: none;
+      touch-action: none;
+    }
+
+    body.is-page-ink-on .pdf-page .mock-page-ink-canvas {
+      pointer-events: auto;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M4 19l3.6-1 9.8-9.8-3.6-3.6L4 14.4V19z' fill='%2352433a' stroke='%23f5ead9' stroke-width='1'/%3E%3Cpath d='M14.8 3.5l3.7 3.7 1-1c.8-.8.8-2 0-2.8l-.9-.9c-.8-.8-2-.8-2.8 0l-1 1z' fill='%239fc48d'/%3E%3C/svg%3E") 3 19, pointer;
+    }
+
+    body.is-page-ink-tool-eraser .pdf-page .mock-page-ink-canvas,
+    body.is-page-ink-tool-eraser .overlay-blank-draw-canvas,
+    body.is-page-ink-tool-eraser .overlay-three-ink-canvas {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5 15.5l8.7-8.7c.7-.7 1.8-.7 2.5 0l2 2c.7.7.7 1.8 0 2.5L9.5 20H5v-4.5z' fill='%23f1adc3' stroke='%2352433a' stroke-width='1.2'/%3E%3Cpath d='M4.5 20.5h10.8' stroke='%23a8cb8f' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M12.3 8.2l4.5 4.5' stroke='%2352433a' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") 5 19, pointer;
+    }
+
+    body.is-page-ink-tool-highlight .pdf-page .mock-page-ink-canvas {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='22' viewBox='0 0 24 22'%3E%3Cpath d='M4 15l8.8-8.8 5 5L9 20H4v-5z' fill='%23f6d479' stroke='%2352433a' stroke-width='1'/%3E%3Cpath d='M14 5l2.2-2.2c.7-.7 1.8-.7 2.5 0l2.5 2.5c.7.7.7 1.8 0 2.5L19 10 14 5z' fill='%23b8dca7'/%3E%3Cpath d='M3 20h9' stroke='%23f6d479' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") 4 18, copy;
+    }
+
+    body.is-page-ink-tool-check .pdf-page .mock-page-ink-canvas,
+    body.is-page-ink-tool-o .pdf-page .mock-page-ink-canvas,
+    body.is-page-ink-tool-x .pdf-page .mock-page-ink-canvas,
+    body.is-page-ink-tool-score .pdf-page .mock-page-ink-canvas {
+      cursor: pointer;
     }
 
     .pdf-text-layer {
@@ -1036,7 +1070,7 @@
       top: 8px;
       right: 10px;
       z-index: 6;
-      display: flex;
+      display: none;
       align-items: center;
       gap: 6px;
     }
@@ -1093,17 +1127,18 @@
       color: rgba(46, 43, 39, 0.38);
     }
 
-    .overlay-blank-pane.is-pen-mode .overlay-memo-textarea {
-      display: none;
-    }
-
     .overlay-blank-draw-wrap {
       position: absolute;
       inset: 0;
       z-index: 4;
-      background: #fdf3e7;
-      border-top: 1px solid rgba(46, 43, 39, 0.08);
+      background: transparent;
+      border-top: none;
+      pointer-events: none;
       touch-action: none;
+    }
+
+    .overlay-blank-pane.is-pen-mode .overlay-blank-draw-wrap {
+      pointer-events: auto;
     }
 
     .overlay-blank-draw-wrap[hidden] {
@@ -1114,10 +1149,8 @@
       width: 100%;
       height: 100%;
       display: block;
-      background:
-        linear-gradient(180deg, rgba(140, 116, 86, 0.06) 0, rgba(140, 116, 86, 0.06) 1px, transparent 1px, transparent 34px);
-      background-size: 100% 34px;
-      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M2 16l3.2-.8 8.6-8.6-2.4-2.4-8.6 8.6L2 16z' fill='%232f2a24' stroke='%23f4c36d' stroke-width='.8'/%3E%3Cpath d='M11.4 2.2l2.4 2.4 1.2-1.2c.7-.7.7-1.8 0-2.5-.7-.7-1.8-.7-2.5 0l-1.1 1.3z' fill='%23463b2c'/%3E%3C/svg%3E") 2 16, pointer;
+      background: transparent;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M4 19l3.6-1 9.8-9.8-3.6-3.6L4 14.4V19z' fill='%2352433a' stroke='%23f5ead9' stroke-width='1'/%3E%3Cpath d='M14.8 3.5l3.7 3.7 1-1c.8-.8.8-2 0-2.8l-.9-.9c-.8-.8-2-.8-2.8 0l-1 1z' fill='%239fc48d'/%3E%3C/svg%3E") 3 19, pointer;
       touch-action: none;
     }
 
@@ -1224,7 +1257,7 @@
     }
 
     .overlay-three-head-tools {
-      display: inline-flex;
+      display: none;
       align-items: center;
       gap: 6px;
       flex: 0 0 auto;
@@ -1479,7 +1512,7 @@
 
     .overlay-three-card-tools {
       margin-left: auto;
-      display: inline-flex;
+      display: none;
       align-items: center;
       gap: 4px;
       flex: 0 0 auto;
@@ -1651,10 +1684,16 @@
       height: 100%;
       display: block;
       touch-action: none;
-      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M2 16l3.2-.8 8.6-8.6-2.4-2.4-8.6 8.6L2 16z' fill='%23f7f2e8' stroke='%233b2a1f' stroke-width='.8'/%3E%3Cpath d='M11.4 2.2l2.4 2.4 1.2-1.2c.7-.7.7-1.8 0-2.5-.7-.7-1.8-.7-2.5 0l-1.1 1.3z' fill='%23f2b14d'/%3E%3C/svg%3E") 2 16, pointer;
+      pointer-events: none;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M4 19l3.6-1 9.8-9.8-3.6-3.6L4 14.4V19z' fill='%2352433a' stroke='%23f5ead9' stroke-width='1'/%3E%3Cpath d='M14.8 3.5l3.7 3.7 1-1c.8-.8.8-2 0-2.8l-.9-.9c-.8-.8-2-.8-2.8 0l-1 1z' fill='%239fc48d'/%3E%3C/svg%3E") 3 19, pointer;
       background:
         linear-gradient(180deg, rgba(244, 230, 205, 0.06) 0, rgba(244, 230, 205, 0.06) 1px, transparent 1px, transparent 26px);
       background-size: 100% 26px;
+    }
+
+    body.is-page-ink-tool-pen .overlay-three-ink-canvas,
+    body.is-page-ink-tool-eraser .overlay-three-ink-canvas {
+      pointer-events: auto;
     }
 
     .overlay-side-flip {
@@ -1816,6 +1855,236 @@
 
     .overlay-type-option:hover {
       background: #5c574e;
+    }
+
+    .page-pen-fab {
+      position: absolute;
+      left: 22px;
+      right: auto;
+      bottom: 28px;
+      z-index: 150;
+      width: 58px;
+      height: 58px;
+      border: 2px solid rgba(188, 255, 45, 0.72);
+      border-radius: 50%;
+      background: #050706;
+      color: #c8ff2f;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.38);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+
+    .overlay-memo.is-left ~ .page-pen-fab {
+      left: auto;
+      right: 22px;
+    }
+
+    .page-pen-fab:hover,
+    .page-pen-fab.is-active {
+      border-color: #dcff64;
+      box-shadow: 0 12px 28px rgba(23, 42, 9, 0.48);
+      transform: translateY(-1px);
+    }
+
+    .page-pen-fab svg {
+      width: 31px;
+      height: 31px;
+      display: block;
+    }
+
+    .page-pen-palette {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 145;
+      width: min(304px, calc(100% - 32px));
+      padding: 8px;
+      border: 1px solid #b7d8a9;
+      border-radius: 8px;
+      background: rgba(239, 248, 225, 0.98);
+      color: #3f503a;
+      box-shadow: 0 16px 30px rgba(72, 96, 52, 0.22);
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .page-pen-palette.is-dragging {
+      box-shadow: 0 20px 36px rgba(72, 96, 52, 0.28);
+    }
+
+    .page-pen-palette-head {
+      position: relative;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 34px 7px;
+      cursor: grab;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0;
+      color: #557248;
+    }
+
+    .page-pen-palette.is-dragging .page-pen-palette-head {
+      cursor: grabbing;
+    }
+
+    .page-pen-palette-head > span {
+      min-height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 13px;
+      border: 1px solid rgba(136, 184, 120, 0.48);
+      border-radius: 999px;
+      background: rgba(251, 255, 245, 0.86);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.48);
+      white-space: nowrap;
+    }
+
+    .page-pen-close {
+      position: absolute;
+      top: 0;
+      right: 2px;
+      width: 25px;
+      height: 25px;
+      border: none;
+      border-radius: 50%;
+      background: #dcebcf;
+      color: #3f503a;
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .page-pen-tool-row,
+    .page-pen-mark-row,
+    .page-pen-action-row,
+    .page-pen-color-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .page-pen-tool-row,
+    .page-pen-mark-row,
+    .page-pen-color-row {
+      margin-bottom: 7px;
+    }
+
+    .page-pen-tool,
+    .page-pen-action {
+      height: 32px;
+      border: 1px solid #bed7ae;
+      border-radius: 7px;
+      background: #fbfff5;
+      color: #43543d;
+      padding: 0 9px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .page-pen-tool.is-active {
+      background: #88b878;
+      border-color: #719f62;
+      color: #fbfff5;
+      box-shadow: inset 0 0 0 1px rgba(251, 255, 245, 0.22);
+    }
+
+    .page-pen-tool--icon {
+      width: 46px;
+      padding: 0;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .page-pen-range {
+      display: grid;
+      grid-template-columns: auto 1fr 34px;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      color: #526d48;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .page-pen-range input[type="range"] {
+      width: 100%;
+      accent-color: #88b878;
+    }
+
+    .page-pen-size-value {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: #557248;
+    }
+
+    .page-pen-color-label {
+      min-width: 42px;
+      color: #526d48;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .page-pen-swatch {
+      width: 25px;
+      height: 25px;
+      border: 2px solid #bed7ae;
+      border-radius: 50%;
+      background: var(--swatch, #111);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.58);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .page-pen-swatch.is-active {
+      border-color: #719f62;
+      box-shadow:
+        0 0 0 2px rgba(113, 159, 98, 0.24),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.68);
+    }
+
+    .page-pen-score-input {
+      width: 64px;
+      height: 32px;
+      border: 1px solid #bed7ae;
+      border-radius: 7px;
+      background: #fbfff5;
+      color: #43543d;
+      padding: 0 8px;
+      font-size: 13px;
+      font-weight: 800;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .page-pen-action {
+      background: #dcebcf;
+    }
+
+    .page-pen-action--icon {
+      width: 34px;
+      padding: 0;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .page-pen-action-row .page-pen-action:first-child {
+      margin-left: auto;
+    }
+
+    .page-pen-action:disabled {
+      opacity: 0.45;
+      cursor: default;
     }
 
     .pdf-preview-empty {
@@ -1995,7 +2264,63 @@
             <button class="overlay-type-option" type="button" data-type="two_three">Words / Translation</button>
           </div>
         </div>
+        <div id="mock-page-pen-palette" class="page-pen-palette" hidden>
+          <div id="mock-page-pen-drag" class="page-pen-palette-head">
+            <span>페이지 필기</span>
+            <button id="mock-page-pen-close" class="page-pen-close" type="button" aria-label="페이지 필기 닫기">x</button>
+          </div>
+          <div class="page-pen-tool-row" role="toolbar" aria-label="페이지 필기 도구">
+            <button class="page-pen-tool is-active" type="button" data-page-ink-tool="pen">펜</button>
+            <button class="page-pen-tool" type="button" data-page-ink-tool="eraser">지우개</button>
+            <button class="page-pen-tool" type="button" data-page-ink-tool="highlight">하이라이트</button>
+          </div>
+          <label class="page-pen-range">
+            <span>굵기</span>
+            <input id="mock-page-pen-size" type="range" min="1" max="18" step="0.5" value="4" />
+            <span id="mock-page-pen-size-value" class="page-pen-size-value">4</span>
+          </label>
+          <div id="mock-page-pen-ink-colors" class="page-pen-color-row page-pen-color-row--ink" aria-label="펜 색상">
+            <span class="page-pen-color-label">펜색</span>
+            <button class="page-pen-swatch is-active" type="button" data-page-ink-color="#4f4a45" style="--swatch:#4f4a45" aria-label="코코아먹"></button>
+            <button class="page-pen-swatch" type="button" data-page-ink-color="#7b5e4a" style="--swatch:#7b5e4a" aria-label="밀크코코아"></button>
+            <button class="page-pen-swatch" type="button" data-page-ink-color="#b56a7c" style="--swatch:#b56a7c" aria-label="베리"></button>
+            <button class="page-pen-swatch" type="button" data-page-ink-color="#6f9a7b" style="--swatch:#6f9a7b" aria-label="세이지"></button>
+            <button class="page-pen-swatch" type="button" data-page-ink-color="#6d9fbe" style="--swatch:#6d9fbe" aria-label="소다"></button>
+            <button class="page-pen-swatch" type="button" data-page-ink-color="#8d83b7" style="--swatch:#8d83b7" aria-label="라벤더"></button>
+          </div>
+          <div id="mock-page-pen-highlight-colors" class="page-pen-color-row page-pen-color-row--highlight" aria-label="하이라이트 색상" hidden>
+            <span class="page-pen-color-label">형광</span>
+            <button class="page-pen-swatch is-active" type="button" data-page-highlight-color="#fff1a6" style="--swatch:#fff1a6" aria-label="버터"></button>
+            <button class="page-pen-swatch" type="button" data-page-highlight-color="#cfeea4" style="--swatch:#cfeea4" aria-label="멜론"></button>
+            <button class="page-pen-swatch" type="button" data-page-highlight-color="#ffd6a6" style="--swatch:#ffd6a6" aria-label="피치"></button>
+            <button class="page-pen-swatch" type="button" data-page-highlight-color="#f7bdd0" style="--swatch:#f7bdd0" aria-label="블러셔"></button>
+            <button class="page-pen-swatch" type="button" data-page-highlight-color="#b7eadb" style="--swatch:#b7eadb" aria-label="민트"></button>
+            <button class="page-pen-swatch" type="button" data-page-highlight-color="#c8d7ff" style="--swatch:#c8d7ff" aria-label="페리윙클"></button>
+          </div>
+          <div class="page-pen-mark-row" role="toolbar" aria-label="채점 표시">
+            <button class="page-pen-tool page-pen-tool--icon" type="button" data-page-ink-tool="check">체크</button>
+            <button class="page-pen-tool page-pen-tool--icon" type="button" data-page-ink-tool="o">O</button>
+            <button class="page-pen-tool page-pen-tool--icon" type="button" data-page-ink-tool="x">X</button>
+            <button class="page-pen-tool" type="button" data-page-ink-tool="score">점수</button>
+            <input id="mock-page-pen-score" class="page-pen-score-input" type="text" inputmode="numeric" value="100" aria-label="점수 값" />
+          </div>
+          <div class="page-pen-action-row">
+            <button id="mock-page-pen-undo" class="page-pen-action page-pen-action--icon" type="button" aria-label="되돌리기" title="되돌리기">&#8630;</button>
+            <button id="mock-page-pen-redo" class="page-pen-action page-pen-action--icon" type="button" aria-label="다시하기" title="다시하기">&#8631;</button>
+            <button id="mock-page-pen-clear" class="page-pen-action" type="button">CLEAR</button>
+          </div>
+        </div>
       </div>
+
+      <button id="mock-page-pen-fab" class="page-pen-fab" type="button" aria-label="페이지 필기" aria-pressed="false" title="페이지 필기">
+        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <path d="M13.8 49.2l3.8-12.6 10 10-12.6 3.8z" fill="#b78355"/>
+          <path d="M19.1 36.1l22.5-22.5 10 10-22.5 22.5z" fill="#f2cf6d"/>
+          <path d="M41.6 13.6l1.7-1.7c2.9-2.9 7.5-2.9 10.4 0l1.1 1.1c2.9 2.9 2.9 7.5 0 10.4l-3.2.2z" fill="#f1a0bc"/>
+          <path d="M13.8 49.2l2.3-7.6 5.3 5.3z" fill="#6b4026"/>
+          <path d="M41.6 13.6l10 10M19.1 36.1l10 10M13.8 49.2l3.8-12.6 25.7-24.7c2.9-2.9 7.5-2.9 10.4 0l1.1 1.1c2.9 2.9 2.9 7.5 0 10.4L29.1 46.1l-14.1 4.3z" fill="none" stroke="#050706" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
 
       <div id="mock-picker-backdrop" class="pdf-picker-backdrop" hidden></div>
       <div id="mock-picker-popup" class="pdf-picker-popup" hidden>
@@ -2097,6 +2422,21 @@
       const previewPages = document.getElementById("mock-pdf-pages");
       const previewEmpty = document.getElementById("pdf-preview-empty");
       const newTabBtn = document.getElementById("mock-pdf-open-newtab");
+      const pagePenFab = document.getElementById("mock-page-pen-fab");
+      const pagePenPalette = document.getElementById("mock-page-pen-palette");
+      const pagePenDragHandle = document.getElementById("mock-page-pen-drag");
+      const pagePenCloseBtn = document.getElementById("mock-page-pen-close");
+      const pagePenSizeInput = document.getElementById("mock-page-pen-size");
+      const pagePenSizeValue = document.getElementById("mock-page-pen-size-value");
+      const pagePenScoreInput = document.getElementById("mock-page-pen-score");
+      const pagePenUndoBtn = document.getElementById("mock-page-pen-undo");
+      const pagePenRedoBtn = document.getElementById("mock-page-pen-redo");
+      const pagePenClearBtn = document.getElementById("mock-page-pen-clear");
+      const pagePenInkColorRow = document.getElementById("mock-page-pen-ink-colors");
+      const pagePenHighlightColorRow = document.getElementById("mock-page-pen-highlight-colors");
+      const pagePenToolBtns = Array.from(document.querySelectorAll("[data-page-ink-tool]"));
+      const pagePenColorBtns = Array.from(document.querySelectorAll("[data-page-ink-color]"));
+      const pageHighlightColorBtns = Array.from(document.querySelectorAll("[data-page-highlight-color]"));
 
       const SUPABASE_ORIGIN = "https://yslwgaephsnbfoiqnpuw.supabase.co";
       const SUPABASE_BASE = `${SUPABASE_ORIGIN}/storage/v1/object/public`;
@@ -2161,6 +2501,12 @@
       const DICT_ZOOM_STEP = 0.1;
       const DEFAULT_PAYLOAD_QNO = 0;
       const DEFAULT_PAYLOAD_LAP = "1.1";
+      const PAGE_INK_VERSION = 1;
+      const PAGE_INK_COLOR = "#4f4a45";
+      const PAGE_INK_HIGHLIGHT_COLOR = "#fff1a6";
+      const PAGE_INK_MARK_COLOR = "#c25f5f";
+      const PAGE_INK_CORRECT_COLOR = "#63aa78";
+      const PAGE_INK_VALID_TOOLS = ["pen", "eraser", "highlight", "check", "o", "x", "score"];
 
       let lastPdfUrl = "";
       let memoFontSize = 15;
@@ -2213,14 +2559,39 @@
         pointerId: null,
         card: null,
         canvas: null,
-        lastPoint: null
+        lastPoint: null,
+        tool: null,
+        erased: false
       };
       const blankPenState = {
         drawing: false,
         pointerId: null,
         stroke: null,
-        lastPoint: null
+        lastPoint: null,
+        tool: null,
+        erased: false
       };
+      const pageInkData = {
+        version: PAGE_INK_VERSION,
+        pages: {}
+      };
+      const pageInkState = {
+        enabled: false,
+        tool: "pen",
+        pointerId: null,
+        drawing: false,
+        canvas: null,
+        page: null,
+        lastPage: null,
+        stroke: null,
+        lastPoint: null,
+        paletteDrag: null
+      };
+      const pageInkUndoStacks = {};
+      const pageInkRedoStacks = {};
+      let pagePenSize = 4;
+      let pagePenColor = PAGE_INK_COLOR;
+      let pageHighlightColor = PAGE_INK_HIGHLIGHT_COLOR;
       const DEBUG_SCROLL_DIAG = false;
       const DEBUG_LIVE_FETCH_LOG = true;
 
@@ -2289,7 +2660,22 @@
         !typeSel ||
         !previewPages ||
         !previewEmpty ||
-        !newTabBtn
+        !newTabBtn ||
+        !pagePenFab ||
+        !pagePenPalette ||
+        !pagePenDragHandle ||
+        !pagePenCloseBtn ||
+        !pagePenSizeInput ||
+        !pagePenSizeValue ||
+        !pagePenScoreInput ||
+        !pagePenUndoBtn ||
+        !pagePenRedoBtn ||
+        !pagePenClearBtn ||
+        !pagePenInkColorRow ||
+        !pagePenHighlightColorRow ||
+        !pagePenToolBtns.length ||
+        !pagePenColorBtns.length ||
+        !pageHighlightColorBtns.length
       ) return;
 
       function showPanel(el) {
@@ -2602,6 +2988,8 @@
 
           if (!safePoints.length) continue;
           safeStroke.points = safePoints;
+          safeStroke.color = normalizeHexColor(safeStroke.color, pagePenColor);
+          safeStroke.width = Math.max(1, Math.min(18, normalizePageInkNumber(safeStroke.width, pagePenSize)));
           normalized.push(safeStroke);
         }
 
@@ -2729,6 +3117,8 @@
 
           if (!safePoints.length) continue;
           safeStroke.points = safePoints;
+          safeStroke.color = normalizeHexColor(safeStroke.color, pagePenColor);
+          safeStroke.width = Math.max(1, Math.min(18, normalizePageInkNumber(safeStroke.width, pagePenSize)));
           normalized.push(safeStroke);
         }
 
@@ -2788,7 +3178,7 @@
       function drawInkDot(ctx, point, width, height, color, widthScale) {
         const px = point.x * width;
         const py = point.y * height;
-        const scale = Math.max(0.45, Math.min(1.4, Number(widthScale) || 1));
+        const scale = Math.max(0.35, Math.min(4.8, Number(widthScale) || 1));
         const penW = (0.9 + (3.8 - 0.9) * Math.max(0.05, Math.min(1, point.p || 0.5))) * scale;
         ctx.fillStyle = color || "#2f2a24";
         ctx.beginPath();
@@ -2802,7 +3192,7 @@
         const x2 = p2.x * width;
         const y2 = p2.y * height;
         const pressure = ((p1.p || 0.5) + (p2.p || 0.5)) * 0.5;
-        const scale = Math.max(0.45, Math.min(1.4, Number(widthScale) || 1));
+        const scale = Math.max(0.35, Math.min(4.8, Number(widthScale) || 1));
         const penW = (0.9 + (3.8 - 0.9) * Math.max(0.05, Math.min(1, pressure))) * scale;
 
         ctx.strokeStyle = color || "#2f2a24";
@@ -2812,6 +3202,1112 @@
         ctx.lineTo(x2, y2);
         ctx.stroke();
       }
+
+      function getOverlayInkColor(stroke, fallback) {
+        return normalizeHexColor(stroke && stroke.color, fallback || pagePenColor);
+      }
+
+      function getOverlayInkWidthScale(stroke, fallback) {
+        const width = normalizePageInkNumber(stroke && stroke.width, fallback || pagePenSize);
+        return Math.max(0.35, Math.min(4.8, width / 4));
+      }
+
+      function overlayInkStrokeHitTest(stroke, point, width, height, radiusPx) {
+        const points = stroke && Array.isArray(stroke.points) ? stroke.points : [];
+        if (!points.length || !point) return false;
+        const px = point.x * width;
+        const py = point.y * height;
+        const strokeWidth = Math.max(1, normalizePageInkNumber(stroke.width, pagePenSize));
+        const hitRadius = Math.max(radiusPx, strokeWidth * 1.8);
+        if (points.length === 1) {
+          return Math.hypot(px - points[0].x * width, py - points[0].y * height) <= hitRadius;
+        }
+        for (let i = 1; i < points.length; i += 1) {
+          const a = points[i - 1];
+          const b = points[i];
+          if (distancePointToSegment(px, py, a.x * width, a.y * height, b.x * width, b.y * height) <= hitRadius) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function eraseOverlayStrokeAt(strokes, point, width, height) {
+        if (!Array.isArray(strokes) || !strokes.length) return false;
+        const radiusPx = Math.max(10, pagePenSize * 2.2);
+        for (let i = strokes.length - 1; i >= 0; i -= 1) {
+          if (overlayInkStrokeHitTest(strokes[i], point, width, height, radiusPx)) {
+            strokes.splice(i, 1);
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function normalizePageInkPageKey(pageNumber) {
+        const page = Math.max(1, Math.trunc(Number(pageNumber) || 1));
+        return String(page);
+      }
+
+      function normalizePageInkNumber(value, fallback) {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : fallback;
+      }
+
+      function normalizePageInkPoint(point) {
+        const safe = point && typeof point === "object" ? point : {};
+        const pressure = normalizePageInkNumber(safe.p, 0.5);
+        const time = normalizePageInkNumber(safe.t, 0);
+        return {
+          x: Math.max(0, Math.min(1, normalizePageInkNumber(safe.x, 0))),
+          y: Math.max(0, Math.min(1, normalizePageInkNumber(safe.y, 0))),
+          p: Math.max(0.05, Math.min(1, pressure)),
+          t: Math.max(0, time)
+        };
+      }
+
+      function normalizePageInkRect(rect) {
+        const safe = rect && typeof rect === "object" ? rect : {};
+        const x = Math.max(0, Math.min(1, normalizePageInkNumber(safe.x, 0)));
+        const y = Math.max(0, Math.min(1, normalizePageInkNumber(safe.y, 0)));
+        const w = Math.max(0.002, Math.min(1 - x, normalizePageInkNumber(safe.w, 0.02)));
+        const h = Math.max(0.002, Math.min(1 - y, normalizePageInkNumber(safe.h, 0.02)));
+        return { x, y, w, h };
+      }
+
+      function clonePageInkItem(rawItem) {
+        const source = rawItem && typeof rawItem === "object" ? rawItem : {};
+        const type = String(source.type || "").trim();
+        if (type === "stroke") {
+          const rawPoints = Array.isArray(source.points) ? source.points : [];
+          const points = rawPoints.map(normalizePageInkPoint).filter(function (point) {
+            return Number.isFinite(point.x) && Number.isFinite(point.y);
+          });
+          if (!points.length) return null;
+          return {
+            type: "stroke",
+            color: typeof source.color === "string" && source.color ? source.color : PAGE_INK_COLOR,
+            width: Math.max(0.6, Math.min(28, normalizePageInkNumber(source.width, 4))),
+            points
+          };
+        }
+        if (type === "highlight") {
+          return {
+            type: "highlight",
+            color: typeof source.color === "string" && source.color ? source.color : PAGE_INK_HIGHLIGHT_COLOR,
+            alpha: Math.max(0.08, Math.min(0.78, normalizePageInkNumber(source.alpha, 0.34))),
+            rect: normalizePageInkRect(source.rect),
+            word: toSafeText(source.word).slice(0, 80)
+          };
+        }
+        if (type === "mark") {
+          const rawMark = String(source.mark || "");
+          const mark = rawMark === "circle"
+            ? "check"
+            : (["check", "o", "x", "score"].indexOf(rawMark) >= 0 ? rawMark : "check");
+          return {
+            type: "mark",
+            mark,
+            x: Math.max(0, Math.min(1, normalizePageInkNumber(source.x, 0.5))),
+            y: Math.max(0, Math.min(1, normalizePageInkNumber(source.y, 0.5))),
+            size: Math.max(10, Math.min(180, normalizePageInkNumber(source.size, mark === "check" ? 24 : 72))),
+            color: mark === "o"
+              ? PAGE_INK_CORRECT_COLOR
+              : (typeof source.color === "string" && source.color ? source.color : PAGE_INK_MARK_COLOR),
+            value: toSafeText(source.value).slice(0, 12)
+          };
+        }
+        return null;
+      }
+
+      function normalizePageInkPayload(rawPayload) {
+        const safe = rawPayload && typeof rawPayload === "object" ? rawPayload : {};
+        const rawPages = safe.pages && typeof safe.pages === "object" ? safe.pages : {};
+        const pages = {};
+        Object.keys(rawPages).forEach(function (rawKey) {
+          const key = normalizePageInkPageKey(rawKey);
+          const items = Array.isArray(rawPages[rawKey]) ? rawPages[rawKey] : [];
+          const normalizedItems = [];
+          for (let i = 0; i < items.length; i += 1) {
+            const item = clonePageInkItem(items[i]);
+            if (item) normalizedItems.push(item);
+          }
+          if (normalizedItems.length) {
+            pages[key] = normalizedItems;
+          }
+        });
+        return {
+          version: PAGE_INK_VERSION,
+          pages
+        };
+      }
+
+      function serializePageInkForSave() {
+        return normalizePageInkPayload(pageInkData);
+      }
+
+      function hasPageInkContent(rawPayload) {
+        const payload = normalizePageInkPayload(rawPayload);
+        return Object.keys(payload.pages).some(function (key) {
+          return Array.isArray(payload.pages[key]) && payload.pages[key].length > 0;
+        });
+      }
+
+      function getOverlayPenInputTool() {
+        if (pageInkState.tool === "pen") return "pen";
+        if (pageInkState.tool === "eraser") return "eraser";
+        return "";
+      }
+
+      function activeOverlayInkHasContent() {
+        const tab = getActiveMemoTab();
+        if (!tab) return false;
+        if (tab.type === "blank") {
+          return hasInkStrokeList(ensureBlankInk(tab));
+        }
+        if (tab.type === "two_three") {
+          const twoThree = ensureTwoThreeData(tab);
+          const sentences = twoThree && Array.isArray(twoThree.sentences) ? twoThree.sentences : [];
+          for (let i = 0; i < sentences.length; i += 1) {
+            if (hasInkStrokeList(ensureThreeSentenceInk(sentences[i]))) return true;
+          }
+        }
+        return false;
+      }
+
+      function cloneOverlayInkSnapshot(snapshot) {
+        const safe = snapshot && typeof snapshot === "object" ? snapshot : null;
+        if (!safe) return null;
+        const tabIndex = Math.max(0, Math.trunc(Number(safe.tabIndex) || 0));
+        if (safe.type === "blank") {
+          return {
+            type: "blank",
+            tabIndex,
+            blankInk: cloneInkStrokes(safe.blankInk)
+          };
+        }
+        if (safe.type === "two_three") {
+          const rows = Array.isArray(safe.sentences) ? safe.sentences : [];
+          return {
+            type: "two_three",
+            tabIndex,
+            sentences: rows.map(function (row) {
+              return cloneInkStrokes(row);
+            })
+          };
+        }
+        return null;
+      }
+
+      function overlayInkSnapshotHasContent(snapshot) {
+        const safe = snapshot && typeof snapshot === "object" ? snapshot : null;
+        if (!safe) return false;
+        if (safe.type === "blank") {
+          return hasInkStrokeList(safe.blankInk);
+        }
+        if (safe.type === "two_three") {
+          const rows = Array.isArray(safe.sentences) ? safe.sentences : [];
+          for (let i = 0; i < rows.length; i += 1) {
+            if (hasInkStrokeList(rows[i])) return true;
+          }
+        }
+        return false;
+      }
+
+      function captureActiveOverlayInkSnapshot() {
+        const tab = getActiveMemoTab();
+        if (!tab) return null;
+        const tabIndex = Math.max(0, Math.trunc(Number(activeMemoTabIndex) || 0));
+        if (tab.type === "blank") {
+          const snapshot = {
+            type: "blank",
+            tabIndex,
+            blankInk: cloneInkStrokes(ensureBlankInk(tab))
+          };
+          return overlayInkSnapshotHasContent(snapshot) ? snapshot : null;
+        }
+        if (tab.type === "two_three") {
+          const twoThree = ensureTwoThreeData(tab);
+          const sentences = twoThree && Array.isArray(twoThree.sentences) ? twoThree.sentences : [];
+          const snapshot = {
+            type: "two_three",
+            tabIndex,
+            sentences: sentences.map(function (row) {
+              return cloneInkStrokes(ensureThreeSentenceInk(row));
+            })
+          };
+          return overlayInkSnapshotHasContent(snapshot) ? snapshot : null;
+        }
+        return null;
+      }
+
+      function makeClearedOverlayInkSnapshot(snapshot) {
+        const cloned = cloneOverlayInkSnapshot(snapshot);
+        if (!cloned) return null;
+        if (cloned.type === "blank") {
+          cloned.blankInk = [];
+        } else if (cloned.type === "two_three") {
+          cloned.sentences = cloned.sentences.map(function () {
+            return [];
+          });
+        }
+        return cloned;
+      }
+
+      function applyOverlayInkSnapshot(snapshot) {
+        const safe = cloneOverlayInkSnapshot(snapshot);
+        if (!safe) return false;
+        const tab = memoTabs[safe.tabIndex];
+        if (!tab || tab.type !== safe.type) return false;
+        if (safe.type === "blank") {
+          tab.blankInk = cloneInkStrokes(safe.blankInk);
+          if (safe.tabIndex === activeMemoTabIndex) {
+            redrawBlankCanvas();
+            updateBlankPenUi();
+          }
+          return true;
+        }
+        if (safe.type === "two_three") {
+          const twoThree = ensureTwoThreeData(tab);
+          const rows = twoThree && Array.isArray(twoThree.sentences) ? twoThree.sentences : [];
+          for (let i = 0; i < rows.length; i += 1) {
+            rows[i].ink = cloneInkStrokes(safe.sentences[i]);
+          }
+          if (safe.tabIndex === activeMemoTabIndex) {
+            stopThreePenDrawing();
+            renderTwoThreeCards();
+          }
+          return true;
+        }
+        return false;
+      }
+
+      function clearOverlayInkSnapshotTarget(snapshot) {
+        const cleared = makeClearedOverlayInkSnapshot(snapshot);
+        if (!cleared) return false;
+        return applyOverlayInkSnapshot(cleared);
+      }
+
+      function replacePageInkData(rawPayload) {
+        const normalized = normalizePageInkPayload(rawPayload);
+        pageInkData.version = normalized.version;
+        pageInkData.pages = normalized.pages;
+        pageInkState.lastPage = null;
+        clearPageInkHistory();
+        redrawAllPageInkCanvases();
+        updatePagePenActionButtons();
+      }
+
+      function resetPageInkData(reason) {
+        pageInkData.version = PAGE_INK_VERSION;
+        pageInkData.pages = {};
+        pageInkState.lastPage = null;
+        clearPageInkHistory();
+        stopPageInkPointer();
+        redrawAllPageInkCanvases();
+        updatePagePenActionButtons();
+        if (reason) {
+          markMemoDirty(reason);
+        }
+      }
+
+      function getPageInkItems(pageNumber) {
+        const key = normalizePageInkPageKey(pageNumber);
+        if (!Array.isArray(pageInkData.pages[key])) {
+          pageInkData.pages[key] = [];
+        }
+        return pageInkData.pages[key];
+      }
+
+      function clonePageInkItems(items) {
+        const source = Array.isArray(items) ? items : [];
+        const cloned = [];
+        for (let i = 0; i < source.length; i += 1) {
+          const item = clonePageInkItem(source[i]);
+          if (item) cloned.push(item);
+        }
+        return cloned;
+      }
+
+      function clearPageInkHistory() {
+        Object.keys(pageInkUndoStacks).forEach(function (key) {
+          delete pageInkUndoStacks[key];
+        });
+        Object.keys(pageInkRedoStacks).forEach(function (key) {
+          delete pageInkRedoStacks[key];
+        });
+      }
+
+      function getPageInkUndoStack(page) {
+        const key = normalizePageInkPageKey(page);
+        if (!Array.isArray(pageInkUndoStacks[key])) {
+          pageInkUndoStacks[key] = [];
+        }
+        return pageInkUndoStacks[key];
+      }
+
+      function getPageInkRedoStack(page) {
+        const key = normalizePageInkPageKey(page);
+        if (!Array.isArray(pageInkRedoStacks[key])) {
+          pageInkRedoStacks[key] = [];
+        }
+        return pageInkRedoStacks[key];
+      }
+
+      function recordPageInkAction(page, action) {
+        if (!action || typeof action !== "object") return;
+        const key = normalizePageInkPageKey(page);
+        const undoStack = getPageInkUndoStack(key);
+        undoStack.push(action);
+        if (undoStack.length > 80) {
+          undoStack.shift();
+        }
+        pageInkRedoStacks[key] = [];
+        updatePagePenActionButtons();
+      }
+
+      function getPageInkCanvasSetup(canvas) {
+        if (!canvas) return null;
+        const rect = canvas.getBoundingClientRect();
+        if (!Number.isFinite(rect.width) || !Number.isFinite(rect.height) || rect.width < 8 || rect.height < 8) {
+          return null;
+        }
+        const cssWidth = Math.max(1, Math.floor(rect.width));
+        const cssHeight = Math.max(1, Math.floor(rect.height));
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const targetW = Math.floor(cssWidth * dpr);
+        const targetH = Math.floor(cssHeight * dpr);
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+          canvas.width = targetW;
+          canvas.height = targetH;
+        }
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return null;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        return {
+          ctx,
+          width: cssWidth,
+          height: cssHeight
+        };
+      }
+
+      function getPageInkStrokeWidth(baseWidth, p1, p2, width, height) {
+        const pressure = ((p1.p || 0.5) + (p2.p || 0.5)) * 0.5;
+        const dist = Math.hypot((p2.x - p1.x) * width, (p2.y - p1.y) * height);
+        const speedTrim = Math.max(0.68, Math.min(1.22, 1.16 - (dist / 155)));
+        return Math.max(0.72, baseWidth * (0.32 + 1.08 * pressure) * speedTrim);
+      }
+
+      function drawPageInkStroke(ctx, item, width, height) {
+        const points = Array.isArray(item.points) ? item.points : [];
+        if (!points.length) return;
+        const baseWidth = Math.max(0.6, Math.min(28, Number(item.width) || pagePenSize || 4));
+        ctx.save();
+        ctx.globalAlpha = 0.96;
+        ctx.strokeStyle = item.color || PAGE_INK_COLOR;
+        ctx.fillStyle = item.color || PAGE_INK_COLOR;
+        if (points.length === 1) {
+          const pt = points[0];
+          const dotW = baseWidth * (0.56 + 0.78 * Math.max(0.05, Math.min(1, pt.p || 0.5)));
+          ctx.beginPath();
+          ctx.arc(pt.x * width, pt.y * height, Math.max(0.7, dotW * 0.5), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          return;
+        }
+
+        if (points.length === 2) {
+          const p1 = points[0];
+          const p2 = points[1];
+          ctx.lineWidth = getPageInkStrokeWidth(baseWidth, p1, p2, width, height);
+          ctx.beginPath();
+          ctx.moveTo(p1.x * width, p1.y * height);
+          ctx.lineTo(p2.x * width, p2.y * height);
+          ctx.stroke();
+          ctx.restore();
+          return;
+        }
+
+        for (let i = 1; i < points.length; i += 1) {
+          const prev = points[i - 1];
+          const current = points[i];
+          const next = points[i + 1] || null;
+          const startX = i === 1
+            ? prev.x * width
+            : ((prev.x + current.x) * 0.5 * width);
+          const startY = i === 1
+            ? prev.y * height
+            : ((prev.y + current.y) * 0.5 * height);
+          const endX = next ? ((current.x + next.x) * 0.5 * width) : current.x * width;
+          const endY = next ? ((current.y + next.y) * 0.5 * height) : current.y * height;
+          ctx.lineWidth = getPageInkStrokeWidth(baseWidth, prev, current, width, height);
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.quadraticCurveTo(current.x * width, current.y * height, endX, endY);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function drawPageInkHighlight(ctx, item, width, height) {
+        const rect = normalizePageInkRect(item.rect);
+        ctx.save();
+        ctx.globalAlpha = Math.max(0.08, Math.min(0.78, Number(item.alpha) || 0.34));
+        ctx.fillStyle = item.color || PAGE_INK_HIGHLIGHT_COLOR;
+        ctx.fillRect(rect.x * width, rect.y * height, rect.w * width, rect.h * height);
+        ctx.restore();
+      }
+
+      function drawPageInkMark(ctx, item, width, height) {
+        const x = Math.max(0, Math.min(1, Number(item.x) || 0)) * width;
+        const y = Math.max(0, Math.min(1, Number(item.y) || 0)) * height;
+        const size = Math.max(10, Math.min(180, Number(item.size) || 24));
+        const color = item.color || PAGE_INK_MARK_COLOR;
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = Math.max(2, size * 0.12);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (item.mark === "check") {
+          const r = size * 0.42;
+          ctx.beginPath();
+          ctx.moveTo(x - r * 0.72, y - r * 0.02);
+          ctx.lineTo(x - r * 0.18, y + r * 0.56);
+          ctx.lineTo(x + r * 0.82, y - r * 0.58);
+          ctx.stroke();
+        } else if (item.mark === "x") {
+          const r = size * 0.42;
+          ctx.beginPath();
+          ctx.moveTo(x - r, y - r);
+          ctx.lineTo(x + r, y + r);
+          ctx.moveTo(x + r, y - r);
+          ctx.lineTo(x - r, y + r);
+          ctx.stroke();
+        } else if (item.mark === "o") {
+          const radius = size * 0.46;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (item.mark === "score") {
+          const value = toSafeText(item.value || pagePenScoreInput.value || "100") || "100";
+          ctx.font = `800 ${Math.max(14, size)}px Arial, sans-serif`;
+          ctx.textBaseline = "middle";
+          ctx.fillText(value, x, y);
+        }
+        ctx.restore();
+      }
+
+      function redrawPageInkCanvas(canvas) {
+        const setup = getPageInkCanvasSetup(canvas);
+        if (!setup) return;
+        const page = normalizePageInkPageKey(canvas.dataset.page || canvas.__mockPageNumber || 1);
+        const items = Array.isArray(pageInkData.pages[page]) ? pageInkData.pages[page] : [];
+        setup.ctx.clearRect(0, 0, setup.width, setup.height);
+        for (let i = 0; i < items.length; i += 1) {
+          const item = clonePageInkItem(items[i]);
+          if (!item) continue;
+          if (item.type === "stroke") {
+            drawPageInkStroke(setup.ctx, item, setup.width, setup.height);
+          } else if (item.type === "highlight") {
+            drawPageInkHighlight(setup.ctx, item, setup.width, setup.height);
+          } else if (item.type === "mark") {
+            drawPageInkMark(setup.ctx, item, setup.width, setup.height);
+          }
+        }
+      }
+
+      function redrawAllPageInkCanvases() {
+        const canvases = previewPages ? previewPages.querySelectorAll(".mock-page-ink-canvas") : [];
+        canvases.forEach(function (canvas) {
+          redrawPageInkCanvas(canvas);
+        });
+      }
+
+      function getPageInkPressure(event) {
+        const pressure = Number(event && event.pressure);
+        if (Number.isFinite(pressure) && pressure > 0) {
+          return Math.max(0.05, Math.min(1, pressure));
+        }
+        if (event && event.pointerType === "pen") return 0.34;
+        if (event && event.pointerType === "touch") return 0.48;
+        return event && event.buttons ? 0.56 : 0.36;
+      }
+
+      function getPageInkPoint(canvas, event) {
+        const rect = canvas.getBoundingClientRect();
+        const localX = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+        const localY = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+        const safeW = Math.max(1, rect.width);
+        const safeH = Math.max(1, rect.height);
+        return {
+          x: localX / safeW,
+          y: localY / safeH,
+          p: getPageInkPressure(event),
+          t: Math.max(0, Math.round(event.timeStamp || performance.now()))
+        };
+      }
+
+      function getPageInkCoalescedPoints(canvas, event) {
+        let events = [event];
+        if (event && typeof event.getCoalescedEvents === "function") {
+          try {
+            const coalesced = event.getCoalescedEvents();
+            if (coalesced && coalesced.length) {
+              events = coalesced;
+            }
+          } catch (_err) {}
+        }
+        return events.map(function (item) {
+          return getPageInkPoint(canvas, item);
+        });
+      }
+
+      function appendPageInkPoint(stroke, point) {
+        if (!stroke || !Array.isArray(stroke.points) || !point) return;
+        const last = stroke.points[stroke.points.length - 1];
+        if (!last) {
+          stroke.points.push(point);
+          return;
+        }
+        const dist = Math.hypot((point.x - last.x) * 1000, (point.y - last.y) * 1000);
+        if (dist <= 0.32) return;
+        stroke.points.push({
+          x: (last.x * 0.18) + (point.x * 0.82),
+          y: (last.y * 0.18) + (point.y * 0.82),
+          p: (last.p * 0.28) + (point.p * 0.72),
+          t: point.t
+        });
+      }
+
+      function stopPageInkPointer() {
+        if (pageInkState.canvas && typeof pageInkState.canvas.releasePointerCapture === "function" && pageInkState.pointerId !== null) {
+          try {
+            pageInkState.canvas.releasePointerCapture(pageInkState.pointerId);
+          } catch (_err) {}
+        }
+        pageInkState.pointerId = null;
+        pageInkState.drawing = false;
+        pageInkState.canvas = null;
+        pageInkState.page = null;
+        pageInkState.stroke = null;
+        pageInkState.lastPoint = null;
+      }
+
+      function distancePointToSegment(px, py, ax, ay, bx, by) {
+        const dx = bx - ax;
+        const dy = by - ay;
+        if (Math.abs(dx) < 0.0001 && Math.abs(dy) < 0.0001) {
+          return Math.hypot(px - ax, py - ay);
+        }
+        const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+        const sx = ax + dx * t;
+        const sy = ay + dy * t;
+        return Math.hypot(px - sx, py - sy);
+      }
+
+      function pageInkItemHitTest(item, point, width, height, radiusPx) {
+        if (!item || !point) return false;
+        const px = point.x * width;
+        const py = point.y * height;
+        if (item.type === "stroke") {
+          const points = Array.isArray(item.points) ? item.points : [];
+          if (points.length === 1) {
+            return Math.hypot(px - points[0].x * width, py - points[0].y * height) <= radiusPx;
+          }
+          for (let i = 1; i < points.length; i += 1) {
+            const a = points[i - 1];
+            const b = points[i];
+            if (distancePointToSegment(px, py, a.x * width, a.y * height, b.x * width, b.y * height) <= radiusPx) {
+              return true;
+            }
+          }
+        }
+        if (item.type === "highlight") {
+          const rect = normalizePageInkRect(item.rect);
+          const left = rect.x * width - radiusPx;
+          const top = rect.y * height - radiusPx;
+          const right = (rect.x + rect.w) * width + radiusPx;
+          const bottom = (rect.y + rect.h) * height + radiusPx;
+          return px >= left && px <= right && py >= top && py <= bottom;
+        }
+        if (item.type === "mark") {
+          const mx = Math.max(0, Math.min(1, Number(item.x) || 0)) * width;
+          const my = Math.max(0, Math.min(1, Number(item.y) || 0)) * height;
+          const hitRadius = Math.max(radiusPx, Math.max(10, Number(item.size) || 24) * 0.78);
+          return Math.hypot(px - mx, py - my) <= hitRadius;
+        }
+        return false;
+      }
+
+      function erasePageInkAt(canvas, event) {
+        const setup = getPageInkCanvasSetup(canvas);
+        if (!setup) return false;
+        const page = normalizePageInkPageKey(canvas.dataset.page || canvas.__mockPageNumber || 1);
+        const items = getPageInkItems(page);
+        if (!items.length) return false;
+        const point = getPageInkPoint(canvas, event);
+        const radiusPx = Math.max(10, pagePenSize * 2.4);
+        let changed = false;
+        for (let i = items.length - 1; i >= 0; i -= 1) {
+          const item = clonePageInkItem(items[i]);
+          if (item && pageInkItemHitTest(item, point, setup.width, setup.height, radiusPx)) {
+            const removed = items.splice(i, 1)[0];
+            recordPageInkAction(page, {
+              type: "remove",
+              index: i,
+              item: clonePageInkItem(removed)
+            });
+            changed = true;
+            break;
+          }
+        }
+        if (changed) {
+          redrawPageInkCanvas(canvas);
+          updatePagePenActionButtons();
+          markMemoDirty("page-ink-erase");
+        }
+        return changed;
+      }
+
+      function addPageInkHighlight(canvas, event) {
+        const setup = getPageInkCanvasSetup(canvas);
+        if (!setup) return false;
+        const rect = canvas.getBoundingClientRect();
+        const px = event.clientX - rect.left;
+        const py = event.clientY - rect.top;
+        const hits = Array.isArray(canvas.__mockWordHits) ? canvas.__mockWordHits : [];
+        const hit = findWordHitAtPoint(hits, px, py);
+        if (!hit) return false;
+        const page = normalizePageInkPageKey(canvas.dataset.page || canvas.__mockPageNumber || 1);
+        pageInkState.lastPage = page;
+        const rectX = Math.max(0, Math.min(1, Math.min(hit.x1, hit.x2) / setup.width));
+        const rectY = Math.max(0, Math.min(1, Math.min(hit.y1, hit.y2) / setup.height));
+        const rectW = Math.max(0.002, Math.min(1 - rectX, Math.abs(hit.x2 - hit.x1) / setup.width));
+        const rectH = Math.max(0.002, Math.min(1 - rectY, Math.abs(hit.y2 - hit.y1) / setup.height));
+        getPageInkItems(page).push({
+          type: "highlight",
+          color: pageHighlightColor,
+          alpha: 0.36,
+          rect: { x: rectX, y: rectY, w: rectW, h: rectH },
+          word: toSafeText(hit.word).slice(0, 80)
+        });
+        recordPageInkAction(page, { type: "add", count: 1 });
+        redrawPageInkCanvas(canvas);
+        updatePagePenActionButtons();
+        markMemoDirty("page-ink-highlight");
+        return true;
+      }
+
+      function addPageInkMark(canvas, event, mark) {
+        const setup = getPageInkCanvasSetup(canvas);
+        if (!setup) return false;
+        const point = getPageInkPoint(canvas, event);
+        const page = normalizePageInkPageKey(canvas.dataset.page || canvas.__mockPageNumber || 1);
+        pageInkState.lastPage = page;
+        const safeMark = ["check", "o", "x", "score"].indexOf(mark) >= 0 ? mark : "check";
+        const markSize = safeMark === "check"
+          ? Math.max(16, Math.min(42, pagePenSize * 2 + 14))
+          : Math.max(48, Math.min(168, pagePenSize * 6.3 + 42));
+        getPageInkItems(page).push({
+          type: "mark",
+          mark: safeMark,
+          x: point.x,
+          y: point.y,
+          size: markSize,
+          color: safeMark === "o" ? PAGE_INK_CORRECT_COLOR : PAGE_INK_MARK_COLOR,
+          value: safeMark === "score" ? (toSafeText(pagePenScoreInput.value).trim() || "100") : ""
+        });
+        recordPageInkAction(page, { type: "add", count: 1 });
+        redrawPageInkCanvas(canvas);
+        updatePagePenActionButtons();
+        markMemoDirty("page-ink-mark");
+        return true;
+      }
+
+      function startPageInkStroke(canvas, event) {
+        const page = normalizePageInkPageKey(canvas.dataset.page || canvas.__mockPageNumber || 1);
+        pageInkState.lastPage = page;
+        const points = getPageInkCoalescedPoints(canvas, event);
+        const stroke = {
+          type: "stroke",
+          color: pagePenColor,
+          width: pagePenSize,
+          points: []
+        };
+        const seedPoints = points.length ? points : [getPageInkPoint(canvas, event)];
+        for (let i = 0; i < seedPoints.length; i += 1) {
+          appendPageInkPoint(stroke, seedPoints[i]);
+        }
+        if (!stroke.points.length) {
+          stroke.points.push(getPageInkPoint(canvas, event));
+        }
+        getPageInkItems(page).push(stroke);
+        recordPageInkAction(page, { type: "add", count: 1 });
+        pageInkState.pointerId = event.pointerId;
+        pageInkState.drawing = true;
+        pageInkState.canvas = canvas;
+        pageInkState.page = page;
+        pageInkState.stroke = stroke;
+        pageInkState.lastPoint = stroke.points[stroke.points.length - 1] || null;
+        if (typeof canvas.setPointerCapture === "function") {
+          try {
+            canvas.setPointerCapture(event.pointerId);
+          } catch (_err) {}
+        }
+        redrawPageInkCanvas(canvas);
+        updatePagePenActionButtons();
+      }
+
+      function startPageInkEraser(canvas, event) {
+        pageInkState.pointerId = event.pointerId;
+        pageInkState.drawing = true;
+        pageInkState.canvas = canvas;
+        pageInkState.page = normalizePageInkPageKey(canvas.dataset.page || canvas.__mockPageNumber || 1);
+        pageInkState.lastPage = pageInkState.page;
+        pageInkState.stroke = null;
+        pageInkState.lastPoint = null;
+        if (typeof canvas.setPointerCapture === "function") {
+          try {
+            canvas.setPointerCapture(event.pointerId);
+          } catch (_err) {}
+        }
+        erasePageInkAt(canvas, event);
+      }
+
+      function handlePageInkPointerDown(event) {
+        if (!pageInkState.enabled) return;
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        const canvas = event.currentTarget;
+        if (!canvas) return;
+        event.preventDefault();
+        hideWordTooltip();
+        if (pageInkState.tool === "pen") {
+          startPageInkStroke(canvas, event);
+          return;
+        }
+        if (pageInkState.tool === "eraser") {
+          startPageInkEraser(canvas, event);
+          return;
+        }
+        if (pageInkState.tool === "highlight") {
+          addPageInkHighlight(canvas, event);
+          return;
+        }
+        addPageInkMark(canvas, event, pageInkState.tool);
+      }
+
+      function handlePageInkPointerMove(event) {
+        if (!pageInkState.enabled || !pageInkState.drawing) return;
+        if (pageInkState.pointerId !== event.pointerId) return;
+        const canvas = pageInkState.canvas || event.currentTarget;
+        if (!canvas) return;
+        event.preventDefault();
+        if (pageInkState.tool === "eraser") {
+          erasePageInkAt(canvas, event);
+          return;
+        }
+        if (pageInkState.tool !== "pen" || !pageInkState.stroke) return;
+        const points = getPageInkCoalescedPoints(canvas, event);
+        for (let i = 0; i < points.length; i += 1) {
+          const point = points[i];
+          appendPageInkPoint(pageInkState.stroke, point);
+        }
+        pageInkState.lastPoint = pageInkState.stroke.points[pageInkState.stroke.points.length - 1] || null;
+        redrawPageInkCanvas(canvas);
+      }
+
+      function handlePageInkPointerEnd(event) {
+        if (!pageInkState.enabled || !pageInkState.drawing) return;
+        if (pageInkState.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        const reason = pageInkState.tool === "eraser" ? "page-ink-erase-end" : "page-ink-draw";
+        stopPageInkPointer();
+        updatePagePenActionButtons();
+        markMemoDirty(reason);
+      }
+
+      function bindPageInkLayer(pageWrap, pageNumber, wordHits) {
+        if (!pageWrap) return null;
+        const inkCanvas = document.createElement("canvas");
+        inkCanvas.className = "mock-page-ink-canvas";
+        inkCanvas.dataset.page = normalizePageInkPageKey(pageNumber);
+        inkCanvas.__mockPageNumber = Math.max(1, Math.trunc(Number(pageNumber) || 1));
+        inkCanvas.__mockWordHits = Array.isArray(wordHits) ? wordHits : [];
+        inkCanvas.addEventListener("pointerdown", handlePageInkPointerDown, { passive: false });
+        inkCanvas.addEventListener("pointermove", handlePageInkPointerMove, { passive: false });
+        inkCanvas.addEventListener("pointerup", handlePageInkPointerEnd, { passive: false });
+        inkCanvas.addEventListener("pointercancel", handlePageInkPointerEnd, { passive: false });
+        pageWrap.appendChild(inkCanvas);
+        requestAnimationFrame(function () {
+          redrawPageInkCanvas(inkCanvas);
+        });
+        return inkCanvas;
+      }
+
+      function currentPageInkKey() {
+        return normalizePageInkPageKey(pageInkState.page || pageInkState.lastPage || getCurrentPreviewPageNumber() || 1);
+      }
+
+      function updatePagePenActionButtons() {
+        if (!pagePenUndoBtn || !pagePenRedoBtn || !pagePenClearBtn) return;
+        const key = currentPageInkKey();
+        const items = Array.isArray(pageInkData.pages[key]) ? pageInkData.pages[key] : [];
+        const hasItems = items.length > 0;
+        const hasOverlayItems = activeOverlayInkHasContent();
+        const undoStack = Array.isArray(pageInkUndoStacks[key]) ? pageInkUndoStacks[key] : [];
+        const redoStack = Array.isArray(pageInkRedoStacks[key]) ? pageInkRedoStacks[key] : [];
+        pagePenUndoBtn.disabled = undoStack.length === 0;
+        pagePenRedoBtn.disabled = redoStack.length === 0;
+        pagePenClearBtn.disabled = !hasItems && !hasOverlayItems;
+      }
+
+      function setPageInkTool(tool) {
+        const next = PAGE_INK_VALID_TOOLS.indexOf(tool) >= 0 ? tool : "pen";
+        if (pageInkState.tool !== next) {
+          stopPageInkPointer();
+        }
+        pageInkState.tool = next;
+        updatePagePenUi();
+      }
+
+      function updatePagePenSize(nextSize) {
+        const parsed = Number(nextSize);
+        pagePenSize = Number.isFinite(parsed) ? Math.max(1, Math.min(18, parsed)) : 4;
+        pagePenSizeInput.value = String(pagePenSize);
+        pagePenSizeValue.textContent = Number.isInteger(pagePenSize) ? String(pagePenSize) : pagePenSize.toFixed(1);
+      }
+
+      function normalizeHexColor(value, fallback) {
+        const text = String(value || "").trim();
+        return /^#[0-9a-f]{6}$/i.test(text) ? text : fallback;
+      }
+
+      function setPagePenColor(color) {
+        pagePenColor = normalizeHexColor(color, PAGE_INK_COLOR);
+        updatePagePenUi();
+      }
+
+      function setPageHighlightColor(color) {
+        pageHighlightColor = normalizeHexColor(color, PAGE_INK_HIGHLIGHT_COLOR);
+        updatePagePenUi();
+      }
+
+      function updatePagePenUi() {
+        pagePenFab.classList.toggle("is-active", pageInkState.enabled);
+        pagePenFab.setAttribute("aria-pressed", pageInkState.enabled ? "true" : "false");
+        pagePenPalette.hidden = !pageInkState.enabled;
+        pagePenPalette.classList.toggle("is-highlight-tool", pageInkState.tool === "highlight");
+        pagePenInkColorRow.hidden = pageInkState.tool === "highlight";
+        pagePenHighlightColorRow.hidden = pageInkState.tool !== "highlight";
+        document.body.classList.toggle("is-page-ink-on", pageInkState.enabled);
+        PAGE_INK_VALID_TOOLS.forEach(function (tool) {
+          document.body.classList.toggle(`is-page-ink-tool-${tool}`, pageInkState.enabled && pageInkState.tool === tool);
+        });
+        pagePenToolBtns.forEach(function (btn) {
+          const tool = btn.dataset.pageInkTool || "";
+          btn.classList.toggle("is-active", tool === pageInkState.tool);
+        });
+        pagePenColorBtns.forEach(function (btn) {
+          btn.classList.toggle("is-active", normalizeHexColor(btn.dataset.pageInkColor, PAGE_INK_COLOR).toLowerCase() === pagePenColor.toLowerCase());
+        });
+        pageHighlightColorBtns.forEach(function (btn) {
+          btn.classList.toggle("is-active", normalizeHexColor(btn.dataset.pageHighlightColor, PAGE_INK_HIGHLIGHT_COLOR).toLowerCase() === pageHighlightColor.toLowerCase());
+        });
+        updatePagePenSize(pagePenSize);
+        updatePagePenActionButtons();
+        updateBlankPenUi();
+        updateThreePenUi();
+      }
+
+      function setPageInkEnabled(forceOn) {
+        const next = typeof forceOn === "boolean" ? forceOn : !pageInkState.enabled;
+        if (!next) {
+          stopPageInkPointer();
+        }
+        pageInkState.enabled = !!next;
+        if (pageInkState.enabled && !isMemoOpen()) {
+          toggleMemoOverlay(true);
+        }
+        updatePagePenUi();
+      }
+
+      function undoCurrentPageInk() {
+        const key = currentPageInkKey();
+        const items = Array.isArray(pageInkData.pages[key]) ? pageInkData.pages[key] : [];
+        const undoStack = getPageInkUndoStack(key);
+        const action = undoStack.pop();
+        if (!action) {
+          updatePagePenActionButtons();
+          return;
+        }
+        const redoStack = getPageInkRedoStack(key);
+        if (action.type === "add") {
+          const count = Math.max(1, Math.trunc(Number(action.count) || 1));
+          const removed = items.splice(Math.max(0, items.length - count), count);
+          redoStack.push({ type: "add", items: clonePageInkItems(removed) });
+        } else if (action.type === "remove") {
+          const item = clonePageInkItem(action.item);
+          if (item) {
+            const index = Math.max(0, Math.min(items.length, Math.trunc(Number(action.index) || 0)));
+            items.splice(index, 0, item);
+            redoStack.push({ type: "remove", index, item: clonePageInkItem(item) });
+          }
+        } else if (action.type === "clear") {
+          const overlaySnapshot = cloneOverlayInkSnapshot(action.overlay);
+          pageInkData.pages[key] = clonePageInkItems(action.items);
+          if (overlaySnapshot) {
+            applyOverlayInkSnapshot(overlaySnapshot);
+          }
+          redoStack.push({
+            type: "clear",
+            items: clonePageInkItems(action.items),
+            overlay: overlaySnapshot
+          });
+        }
+        redrawAllPageInkCanvases();
+        updatePagePenActionButtons();
+        markMemoDirty("page-ink-undo");
+      }
+
+      function redoCurrentPageInk() {
+        const key = currentPageInkKey();
+        const items = getPageInkItems(key);
+        const redoStack = getPageInkRedoStack(key);
+        const action = redoStack.pop();
+        if (!action) {
+          updatePagePenActionButtons();
+          return;
+        }
+        const undoStack = getPageInkUndoStack(key);
+        if (action.type === "add") {
+          const toAdd = clonePageInkItems(action.items);
+          toAdd.forEach(function (item) {
+            items.push(item);
+          });
+          undoStack.push({ type: "add", count: toAdd.length });
+        } else if (action.type === "remove") {
+          const index = Math.max(0, Math.min(items.length - 1, Math.trunc(Number(action.index) || 0)));
+          const removed = items.splice(index, 1)[0];
+          undoStack.push({
+            type: "remove",
+            index,
+            item: clonePageInkItem(removed || action.item)
+          });
+        } else if (action.type === "clear") {
+          const oldItems = clonePageInkItems(items);
+          const overlaySnapshot = cloneOverlayInkSnapshot(action.overlay);
+          pageInkData.pages[key] = [];
+          if (overlaySnapshot) {
+            clearOverlayInkSnapshotTarget(overlaySnapshot);
+          }
+          undoStack.push({
+            type: "clear",
+            items: oldItems,
+            overlay: overlaySnapshot
+          });
+        }
+        redrawAllPageInkCanvases();
+        updatePagePenActionButtons();
+        markMemoDirty("page-ink-redo");
+      }
+
+      function clearCurrentPageInk() {
+        const key = currentPageInkKey();
+        const items = Array.isArray(pageInkData.pages[key]) ? pageInkData.pages[key] : [];
+        const overlaySnapshot = captureActiveOverlayInkSnapshot();
+        if (!items.length && !overlaySnapshot) return;
+        recordPageInkAction(key, {
+          type: "clear",
+          items: clonePageInkItems(items),
+          overlay: cloneOverlayInkSnapshot(overlaySnapshot)
+        });
+        pageInkData.pages[key] = [];
+        if (overlaySnapshot) {
+          clearOverlayInkSnapshotTarget(overlaySnapshot);
+        }
+        redrawAllPageInkCanvases();
+        updatePagePenActionButtons();
+        markMemoDirty("page-ink-clear-page");
+      }
+
+      function clampPagePenPalettePosition() {
+        if (pagePenPalette.hidden) return;
+        const overlayRect = overlayMemo.getBoundingClientRect();
+        const rect = pagePenPalette.getBoundingClientRect();
+        if (!overlayRect.width || !overlayRect.height || !rect.width || !rect.height) return;
+        const hasManualPosition = pagePenPalette.style.left && pagePenPalette.style.top && pagePenPalette.style.bottom === "auto";
+        if (!hasManualPosition) return;
+        const left = Math.max(8, Math.min(overlayRect.width - rect.width - 8, rect.left - overlayRect.left));
+        const top = Math.max(8, Math.min(overlayRect.height - rect.height - 8, rect.top - overlayRect.top));
+        pagePenPalette.style.left = `${Math.round(left)}px`;
+        pagePenPalette.style.top = `${Math.round(top)}px`;
+      }
+
+      function movePagePenPalette(clientX, clientY) {
+        const drag = pageInkState.paletteDrag;
+        if (!drag) return;
+        const overlayRect = overlayMemo.getBoundingClientRect();
+        const rect = pagePenPalette.getBoundingClientRect();
+        const left = Math.max(8, Math.min(overlayRect.width - rect.width - 8, clientX - overlayRect.left - drag.offsetX));
+        const top = Math.max(8, Math.min(overlayRect.height - rect.height - 8, clientY - overlayRect.top - drag.offsetY));
+        pagePenPalette.style.left = `${Math.round(left)}px`;
+        pagePenPalette.style.top = `${Math.round(top)}px`;
+        pagePenPalette.style.right = "auto";
+        pagePenPalette.style.bottom = "auto";
+      }
+
+      function stopPagePenPaletteDrag(event) {
+        if (!pageInkState.paletteDrag) return;
+        if (event && pageInkState.paletteDrag.pointerId !== null && event.pointerId !== pageInkState.paletteDrag.pointerId) return;
+        if (typeof pagePenDragHandle.releasePointerCapture === "function" && pageInkState.paletteDrag.pointerId !== null) {
+          try {
+            pagePenDragHandle.releasePointerCapture(pageInkState.paletteDrag.pointerId);
+          } catch (_err) {}
+        }
+        pageInkState.paletteDrag = null;
+        pagePenPalette.classList.remove("is-dragging");
+      }
+
+      function handlePagePenPaletteDragStart(event) {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        event.preventDefault();
+        const rect = pagePenPalette.getBoundingClientRect();
+        pageInkState.paletteDrag = {
+          pointerId: event.pointerId,
+          offsetX: event.clientX - rect.left,
+          offsetY: event.clientY - rect.top
+        };
+        pagePenPalette.classList.add("is-dragging");
+        if (typeof pagePenDragHandle.setPointerCapture === "function") {
+          try {
+            pagePenDragHandle.setPointerCapture(event.pointerId);
+          } catch (_err) {}
+        }
+        movePagePenPalette(event.clientX, event.clientY);
+      }
+
+      function handlePagePenPaletteDragMove(event) {
+        if (!pageInkState.paletteDrag) return;
+        if (pageInkState.paletteDrag.pointerId !== null && event.pointerId !== pageInkState.paletteDrag.pointerId) return;
+        event.preventDefault();
+        movePagePenPalette(event.clientX, event.clientY);
+      }
+
+      window.__mockExamPageInk = {
+        export: function () {
+          return serializePageInkForSave();
+        },
+        import: function (payload) {
+          replacePageInkData(payload);
+          markMemoDirty("page-ink-import");
+        },
+        clear: function () {
+          resetPageInkData("page-ink-clear-all");
+        }
+      };
 
       function redrawBlankCanvas() {
         const tab = getActiveBlankTab();
@@ -2825,37 +4321,61 @@
         ctx.clearRect(0, 0, width, height);
 
         for (let i = 0; i < ink.length; i += 1) {
-          const points = ink[i].points;
+          const stroke = ink[i];
+          const points = stroke.points;
           if (!points || !points.length) continue;
+          const color = getOverlayInkColor(stroke, pagePenColor);
+          const widthScale = getOverlayInkWidthScale(stroke, pagePenSize);
           if (points.length === 1) {
-            drawInkDot(ctx, points[0], width, height);
+            drawInkDot(ctx, points[0], width, height, color, widthScale);
             continue;
           }
           for (let j = 1; j < points.length; j += 1) {
-            drawInkSegment(ctx, points[j - 1], points[j], width, height);
+            drawInkSegment(ctx, points[j - 1], points[j], width, height, color, widthScale);
           }
         }
+      }
+
+      function stopBlankPenDrawing() {
+        if (blankPenState.drawing && typeof blankDrawCanvas.releasePointerCapture === "function" && blankPenState.pointerId !== null) {
+          try {
+            blankDrawCanvas.releasePointerCapture(blankPenState.pointerId);
+          } catch (_err) {}
+        }
+        blankPenState.drawing = false;
+        blankPenState.pointerId = null;
+        blankPenState.stroke = null;
+        blankPenState.lastPoint = null;
+        blankPenState.tool = null;
+        blankPenState.erased = false;
+        unbindBlankPenWindowListeners();
+      }
+
+      function isBlankOverlayInkInputOn() {
+        return !!(getActiveBlankTab() && pageInkState.enabled && getOverlayPenInputTool());
       }
 
       function updateBlankPenUi() {
         const tab = getActiveBlankTab();
         const isBlankTab = !!tab && !overlayBlankPane.hidden;
+        const ink = tab ? ensureBlankInk(tab) : [];
+        const penOn = isBlankTab && pageInkState.enabled && !!getOverlayPenInputTool();
+        const drawVisible = isBlankTab && (penOn || ink.length > 0);
 
-        blankPenToggleBtn.hidden = !isBlankTab;
-        blankPenClearBtn.hidden = !isBlankTab;
+        blankPenToggleBtn.hidden = true;
+        blankPenClearBtn.hidden = true;
 
-        const penOn = isBlankTab && isBlankPenMode;
         overlayBlankPane.classList.toggle("is-pen-mode", penOn);
-        blankDrawWrap.hidden = !penOn;
+        blankDrawWrap.hidden = !drawVisible;
         blankPenToggleBtn.classList.toggle("is-on", penOn);
         blankPenToggleBtn.setAttribute("aria-pressed", penOn ? "true" : "false");
         blankPenToggleBtn.textContent = penOn ? "펜 ON" : "펜";
-
-        const ink = tab ? ensureBlankInk(tab) : [];
         blankPenClearBtn.disabled = !isBlankTab || ink.length === 0;
 
-        if (penOn) {
-          overlayMemoText.blur();
+        if (!penOn) {
+          stopBlankPenDrawing();
+        }
+        if (drawVisible) {
           redrawBlankCanvas();
         }
       }
@@ -2864,11 +4384,7 @@
         const next = typeof forceOn === "boolean" ? forceOn : !isBlankPenMode;
         isBlankPenMode = !!next;
         if (!isBlankPenMode) {
-          blankPenState.drawing = false;
-          blankPenState.pointerId = null;
-          blankPenState.stroke = null;
-          blankPenState.lastPoint = null;
-          unbindBlankPenWindowListeners();
+          stopBlankPenDrawing();
         }
         updateBlankPenUi();
       }
@@ -2879,6 +4395,7 @@
         tab.blankInk = [];
         redrawBlankCanvas();
         updateBlankPenUi();
+        updatePagePenActionButtons();
         markMemoDirty("blank-ink-clear");
       }
 
@@ -2895,21 +4412,36 @@
         };
       }
 
+      function eraseBlankInkAt(event) {
+        const tab = getActiveBlankTab();
+        if (!tab) return false;
+        const setup = setupBlankCanvasContext();
+        if (!setup) return false;
+        const point = getBlankCanvasPoint(event);
+        const ink = ensureBlankInk(tab);
+        const changed = eraseOverlayStrokeAt(ink, point, setup.width, setup.height);
+        if (changed) {
+          redrawBlankCanvas();
+          updateBlankPenUi();
+          updatePagePenActionButtons();
+        }
+        return changed;
+      }
+
       function handleBlankPenPointerDown(event) {
-        if (!isBlankPenMode) return;
+        if (!isBlankOverlayInkInputOn()) return;
+        const activeTool = getOverlayPenInputTool();
+        if (!activeTool) return;
         const tab = getActiveBlankTab();
         if (!tab) return;
 
         event.preventDefault();
-        const ink = ensureBlankInk(tab);
-        const point = getBlankCanvasPoint(event);
-        const stroke = { points: [point] };
-        ink.push(stroke);
-
         blankPenState.drawing = true;
         blankPenState.pointerId = event.pointerId;
-        blankPenState.stroke = stroke;
-        blankPenState.lastPoint = point;
+        blankPenState.stroke = null;
+        blankPenState.lastPoint = null;
+        blankPenState.tool = activeTool;
+        blankPenState.erased = false;
         bindBlankPenWindowListeners();
 
         if (typeof blankDrawCanvas.setPointerCapture === "function") {
@@ -2918,25 +4450,53 @@
           } catch (_err) {}
         }
 
+        if (activeTool === "eraser") {
+          blankPenState.erased = eraseBlankInkAt(event);
+          return;
+        }
+
+        const ink = ensureBlankInk(tab);
+        const point = getBlankCanvasPoint(event);
+        const stroke = { points: [point], color: pagePenColor, width: pagePenSize };
+        ink.push(stroke);
+        blankPenState.stroke = stroke;
+        blankPenState.lastPoint = point;
+
         const setup = setupBlankCanvasContext();
         if (setup) {
-          drawInkDot(setup.ctx, point, setup.width, setup.height);
+          drawInkDot(setup.ctx, point, setup.width, setup.height, pagePenColor, pagePenSize / 4);
         }
         updateBlankPenUi();
+        updatePagePenActionButtons();
       }
 
       function handleBlankPenPointerMove(event) {
         if (!blankPenState.drawing || blankPenState.pointerId !== event.pointerId) return;
-        if (!isBlankPenMode) return;
+        if (!isBlankOverlayInkInputOn()) return;
 
         event.preventDefault();
+        if (blankPenState.tool === "eraser") {
+          if (eraseBlankInkAt(event)) {
+            blankPenState.erased = true;
+          }
+          return;
+        }
+        if (blankPenState.tool !== "pen") return;
         const nextPoint = getBlankCanvasPoint(event);
         if (!blankPenState.stroke) return;
         blankPenState.stroke.points.push(nextPoint);
 
         const setup = setupBlankCanvasContext();
         if (setup && blankPenState.lastPoint) {
-          drawInkSegment(setup.ctx, blankPenState.lastPoint, nextPoint, setup.width, setup.height);
+          drawInkSegment(
+            setup.ctx,
+            blankPenState.lastPoint,
+            nextPoint,
+            setup.width,
+            setup.height,
+            getOverlayInkColor(blankPenState.stroke, pagePenColor),
+            getOverlayInkWidthScale(blankPenState.stroke, pagePenSize)
+          );
         }
         blankPenState.lastPoint = nextPoint;
       }
@@ -2944,6 +4504,8 @@
       function handleBlankPenPointerEnd(event) {
         if (!blankPenState.drawing || blankPenState.pointerId !== event.pointerId) return;
         event.preventDefault();
+        const activeTool = blankPenState.tool;
+        const hasEraseChange = !!blankPenState.erased;
 
         if (typeof blankDrawCanvas.releasePointerCapture === "function") {
           try {
@@ -2955,8 +4517,17 @@
         blankPenState.pointerId = null;
         blankPenState.stroke = null;
         blankPenState.lastPoint = null;
+        blankPenState.tool = null;
+        blankPenState.erased = false;
         unbindBlankPenWindowListeners();
         updateBlankPenUi();
+        updatePagePenActionButtons();
+        if (activeTool === "eraser") {
+          if (hasEraseChange) {
+            markMemoDirty("blank-ink-erase");
+          }
+          return;
+        }
         markMemoDirty("blank-ink-draw");
       }
 
@@ -2998,14 +4569,17 @@
         ctx.clearRect(0, 0, width, height);
 
         for (let i = 0; i < strokes.length; i += 1) {
-          const points = strokes[i].points;
+          const stroke = strokes[i];
+          const points = stroke.points;
           if (!points || !points.length) continue;
+          const color = getOverlayInkColor(stroke, pagePenColor);
+          const widthScale = getOverlayInkWidthScale(stroke, pagePenSize);
           if (points.length === 1) {
-            drawInkDot(ctx, points[0], width, height, THREE_PEN_COLOR, THREE_PEN_WIDTH_SCALE);
+            drawInkDot(ctx, points[0], width, height, color, widthScale);
             continue;
           }
           for (let j = 1; j < points.length; j += 1) {
-            drawInkSegment(ctx, points[j - 1], points[j], width, height, THREE_PEN_COLOR, THREE_PEN_WIDTH_SCALE);
+            drawInkSegment(ctx, points[j - 1], points[j], width, height, color, widthScale);
           }
         }
       }
@@ -3023,6 +4597,19 @@
         };
       }
 
+      function eraseThreeInkAt(sentenceCard, canvas, event) {
+        const setup = setupThreeInkCanvas(canvas);
+        if (!setup) return false;
+        const strokes = ensureThreeSentenceInk(sentenceCard);
+        const point = getThreeCanvasPoint(canvas, event);
+        const changed = eraseOverlayStrokeAt(strokes, point, setup.width, setup.height);
+        if (changed) {
+          redrawThreeInkCanvas(canvas, sentenceCard);
+          updatePagePenActionButtons();
+        }
+        return changed;
+      }
+
       function stopThreePenDrawing() {
         if (threePenState.drawing && threePenState.canvas && typeof threePenState.canvas.releasePointerCapture === "function") {
           try {
@@ -3034,27 +4621,35 @@
         threePenState.card = null;
         threePenState.canvas = null;
         threePenState.lastPoint = null;
+        threePenState.tool = null;
+        threePenState.erased = false;
+      }
+
+      function isThreeOverlayInkInputOn() {
+        const tab = getActiveMemoTab();
+        return !!(tab && tab.type === "two_three" && !isDictModeOn && pageInkState.enabled && getOverlayPenInputTool());
       }
 
       function updateThreePenUi() {
         const tab = getActiveMemoTab();
         const isTwoThree = !!tab && tab.type === "two_three" && !overlayTwoThreePane.hidden;
         const allowPen = isTwoThree && !isDictModeOn;
-        if (!allowPen && isThreeTPenMode) {
-          isThreeTPenMode = false;
+        const penOn = allowPen && pageInkState.enabled && !!getOverlayPenInputTool();
+        const hasInk = isTwoThree && activeOverlayInkHasContent();
+        if (!penOn) {
           stopThreePenDrawing();
         }
 
-        overlayThreePenToggleBtn.hidden = !isTwoThree;
+        overlayThreePenToggleBtn.hidden = true;
         overlayThreePenToggleBtn.disabled = !allowPen;
-        overlayThreePenToggleBtn.classList.toggle("is-on", allowPen && isThreeTPenMode);
-        overlayThreePenToggleBtn.setAttribute("aria-pressed", (allowPen && isThreeTPenMode) ? "true" : "false");
-        overlayThreePenToggleBtn.textContent = allowPen && isThreeTPenMode ? "펜 ON" : "펜";
+        overlayThreePenToggleBtn.classList.toggle("is-on", penOn);
+        overlayThreePenToggleBtn.setAttribute("aria-pressed", penOn ? "true" : "false");
+        overlayThreePenToggleBtn.textContent = penOn ? "펜 ON" : "펜";
 
-        overlayThreePenClearBtn.hidden = !isTwoThree;
+        overlayThreePenClearBtn.hidden = true;
         overlayThreePenClearBtn.disabled = !isTwoThree;
 
-        overlayTwoThreePane.classList.toggle("is-three-pen-mode", allowPen && isThreeTPenMode);
+        overlayTwoThreePane.classList.toggle("is-three-pen-mode", isTwoThree && (penOn || hasInk));
       }
 
       function setThreePenMode(forceOn) {
@@ -3088,6 +4683,7 @@
         if (!changed) return;
         stopThreePenDrawing();
         renderTwoThreeCards();
+        updatePagePenActionButtons();
         markMemoDirty("three-ink-clear-all");
       }
 
@@ -3100,6 +4696,7 @@
         }
         sentenceCard.ink = [];
         redrawThreeInkCanvas(canvas, sentenceCard);
+        updatePagePenActionButtons();
         markMemoDirty("three-ink-clear-one");
       }
 
@@ -3112,23 +4709,23 @@
         }
         strokes.pop();
         redrawThreeInkCanvas(canvas, sentenceCard);
+        updatePagePenActionButtons();
         markMemoDirty("three-ink-undo");
       }
 
       function handleThreeInkPointerDown(event, sentenceCard, canvas) {
-        if (!isThreeTPenMode || isDictModeOn) return;
+        if (!isThreeOverlayInkInputOn()) return;
+        const activeTool = getOverlayPenInputTool();
+        if (!activeTool) return;
         event.preventDefault();
-
-        const strokes = ensureThreeSentenceInk(sentenceCard);
-        const point = getThreeCanvasPoint(canvas, event);
-        const stroke = { points: [point] };
-        strokes.push(stroke);
 
         threePenState.drawing = true;
         threePenState.pointerId = event.pointerId;
         threePenState.card = sentenceCard;
         threePenState.canvas = canvas;
-        threePenState.lastPoint = point;
+        threePenState.lastPoint = null;
+        threePenState.tool = activeTool;
+        threePenState.erased = false;
 
         if (typeof canvas.setPointerCapture === "function") {
           try {
@@ -3136,18 +4733,37 @@
           } catch (_err) {}
         }
 
+        if (activeTool === "eraser") {
+          threePenState.erased = eraseThreeInkAt(sentenceCard, canvas, event);
+          return;
+        }
+
+        const strokes = ensureThreeSentenceInk(sentenceCard);
+        const point = getThreeCanvasPoint(canvas, event);
+        const stroke = { points: [point], color: pagePenColor, width: pagePenSize };
+        strokes.push(stroke);
+        threePenState.lastPoint = point;
+
         const setup = setupThreeInkCanvas(canvas);
         if (setup) {
-          drawInkDot(setup.ctx, point, setup.width, setup.height, THREE_PEN_COLOR, THREE_PEN_WIDTH_SCALE);
+          drawInkDot(setup.ctx, point, setup.width, setup.height, pagePenColor, pagePenSize / 4);
         }
+        updatePagePenActionButtons();
       }
 
       function handleThreeInkPointerMove(event, sentenceCard, canvas) {
         if (!threePenState.drawing || threePenState.pointerId !== event.pointerId) return;
-        if (!isThreeTPenMode || isDictModeOn) return;
+        if (!isThreeOverlayInkInputOn()) return;
         if (threePenState.canvas !== canvas || threePenState.card !== sentenceCard) return;
 
         event.preventDefault();
+        if (threePenState.tool === "eraser") {
+          if (eraseThreeInkAt(sentenceCard, canvas, event)) {
+            threePenState.erased = true;
+          }
+          return;
+        }
+        if (threePenState.tool !== "pen") return;
         const nextPoint = getThreeCanvasPoint(canvas, event);
         const strokes = ensureThreeSentenceInk(sentenceCard);
         const activeStroke = strokes[strokes.length - 1];
@@ -3156,7 +4772,15 @@
 
         const setup = setupThreeInkCanvas(canvas);
         if (setup && threePenState.lastPoint) {
-          drawInkSegment(setup.ctx, threePenState.lastPoint, nextPoint, setup.width, setup.height, THREE_PEN_COLOR, THREE_PEN_WIDTH_SCALE);
+          drawInkSegment(
+            setup.ctx,
+            threePenState.lastPoint,
+            nextPoint,
+            setup.width,
+            setup.height,
+            getOverlayInkColor(activeStroke, pagePenColor),
+            getOverlayInkWidthScale(activeStroke, pagePenSize)
+          );
         }
         threePenState.lastPoint = nextPoint;
       }
@@ -3165,7 +4789,16 @@
         if (!threePenState.drawing || threePenState.pointerId !== event.pointerId) return;
         if (threePenState.canvas !== canvas || threePenState.card !== sentenceCard) return;
         event.preventDefault();
+        const activeTool = threePenState.tool;
+        const hasEraseChange = !!threePenState.erased;
         stopThreePenDrawing();
+        updatePagePenActionButtons();
+        if (activeTool === "eraser") {
+          if (hasEraseChange) {
+            markMemoDirty("three-ink-erase");
+          }
+          return;
+        }
         markMemoDirty("three-ink-draw");
       }
 
@@ -3359,7 +4992,7 @@
         sentenceInput.className = "overlay-card-textarea overlay-card-textarea--threeT overlay-card-textarea--threeT-sentence";
         sentenceInput.placeholder = "문장";
         sentenceInput.value = card.sentence || "";
-        sentenceInput.readOnly = isThreeTPenMode;
+        sentenceInput.readOnly = false;
         sentenceInput.addEventListener("input", function () {
           card.sentence = sentenceInput.value;
           markMemoDirty("three-t-sentence");
@@ -3436,6 +5069,7 @@
 
         if (!tab) {
           updateBlankPenUi();
+          updatePagePenActionButtons();
           updateOverlayQuestionNoBar();
           return;
         }
@@ -3448,6 +5082,7 @@
         }
         updateThreePenUi();
         updateBlankPenUi();
+        updatePagePenActionButtons();
         updateOverlayQuestionNoBar();
       }
 
@@ -3554,12 +5189,9 @@
         overlayMemo.setAttribute("aria-hidden", shouldShow ? "false" : "true");
         setBtnActive(memoToggleBtn, shouldShow);
         if (!shouldShow) {
+          setPageInkEnabled(false);
           stopThreePenDrawing();
-          blankPenState.drawing = false;
-          blankPenState.pointerId = null;
-          blankPenState.stroke = null;
-          blankPenState.lastPoint = null;
-          unbindBlankPenWindowListeners();
+          stopBlankPenDrawing();
           closeFontPopup();
           closeTabTypePopup();
           closeTabCloseConfirm();
@@ -3867,6 +5499,8 @@
       function resetMemoWorkspaceForNewLoad() {
         stopThreePenDrawing();
         setBlankPenMode(false);
+        setPageInkEnabled(false);
+        resetPageInkData("");
         isThreeTPenMode = false;
         isDictModeOn = false;
         lastCapturedWord = "";
@@ -3943,7 +5577,11 @@
             });
           }
           if (!points.length) continue;
-          cloned.push({ points });
+          cloned.push({
+            points,
+            color: normalizeHexColor(stroke.color, pagePenColor),
+            width: Math.max(1, Math.min(18, normalizePageInkNumber(stroke.width, pagePenSize)))
+          });
         }
         return cloned;
       }
@@ -4048,17 +5686,19 @@
         syncActiveBlankTextFromEditor();
         const tabs = serializeMemoTabsForSave(memoTabs);
         const mode = submitMode === "all" ? "all" : "active";
+        const hasPdfPageInk = hasPageInkContent(pageInkData);
 
         if (mode === "active") {
           const idxNum = Number(activeMemoTabIndex);
           const idx = Number.isFinite(idxNum) ? Math.trunc(idxNum) : -1;
           if (idx < 0 || idx >= tabs.length) return [];
           const tab = tabs[idx];
-          if (!isTemplateTabFilled(tab)) return [];
+          if (!isTemplateTabFilled(tab) && !hasPdfPageInk) return [];
           return [{
             tab,
             templatePage: idx + 1,
-            originalIndex: idx
+            originalIndex: idx,
+            includePageInk: hasPdfPageInk
           }];
         }
 
@@ -4069,8 +5709,24 @@
           targets.push({
             tab,
             templatePage: i + 1,
-            originalIndex: i
+            originalIndex: i,
+            includePageInk: false
           });
+        }
+        if (hasPdfPageInk) {
+          if (targets.length) {
+            targets[0].includePageInk = true;
+          } else {
+            const idxNum = Number(activeMemoTabIndex);
+            const idx = Number.isFinite(idxNum) ? Math.min(Math.max(Math.trunc(idxNum), 0), tabs.length - 1) : 0;
+            const tab = tabs[idx] || { type: "blank", blankText: "", blankInk: [] };
+            targets.push({
+              tab,
+              templatePage: idx + 1,
+              originalIndex: idx,
+              includePageInk: true
+            });
+          }
         }
         return targets;
       }
@@ -4083,6 +5739,7 @@
         const order = Math.max(1, Math.trunc(Number(submitMeta && submitMeta.order) || 1));
         const count = Math.max(1, Math.trunc(Number(submitMeta && submitMeta.count) || 1));
         const tabIndex = Math.max(0, Math.trunc(Number(submitMeta && submitMeta.tabIndex) || 0));
+        const includePageInk = !!(submitMeta && submitMeta.includePageInk);
         const tabQNo = parseQNoForPayload(getRawQNoFromAny(safeTab));
         const metaQNo = parseQNoForPayload(submitMeta && submitMeta.qNo !== undefined ? submitMeta.qNo : null);
         const qNo = tabQNo > 0 ? tabQNo : (metaQNo > 0 ? metaQNo : DEFAULT_PAYLOAD_QNO);
@@ -4118,6 +5775,14 @@
             Lap: lap
           }
         };
+
+        if (includePageInk) {
+          const pageInk = serializePageInkForSave();
+          if (hasPageInkContent(pageInk)) {
+            payload.pageInk = pageInk;
+            payload.meta.hasPageInk = true;
+          }
+        }
 
         if (tabType === "two_three") {
           const words = Array.isArray(safeTab.words)
@@ -4182,6 +5847,7 @@
           }
         }
         if (hasInkStrokeList(safe.blankInk)) return true;
+        if (hasPageInkContent(safe.pageInk)) return true;
         return false;
       }
 
@@ -4230,7 +5896,7 @@
 
       function isSubmittedSessionNo(sessionNo) {
         const n = Number(sessionNo);
-        return n === 99 || n === 992;
+        return n === 99 || n === 992 || n === 993;
       }
 
       function formatQuestionNoLabel(rawValue) {
@@ -4599,6 +6265,8 @@
       function resetWorkspaceAfterSubmit() {
         stopThreePenDrawing();
         setBlankPenMode(false);
+        setPageInkEnabled(false);
+        resetPageInkData("");
         isThreeTPenMode = false;
         isDictModeOn = false;
         lastCapturedWord = "";
@@ -4708,17 +6376,20 @@
                 order: i + 1,
                 count: submitTargets.length,
                 tabIndex: target.originalIndex,
+                includePageInk: target.includePageInk === true,
                 qNo: submitQuestionMeta.hasQNo ? submitQuestionMeta.qNo : undefined,
                 lap: submitQuestionMeta.hasLap ? submitQuestionMeta.lap : undefined,
                 forceLap: submitQuestionMeta.forceLap === true
               }
             );
+            const hasPdfPageInk = hasPageInkContent(payloadJson.pageInk);
             const hasPenInk = payloadHasAnyPenInk(payloadJson);
-            const sessionNoForSave = hasPenInk ? 992 : 99;
+            const sessionNoForSave = hasPdfPageInk ? 993 : (hasPenInk ? 992 : 99);
             if (!payloadJson.meta || typeof payloadJson.meta !== "object") {
               payloadJson.meta = {};
             }
             payloadJson.meta.hasPenInk = !!hasPenInk;
+            payloadJson.meta.hasPageInk = !!hasPdfPageInk;
             payloadJson.meta.sessionNo = sessionNoForSave;
 
             let posted = null;
@@ -4781,7 +6452,8 @@
           selectedSessionTargetPage: parsePositivePage(selectedSessionTargetPage),
           overlaySide: overlaySide === "left" ? "left" : "right",
           activeTabIndex: activeMemoTabIndex,
-          tabs: serializeMemoTabsForSave(memoTabs)
+          tabs: serializeMemoTabsForSave(memoTabs),
+          pageInk: serializePageInkForSave()
         };
       }
 
@@ -4791,6 +6463,7 @@
         for (let i = 0; i < tabs.length; i += 1) {
           if (isTemplateTabFilled(tabs[i])) return true;
         }
+        if (hasPageInkContent(safe.pageInk)) return true;
         return false;
       }
 
@@ -4880,6 +6553,7 @@
               memoTabs.push(tab);
             });
           }
+          replacePageInkData(parsed.pageInk);
           nextMemoTabId = memoTabs.length + 1;
           const nextIndex = Number(parsed.activeTabIndex);
           activeMemoTabIndex = Number.isFinite(nextIndex)
@@ -5266,6 +6940,7 @@
           const scaleX = viewport.width / baseViewport.width;
           const scaleY = viewport.height / baseViewport.height;
           const wordHits = buildWordHitsFromIndexRows(indexRows, scaleX, scaleY, viewport.height);
+          bindPageInkLayer(pageWrap, pageNum, wordHits);
           canvas.style.cursor = wordHits.length ? "pointer" : "default";
           const pickWordHitByClientPoint = function (clientX, clientY) {
             if (!wordHits.length) return null;
@@ -6551,6 +8226,7 @@
         session.templateLabel = parseTemplateLabel(payloadObj);
         session.qNo = extractQNoFromPayload(payloadObj);
         session.lap = extractLapFromPayload(payloadObj);
+        session.pageInk = normalizePageInkPayload(payloadObj.pageInk);
         session.note = session.templateLabel || "";
 
         const activeIndex = Number(payloadObj.activeTabIndex);
@@ -7015,6 +8691,7 @@
 
         overlaySide = session.overlaySide === "left" ? "left" : "right";
         applyOverlaySide();
+        replacePageInkData(session.pageInk);
 
         const normalizedTabs = normalizeSessionTabs(session.tabs);
         memoTabs.length = 0;
@@ -7426,6 +9103,38 @@
         window.open(url, "_blank", "noopener,noreferrer");
       });
 
+      pagePenFab.addEventListener("click", function () {
+        setPageInkEnabled(!pageInkState.enabled);
+      });
+      pagePenCloseBtn.addEventListener("click", function () {
+        setPageInkEnabled(false);
+      });
+      pagePenToolBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setPageInkTool(btn.dataset.pageInkTool || "pen");
+        });
+      });
+      pagePenSizeInput.addEventListener("input", function () {
+        updatePagePenSize(pagePenSizeInput.value);
+      });
+      pagePenColorBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setPagePenColor(btn.dataset.pageInkColor || PAGE_INK_COLOR);
+        });
+      });
+      pageHighlightColorBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setPageHighlightColor(btn.dataset.pageHighlightColor || PAGE_INK_HIGHLIGHT_COLOR);
+        });
+      });
+      pagePenUndoBtn.addEventListener("click", undoCurrentPageInk);
+      pagePenRedoBtn.addEventListener("click", redoCurrentPageInk);
+      pagePenClearBtn.addEventListener("click", clearCurrentPageInk);
+      pagePenDragHandle.addEventListener("pointerdown", handlePagePenPaletteDragStart, { passive: false });
+      pagePenDragHandle.addEventListener("pointermove", handlePagePenPaletteDragMove, { passive: false });
+      pagePenDragHandle.addEventListener("pointerup", stopPagePenPaletteDrag, { passive: false });
+      pagePenDragHandle.addEventListener("pointercancel", stopPagePenPaletteDrag, { passive: false });
+
       newTabBtn.addEventListener("click", function () {
         const target = lastPdfUrl;
         if (!target) return;
@@ -7437,14 +9146,18 @@
         attachPreviewScrollDiagnostics(previewScrollHost);
         previewScrollHost.addEventListener("scroll", function () {
           lastPreviewScrollAt = Date.now();
+          pageInkState.lastPage = null;
           hideWordTooltip();
+          updatePagePenActionButtons();
         }, { passive: true });
       }
       window.addEventListener("resize", function () {
         lockPreviewViewportHeight("resize");
-        if (isBlankPenMode && getActiveBlankTab() && !overlayBlankPane.hidden) {
+        if (!blankDrawWrap.hidden && getActiveBlankTab() && !overlayBlankPane.hidden) {
           redrawBlankCanvas();
         }
+        redrawAllPageInkCanvases();
+        clampPagePenPalettePosition();
       });
       window.addEventListener("beforeunload", function () {
         saveLocalDraftNow("beforeunload");
@@ -7503,6 +9216,10 @@
           closeTabTypePopup();
           return;
         }
+        if (pageInkState.enabled) {
+          setPageInkEnabled(false);
+          return;
+        }
         if (isMemoOpen()) {
           toggleMemoOverlay(false);
         }
@@ -7524,6 +9241,7 @@
       void fetchLiveSessions(true);
       applyMemoFontSize();
       applyDictZoom();
+      updatePagePenUi();
       applyOverlaySide();
       switchMemoTab(activeMemoTabIndex);
       renderMemoTabbar();

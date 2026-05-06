@@ -10,7 +10,8 @@
   var MEANING_FALLBACK_KR = "\uB73B \uB370\uC774\uD130 \uC5C6\uC74C";
 
   var DEFAULTS = {
-    excelFile: "LTRYI-herma-round2-master.xlsx",
+    excelFile: "herma_allq_chwi.xlsx",
+    excelSheet: "round2_master",
     lesson: 3,
     exercise: 6,
     round: 2,
@@ -499,7 +500,8 @@
       })
       .then(function (buf) {
         var wb = global.XLSX.read(buf, { type: "array" });
-        var sheet = wb.Sheets[wb.SheetNames[0]];
+        var sheetName = state.config.excelSheet || wb.SheetNames[0];
+        var sheet = wb.Sheets[sheetName] || wb.Sheets[wb.SheetNames[0]];
         var rows = global.XLSX.utils.sheet_to_json(sheet, { defval: "" });
         return rows.filter(function (r) { return !isRowAllEmpty(r); });
       });

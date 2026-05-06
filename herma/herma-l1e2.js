@@ -25,7 +25,8 @@
 //   ||link=because||hinge=서||cut=4||a=...||b=...||그녀는 ... (전체 한국어)
 // ------------------------------------------------------------
 
-const EXCEL_FILE = "LTRYI-herma-lesson-questions.xlsx";
+const EXCEL_FILE = "herma_allq_chwi.xlsx";
+const EXCEL_SHEET = "round1_questions";
 const TARGET_LESSON = 1;
 const TARGET_EXERCISE = 2;
 const MAX_QUESTIONS = 0; // 0이면 제한 없음
@@ -236,7 +237,7 @@ async function loadExcelRows(filename) {
   const buf = await res.arrayBuffer();
 
   const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const sheet = wb.Sheets[EXCEL_SHEET] || wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
   return rows.filter((r) => !isRowAllEmpty(r));
@@ -360,6 +361,21 @@ function inferLinkFromQuestion(qEn) {
 function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
+
+  if (window.HermaIntroFronts && typeof window.HermaIntroFronts.render === "function") {
+    try {
+      if (window.HermaIntroFronts.render(area, {
+        lesson: TARGET_LESSON,
+        exercise: TARGET_EXERCISE,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("HermaIntroFronts render failed:", err);
+    }
+  }
+
 
   const total = questions.length;
   const title = questions[0]?.title || "Herma L1-E2";

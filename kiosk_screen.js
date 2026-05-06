@@ -9,18 +9,11 @@ function injectKioskPopupHTML() {
           <button class="tab active" data-tab="tukurry">
             <span class="tab-large">숙제</span><br><span class="tab-small">주세요</span>
           </button>
-          <button class="tab" data-tab="etc">
-            <span class="tab-large">내 숙제</span><br><span class="tab-small">할래요</span>
-          </button>
         </div>
         <div class="tab-content" id="tab-tukurry">
           <button class="menu-btn square">단어</button>
           <button class="menu-btn square">문법</button>
           <button class="menu-btn square">독해</button>
-        </div>
-        <div class="tab-content hidden" id="tab-etc">
-          <button class="menu-btn square">오늘 내 숙제</button>
-          <button class="menu-btn square">시험지 만들어주세요</button>
         </div>
         <div id="sub-popup" class="sub-popup hidden">
           <button class="popup-close" id="subPopupCloseBtn">✖</button>
@@ -76,13 +69,10 @@ function bindMenuButtons() {
   document.querySelectorAll('.menu-btn').forEach(btn => {
     btn.onclick = () => {
       const item = btn.textContent.trim();
-      if (triggerSet.has(item)) {
-        currentSubItem = item;
-        difficulty = 1; rangeBegin = 1; rangeEnd = 1;
-        renderBasicSubPopup();
-      } else {
-        renderSubPopup(item);
-      }
+      if (!triggerSet.has(item)) return;
+      currentSubItem = item;
+      difficulty = 1; rangeBegin = 1; rangeEnd = 1;
+      renderBasicSubPopup();
     };
   });
 }
@@ -139,49 +129,6 @@ function renderBasicSubPopup() {
 
   subPopup.classList.remove('hidden');
 }
-
-
-function renderSubPopup(type) {
-  const inner = document.querySelector('.sub-popup-inner');
-  const subPopup = document.getElementById('sub-popup');
-  inner.innerHTML = '';
-  subPopup.classList.remove('hidden');
-
-  let label = '';
-
-  if (type === '오늘 내 숙제') {
-    label = '오늘 내 숙제';
-  } else if (type === '시험지 만들어주세요') {
-    label = '시험지 만들어주세요';
-  } else {
-    // 알 수 없는 타입일 경우 닫기
-    subPopup.classList.add('hidden');
-    return;
-  }
-
-  inner.innerHTML = `
-    <div class="sub-popup-title">${label}</div>
-    <div class="sub-popup-desc" style="font-size: 13px; margin: 8px 0 14px; color: #ccc;">
-      상세내용은 테이블에서 작성해주세요.
-    </div>
-    <button id="subPopupConfirm" class="order-btn">담기</button>
-  `;
-
-  document.getElementById('subPopupConfirm')?.addEventListener('click', () => {
-    selectedItems.push({ label }); // ✅ label만 푸시
-    updateSelectedDisplay();
-    subPopup.classList.add('hidden');
-  });
-
-  document.getElementById('subPopupCloseBtn')?.addEventListener('click', () => {
-    subPopup.classList.add('hidden');
-  });
-}
-
-
-
-
-
 
 
 
@@ -286,14 +233,6 @@ function handleFinalOrder() {
         HWImageURL: entry.fileName
       });
       receiptText += `🛠 시험 제작 요청: ${entry.examName} [파일: ${entry.fileName}]\n`;
-    }
-
-    // ✅ 오늘 내 숙제 / 시험지 만들어주세요
-    else if (entry.label === '오늘 내 숙제' || entry.label === '시험지 만들어주세요') {
-      qordered.push({
-        WhichHW: entry.label
-      });
-      receiptText += `${entry.label}\n`;
     }
   });
 
