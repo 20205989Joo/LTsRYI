@@ -611,12 +611,15 @@
           document.querySelectorAll(".option").forEach(b => b.classList.remove("selected"));
           btn.classList.add("selected");
           selected = btn.dataset.answer;
-          document.getElementById("checkBtn").disabled = false;
+          checkAnswer();
         });
       });
 
-      document.getElementById("checkBtn").addEventListener("click", checkAnswer);
-      document.getElementById("skipBtn").addEventListener("click", nextQuestion);
+      const checkBtn = document.getElementById("checkBtn");
+      const skipBtn = document.getElementById("skipBtn");
+      checkBtn.textContent = current === quiz.length - 1 ? "\uACB0\uACFC \uBCF4\uAE30" : "\uB2E4\uC74C \uBB38\uC81C";
+      checkBtn.disabled = true;
+      skipBtn.hidden = true;
     }
 
     function checkAnswer() {
