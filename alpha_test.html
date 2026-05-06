@@ -48,8 +48,8 @@
     (function () {
       const DEFAULT_REDIRECT_TARGET = "pleks/pleks-l1e1.html";
       const IMSI_REDIRECT_TARGET = "imsi_user_custom_hw_2_softpath.html";
+      const BEFORECLASS_REDIRECT_TARGET = "imsi_beforeclass.html";
       const BITNALEE_REDIRECT_TARGET = "imsi_bitnalee_hw_2.html";
-      const YS_USERPAGE_TARGET = "YS_userpage1.html";
 
       const currentUrl = new URL(window.location.href);
       const userId = (currentUrl.searchParams.get("id") || "").trim().toLowerCase();
@@ -57,9 +57,9 @@
 
       if (userId === "bitnalee") {
         redirectTarget = BITNALEE_REDIRECT_TARGET;
-      } else if (userId === "kil030328") {
-        redirectTarget = YS_USERPAGE_TARGET;
-      } else if (userId === "080530hn" || userId === "tester") {
+      } else if (userId === "kil030328" || userId === "080530hn") {
+        redirectTarget = BEFORECLASS_REDIRECT_TARGET;
+      } else if (userId === "tester") {
         redirectTarget = IMSI_REDIRECT_TARGET;
       }
 

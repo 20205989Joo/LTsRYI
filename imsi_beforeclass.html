@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>클리셰 예측 퀴즈</title>
+  <style>
+    :root {
+      --bg: #f5f0e8;
+      --card: #fffaf2;
+      --ink: #2f2923;
+      --muted: #7c6f62;
+      --line: #d8c8b7;
+      --chip: #efe2d0;
+      --chip2: #dff4ee;
+      --accent: #4fbfa8;
+      --wrong: #d86f62;
+      --right: #3a9f76;
+      --shadow: 0 14px 35px rgba(60, 40, 20, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(79, 191, 168, 0.16), transparent 35%),
+        var(--bg);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(760px, 100%);
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .sub {
+      margin-top: 5px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .score {
+      min-width: 110px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.45);
+      font-size: 13px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .progress-wrap {
+      height: 8px;
+      background: #eadcc9;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.25s ease;
+    }
+
+    .inner {
+      padding: 26px;
+    }
+
+    .q-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .prompt {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 18px;
+    }
+
+    .word-area {
+      border: 1px dashed var(--line);
+      background: #fff6e8;
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 22px;
+    }
+
+    .plain-words {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: var(--chip);
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+
+    .vs-box {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .side {
+      border-radius: 18px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid #ead9c5;
+      padding: 14px;
+    }
+
+    .side-title {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .side .chip {
+      margin: 4px 3px;
+    }
+
+    .vs {
+      align-self: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .option {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      color: var(--ink);
+      border-radius: 16px;
+      padding: 14px 15px;
+      font-size: 16px;
+      font-weight: 800;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .option:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+    }
+
+    .option.selected {
+      border-color: var(--accent);
+      background: var(--chip2);
+    }
+
+    .option.correct {
+      border-color: var(--right);
+      background: rgba(58, 159, 118, 0.14);
+    }
+
+    .option.wrong {
+      border-color: var(--wrong);
+      background: rgba(216, 111, 98, 0.13);
+    }
+
+    .feedback {
+      min-height: 54px;
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #f3eadc;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback strong {
+      color: var(--ink);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .main-btn, .ghost-btn {
+      flex: 1;
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 15px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .main-btn {
+      background: var(--accent);
+      color: white;
+    }
+
+    .main-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .ghost-btn {
+      background: #eadcc9;
+      color: var(--ink);
+    }
+
+    .result {
+      text-align: center;
+      padding: 32px 18px;
+    }
+
+    .result h2 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+    }
+
+    .result p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 14px;
+        align-items: flex-start;
+      }
+
+      .top {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .inner {
+        padding: 20px;
+      }
+
+      .vs-box {
+        grid-template-columns: 1fr;
+      }
+
+      .vs {
+        text-align: center;
+      }
+
+      .prompt {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="top">
+      <div>
+        <h1>클리셰 예측 퀴즈</h1>
+        <div class="sub">단어 4개를 보고 수능 영어 제시문 대분류를 예측하세요.</div>
+      </div>
+      <div class="score" id="scoreBox">0 / 0</div>
+    </div>
+
+    <section class="card">
+      <div class="progress-wrap">
+        <div class="progress" id="progress"></div>
+      </div>
+
+      <div class="inner" id="quizArea"></div>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        answer: "개인 vs 단체",
+        type: "vs",
+        left: ["individual", "isolated"],
+        right: ["group", "community"],
+        note: "개인의 고립/자율성과 집단의 소속/연결이 부딪히는 구조입니다."
+      },
+      {
+        answer: "문과 vs 이과",
+        type: "vs",
+        left: ["interpretation", "meaning"],
+        right: ["evidence", "experiment"],
+        note: "의미·해석의 세계와 증거·실험의 세계를 대비하거나 통합하는 구조입니다."
+      },
+      {
+        answer: "표면 vs 심층",
+        type: "vs",
+        left: ["appearance", "visible"],
+        right: ["underlying", "essence"],
+        note: "겉으로 보이는 것과 그 아래의 진짜 원리/구조를 구분하는 구조입니다."
+      },
+      {
+        answer: "정보사회",
+        type: "plain",
+        words: ["algorithm", "platform", "data", "filter bubble"],
+        note: "디지털 연결, 데이터, 알고리즘, 미디어 편향이 나오면 정보사회 테마를 의심할 수 있습니다."
+      },
+      {
+        answer: "언어사고",
+        type: "plain",
+        words: ["language", "label", "framing", "metaphor"],
+        note: "말, 이름, 프레임, 은유가 생각과 현실 인식을 바꾸는 구조입니다."
+      },
+      {
+        answer: "객관 vs 주관",
+        type: "vs",
+        left: ["fact", "evidence"],
+        right: ["belief", "perception"],
+        note: "사실과 해석, 증거와 인식 사이의 간극을 다루는 구조입니다."
+      },
+      {
+        answer: "편향성 / 귀인오류",
+        type: "plain",
+        words: ["bias", "assumption", "hindsight", "misjudge"],
+        note: "사람이 합리적으로 판단한다고 믿지만 실제로는 착각과 편향에 흔들리는 구조입니다."
+      },
+      {
+        answer: "교육 / 학습",
+        type: "plain",
+        words: ["student", "practice", "feedback", "reflection"],
+        note: "학습은 설명만이 아니라 연습, 피드백, 성찰을 통해 깊어진다는 구조입니다."
+      },
+      {
+        answer: "이론 vs 실습",
+        type: "vs",
+        left: ["theory", "concept"],
+        right: ["practice", "hands-on"],
+        note: "머리로 아는 것과 직접 해보는 것의 차이 또는 결합을 묻는 구조입니다."
+      },
+      {
+        answer: "창의성 / 집단지성",
+        type: "vs",
+        left: ["imagination", "inspiration"],
+        right: ["collaboration", "network"],
+        note: "창의성을 개인 천재성만이 아니라 협업과 맥락 속에서 보는 구조입니다."
+      },
+      {
+        answer: "사회전략 / 평판",
+        type: "plain",
+        words: ["reputation", "status", "approval", "gossip"],
+        note: "사람이 평판, 지위, 인정, 소문을 의식하며 행동하는 구조입니다."
+      },
+      {
+        answer: "윤리 / 이기 vs 이타",
+        type: "vs",
+        left: ["self-interest", "gain"],
+        right: ["altruism", "fairness"],
+        note: "자기이익과 타인 배려, 이기심과 도덕성의 긴장을 다루는 구조입니다."
+      },
+      {
+        answer: "법 / 제도 / 정책",
+        type: "plain",
+        words: ["regulation", "policy", "institution", "enforce"],
+        note: "개인의 선의보다 규칙, 정책, 제도 설계가 행동을 바꾸는 구조입니다."
+      },
+      {
+        answer: "경제 / 시장",
+        type: "plain",
+        words: ["market", "cost", "demand", "incentive"],
+        note: "비용, 수요, 보상, 시장 논리로 인간 행동이나 사회 구조를 설명합니다."
+      },
+      {
+        answer: "마케팅 / 소비자 선택",
+        type: "plain",
+        words: ["brand", "advertising", "consumer", "preference"],
+        note: "제품 자체보다 이미지, 광고, 기대, 소비자 인식이 선택을 움직이는 구조입니다."
+      },
+      {
+        answer: "자연 vs 인간",
+        type: "vs",
+        left: ["ecosystem", "biodiversity"],
+        right: ["industry", "intervention"],
+        note: "자연의 복잡한 균형과 인간의 개발/개입이 충돌하는 구조입니다."
+      },
+      {
+        answer: "진화 / 동물행동",
+        type: "plain",
+        words: ["adaptation", "predator", "offspring", "selection"],
+        note: "동물 행동을 생존, 번식, 적응, 선택의 관점에서 설명하는 구조입니다."
+      },
+      {
+        answer: "선천 vs 후천",
+        type: "vs",
+        left: ["genetic", "innate"],
+        right: ["learned", "environmental"],
+        note: "타고난 특성과 경험/환경으로 만들어지는 특성을 대비하는 구조입니다."
+      },
+      {
+        answer: "뇌 / 인지심리",
+        type: "plain",
+        words: ["memory", "attention", "perception", "habit"],
+        note: "뇌가 기억, 주의, 지각, 습관을 통해 세계를 처리하는 구조입니다."
+      },
+      {
+        answer: "스트레스 / 회복",
+        type: "vs",
+        left: ["pressure", "anxiety"],
+        right: ["resilience", "motivation"],
+        note: "압박과 불안이 회복력이나 동기와 연결되는 구조입니다."
+      },
+      {
+        answer: "사회변화 / 전통 vs 진보",
+        type: "vs",
+        left: ["reform", "innovation"],
+        right: ["tradition", "convention"],
+        note: "새로운 변화와 기존 관습/전통 사이의 긴장을 다루는 구조입니다."
+      },
+      {
+        answer: "도시 vs 시골",
+        type: "vs",
+        left: ["urban", "crowded"],
+        right: ["rural", "quiet"],
+        note: "도시적 속도/복잡성과 시골적 느림/평온을 대비하는 구조입니다."
+      },
+      {
+        answer: "보편 vs 특수",
+        type: "vs",
+        left: ["universal", "general"],
+        right: ["specific", "context"],
+        note: "일반 법칙과 구체적 맥락/예외 사이의 관계를 묻는 구조입니다."
+      },
+      {
+        answer: "자유 vs 통제",
+        type: "vs",
+        left: ["autonomy", "choice"],
+        right: ["regulation", "authority"],
+        note: "자율성과 선택이 규제, 권위, 통제와 부딪히는 구조입니다."
+      },
+      {
+        answer: "질서 vs 혼돈",
+        type: "vs",
+        left: ["order", "pattern"],
+        right: ["chaos", "uncertainty"],
+        note: "세상에서 질서와 패턴을 찾으려 하지만 혼돈과 불확실성이 끼어드는 구조입니다."
+      }
+    ];
+
+    const categories = questions.map(q => q.answer);
+
+    let quiz = [];
+    let current = 0;
+    let selected = null;
+    let checked = false;
+    let correctCount = 0;
+
+    const quizArea = document.getElementById("quizArea");
+    const scoreBox = document.getElementById("scoreBox");
+    const progress = document.getElementById("progress");
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function makeOptions(answer) {
+      const distractors = shuffle(categories.filter(c => c !== answer)).slice(0, 4);
+      return shuffle([answer, ...distractors]);
+    }
+
+    function initQuiz() {
+      quiz = shuffle(questions).map(q => ({
+        ...q,
+        options: makeOptions(q.answer)
+      }));
+      current = 0;
+      selected = null;
+      checked = false;
+      correctCount = 0;
+      render();
+    }
+
+    function renderWords(q) {
+      if (q.type === "vs") {
+        return `
+          <div class="word-area">
+            <div class="vs-box">
+              <div class="side">
+                <div class="side-title">A 묶음</div>
+                ${q.left.map(w => `<span class="chip">${w}</span>`).join("")}
+              </div>
+              <div class="vs">VS</div>
+              <div class="side">
+                <div class="side-title">B 묶음</div>
+                ${q.right.map(w => `<span class="chip">${w}</span>`).join("")}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="word-area">
+          <div class="plain-words">
+            ${q.words.map(w => `<span class="chip">${w}</span>`).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      if (current >= quiz.length) {
+        renderResult();
+        return;
+      }
+
+      const q = quiz[current];
+      selected = null;
+      checked = false;
+
+      scoreBox.textContent = `${correctCount} / ${quiz.length}`;
+      progress.style.width = `${(current / quiz.length) * 100}%`;
+
+      quizArea.innerHTML = `
+        <div class="q-meta">
+          <span>문제 ${current + 1} / ${quiz.length}</span>
+          <span>${q.type === "vs" ? "VS형 단서" : "테마형 단서"}</span>
+        </div>
+
+        <div class="prompt">이 단어들이 가리키는 클리셰 대분류는?</div>
+
+        ${renderWords(q)}
+
+        <div class="options">
+          ${q.options.map((op, idx) => `
+            <button class="option" data-answer="${op}">
+              ${idx + 1}. ${op}
+            </button>
+          `).join("")}
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="controls">
+          <button class="ghost-btn" id="skipBtn">넘기기</button>
+          <button class="main-btn" id="checkBtn" disabled>채점하기</button>
+        </div>
+      `;
+
+      document.querySelectorAll(".option").forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (checked) return;
+
+          document.querySelectorAll(".option").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          selected = btn.dataset.answer;
+          document.getElementById("checkBtn").disabled = false;
+        });
+      });
+
+      document.getElementById("checkBtn").addEventListener("click", checkAnswer);
+      document.getElementById("skipBtn").addEventListener("click", nextQuestion);
+    }
+
+    function checkAnswer() {
+      if (!selected || checked) return;
+
+      checked = true;
+      const q = quiz[current];
+      const feedback = document.getElementById("feedback");
+      const checkBtn = document.getElementById("checkBtn");
+
+      document.querySelectorAll(".option").forEach(btn => {
+        const value = btn.dataset.answer;
+
+        if (value === q.answer) {
+          btn.classList.add("correct");
+        }
+
+        if (value === selected && selected !== q.answer) {
+          btn.classList.add("wrong");
+        }
+      });
+
+      if (selected === q.answer) {
+        correctCount++;
+        feedback.innerHTML = `정답입니다. <strong>${q.answer}</strong><br>${q.note}`;
+      } else {
+        feedback.innerHTML = `오답입니다. 정답은 <strong>${q.answer}</strong>입니다.<br>${q.note}`;
+      }
+
+      feedback.classList.add("show");
+      scoreBox.textContent = `${correctCount} / ${quiz.length}`;
+      checkBtn.textContent = current === quiz.length - 1 ? "결과 보기" : "다음 문제";
+      checkBtn.disabled = false;
+      checkBtn.removeEventListener("click", checkAnswer);
+      checkBtn.addEventListener("click", nextQuestion);
+    }
+
+    function nextQuestion() {
+      current++;
+      render();
+    }
+
+    function renderResult() {
+      progress.style.width = "100%";
+
+      const percent = Math.round((correctCount / quiz.length) * 100);
+
+      quizArea.innerHTML = `
+        <div class="result">
+          <h2>${correctCount} / ${quiz.length}</h2>
+          <p>정답률 ${percent}%입니다.</p>
+          <p>
+            목표는 단어를 외우는 게 아니라,<br>
+            단어들이 어느 방향으로 몰려 있는지 보고 제시문 클리셰를 예측하는 것입니다.
+          </p>
+          <button class="main-btn" onclick="initQuiz()">다시 풀기</button>
+        </div>
+      `;
+    }
+
+    initQuiz();
+  </script>
+</body>
+</html>
