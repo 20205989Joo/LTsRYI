@@ -1154,6 +1154,25 @@
       touch-action: none;
     }
 
+    .overlay-walkthrough-pane {
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 24px;
+      box-sizing: border-box;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(238, 229, 214, 0.74)),
+        #f6efe4;
+    }
+
+    .overlay-walkthrough-image {
+      width: min(76%, 380px);
+      max-height: 76%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 12px 22px rgba(46, 43, 39, 0.22));
+    }
+
     .overlay-two-three {
       display: grid;
       grid-template-columns: 3fr 7fr;
@@ -1161,6 +1180,435 @@
       width: 100%;
       height: 100%;
       position: relative;
+    }
+
+    .overlay-four-t {
+      display: grid;
+      grid-template-columns: 3fr 7fr;
+      gap: 0;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(220, 230, 222, 0.28) 34%, rgba(238, 232, 220, 0.58) 64%, rgba(255, 255, 255, 0.7)),
+        radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.86), transparent 30%),
+        radial-gradient(circle at 88% 8%, rgba(176, 197, 184, 0.28), transparent 26%),
+        #edf0e8;
+      color: #28312e;
+    }
+
+    .overlay-four-col {
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .overlay-four-col--bank {
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(228, 235, 225, 0.74)),
+        #eef4e9;
+      border-right: 1px solid rgba(119, 139, 124, 0.34);
+    }
+
+    .overlay-four-col--fragments {
+      background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.84), rgba(225, 231, 226, 0.52) 34%, rgba(246, 242, 233, 0.76) 62%, rgba(214, 225, 216, 0.5)),
+        repeating-linear-gradient(116deg, rgba(104, 126, 116, 0.06) 0 1px, transparent 1px 28px),
+        #f5f3ec;
+      color: #28312e;
+    }
+
+    .overlay-four-head {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      border-bottom: 1px solid rgba(91, 112, 101, 0.22);
+      box-sizing: border-box;
+      font-size: 12px;
+      font-weight: 900;
+      color: #43584d;
+    }
+
+    .overlay-four-col--fragments .overlay-four-head {
+      border-bottom-color: rgba(91, 112, 101, 0.24);
+      background: rgba(255, 255, 255, 0.42);
+    }
+
+    .overlay-four-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 8px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .overlay-four-bank-card,
+    .overlay-four-fragment-card {
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    .overlay-four-bank-card {
+      border: 1px solid rgba(137, 160, 141, 0.34);
+      background: rgba(255, 255, 255, 0.62);
+      padding: 6px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.54);
+    }
+
+    .overlay-four-fragment-card {
+      border: 1px solid rgba(127, 147, 136, 0.34);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(237, 239, 232, 0.7)),
+        #f9f8f2;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.68),
+        0 2px 8px rgba(71, 89, 80, 0.08);
+    }
+
+    .overlay-four-fragment-no {
+      min-width: 24px;
+      height: 22px;
+      border-radius: 5px;
+      background: #dfe9dc;
+      color: #3f574a;
+      border: 1px solid rgba(104, 133, 112, 0.36);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .overlay-four-bank-text,
+    .overlay-four-fragment-text {
+      width: 100%;
+      max-width: 100%;
+      min-height: 42px;
+      border-radius: 5px;
+      box-sizing: border-box;
+      resize: vertical;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      font-size: calc(var(--memo-font-size) - 1px);
+      line-height: 1.35;
+      outline: none;
+      padding: 5px 7px;
+    }
+
+    .overlay-four-bank-text {
+      border: 1px solid rgba(137, 160, 141, 0.36);
+      background: rgba(255, 255, 255, 0.76);
+      color: #28312e;
+    }
+
+    .overlay-four-fragment-text {
+      min-height: 64px;
+      border: 1px solid rgba(137, 160, 141, 0.34);
+      background: rgba(255, 255, 255, 0.86);
+      color: #28312e;
+    }
+
+    .overlay-four-fragment-body {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .overlay-four-source {
+      border: 1px solid rgba(137, 160, 141, 0.26);
+      border-radius: 6px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(242, 244, 238, 0.78)),
+        #fbfaf5;
+      color: #2e3733;
+      padding: 7px 8px;
+      box-sizing: border-box;
+      font-size: calc(var(--memo-font-size) - 1px);
+      line-height: 1.4;
+      white-space: pre-wrap;
+      user-select: text;
+      cursor: zoom-in;
+      transition: border-color 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+    }
+
+    .overlay-four-source:hover {
+      border-color: rgba(89, 118, 101, 0.48);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(239, 244, 237, 0.86)),
+        #fbfaf5;
+      box-shadow: 0 2px 10px rgba(71, 89, 80, 0.12);
+    }
+
+    .overlay-four-empty {
+      border: 1px dashed rgba(91, 112, 101, 0.34);
+      border-radius: 6px;
+      padding: 12px;
+      color: rgba(40, 49, 46, 0.62);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .overlay-four-zoombox {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      height: 50%;
+      min-width: 260px;
+      min-height: 230px;
+      max-width: 920px;
+      max-height: 440px;
+      z-index: 240;
+      display: grid;
+      grid-template-columns: minmax(132px, 30%) minmax(0, 1fr);
+      overflow: hidden;
+      transform: translate(-50%, -50%);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(251, 251, 247, 0.98), rgba(232, 240, 235, 0.96)),
+        #f8f8f0;
+      color: #28312e;
+      box-shadow:
+        inset 0 0 0 1px rgba(87, 105, 96, 0.22),
+        0 14px 32px rgba(14, 20, 17, 0.24);
+    }
+
+    .overlay-four-zoombox[hidden] {
+      display: none;
+    }
+
+    .overlay-four-zoombox-bank-col,
+    .overlay-four-zoombox-main {
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .overlay-four-zoombox-bank-col {
+      border-right: 1px solid rgba(104, 126, 116, 0.28);
+      background: rgba(244, 248, 241, 0.9);
+    }
+
+    .overlay-four-zoombox-head {
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 10px;
+      border-bottom: 1px solid rgba(104, 126, 116, 0.24);
+      box-sizing: border-box;
+      font-size: 12px;
+      font-weight: 900;
+      color: #40564a;
+    }
+
+    .overlay-four-zoombox-close {
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(80, 103, 91, 0.32);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.86);
+      color: #324139;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .overlay-four-zoombox-close:hover {
+      background: #f2f7ed;
+      border-color: rgba(80, 103, 91, 0.52);
+    }
+
+    .overlay-four-zoombox-bank-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 6px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .overlay-four-zoombox-bank-row {
+      --bank-color: #fff1a6;
+      width: 100%;
+      border: 1px solid rgba(109, 130, 119, 0.28);
+      border-left: 6px solid var(--bank-color);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 5px;
+      box-sizing: border-box;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.54);
+    }
+
+    .overlay-four-zoombox-bank-row.is-active {
+      border-color: rgba(63, 83, 72, 0.56);
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.78),
+        0 0 0 2px rgba(69, 92, 80, 0.18);
+    }
+
+    .overlay-four-zoombox-bank-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+      font-size: 10px;
+      font-weight: 900;
+      color: #40564a;
+    }
+
+    .overlay-four-zoombox-word-slot {
+      width: 100%;
+      min-height: 32px;
+      border: 1px solid rgba(119, 139, 124, 0.24);
+      border-radius: 5px;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.8);
+      color: #28312e;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      font-size: calc(var(--memo-font-size, 15px) - 1px);
+      line-height: 1.35;
+      padding: 5px 6px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .overlay-four-zoombox-word-slot.is-empty::before {
+      content: "Words";
+      color: rgba(40, 49, 46, 0.34);
+      font-weight: 700;
+    }
+
+    .overlay-four-zoombox-bank-word {
+      border-radius: 4px;
+      background: var(--bank-color);
+      border: 1px solid rgba(78, 99, 88, 0.2);
+      padding: 1px 5px;
+      font-weight: 800;
+      box-shadow: inset 0 -1px 0 rgba(78, 99, 88, 0.18);
+    }
+
+    .overlay-four-zoombox-bank-meaning {
+      width: 100%;
+      height: 34px;
+      min-height: 34px;
+      max-height: 64px;
+      margin-top: 5px;
+      border: 1px solid rgba(119, 139, 124, 0.24);
+      border-radius: 5px;
+      box-sizing: border-box;
+      resize: vertical;
+      background: rgba(255, 255, 255, 0.84);
+      color: #28312e;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      font-size: calc(var(--memo-font-size, 15px) - 1px);
+      line-height: 1.35;
+      padding: 5px 7px;
+      outline: none;
+    }
+
+    .overlay-four-zoombox-main {
+      background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.86), rgba(243, 245, 238, 0.82)),
+        #fbfaf4;
+    }
+
+    .overlay-four-zoombox-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 8px;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) 42px;
+      gap: 8px;
+    }
+
+    .overlay-four-zoombox-sentence {
+      min-height: 0;
+      border: 1px solid rgba(120, 141, 130, 0.3);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.82);
+      padding: 18px 20px;
+      box-sizing: border-box;
+      color: #2e3733;
+      font-size: var(--memo-font-size, 15px);
+      line-height: 1.72;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      align-content: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+
+    .overlay-four-zoombox-token {
+      --token-color: #fff1a6;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      line-height: 1.4;
+      padding: 3px 7px;
+      margin: 2px 4px;
+      cursor: pointer;
+      vertical-align: baseline;
+    }
+
+    .overlay-four-zoombox-token:hover {
+      border-color: rgba(84, 103, 94, 0.28);
+      background: rgba(232, 240, 235, 0.72);
+    }
+
+    .overlay-four-zoombox-token.is-selected {
+      border-color: rgba(78, 99, 88, 0.42);
+      background: var(--token-color);
+      box-shadow: inset 0 -2px 0 rgba(78, 99, 88, 0.24);
+      font-weight: 800;
+    }
+
+    .overlay-four-zoombox-answer {
+      width: 100%;
+      height: 42px;
+      min-height: 42px;
+      max-height: 42px;
+      border: 1px solid rgba(120, 141, 130, 0.32);
+      border-radius: 6px;
+      box-sizing: border-box;
+      resize: none;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.88);
+      color: #28312e;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      font-size: var(--memo-font-size, 15px);
+      line-height: 1.35;
+      padding: 8px 9px;
+      outline: none;
     }
 
     .overlay-two-three.is-flipped {
@@ -1475,7 +1923,7 @@
     }
 
     .overlay-two-three.is-three-pen-mode .overlay-card--threeT {
-      min-height: 212px;
+      min-height: 150px;
     }
 
     .overlay-card-inner {
@@ -1639,9 +2087,14 @@
     }
 
     .overlay-two-three.is-three-pen-mode .overlay-card-textarea--threeT-sentence {
-      display: none;
-      min-height: 68px !important;
+      display: block;
+      min-height: 122px !important;
       max-height: 180px;
+    }
+
+    .overlay-three-write-wrap {
+      position: relative;
+      min-height: 32px;
     }
 
     .overlay-card-input--threeT,
@@ -1662,21 +2115,24 @@
     }
 
     .overlay-three-ink-wrap {
-      margin-top: 6px;
-      height: 86px;
-      border: 1px solid rgba(247, 242, 232, 0.26);
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      margin: 0;
+      height: auto;
+      border: none;
       border-radius: 6px;
-      background: rgba(246, 239, 225, 0.06);
+      background: transparent;
       overflow: hidden;
       touch-action: none;
-      display: none;
-      position: relative;
+      display: block;
+      pointer-events: none;
     }
 
     .overlay-two-three.is-three-pen-mode .overlay-three-ink-wrap {
       display: block;
       margin-top: 0;
-      height: 182px;
+      height: auto;
     }
 
     .overlay-three-ink-canvas {
@@ -1686,11 +2142,11 @@
       touch-action: none;
       pointer-events: none;
       cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M4 19l3.6-1 9.8-9.8-3.6-3.6L4 14.4V19z' fill='%2352433a' stroke='%23f5ead9' stroke-width='1'/%3E%3Cpath d='M14.8 3.5l3.7 3.7 1-1c.8-.8.8-2 0-2.8l-.9-.9c-.8-.8-2-.8-2.8 0l-1 1z' fill='%239fc48d'/%3E%3C/svg%3E") 3 19, pointer;
-      background:
-        linear-gradient(180deg, rgba(244, 230, 205, 0.06) 0, rgba(244, 230, 205, 0.06) 1px, transparent 1px, transparent 26px);
-      background-size: 100% 26px;
+      background: transparent;
     }
 
+    body.is-page-ink-tool-pen .overlay-three-ink-wrap,
+    body.is-page-ink-tool-eraser .overlay-three-ink-wrap,
     body.is-page-ink-tool-pen .overlay-three-ink-canvas,
     body.is-page-ink-tool-eraser .overlay-three-ink-canvas {
       pointer-events: auto;
@@ -1918,17 +2374,19 @@
 
     .page-pen-palette-head {
       position: relative;
-      height: 30px;
+      height: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 0 34px 7px;
+      padding: 0 10px 8px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid rgba(100, 139, 82, 0.28);
       cursor: grab;
       font-size: 11px;
       font-weight: 900;
       letter-spacing: 0;
-      color: #557248;
+      color: #6f4b2f;
     }
 
     .page-pen-palette.is-dragging .page-pen-palette-head {
@@ -1940,20 +2398,24 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0 13px;
-      border: 1px solid rgba(136, 184, 120, 0.48);
+      padding: 0 26px;
+      border: 1px solid rgba(191, 153, 94, 0.52);
       border-radius: 999px;
-      background: rgba(251, 255, 245, 0.86);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.48);
+      background: rgba(255, 245, 214, 0.92);
+      color: #725033;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.52),
+        0 1px 3px rgba(105, 132, 78, 0.12);
       white-space: nowrap;
     }
 
     .page-pen-close {
       position: absolute;
-      top: 0;
+      top: 1px;
       right: 2px;
+      z-index: 2;
       width: 25px;
-      height: 25px;
+      height: 20px;
       border: none;
       border-radius: 50%;
       background: #dcebcf;
@@ -2023,7 +2485,7 @@
     }
 
     .page-pen-size-value {
-      text-align: right;
+      text-align: center;
       font-variant-numeric: tabular-nums;
       color: #557248;
     }
@@ -2035,6 +2497,54 @@
       font-weight: 900;
     }
 
+    .page-pen-color-track {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+
+    .page-pen-color-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .page-pen-color-arrow {
+      width: 22px;
+      height: 25px;
+      border: 1px solid #bed7ae;
+      border-radius: 6px;
+      background: #fbfff5;
+      color: #557248;
+      cursor: pointer;
+      padding: 0;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .page-pen-color-arrow::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      transform: translate(-50%, -50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    .page-pen-color-arrow--prev::before {
+      border-right: 7px solid currentColor;
+    }
+
+    .page-pen-color-arrow--next::before {
+      border-left: 7px solid currentColor;
+    }
+
     .page-pen-swatch {
       width: 25px;
       height: 25px;
@@ -2044,6 +2554,7 @@
       box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.58);
       cursor: pointer;
       padding: 0;
+      flex: 0 0 auto;
     }
 
     .page-pen-swatch.is-active {
@@ -2255,6 +2766,41 @@
               </div>
             </div>
           </div>
+          <div id="mock-overlay-four-t-pane" class="overlay-pane overlay-four-t" hidden>
+            <div class="overlay-four-col overlay-four-col--bank">
+              <div class="overlay-four-head">Bank</div>
+              <div id="mock-overlay-four-bank-list" class="overlay-four-scroll"></div>
+            </div>
+            <div class="overlay-four-col overlay-four-col--fragments">
+              <div class="overlay-four-head">Chunks &amp; Fragments</div>
+              <div id="mock-overlay-four-fragment-list" class="overlay-four-scroll"></div>
+            </div>
+            <div id="mock-four-zoombox" class="overlay-four-zoombox" hidden>
+              <div class="overlay-four-zoombox-bank-col">
+                <div class="overlay-four-zoombox-head">
+                  <span>Zoombox Bank</span>
+                </div>
+                <div id="mock-four-zoombox-bank-list" class="overlay-four-zoombox-bank-list"></div>
+              </div>
+              <div class="overlay-four-zoombox-main">
+                <div class="overlay-four-zoombox-head">
+                  <span id="mock-four-zoombox-title">Zoombox</span>
+                  <button id="mock-four-zoombox-close" class="overlay-four-zoombox-close" type="button" aria-label="Close zoombox">x</button>
+                </div>
+                <div class="overlay-four-zoombox-body">
+                  <div id="mock-four-zoombox-sentence" class="overlay-four-zoombox-sentence"></div>
+                  <textarea id="mock-four-zoombox-answer" class="overlay-four-zoombox-answer" placeholder="Translation" rows="1"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="mock-overlay-walkthrough-pane" class="overlay-pane overlay-walkthrough-pane" hidden>
+            <img
+              class="overlay-walkthrough-image"
+              alt="Walkthrough under construction"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='360' viewBox='0 0 520 360'%3E%3Crect width='520' height='360' rx='30' fill='%23f8f1e7'/%3E%3Cg transform='translate(92 55)'%3E%3Crect x='0' y='156' width='336' height='58' rx='10' fill='%23342f2a'/%3E%3Cg%3E%3Crect x='10' y='168' width='48' height='34' fill='%23f4bd50'/%3E%3Crect x='82' y='168' width='48' height='34' fill='%23f4bd50'/%3E%3Crect x='154' y='168' width='48' height='34' fill='%23f4bd50'/%3E%3Crect x='226' y='168' width='48' height='34' fill='%23f4bd50'/%3E%3Crect x='298' y='168' width='28' height='34' fill='%23f4bd50'/%3E%3C/g%3E%3Cpath d='M84 154l39-106h90l39 106z' fill='%23e8a83d'/%3E%3Cpath d='M132 48h72l14 38H118z' fill='%23f7cf73'/%3E%3Cpath d='M104 154h128l-14-42H118z' fill='%23f7cf73'/%3E%3Crect x='134' y='24' width='68' height='35' rx='8' fill='%23342f2a'/%3E%3Cpath d='M148 24c5-18 35-18 40 0z' fill='%23f4bd50'/%3E%3C/g%3E%3Ctext x='260' y='292' text-anchor='middle' font-family='Arial,sans-serif' font-size='28' font-weight='800' fill='%23342f2a'%3EWALKTHROUGH%3C/text%3E%3Ctext x='260' y='322' text-anchor='middle' font-family='Arial,sans-serif' font-size='18' font-weight='700' fill='%236a5b4c'%3EUNDER CONSTRUCTION%3C/text%3E%3C/svg%3E"
+            />
+          </div>
         </div>
         <div class="overlay-memo-tabbar">
           <div id="mock-overlay-tab-list" class="overlay-tab-list"></div>
@@ -2262,6 +2808,8 @@
           <div id="mock-overlay-tab-type-popup" class="overlay-tab-type-popup" hidden>
             <button class="overlay-type-option" type="button" data-type="blank">Blank</button>
             <button class="overlay-type-option" type="button" data-type="two_three">Words / Translation</button>
+            <button class="overlay-type-option" type="button" data-type="four_t">Chunks &amp; Fragments</button>
+            <button class="overlay-type-option" type="button" data-type="walkthrough">Walkthrough</button>
           </div>
         </div>
         <div id="mock-page-pen-palette" class="page-pen-palette" hidden>
@@ -2281,12 +2829,25 @@
           </label>
           <div id="mock-page-pen-ink-colors" class="page-pen-color-row page-pen-color-row--ink" aria-label="펜 색상">
             <span class="page-pen-color-label">펜색</span>
-            <button class="page-pen-swatch is-active" type="button" data-page-ink-color="#4f4a45" style="--swatch:#4f4a45" aria-label="코코아먹"></button>
-            <button class="page-pen-swatch" type="button" data-page-ink-color="#7b5e4a" style="--swatch:#7b5e4a" aria-label="밀크코코아"></button>
-            <button class="page-pen-swatch" type="button" data-page-ink-color="#b56a7c" style="--swatch:#b56a7c" aria-label="베리"></button>
-            <button class="page-pen-swatch" type="button" data-page-ink-color="#6f9a7b" style="--swatch:#6f9a7b" aria-label="세이지"></button>
-            <button class="page-pen-swatch" type="button" data-page-ink-color="#6d9fbe" style="--swatch:#6d9fbe" aria-label="소다"></button>
-            <button class="page-pen-swatch" type="button" data-page-ink-color="#8d83b7" style="--swatch:#8d83b7" aria-label="라벤더"></button>
+            <button class="page-pen-color-arrow page-pen-color-arrow--prev" type="button" data-page-color-scroll="-1" aria-label="이전 펜색"></button>
+            <div id="mock-page-pen-ink-track" class="page-pen-color-track">
+              <button class="page-pen-swatch is-active" type="button" data-page-ink-color="#4f4a45" style="--swatch:#4f4a45" aria-label="코코아먹"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#7b5e4a" style="--swatch:#7b5e4a" aria-label="밀크코코아"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#f8f2e4" style="--swatch:#f8f2e4" aria-label="아이보리"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#ead8bf" style="--swatch:#ead8bf" aria-label="오트밀"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#d5bfa1" style="--swatch:#d5bfa1" aria-label="라떼"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#c98f7a" style="--swatch:#c98f7a" aria-label="살몬"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#b56a7c" style="--swatch:#b56a7c" aria-label="베리"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#d997b5" style="--swatch:#d997b5" aria-label="로즈"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#c5a7d8" style="--swatch:#c5a7d8" aria-label="라일락"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#8d83b7" style="--swatch:#8d83b7" aria-label="라벤더"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#7fa6d6" style="--swatch:#7fa6d6" aria-label="스카이"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#6d9fbe" style="--swatch:#6d9fbe" aria-label="소다"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#8abaae" style="--swatch:#8abaae" aria-label="민트그레이"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#6f9a7b" style="--swatch:#6f9a7b" aria-label="세이지"></button>
+              <button class="page-pen-swatch" type="button" data-page-ink-color="#a8b66f" style="--swatch:#a8b66f" aria-label="올리브"></button>
+            </div>
+            <button class="page-pen-color-arrow page-pen-color-arrow--next" type="button" data-page-color-scroll="1" aria-label="다음 펜색"></button>
           </div>
           <div id="mock-page-pen-highlight-colors" class="page-pen-color-row page-pen-color-row--highlight" aria-label="하이라이트 색상" hidden>
             <span class="page-pen-color-label">형광</span>
@@ -2387,6 +2948,8 @@
       const overlayFontSizeValue = document.getElementById("mock-overlay-font-size-value");
       const overlayBlankPane = document.getElementById("mock-overlay-blank-pane");
       const overlayTwoThreePane = document.getElementById("mock-overlay-two-three-pane");
+      const overlayFourTPane = document.getElementById("mock-overlay-four-t-pane");
+      const overlayWalkthroughPane = document.getElementById("mock-overlay-walkthrough-pane");
       const overlayTwoFlipTriangleBtn = document.getElementById("mock-overlay-two-flip-triangle");
       const overlayQuestionBar = document.getElementById("mock-overlay-question-bar");
       const overlayMemoText = document.getElementById("mock-overlay-memo-text");
@@ -2396,6 +2959,14 @@
       const blankDrawCanvas = document.getElementById("mock-blank-draw-canvas");
       const overlayTwoLeftList = document.getElementById("mock-overlay-two-left-list");
       const overlayTwoRightList = document.getElementById("mock-overlay-two-right-list");
+      const overlayFourBankList = document.getElementById("mock-overlay-four-bank-list");
+      const overlayFourFragmentList = document.getElementById("mock-overlay-four-fragment-list");
+      const overlayFourZoombox = document.getElementById("mock-four-zoombox");
+      const overlayFourZoomboxBankList = document.getElementById("mock-four-zoombox-bank-list");
+      const overlayFourZoomboxTitle = document.getElementById("mock-four-zoombox-title");
+      const overlayFourZoomboxCloseBtn = document.getElementById("mock-four-zoombox-close");
+      const overlayFourZoomboxSentence = document.getElementById("mock-four-zoombox-sentence");
+      const overlayFourZoomboxAnswer = document.getElementById("mock-four-zoombox-answer");
       const overlayThreeCol = document.getElementById("mock-overlay-three-col");
       const overlayThreeHead = document.getElementById("mock-overlay-three-head");
       const overlayThreeHeadLabel = document.getElementById("mock-overlay-three-head-label");
@@ -2414,6 +2985,7 @@
       const overlayTabTypePopup = document.getElementById("mock-overlay-tab-type-popup");
       const overlayTypeOptionBtns = Array.from(document.querySelectorAll("#mock-overlay-tab-type-popup [data-type]"));
       const topbarStatus = document.getElementById("mock-topbar-status");
+      const mockWorkspace = document.getElementById("mock-workspace");
       const openBtn = document.getElementById("mock-pdf-open-btn");
       const gradeSel = document.getElementById("mock-grade-select");
       const yearSel = document.getElementById("mock-year-select");
@@ -2433,10 +3005,12 @@
       const pagePenRedoBtn = document.getElementById("mock-page-pen-redo");
       const pagePenClearBtn = document.getElementById("mock-page-pen-clear");
       const pagePenInkColorRow = document.getElementById("mock-page-pen-ink-colors");
+      const pagePenInkTrack = document.getElementById("mock-page-pen-ink-track");
       const pagePenHighlightColorRow = document.getElementById("mock-page-pen-highlight-colors");
       const pagePenToolBtns = Array.from(document.querySelectorAll("[data-page-ink-tool]"));
       const pagePenColorBtns = Array.from(document.querySelectorAll("[data-page-ink-color]"));
       const pageHighlightColorBtns = Array.from(document.querySelectorAll("[data-page-highlight-color]"));
+      const pagePenColorScrollBtns = Array.from(document.querySelectorAll("[data-page-color-scroll]"));
 
       const SUPABASE_ORIGIN = "https://yslwgaephsnbfoiqnpuw.supabase.co";
       const SUPABASE_BASE = `${SUPABASE_ORIGIN}/storage/v1/object/public`;
@@ -2507,6 +3081,7 @@
       const PAGE_INK_MARK_COLOR = "#c25f5f";
       const PAGE_INK_CORRECT_COLOR = "#63aa78";
       const PAGE_INK_VALID_TOOLS = ["pen", "eraser", "highlight", "check", "o", "x", "score"];
+      const FOUR_T_SOURCE_MODE = "source_sentence_translation_v2";
 
       let lastPdfUrl = "";
       let memoFontSize = 15;
@@ -2514,17 +3089,34 @@
       let nextMemoTabId = 2;
       const DEFAULT_TWO_T_CARD_COUNT = 50;
       const DEFAULT_THREE_T_CARD_COUNT = 15;
+      const DEFAULT_FOUR_T_BANK_COUNT = 18;
+      const FOUR_T_ZOOMBOX_BANK_COUNT = 8;
+      const FOUR_T_ZOOMBOX_OWNER = "four_t_zoombox";
+      const FOUR_T_ZOOMBOX_BANK_COLORS = [
+        "#fff1a6",
+        "#cfeea4",
+        "#ffd6a6",
+        "#f7bdd0",
+        "#b7eadb",
+        "#c8d7ff",
+        "#dfc8ff",
+        "#d8d5c7"
+      ];
+      const DEBUG_FOUR_T_ZOOMBOX = true;
       const memoTabs = [{
         id: 1,
         type: "blank",
         blankText: "",
         twoThree: null,
+        fourT: null,
         blankInk: []
       }];
       let activeMemoTabIndex = 0;
       const TAB_TYPE_LABEL = {
         blank: "Blank",
-        two_three: "Words / Translation"
+        two_three: "Words / Translation",
+        four_t: "Chunks & Fragments",
+        walkthrough: "Walkthrough"
       };
       let classSessions = [];
       let isSessionListLoading = false;
@@ -2543,6 +3135,7 @@
       let activeWordIndex = null;
       let wordMeaningMap = new Map();
       let wordTooltipEl = null;
+      let lastFourTZoomboxTokenCommit = { key: "", at: 0 };
       let isDictModeOn = false;
       let lastCapturedWord = "";
       let dictZoom = 1;
@@ -2571,6 +3164,12 @@
         tool: null,
         erased: false
       };
+      const fourTZoomboxState = {
+        open: false,
+        row: null,
+        rowIndex: -1,
+        activeBankIndex: 0
+      };
       const pageInkData = {
         version: PAGE_INK_VERSION,
         pages: {}
@@ -2592,6 +3191,7 @@
       let pagePenSize = 4;
       let pagePenColor = PAGE_INK_COLOR;
       let pageHighlightColor = PAGE_INK_HIGHLIGHT_COLOR;
+      let nextFourTZoomboxHighlightId = 1;
       const DEBUG_SCROLL_DIAG = false;
       const DEBUG_LIVE_FETCH_LOG = true;
 
@@ -2626,6 +3226,8 @@
         !overlayFontSizeValue ||
         !overlayBlankPane ||
         !overlayTwoThreePane ||
+        !overlayFourTPane ||
+        !overlayWalkthroughPane ||
         !overlayTwoFlipTriangleBtn ||
         !overlayQuestionBar ||
         !overlayMemoText ||
@@ -2635,6 +3237,14 @@
         !blankDrawCanvas ||
         !overlayTwoLeftList ||
         !overlayTwoRightList ||
+        !overlayFourBankList ||
+        !overlayFourFragmentList ||
+        !overlayFourZoombox ||
+        !overlayFourZoomboxBankList ||
+        !overlayFourZoomboxTitle ||
+        !overlayFourZoomboxCloseBtn ||
+        !overlayFourZoomboxSentence ||
+        !overlayFourZoomboxAnswer ||
         !overlayThreeCol ||
         !overlayThreeHead ||
         !overlayThreeHeadLabel ||
@@ -2653,6 +3263,7 @@
         !overlayTabTypePopup ||
         !overlayTypeOptionBtns.length ||
         !topbarStatus ||
+        !mockWorkspace ||
         !openBtn ||
         !gradeSel ||
         !yearSel ||
@@ -2672,11 +3283,14 @@
         !pagePenRedoBtn ||
         !pagePenClearBtn ||
         !pagePenInkColorRow ||
+        !pagePenInkTrack ||
         !pagePenHighlightColorRow ||
         !pagePenToolBtns.length ||
         !pagePenColorBtns.length ||
         !pageHighlightColorBtns.length
       ) return;
+
+      mockWorkspace.appendChild(overlayFourZoombox);
 
       function showPanel(el) {
         el.hidden = false;
@@ -2956,6 +3570,384 @@
         });
       }
 
+      function makeDefaultFourTBankRows() {
+        return Array.from({ length: DEFAULT_FOUR_T_BANK_COUNT }, function () {
+          return {
+            text: "",
+            meaning: ""
+          };
+        });
+      }
+
+      function makeDefaultFourTChunkBanks() {
+        return Array.from({ length: FOUR_T_ZOOMBOX_BANK_COUNT }, function (_item, idx) {
+          return {
+            text: "",
+            meaning: "",
+            color: FOUR_T_ZOOMBOX_BANK_COLORS[idx % FOUR_T_ZOOMBOX_BANK_COLORS.length],
+            tokens: []
+          };
+        });
+      }
+
+      function normalizeFourTChunkToken(rawToken) {
+        const safe = rawToken && typeof rawToken === "object" ? rawToken : {};
+        const rawIndex = safe.tokenIndex != null ? safe.tokenIndex : safe.index;
+        const indexNum = Number(rawIndex);
+        if (!Number.isFinite(indexNum) || indexNum < 0) return null;
+        const word = normalizeCapturedWord(safe.word || safe.raw || safe.text || "");
+        return {
+          tokenIndex: Math.trunc(indexNum),
+          word,
+          raw: toSafeText(safe.raw != null ? safe.raw : (safe.text != null ? safe.text : safe.word)).slice(0, 80),
+          highlightId: toSafeText(safe.highlightId || safe.pageInkId || "").slice(0, 120)
+        };
+      }
+
+      function normalizeFourTChunkBank(rawBank, idx) {
+        const safe = rawBank && typeof rawBank === "object" ? rawBank : {};
+        const color = normalizeHexColor(safe.color, FOUR_T_ZOOMBOX_BANK_COLORS[idx % FOUR_T_ZOOMBOX_BANK_COLORS.length]);
+        const rawTokens = Array.isArray(safe.tokens) ? safe.tokens : [];
+        const tokens = [];
+        const seen = new Set();
+        for (let i = 0; i < rawTokens.length; i += 1) {
+          const token = normalizeFourTChunkToken(rawTokens[i]);
+          if (!token || seen.has(token.tokenIndex)) continue;
+          seen.add(token.tokenIndex);
+          tokens.push(token);
+        }
+        tokens.sort(function (a, b) {
+          return a.tokenIndex - b.tokenIndex;
+        });
+        return {
+          text: toSafeText(safe.text),
+          meaning: toSafeText(safe.meaning != null ? safe.meaning : (safe.memo != null ? safe.memo : safe.note)),
+          color,
+          tokens
+        };
+      }
+
+      function normalizeFourTChunkBanks(rawBanks) {
+        const source = Array.isArray(rawBanks) ? rawBanks : [];
+        const banks = [];
+        for (let idx = 0; idx < FOUR_T_ZOOMBOX_BANK_COUNT; idx += 1) {
+          banks.push(normalizeFourTChunkBank(source[idx], idx));
+        }
+        return banks;
+      }
+
+      function normalizeFourTBankRow(rawRow, idx) {
+        const safe = rawRow && typeof rawRow === "object" ? rawRow : {};
+        const sourceText = safe.text != null
+          ? safe.text
+          : (safe.word != null ? safe.word : (safe.words != null ? safe.words : ""));
+        const words = Array.isArray(sourceText)
+          ? sourceText.map(function (word) { return toSafeText(word).trim(); }).filter(Boolean).join(" ")
+          : toSafeText(sourceText);
+        return {
+          text: words,
+          meaning: toSafeText(safe.meaning != null ? safe.meaning : (safe.memo != null ? safe.memo : safe.note)),
+          color: normalizeHexColor(safe.color, FOUR_T_ZOOMBOX_BANK_COLORS[idx % FOUR_T_ZOOMBOX_BANK_COLORS.length])
+        };
+      }
+
+      function normalizeFourTBankRows(rawRows) {
+        const source = Array.isArray(rawRows) ? rawRows : [];
+        const rows = source.map(function (row, idx) {
+          return normalizeFourTBankRow(row, idx);
+        });
+        while (rows.length < DEFAULT_FOUR_T_BANK_COUNT) {
+          rows.push(normalizeFourTBankRow(null, rows.length));
+        }
+        return rows;
+      }
+
+      function getFourTSentenceWordTokens(text) {
+        const src = toSafeText(text);
+        const tokens = [];
+        const regex = /[A-Za-z][A-Za-z0-9'-]*/g;
+        let lastIndex = 0;
+        let wordIndex = 0;
+        let match = regex.exec(src);
+        while (match) {
+          if (match.index > lastIndex) {
+            tokens.push({
+              type: "text",
+              text: src.slice(lastIndex, match.index)
+            });
+          }
+          const raw = match[0];
+          tokens.push({
+            type: "word",
+            text: raw,
+            word: normalizeCapturedWord(raw),
+            wordIndex
+          });
+          wordIndex += 1;
+          lastIndex = match.index + raw.length;
+          match = regex.exec(src);
+        }
+        if (lastIndex < src.length) {
+          tokens.push({
+            type: "text",
+            text: src.slice(lastIndex)
+          });
+        }
+        return tokens;
+      }
+
+      function getFourTWordTokenMap(text) {
+        const map = new Map();
+        const tokens = getFourTSentenceWordTokens(text);
+        for (let i = 0; i < tokens.length; i += 1) {
+          const token = tokens[i];
+          if (token.type === "word") {
+            map.set(token.wordIndex, token);
+          }
+        }
+        return map;
+      }
+
+      function normalizeFourTWordRef(rawRef) {
+        if (rawRef == null) return null;
+        if (typeof rawRef === "number" || typeof rawRef === "string") {
+          const idx = normalizeWordIndexIdx(rawRef);
+          if (idx != null) return { page: null, idx, word: "" };
+          const pair = parseWordIndexTupleRef(rawRef);
+          if (pair) return { page: normalizeWordIndexPage(pair[0]), idx: normalizeWordIndexIdx(pair[1]), word: "" };
+          return null;
+        }
+        if (Array.isArray(rawRef)) {
+          if (rawRef.length >= 2) {
+            const ref = {
+              page: normalizeWordIndexPage(rawRef[0]),
+              idx: normalizeWordIndexIdx(rawRef[1]),
+              word: normalizeCapturedWord(rawRef.length >= 3 ? rawRef[2] : "")
+            };
+            return ref.idx == null && !ref.word ? null : ref;
+          }
+          if (rawRef.length === 1) {
+            const idx = normalizeWordIndexIdx(rawRef[0]);
+            return idx != null ? { page: null, idx, word: "" } : null;
+          }
+          return null;
+        }
+        if (typeof rawRef === "object") {
+          const page = getWordIndexPageFromObject(rawRef, null);
+          const idx = normalizeWordIndexIdx(getObjectValueByAliases(rawRef, [
+            "idx",
+            "word_index",
+            "wordIndex",
+            "word_idx",
+            "wordIdx",
+            "token_index",
+            "tokenIndex",
+            "index"
+          ]));
+          const word = normalizeCapturedWord(rawRef.word != null ? rawRef.word : (rawRef.text != null ? rawRef.text : rawRef.raw));
+          if (idx == null && !word) return null;
+          return { page, idx, word };
+        }
+        return null;
+      }
+
+      function normalizeFourTWordRefs(rawRefs) {
+        const source = Array.isArray(rawRefs) ? rawRefs : [];
+        const refs = [];
+        for (let i = 0; i < source.length; i += 1) {
+          const ref = normalizeFourTWordRef(source[i]);
+          if (!ref) continue;
+          refs.push(ref);
+        }
+        return refs;
+      }
+
+      function rebuildFourTChunkBankTexts(row) {
+        if (!row || typeof row !== "object") return [];
+        const banks = normalizeFourTChunkBanks(row.chunkBanks);
+        const tokenMap = getFourTWordTokenMap(row.text || row.sentence || "");
+        const assigned = new Set();
+        for (let bankIdx = 0; bankIdx < banks.length; bankIdx += 1) {
+          const bank = banks[bankIdx];
+          const nextTokens = [];
+          const seen = new Set();
+          for (let i = 0; i < bank.tokens.length; i += 1) {
+            const token = bank.tokens[i];
+            if (seen.has(token.tokenIndex) || assigned.has(token.tokenIndex)) continue;
+            const sourceToken = tokenMap.get(token.tokenIndex);
+            if (!sourceToken) continue;
+            seen.add(token.tokenIndex);
+            assigned.add(token.tokenIndex);
+            nextTokens.push({
+              tokenIndex: token.tokenIndex,
+              word: sourceToken.word,
+              raw: sourceToken.text,
+              highlightId: token.highlightId || ""
+            });
+          }
+          nextTokens.sort(function (a, b) {
+            return a.tokenIndex - b.tokenIndex;
+          });
+          bank.tokens = nextTokens;
+          bank.meaning = toSafeText(bank.meaning);
+          bank.text = nextTokens.map(function (token) {
+            return token.raw || token.word;
+          }).join(" ");
+        }
+        row.chunkBanks = banks;
+        return banks;
+      }
+
+      function ensureFourTFragmentChunkData(row) {
+        if (!row || typeof row !== "object") return [];
+        if (!Array.isArray(row.chunkBanks)) {
+          row.chunkBanks = makeDefaultFourTChunkBanks();
+        }
+        return rebuildFourTChunkBankTexts(row);
+      }
+
+      function rebuildFourTPageBankFromFragments(fourT) {
+        if (!fourT || typeof fourT !== "object") return [];
+        const existing = normalizeFourTBankRows(fourT.bank);
+        const fragments = Array.isArray(fourT.fragments) ? fourT.fragments : [];
+        const buckets = existing.map(function (bank, idx) {
+          return {
+            text: bank.text,
+            meaning: bank.meaning,
+            color: normalizeHexColor(bank.color, FOUR_T_ZOOMBOX_BANK_COLORS[idx % FOUR_T_ZOOMBOX_BANK_COLORS.length]),
+            words: [],
+            seen: new Set()
+          };
+        });
+
+        for (let fIdx = 0; fIdx < fragments.length; fIdx += 1) {
+          const banks = ensureFourTFragmentChunkData(fragments[fIdx]);
+          for (let bankIdx = 0; bankIdx < banks.length; bankIdx += 1) {
+            if (!buckets[bankIdx]) continue;
+            const bucket = buckets[bankIdx];
+            const chunkBank = banks[bankIdx];
+            if (!bucket.meaning && hasMeaningfulText(chunkBank.meaning)) {
+              bucket.meaning = chunkBank.meaning;
+            }
+            const tokens = Array.isArray(chunkBank.tokens) ? chunkBank.tokens : [];
+            for (let tokenIdx = 0; tokenIdx < tokens.length; tokenIdx += 1) {
+              const rawWord = toSafeText(tokens[tokenIdx].raw || tokens[tokenIdx].word).trim();
+              const word = rawWord || normalizeCapturedWord(tokens[tokenIdx].word);
+              if (!word) continue;
+              const key = `${fIdx}:${tokens[tokenIdx].tokenIndex}`;
+              if (key && bucket.seen.has(key)) continue;
+              if (key) bucket.seen.add(key);
+              bucket.words.push(word);
+            }
+          }
+        }
+
+        fourT.bank = buckets.map(function (bucket) {
+          return {
+            text: bucket.words.length ? bucket.words.join(" ") : bucket.text,
+            meaning: toSafeText(bucket.meaning),
+            color: bucket.color
+          };
+        });
+        return fourT.bank;
+      }
+
+      function syncFourTPageBankForActiveTab() {
+        const tab = getActiveMemoTab();
+        if (!tab || tab.type !== "four_t" || !tab.fourT) return [];
+        return rebuildFourTPageBankFromFragments(tab.fourT);
+      }
+
+      function renderFourTPageBankListOnly() {
+        const tab = getActiveMemoTab();
+        if (!tab || tab.type !== "four_t" || !tab.fourT || !overlayFourBankList) return;
+        tab.fourT.bank = normalizeFourTBankRows(tab.fourT.bank);
+        overlayFourBankList.innerHTML = "";
+        for (let idx = 0; idx < tab.fourT.bank.length; idx += 1) {
+          overlayFourBankList.appendChild(buildFourTBankCard(tab.fourT.bank[idx], idx));
+        }
+      }
+
+      function getFourTBankDebugSnapshot(row) {
+        const banks = row && Array.isArray(row.chunkBanks) ? normalizeFourTChunkBanks(row.chunkBanks) : [];
+        return banks.map(function (bank, idx) {
+          return {
+            idx,
+            text: bank.text,
+            meaning: bank.meaning,
+            tokenCount: Array.isArray(bank.tokens) ? bank.tokens.length : 0,
+            tokens: Array.isArray(bank.tokens) ? bank.tokens.map(function (token) {
+              return {
+                tokenIndex: token.tokenIndex,
+                word: token.word,
+                raw: token.raw,
+                highlightId: token.highlightId
+              };
+            }) : []
+          };
+        });
+      }
+
+      function hasFourTChunkContent(row) {
+        const safe = row && typeof row === "object" ? row : {};
+        const banks = normalizeFourTChunkBanks(safe.chunkBanks);
+        for (let i = 0; i < banks.length; i += 1) {
+          if (banks[i].tokens.length || hasMeaningfulText(banks[i].text) || hasMeaningfulText(banks[i].meaning)) return true;
+        }
+        return false;
+      }
+
+      function normalizeFourTRow(row, fallbackNo) {
+        const safe = row && typeof row === "object" ? row : {};
+        const rawNo = safe.no != null ? safe.no : (safe.index != null ? safe.index : fallbackNo);
+        const no = Math.max(0, Math.trunc(Number(rawNo) || 0));
+        const text = toSafeText(safe.text != null ? safe.text : (safe.sentence != null ? safe.sentence : safe.sourceText));
+        const rawAnswer = hasMeaningfulText(safe.answer)
+          ? safe.answer
+          : (hasMeaningfulText(safe.translation) ? safe.translation : safe.response);
+        const answer = toSafeText(rawAnswer);
+        const normalized = {
+          no,
+          text,
+          sentence: text,
+          answer,
+          translation: answer,
+          source: toSafeText(safe.source).slice(0, 40),
+          page: normalizeWordIndexPage(safe.page),
+          wordRefs: normalizeFourTWordRefs(safe.wordRefs || safe.word_refs || safe.tokenRefs || safe.token_refs),
+          chunkBanks: normalizeFourTChunkBanks(safe.chunkBanks)
+        };
+        rebuildFourTChunkBankTexts(normalized);
+        return normalized;
+      }
+
+      function ensureFourTData(tab) {
+        if (!tab) return null;
+        if (!tab.fourT || typeof tab.fourT !== "object") {
+          tab.fourT = {
+            bank: makeDefaultFourTBankRows(),
+            sourceQNo: 0,
+            sourceMode: FOUR_T_SOURCE_MODE,
+            fragments: []
+          };
+        }
+        if (tab.fourT.sourceMode !== FOUR_T_SOURCE_MODE) {
+          tab.fourT.sourceMode = FOUR_T_SOURCE_MODE;
+          tab.fourT.sourceQNo = 0;
+          tab.fourT.fragments = [];
+        }
+        tab.fourT.sourceQNo = parseQNoForPayload(tab.fourT.sourceQNo);
+        tab.fourT.bank = normalizeFourTBankRows(tab.fourT.bank);
+        if (!Array.isArray(tab.fourT.fragments)) {
+          tab.fourT.fragments = [];
+        }
+        tab.fourT.fragments = tab.fourT.fragments.map(function (row, idx) {
+          return normalizeFourTRow(row, idx + 1);
+        });
+        rebuildFourTPageBankFromFragments(tab.fourT);
+        return tab.fourT;
+      }
+
       function ensureThreeSentenceInk(card) {
         if (!card || typeof card !== "object") return [];
         if (!Array.isArray(card.ink)) {
@@ -3077,6 +4069,7 @@
       function applyMemoFontSize() {
         const px = `${memoFontSize}px`;
         overlayMemo.style.setProperty("--memo-font-size", px);
+        overlayFourZoombox.style.setProperty("--memo-font-size", px);
         overlayFontSizeValue.textContent = px;
       }
 
@@ -3292,13 +4285,21 @@
           };
         }
         if (type === "highlight") {
-          return {
+          const highlight = {
             type: "highlight",
             color: typeof source.color === "string" && source.color ? source.color : PAGE_INK_HIGHLIGHT_COLOR,
             alpha: Math.max(0.08, Math.min(0.78, normalizePageInkNumber(source.alpha, 0.34))),
             rect: normalizePageInkRect(source.rect),
             word: toSafeText(source.word).slice(0, 80)
           };
+          const zoomboxId = toSafeText(source.zoomboxId || source.fourTZoomboxId || "").slice(0, 120);
+          if (zoomboxId) {
+            highlight.zoomboxId = zoomboxId;
+            highlight.owner = FOUR_T_ZOOMBOX_OWNER;
+            highlight.bankIndex = Math.max(0, Math.trunc(Number(source.bankIndex) || 0));
+            highlight.tokenIndex = Math.max(0, Math.trunc(Number(source.tokenIndex) || 0));
+          }
+          return highlight;
         }
         if (type === "mark") {
           const rawMark = String(source.mark || "");
@@ -4047,6 +5048,361 @@
         return inkCanvas;
       }
 
+      function makeFourTZoomboxHighlightId() {
+        const id = nextFourTZoomboxHighlightId;
+        nextFourTZoomboxHighlightId += 1;
+        return `zt-${Date.now().toString(36)}-${id.toString(36)}`;
+      }
+
+      function redrawPageInkCanvasesForPages(pages) {
+        if (!previewPages || !pages || !pages.size) return;
+        const canvases = previewPages.querySelectorAll(".mock-page-ink-canvas");
+        canvases.forEach(function (canvas) {
+          const page = normalizePageInkPageKey(canvas.dataset.page || canvas.__mockPageNumber || 1);
+          if (pages.has(page)) {
+            redrawPageInkCanvas(canvas);
+          }
+        });
+      }
+
+      function findPageInkItemByZoomboxId(zoomboxId) {
+        const id = toSafeText(zoomboxId);
+        if (!id) return null;
+        const pages = pageInkData.pages && typeof pageInkData.pages === "object" ? pageInkData.pages : {};
+        const keys = Object.keys(pages);
+        for (let k = 0; k < keys.length; k += 1) {
+          const page = normalizePageInkPageKey(keys[k]);
+          const items = Array.isArray(pages[keys[k]]) ? pages[keys[k]] : [];
+          for (let i = 0; i < items.length; i += 1) {
+            const item = items[i];
+            if (item && item.type === "highlight" && item.zoomboxId === id) {
+              return { page, items, item, index: i };
+            }
+          }
+        }
+        return null;
+      }
+
+      function removeFourTZoomboxHighlight(token) {
+        if (!token || !token.highlightId) return false;
+        const id = token.highlightId;
+        const pages = pageInkData.pages && typeof pageInkData.pages === "object" ? pageInkData.pages : {};
+        const changedPages = new Set();
+        Object.keys(pages).forEach(function (rawPage) {
+          const page = normalizePageInkPageKey(rawPage);
+          const items = Array.isArray(pages[rawPage]) ? pages[rawPage] : [];
+          for (let i = items.length - 1; i >= 0; i -= 1) {
+            const item = items[i];
+            if (!item || item.type !== "highlight" || item.zoomboxId !== id) continue;
+            const removed = items.splice(i, 1)[0];
+            recordPageInkAction(page, {
+              type: "remove",
+              index: i,
+              item: clonePageInkItem(removed)
+            });
+            changedPages.add(page);
+          }
+        });
+        token.highlightId = "";
+        if (!changedPages.size) return false;
+        redrawPageInkCanvasesForPages(changedPages);
+        updatePagePenActionButtons();
+        return true;
+      }
+
+      function collectFourTRenderedWordHits(row) {
+        if (!previewPages) return [];
+        const canvases = previewPages.querySelectorAll(".mock-page-ink-canvas");
+        const allHits = [];
+        canvases.forEach(function (canvas) {
+          const page = normalizePageInkPageKey(canvas.dataset.page || canvas.__mockPageNumber || 1);
+          const hits = Array.isArray(canvas.__mockWordHits) ? canvas.__mockWordHits : [];
+          for (let i = 0; i < hits.length; i += 1) {
+            const hit = hits[i];
+            const word = normalizeCapturedWord(hit && hit.word);
+            if (!word) continue;
+            allHits.push({
+              word,
+              qNo: parseQNoForPayload(hit.qNo),
+              x1: Number(hit.x1) || 0,
+              y1: Number(hit.y1) || 0,
+              x2: Number(hit.x2) || 0,
+              y2: Number(hit.y2) || 0,
+              idx: normalizeWordIndexIdx(hit.idx),
+              page,
+              canvas
+            });
+          }
+        });
+        allHits.sort(function (a, b) {
+          if (a.page !== b.page) return Number(a.page) - Number(b.page);
+          if (Math.abs(a.y1 - b.y1) > 2) return a.y1 - b.y1;
+          return a.x1 - b.x1;
+        });
+
+        const tab = getActiveMemoTab();
+        const qNo = getActiveTabEffectiveQNo(tab);
+        let candidates = allHits;
+        if (qNo > 0) {
+          const qHits = allHits.filter(function (hit) {
+            return hit.qNo === qNo;
+          });
+          if (qHits.length) candidates = qHits;
+        }
+        const rowPage = normalizeWordIndexPage(row && row.page);
+        if (rowPage) {
+          const pageHits = candidates.filter(function (hit) {
+            return normalizeWordIndexPage(hit.page) === rowPage;
+          });
+          if (pageHits.length) candidates = pageHits;
+        }
+        return candidates;
+      }
+
+      function getFourTWordSequence(row) {
+        return getFourTSentenceWordTokens(row && (row.text || row.sentence) || "").filter(function (token) {
+          return token.type === "word" && token.word;
+        });
+      }
+
+      function findFourTWordHitForRef(row, tokenIndex, token, hits) {
+        const refs = normalizeFourTWordRefs(row && row.wordRefs);
+        if (!refs.length || !Array.isArray(hits) || !hits.length) return null;
+        const idx = Math.trunc(Number(tokenIndex));
+        const expected = normalizeCapturedWord(token && (token.word || token.text)).toLowerCase();
+        const directRef = idx >= 0 && idx < refs.length ? refs[idx] : null;
+        const matchRef = function (ref) {
+          if (!ref) return null;
+          const refPage = normalizeWordIndexPage(ref.page);
+          const refIdx = normalizeWordIndexIdx(ref.idx);
+          for (let i = 0; i < hits.length; i += 1) {
+            const hit = hits[i];
+            if (refPage && normalizeWordIndexPage(hit.page) !== refPage) continue;
+            if (refIdx != null && normalizeWordIndexIdx(hit.idx) !== refIdx) continue;
+            const hitWord = normalizeCapturedWord(hit.word).toLowerCase();
+            const refWord = normalizeCapturedWord(ref.word).toLowerCase();
+            if (expected && hitWord && hitWord !== expected && (!refWord || refWord !== expected)) continue;
+            return hit;
+          }
+          return null;
+        };
+        const directHit = matchRef(directRef);
+        if (directHit) return directHit;
+        if (expected) {
+          let occurrence = 0;
+          const words = getFourTWordSequence(row);
+          for (let i = 0; i <= idx; i += 1) {
+            const word = normalizeCapturedWord(words[i] && words[i].word).toLowerCase();
+            if (word === expected) occurrence += 1;
+          }
+          let seen = 0;
+          for (let i = 0; i < refs.length; i += 1) {
+            const refWord = normalizeCapturedWord(refs[i].word).toLowerCase();
+            if (refWord && refWord !== expected) continue;
+            const hit = matchRef(refs[i]);
+            if (!hit) continue;
+            const hitWord = normalizeCapturedWord(hit.word).toLowerCase();
+            if (hitWord !== expected) continue;
+            seen += 1;
+            if (seen === occurrence) return hit;
+          }
+        }
+        return null;
+      }
+
+      function findFourTWordHitForToken(row, tokenIndex) {
+        const words = getFourTWordSequence(row);
+        const idx = Math.trunc(Number(tokenIndex));
+        if (!Number.isFinite(idx) || idx < 0 || idx >= words.length) return null;
+        const hits = collectFourTRenderedWordHits(row);
+        if (!hits.length) return null;
+        const sentenceWords = words.map(function (token) {
+          return token.word.toLowerCase();
+        });
+        const hitWords = hits.map(function (hit) {
+          return hit.word.toLowerCase();
+        });
+        const exactRefHit = findFourTWordHitForRef(row, idx, words[idx], hits);
+        if (exactRefHit) return exactRefHit;
+
+        for (let start = 0; start + sentenceWords.length <= hits.length; start += 1) {
+          let ok = true;
+          for (let j = 0; j < sentenceWords.length; j += 1) {
+            if (hitWords[start + j] !== sentenceWords[j]) {
+              ok = false;
+              break;
+            }
+          }
+          if (ok) return hits[start + idx];
+        }
+
+        let bestMap = null;
+        let bestSpan = Number.POSITIVE_INFINITY;
+        for (let start = 0; start < hits.length; start += 1) {
+          if (hitWords[start] !== sentenceWords[0]) continue;
+          const map = [];
+          let pos = start;
+          let ok = true;
+          for (let j = 0; j < sentenceWords.length; j += 1) {
+            while (pos < hits.length && hitWords[pos] !== sentenceWords[j]) {
+              pos += 1;
+            }
+            if (pos >= hits.length) {
+              ok = false;
+              break;
+            }
+            map[j] = hits[pos];
+            pos += 1;
+          }
+          if (!ok) continue;
+          const span = (map[map.length - 1].y1 - map[0].y1) * 10000 + (map[map.length - 1].x2 - map[0].x1);
+          if (span < bestSpan) {
+            bestSpan = span;
+            bestMap = map;
+          }
+        }
+        if (bestMap && bestMap[idx]) return bestMap[idx];
+
+        const targetWord = sentenceWords[idx];
+        let occurrence = 0;
+        for (let i = 0; i <= idx; i += 1) {
+          if (sentenceWords[i] === targetWord) occurrence += 1;
+        }
+        let seen = 0;
+        for (let i = 0; i < hits.length; i += 1) {
+          if (hitWords[i] !== targetWord) continue;
+          seen += 1;
+          if (seen === occurrence) return hits[i];
+        }
+        return hits.find(function (hit) {
+          return hit.word.toLowerCase() === targetWord;
+        }) || null;
+      }
+
+      function arePageInkRectsClose(a, b) {
+        const left = normalizePageInkRect(a);
+        const right = normalizePageInkRect(b);
+        const epsilon = 0.0005;
+        return Math.abs(left.x - right.x) <= epsilon
+          && Math.abs(left.y - right.y) <= epsilon
+          && Math.abs(left.w - right.w) <= epsilon
+          && Math.abs(left.h - right.h) <= epsilon;
+      }
+
+      function makeFourTZoomboxHighlightRect(hit, setup) {
+        const width = Math.max(1, setup && setup.width ? setup.width : 1);
+        const height = Math.max(1, setup && setup.height ? setup.height : 1);
+        const leftRaw = Math.min(Number(hit && hit.x1) || 0, Number(hit && hit.x2) || 0);
+        const rightRaw = Math.max(Number(hit && hit.x1) || 0, Number(hit && hit.x2) || 0);
+        const topRaw = Math.min(Number(hit && hit.y1) || 0, Number(hit && hit.y2) || 0);
+        const bottomRaw = Math.max(Number(hit && hit.y1) || 0, Number(hit && hit.y2) || 0);
+        const padX = Math.min(5, Math.max(1.5, (rightRaw - leftRaw) * 0.08));
+        const padY = Math.min(4, Math.max(1, (bottomRaw - topRaw) * 0.18));
+        const left = Math.max(0, leftRaw - padX);
+        const top = Math.max(0, topRaw - padY);
+        const right = Math.min(width, rightRaw + padX);
+        const bottom = Math.min(height, bottomRaw + padY);
+        const x = Math.max(0, Math.min(1, left / width));
+        const y = Math.max(0, Math.min(1, top / height));
+        const w = Math.max(0.002, Math.min(1 - x, (right - left) / width));
+        const h = Math.max(0.002, Math.min(1 - y, (bottom - top) / height));
+        return { x, y, w, h };
+      }
+
+      function syncFourTZoomboxTokenHighlight(row, token, bank, bankIndex) {
+        if (!row || !token || !bank) return false;
+        const color = normalizeHexColor(bank.color, FOUR_T_ZOOMBOX_BANK_COLORS[bankIndex % FOUR_T_ZOOMBOX_BANK_COLORS.length]);
+        const hit = findFourTWordHitForToken(row, token.tokenIndex);
+        const setup = hit && hit.canvas ? getPageInkCanvasSetup(hit.canvas) : null;
+        const rect = hit && setup ? makeFourTZoomboxHighlightRect(hit, setup) : null;
+        if (token.highlightId) {
+          const existing = findPageInkItemByZoomboxId(token.highlightId);
+          if (existing && existing.item) {
+            let changed = false;
+            if (existing.item.color !== color) {
+              existing.item.color = color;
+              changed = true;
+            }
+            if (existing.item.bankIndex !== bankIndex) {
+              existing.item.bankIndex = bankIndex;
+              changed = true;
+            }
+            if (existing.item.tokenIndex !== token.tokenIndex) {
+              existing.item.tokenIndex = token.tokenIndex;
+              changed = true;
+            }
+            if (rect && !arePageInkRectsClose(existing.item.rect, rect)) {
+              existing.item.rect = rect;
+              changed = true;
+            }
+            const nextWord = toSafeText(token.word || (hit && hit.word)).slice(0, 80);
+            if (nextWord && existing.item.word !== nextWord) {
+              existing.item.word = nextWord;
+              changed = true;
+            }
+            if (!changed) return false;
+            redrawPageInkCanvasesForPages(new Set([existing.page]));
+            updatePagePenActionButtons();
+            return true;
+          }
+        }
+
+        if (!hit || !hit.canvas || !setup) return false;
+        const page = normalizePageInkPageKey(hit.page || hit.canvas.dataset.page || hit.canvas.__mockPageNumber || 1);
+        if (!token.highlightId) {
+          token.highlightId = makeFourTZoomboxHighlightId();
+        }
+        getPageInkItems(page).push({
+          type: "highlight",
+          color,
+          alpha: 0.36,
+          rect,
+          word: toSafeText(token.word || hit.word).slice(0, 80),
+          zoomboxId: token.highlightId,
+          owner: FOUR_T_ZOOMBOX_OWNER,
+          bankIndex,
+          tokenIndex: token.tokenIndex
+        });
+        recordPageInkAction(page, { type: "add", count: 1 });
+        redrawPageInkCanvas(hit.canvas);
+        updatePagePenActionButtons();
+        return true;
+      }
+
+      function syncFourTZoomboxHighlightsForRow(row) {
+        if (!row) return false;
+        const banks = ensureFourTFragmentChunkData(row);
+        let changed = false;
+        for (let bankIdx = 0; bankIdx < banks.length; bankIdx += 1) {
+          const bank = banks[bankIdx];
+          const tokens = Array.isArray(bank.tokens) ? bank.tokens : [];
+          for (let tokenIdx = 0; tokenIdx < tokens.length; tokenIdx += 1) {
+            if (syncFourTZoomboxTokenHighlight(row, tokens[tokenIdx], bank, bankIdx)) {
+              changed = true;
+            }
+          }
+        }
+        return changed;
+      }
+
+      function syncFourTZoomboxHighlightsForActiveTab() {
+        const tab = getActiveMemoTab();
+        if (!tab || tab.type !== "four_t") return false;
+        const fourT = ensureFourTData(tab);
+        const fragments = fourT && Array.isArray(fourT.fragments) ? fourT.fragments : [];
+        let changed = false;
+        for (let idx = 0; idx < fragments.length; idx += 1) {
+          if (syncFourTZoomboxHighlightsForRow(fragments[idx])) {
+            changed = true;
+          }
+        }
+        if (changed) {
+          if (fourTZoomboxState.open) renderFourTZoombox();
+          markMemoDirty("four-t-zoombox-highlight-sync");
+        }
+        return changed;
+      }
+
       function currentPageInkKey() {
         return normalizePageInkPageKey(pageInkState.page || pageInkState.lastPage || getCurrentPreviewPageNumber() || 1);
       }
@@ -4093,6 +5449,13 @@
       function setPageHighlightColor(color) {
         pageHighlightColor = normalizeHexColor(color, PAGE_INK_HIGHLIGHT_COLOR);
         updatePagePenUi();
+      }
+
+      function scrollPagePenInkColors(direction) {
+        if (!pagePenInkTrack) return;
+        const dir = Number(direction) < 0 ? -1 : 1;
+        const amount = Math.max(54, Math.floor(pagePenInkTrack.clientWidth * 0.72));
+        pagePenInkTrack.scrollBy({ left: dir * amount, behavior: "smooth" });
       }
 
       function updatePagePenUi() {
@@ -4262,17 +5625,22 @@
       function stopPagePenPaletteDrag(event) {
         if (!pageInkState.paletteDrag) return;
         if (event && pageInkState.paletteDrag.pointerId !== null && event.pointerId !== pageInkState.paletteDrag.pointerId) return;
-        if (typeof pagePenDragHandle.releasePointerCapture === "function" && pageInkState.paletteDrag.pointerId !== null) {
+        if (typeof pagePenPalette.releasePointerCapture === "function" && pageInkState.paletteDrag.pointerId !== null) {
           try {
-            pagePenDragHandle.releasePointerCapture(pageInkState.paletteDrag.pointerId);
+            pagePenPalette.releasePointerCapture(pageInkState.paletteDrag.pointerId);
           } catch (_err) {}
         }
         pageInkState.paletteDrag = null;
         pagePenPalette.classList.remove("is-dragging");
       }
 
+      function shouldIgnorePagePenPaletteDragStart(target) {
+        return !!(target instanceof Element && target.closest("button,input,select,textarea,label"));
+      }
+
       function handlePagePenPaletteDragStart(event) {
         if (event.pointerType === "mouse" && event.button !== 0) return;
+        if (shouldIgnorePagePenPaletteDragStart(event.target)) return;
         event.preventDefault();
         const rect = pagePenPalette.getBoundingClientRect();
         pageInkState.paletteDrag = {
@@ -4281,9 +5649,9 @@
           offsetY: event.clientY - rect.top
         };
         pagePenPalette.classList.add("is-dragging");
-        if (typeof pagePenDragHandle.setPointerCapture === "function") {
+        if (typeof pagePenPalette.setPointerCapture === "function") {
           try {
-            pagePenDragHandle.setPointerCapture(event.pointerId);
+            pagePenPalette.setPointerCapture(event.pointerId);
           } catch (_err) {}
         }
         movePagePenPalette(event.clientX, event.clientY);
@@ -4584,6 +5952,13 @@
         }
       }
 
+      function redrawRenderedThreeInkCanvases() {
+        const canvases = overlayTwoRightList.querySelectorAll(".overlay-three-ink-canvas");
+        canvases.forEach(function (canvas) {
+          redrawThreeInkCanvas(canvas, canvas.__mockSentenceCard || null);
+        });
+      }
+
       function getThreeCanvasPoint(canvas, event) {
         const rect = canvas.getBoundingClientRect();
         const localX = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
@@ -4650,6 +6025,9 @@
         overlayThreePenClearBtn.disabled = !isTwoThree;
 
         overlayTwoThreePane.classList.toggle("is-three-pen-mode", isTwoThree && (penOn || hasInk));
+        if (isTwoThree) {
+          requestAnimationFrame(redrawRenderedThreeInkCanvases);
+        }
       }
 
       function setThreePenMode(forceOn) {
@@ -4997,6 +6375,8 @@
           card.sentence = sentenceInput.value;
           markMemoDirty("three-t-sentence");
         });
+        const writeWrap = document.createElement("div");
+        writeWrap.className = "overlay-three-write-wrap";
 
         row.appendChild(idxEl);
         tools.appendChild(undoBtn);
@@ -5004,12 +6384,12 @@
         row.appendChild(tools);
 
         inner.appendChild(row);
-        inner.appendChild(sentenceInput);
 
         const inkWrap = document.createElement("div");
         inkWrap.className = "overlay-three-ink-wrap";
         const inkCanvas = document.createElement("canvas");
         inkCanvas.className = "overlay-three-ink-canvas";
+        inkCanvas.__mockSentenceCard = card;
         inkCanvas.addEventListener("pointerdown", function (event) {
           handleThreeInkPointerDown(event, card, inkCanvas);
         });
@@ -5029,13 +6409,601 @@
           clearThreeCardInk(card, inkCanvas);
         });
         inkWrap.appendChild(inkCanvas);
-        inner.appendChild(inkWrap);
+        writeWrap.appendChild(sentenceInput);
+        writeWrap.appendChild(inkWrap);
+        inner.appendChild(writeWrap);
         outer.appendChild(inner);
 
         requestAnimationFrame(function () {
           redrawThreeInkCanvas(inkCanvas, card);
         });
         return outer;
+      }
+
+      function getIndexedSentencesForQuestion(rawQNo) {
+        const qNo = parseQNoForPayload(rawQNo);
+        if (qNo <= 0 || !activeWordIndex || !activeWordIndex.sentencesByQNo) return [];
+        const rows = activeWordIndex.sentencesByQNo[String(qNo)] || [];
+        return Array.isArray(rows) ? rows : [];
+      }
+
+      function syncFourTFragmentsFromQuestion(tab) {
+        if (!tab || tab.type !== "four_t") return false;
+        const fourT = ensureFourTData(tab);
+        if (!fourT) return false;
+        const qNo = applyEffectiveQNoToTab(tab);
+        if (qNo <= 0) return false;
+        const sourceQNo = parseQNoForPayload(fourT.sourceQNo);
+        const shouldRefresh = sourceQNo !== qNo || !fourT.fragments.length;
+        if (!shouldRefresh) return false;
+        const rows = getIndexedSentencesForQuestion(qNo);
+        if (!rows.length) {
+          if (sourceQNo !== qNo || fourT.fragments.length) {
+            fourT.sourceQNo = qNo;
+            fourT.fragments = [];
+            return true;
+          }
+          return false;
+        }
+        const nextFragments = rows.map(function (row, idx) {
+          return normalizeFourTRow({
+            no: row && row.no ? row.no : idx + 1,
+            text: row && row.text,
+            answer: "",
+            source: row && row.source,
+            page: row && row.page,
+            wordRefs: row && row.wordRefs
+          }, idx + 1);
+        });
+        const oldText = JSON.stringify(fourT.fragments || []);
+        const nextText = JSON.stringify(nextFragments);
+        fourT.sourceQNo = qNo;
+        if (oldText === nextText) return false;
+        fourT.fragments = nextFragments;
+        return true;
+      }
+
+      function closeFourTZoombox(renderList) {
+        if (!overlayFourZoombox) return;
+        debugFourTZoombox("close", {
+          renderList,
+          wasOpen: fourTZoomboxState.open,
+          rowIndex: fourTZoomboxState.rowIndex
+        });
+        fourTZoomboxState.open = false;
+        fourTZoomboxState.row = null;
+        fourTZoomboxState.rowIndex = -1;
+        fourTZoomboxState.activeBankIndex = 0;
+        overlayFourZoombox.hidden = true;
+        overlayFourZoomboxBankList.innerHTML = "";
+        overlayFourZoomboxSentence.innerHTML = "";
+        overlayFourZoomboxAnswer.value = "";
+        if (renderList !== false) {
+          renderFourTCards();
+        }
+      }
+
+      function getFourTTokenSelection(row, tokenIndex) {
+        const banks = ensureFourTFragmentChunkData(row);
+        return getFourTTokenSelectionFromBanks(banks, tokenIndex);
+      }
+
+      function getFourTTokenSelectionFromBanks(banks, tokenIndex) {
+        const sourceBanks = Array.isArray(banks) ? banks : [];
+        for (let bankIdx = 0; bankIdx < sourceBanks.length; bankIdx += 1) {
+          const tokens = sourceBanks[bankIdx] && Array.isArray(sourceBanks[bankIdx].tokens)
+            ? sourceBanks[bankIdx].tokens
+            : [];
+          for (let tokenIdx = 0; tokenIdx < tokens.length; tokenIdx += 1) {
+            if (tokens[tokenIdx].tokenIndex === tokenIndex) {
+              return {
+                bank: sourceBanks[bankIdx],
+                bankIndex: bankIdx,
+                token: tokens[tokenIdx],
+                tokenListIndex: tokenIdx
+              };
+            }
+          }
+        }
+        return null;
+      }
+
+      function setFourTZoomboxActiveBank(index) {
+        const banks = fourTZoomboxState.row ? ensureFourTFragmentChunkData(fourTZoomboxState.row) : [];
+        const next = Math.max(0, Math.min(banks.length - 1, Math.trunc(Number(index) || 0)));
+        debugFourTZoombox("set active bank", {
+          requested: index,
+          next,
+          bankCount: banks.length
+        });
+        fourTZoomboxState.activeBankIndex = next;
+        renderFourTZoombox();
+      }
+
+      function saveFourTZoomboxAnswer() {
+        const row = fourTZoomboxState.row;
+        if (!row) return;
+        row.answer = overlayFourZoomboxAnswer.value;
+        row.translation = overlayFourZoomboxAnswer.value;
+        markMemoDirty("four-t-zoombox-answer");
+      }
+
+      function getFourTZoomboxEventDebug(event, target) {
+        const pointTarget = event && typeof document.elementFromPoint === "function"
+          ? document.elementFromPoint(event.clientX || 0, event.clientY || 0)
+          : null;
+        return {
+          type: event && event.type,
+          target: describeNodeForDiag(target || (event && event.target)),
+          currentTarget: describeNodeForDiag(event && event.currentTarget),
+          pointTarget: describeNodeForDiag(pointTarget),
+          clientX: Math.round(Number(event && event.clientX) || 0),
+          clientY: Math.round(Number(event && event.clientY) || 0),
+          hidden: !!(overlayFourZoombox && overlayFourZoombox.hidden),
+          open: !!fourTZoomboxState.open,
+          hasRow: !!fourTZoomboxState.row,
+          rowIndex: fourTZoomboxState.rowIndex,
+          activeBankIndex: fourTZoomboxState.activeBankIndex
+        };
+      }
+
+      function debugFourTZoombox(message, meta) {
+        if (!DEBUG_FOUR_T_ZOOMBOX) return;
+        trace("info", `four-t zoombox: ${message}`, meta);
+      }
+
+      function shouldSkipFourTZoomboxDuplicateCommit(wordIndex) {
+        const now = Date.now();
+        const key = String(wordIndex);
+        if (lastFourTZoomboxTokenCommit.key === key && now - lastFourTZoomboxTokenCommit.at < 320) {
+          debugFourTZoombox("skip duplicate token event", {
+            wordIndex,
+            elapsed: now - lastFourTZoomboxTokenCommit.at
+          });
+          return true;
+        }
+        lastFourTZoomboxTokenCommit = { key, at: now };
+        return false;
+      }
+
+      function toggleFourTZoomboxToken(tokenInfo) {
+        const row = fourTZoomboxState.row;
+        debugFourTZoombox("toggle token start", {
+          hasRow: !!row,
+          tokenInfo,
+          activeBankIndex: fourTZoomboxState.activeBankIndex
+        });
+        if (!row || !tokenInfo || tokenInfo.type !== "word") {
+          debugFourTZoombox("toggle token aborted: missing row/token", {
+            hasRow: !!row,
+            tokenInfo
+          });
+          return;
+        }
+        const banks = ensureFourTFragmentChunkData(row);
+        if (!banks.length) {
+          debugFourTZoombox("toggle token aborted: no banks", { tokenInfo });
+          return;
+        }
+        const activeBankIndex = Math.max(0, Math.min(banks.length - 1, fourTZoomboxState.activeBankIndex));
+        debugFourTZoombox("toggle token bank before", {
+          activeBankIndex,
+          banks: getFourTBankDebugSnapshot(row)
+        });
+        const existing = getFourTTokenSelectionFromBanks(banks, tokenInfo.wordIndex);
+        const activeBank = banks[activeBankIndex];
+        if (!activeBank) {
+          debugFourTZoombox("toggle token aborted: active bank missing after refresh", {
+            activeBankIndex,
+            banks: getFourTBankDebugSnapshot(row)
+          });
+          return;
+        }
+        if (existing && existing.bankIndex === activeBankIndex) {
+          const removed = existing.bank.tokens.splice(existing.tokenListIndex, 1)[0];
+          removeFourTZoomboxHighlight(removed);
+          const rebuiltBanks = rebuildFourTChunkBankTexts(row);
+          const pageBanks = syncFourTPageBankForActiveTab();
+          renderFourTPageBankListOnly();
+          renderFourTZoombox();
+          rebuildWordMeaningMap();
+          markMemoDirty("four-t-zoombox-token-remove");
+          debugFourTZoombox("token removed", {
+            tokenInfo,
+            activeBankIndex,
+            removed,
+            rebuiltBank: rebuiltBanks[activeBankIndex],
+            pageBank: pageBanks[activeBankIndex],
+            banks: getFourTBankDebugSnapshot(row)
+          });
+          return;
+        }
+
+        let nextToken = {
+          tokenIndex: tokenInfo.wordIndex,
+          word: tokenInfo.word,
+          raw: tokenInfo.text,
+          highlightId: ""
+        };
+        if (existing) {
+          nextToken = existing.bank.tokens.splice(existing.tokenListIndex, 1)[0] || nextToken;
+          nextToken.tokenIndex = tokenInfo.wordIndex;
+          nextToken.word = tokenInfo.word;
+          nextToken.raw = tokenInfo.text;
+        }
+        const capturedMeaning = findMeaningForWord(tokenInfo.word);
+        if (capturedMeaning && !hasMeaningfulText(activeBank.meaning)) {
+          activeBank.meaning = capturedMeaning;
+        }
+        activeBank.tokens.push(nextToken);
+        debugFourTZoombox("token pushed before rebuild", {
+          activeBankIndex,
+          nextToken,
+          rawBankTokens: activeBank.tokens.map(function (token) {
+            return {
+              tokenIndex: token.tokenIndex,
+              word: token.word,
+              raw: token.raw,
+              highlightId: token.highlightId
+            };
+          })
+        });
+        const rebuiltBanks = rebuildFourTChunkBankTexts(row);
+        let pageBanks = syncFourTPageBankForActiveTab();
+        debugFourTZoombox("after rebuild", {
+          activeBankIndex,
+          rebuiltBank: rebuiltBanks[activeBankIndex],
+          pageBank: pageBanks[activeBankIndex],
+          banks: getFourTBankDebugSnapshot(row)
+        });
+        const refreshed = getFourTTokenSelection(row, tokenInfo.wordIndex);
+        if (refreshed) {
+          try {
+            const highlightChanged = syncFourTZoomboxTokenHighlight(row, refreshed.token, refreshed.bank, refreshed.bankIndex);
+            debugFourTZoombox("highlight sync result", {
+              tokenInfo,
+              highlightChanged,
+              highlightId: refreshed.token && refreshed.token.highlightId
+            });
+          } catch (err) {
+            trace("warn", "four-t highlight sync failed", err && err.message ? err.message : err);
+          }
+          rebuildFourTChunkBankTexts(row);
+          pageBanks = syncFourTPageBankForActiveTab();
+        } else {
+          debugFourTZoombox("refreshed token missing after rebuild", {
+            tokenInfo,
+            activeBankIndex,
+            banks: getFourTBankDebugSnapshot(row)
+          });
+        }
+        renderFourTPageBankListOnly();
+        renderFourTZoombox();
+        rebuildWordMeaningMap();
+        markMemoDirty(existing ? "four-t-zoombox-token-move" : "four-t-zoombox-token-add");
+        const finalBanks = getFourTBankDebugSnapshot(row);
+        debugFourTZoombox(existing ? "token moved" : "token added", {
+          tokenInfo,
+          activeBankIndex,
+          bank: finalBanks[activeBankIndex],
+          pageBank: pageBanks[activeBankIndex],
+          selectedTokenCount: overlayFourZoomboxSentence.querySelectorAll(".overlay-four-zoombox-token.is-selected").length,
+          zoomboxBankChipCount: overlayFourZoomboxBankList.querySelectorAll(".overlay-four-zoombox-bank-word").length
+        });
+      }
+
+      function renderFourTZoomboxBanks(row) {
+        const banks = ensureFourTFragmentChunkData(row);
+        overlayFourZoomboxBankList.innerHTML = "";
+        for (let idx = 0; idx < banks.length; idx += 1) {
+          const bank = banks[idx];
+          const rowBtn = document.createElement("div");
+          rowBtn.className = "overlay-four-zoombox-bank-row";
+          rowBtn.classList.toggle("is-active", idx === fourTZoomboxState.activeBankIndex);
+          rowBtn.style.setProperty("--bank-color", bank.color);
+          rowBtn.dataset.bankIndex = String(idx);
+          rowBtn.tabIndex = 0;
+          rowBtn.setAttribute("role", "button");
+          rowBtn.addEventListener("click", function (event) {
+            debugFourTZoombox("bank row click", {
+              bankIndex: idx,
+              event: getFourTZoomboxEventDebug(event, rowBtn)
+            });
+            setFourTZoomboxActiveBank(idx);
+          });
+          rowBtn.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            setFourTZoomboxActiveBank(idx);
+          });
+
+          const label = document.createElement("div");
+          label.className = "overlay-four-zoombox-bank-label";
+          const name = document.createElement("span");
+          name.textContent = `Bank ${idx + 1}`;
+          const count = document.createElement("span");
+          count.textContent = String(bank.tokens.length);
+          label.appendChild(name);
+          label.appendChild(count);
+
+          const wordSlot = document.createElement("div");
+          wordSlot.className = "overlay-four-zoombox-word-slot";
+          wordSlot.classList.toggle("is-empty", !bank.tokens.length);
+          for (let tokenIdx = 0; tokenIdx < bank.tokens.length; tokenIdx += 1) {
+            const chip = document.createElement("span");
+            chip.className = "overlay-four-zoombox-bank-word";
+            chip.textContent = bank.tokens[tokenIdx].raw || bank.tokens[tokenIdx].word || "";
+            wordSlot.appendChild(chip);
+          }
+
+          const meaning = document.createElement("textarea");
+          meaning.className = "overlay-four-zoombox-bank-meaning";
+          meaning.placeholder = "Meaning";
+          meaning.value = bank.meaning || "";
+          meaning.addEventListener("click", function (event) {
+            event.stopPropagation();
+          });
+          meaning.addEventListener("focus", function () {
+            fourTZoomboxState.activeBankIndex = idx;
+          });
+          meaning.addEventListener("input", function () {
+            bank.meaning = meaning.value;
+            syncFourTPageBankForActiveTab();
+            rebuildWordMeaningMap();
+            markMemoDirty("four-t-zoombox-bank-meaning");
+          });
+
+          rowBtn.appendChild(label);
+          rowBtn.appendChild(wordSlot);
+          rowBtn.appendChild(meaning);
+          overlayFourZoomboxBankList.appendChild(rowBtn);
+        }
+      }
+
+      function renderFourTZoomboxSentence(row) {
+        const tokens = getFourTSentenceWordTokens(row.text || row.sentence || "");
+        overlayFourZoomboxSentence.innerHTML = "";
+        debugFourTZoombox("render sentence", {
+          rowNo: row && row.no,
+          textLength: toSafeText(row && (row.text || row.sentence)).length,
+          tokenCount: tokens.length,
+          wordCount: tokens.filter(function (token) { return token.type === "word"; }).length
+        });
+        for (let idx = 0; idx < tokens.length; idx += 1) {
+          const token = tokens[idx];
+          if (token.type !== "word") {
+            overlayFourZoomboxSentence.appendChild(document.createTextNode(token.text || ""));
+            continue;
+          }
+          const selected = getFourTTokenSelection(row, token.wordIndex);
+          const tokenBtn = document.createElement("button");
+          tokenBtn.type = "button";
+          tokenBtn.className = "overlay-four-zoombox-token";
+          tokenBtn.textContent = token.text;
+          tokenBtn.dataset.wordIndex = String(token.wordIndex);
+          if (selected) {
+            tokenBtn.classList.add("is-selected");
+            tokenBtn.style.setProperty("--token-color", selected.bank.color);
+          }
+          tokenBtn.addEventListener("pointerdown", function (event) {
+            event.stopPropagation();
+          });
+          overlayFourZoomboxSentence.appendChild(tokenBtn);
+        }
+      }
+
+      function handleFourTZoomboxSentenceTokenClick(event) {
+        debugFourTZoombox("sentence event received", getFourTZoomboxEventDebug(event));
+        const target = event.target && event.target.closest
+          ? event.target.closest(".overlay-four-zoombox-token")
+          : null;
+        if (!target || !overlayFourZoomboxSentence.contains(target)) {
+          debugFourTZoombox("sentence event ignored: no token target", getFourTZoomboxEventDebug(event, target));
+          return;
+        }
+        const row = fourTZoomboxState.row;
+        if (!row) {
+          debugFourTZoombox("sentence event ignored: no row", getFourTZoomboxEventDebug(event, target));
+          return;
+        }
+        const wordIndex = Math.trunc(Number(target.dataset.wordIndex));
+        if (!Number.isFinite(wordIndex) || wordIndex < 0) {
+          debugFourTZoombox("sentence event ignored: invalid word index", {
+            dataset: target.dataset && target.dataset.wordIndex,
+            event: getFourTZoomboxEventDebug(event, target)
+          });
+          return;
+        }
+        if (event.type !== "click" && event.type !== "pointerup") {
+          debugFourTZoombox("sentence event observed only", {
+            wordIndex,
+            event: getFourTZoomboxEventDebug(event, target)
+          });
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        if (shouldSkipFourTZoomboxDuplicateCommit(wordIndex)) return;
+        const tokens = getFourTSentenceWordTokens(row.text || row.sentence || "");
+        const token = tokens.find(function (item) {
+          return item && item.type === "word" && item.wordIndex === wordIndex;
+        });
+        if (!token) {
+          debugFourTZoombox("sentence event ignored: token not found", {
+            wordIndex,
+            tokens,
+            event: getFourTZoomboxEventDebug(event, target)
+          });
+          return;
+        }
+        debugFourTZoombox("sentence event commits token", {
+          token,
+          event: getFourTZoomboxEventDebug(event, target)
+        });
+        toggleFourTZoomboxToken(token);
+      }
+
+      function renderFourTZoombox() {
+        const row = fourTZoomboxState.row;
+        if (!fourTZoomboxState.open || !row) {
+          debugFourTZoombox("render skipped", {
+            open: fourTZoomboxState.open,
+            hasRow: !!row
+          });
+          return;
+        }
+        const banks = ensureFourTFragmentChunkData(row);
+        if (fourTZoomboxState.activeBankIndex < 0 || fourTZoomboxState.activeBankIndex >= banks.length) {
+          fourTZoomboxState.activeBankIndex = 0;
+        }
+        debugFourTZoombox("render", {
+          rowIndex: fourTZoomboxState.rowIndex,
+          activeBankIndex: fourTZoomboxState.activeBankIndex,
+          bankCount: banks.length,
+          tokenCounts: banks.map(function (bank) { return bank.tokens.length; })
+        });
+        overlayFourZoombox.hidden = false;
+        overlayFourZoomboxTitle.textContent = `Sentence ${fourTZoomboxState.rowIndex + 1}`;
+        renderFourTZoomboxBanks(row);
+        renderFourTZoomboxSentence(row);
+        const answerText = row.answer || row.translation || "";
+        if (overlayFourZoomboxAnswer.value !== answerText) {
+          overlayFourZoomboxAnswer.value = answerText;
+        }
+      }
+
+      function openFourTZoombox(row, idx) {
+        debugFourTZoombox("open requested", {
+          hasRow: !!row,
+          idx,
+          rowNo: row && row.no,
+          text: toSafeText(row && (row.text || row.sentence)).slice(0, 160),
+          wordRefs: row && row.wordRefs
+        });
+        if (!row) return;
+        fourTZoomboxState.open = true;
+        fourTZoomboxState.row = row;
+        fourTZoomboxState.rowIndex = idx;
+        fourTZoomboxState.activeBankIndex = 0;
+        ensureFourTFragmentChunkData(row);
+        if (syncFourTZoomboxHighlightsForRow(row)) {
+          markMemoDirty("four-t-zoombox-highlight-sync");
+        }
+        renderFourTZoombox();
+      }
+
+      function buildFourTBankCard(row, idx) {
+        const outer = document.createElement("div");
+        outer.className = "overlay-four-bank-card";
+        outer.style.setProperty("--bank-color", normalizeHexColor(row && row.color, FOUR_T_ZOOMBOX_BANK_COLORS[idx % FOUR_T_ZOOMBOX_BANK_COLORS.length]));
+
+        const label = document.createElement("div");
+        label.className = "overlay-four-zoombox-bank-label";
+        const name = document.createElement("span");
+        name.textContent = `Bank ${idx + 1}`;
+        const count = document.createElement("span");
+        const words = toSafeText(row && row.text).split(/\s+/).filter(Boolean);
+        count.textContent = words.length ? `${words.length}` : "0";
+        label.appendChild(name);
+        label.appendChild(count);
+
+        const wordSlot = document.createElement("div");
+        wordSlot.className = "overlay-four-zoombox-word-slot";
+        wordSlot.classList.toggle("is-empty", !words.length);
+        for (let i = 0; i < words.length; i += 1) {
+          const chip = document.createElement("span");
+          chip.className = "overlay-four-zoombox-bank-word";
+          chip.textContent = words[i];
+          wordSlot.appendChild(chip);
+        }
+
+        const meaning = document.createElement("textarea");
+        meaning.className = "overlay-four-zoombox-bank-meaning";
+        meaning.placeholder = "Meaning";
+        meaning.rows = 1;
+        meaning.value = row && row.meaning ? row.meaning : "";
+        meaning.addEventListener("input", function () {
+          row.meaning = meaning.value;
+          rebuildWordMeaningMap();
+          markMemoDirty("four-t-bank");
+        });
+        outer.appendChild(label);
+        outer.appendChild(wordSlot);
+        outer.appendChild(meaning);
+        return outer;
+      }
+
+      function buildFourTFragmentCard(row, idx) {
+        const safe = normalizeFourTRow(row, idx + 1);
+        ensureFourTFragmentChunkData(row);
+        const outer = document.createElement("div");
+        outer.className = "overlay-four-fragment-card";
+        const no = document.createElement("span");
+        no.className = "overlay-four-fragment-no";
+        no.textContent = safe.no > 0 ? String(safe.no).padStart(2, "0") : String(idx + 1).padStart(2, "0");
+        const body = document.createElement("div");
+        body.className = "overlay-four-fragment-body";
+        const source = document.createElement("div");
+        source.className = "overlay-four-source";
+        source.textContent = safe.text || "";
+        source.tabIndex = 0;
+        source.setAttribute("role", "button");
+        source.title = "Open zoombox";
+        source.addEventListener("click", function () {
+          openFourTZoombox(row, idx);
+        });
+        source.addEventListener("keydown", function (event) {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          openFourTZoombox(row, idx);
+        });
+        const answer = document.createElement("textarea");
+        answer.className = "overlay-four-fragment-text";
+        answer.value = safe.answer;
+        answer.placeholder = "Translation";
+        answer.addEventListener("input", function () {
+          row.answer = answer.value;
+          row.translation = answer.value;
+          markMemoDirty("four-t-fragment");
+        });
+        body.appendChild(source);
+        body.appendChild(answer);
+        outer.appendChild(no);
+        outer.appendChild(body);
+        return outer;
+      }
+
+      function renderFourTCards() {
+        const tab = getActiveMemoTab();
+        if (!tab || tab.type !== "four_t") return;
+        const changed = syncFourTFragmentsFromQuestion(tab);
+        if (changed && fourTZoomboxState.open) {
+          closeFourTZoombox(false);
+        }
+        const fourT = ensureFourTData(tab);
+        if (!fourT) return;
+
+        overlayFourBankList.innerHTML = "";
+        overlayFourFragmentList.innerHTML = "";
+
+        for (let idx = 0; idx < fourT.bank.length; idx += 1) {
+          overlayFourBankList.appendChild(buildFourTBankCard(fourT.bank[idx], idx));
+        }
+
+        if (!fourT.fragments.length) {
+          const empty = document.createElement("div");
+          empty.className = "overlay-four-empty";
+          empty.textContent = "Click a question in the PDF to load its sentences.";
+          overlayFourFragmentList.appendChild(empty);
+        } else {
+          for (let idx = 0; idx < fourT.fragments.length; idx += 1) {
+            overlayFourFragmentList.appendChild(buildFourTFragmentCard(fourT.fragments[idx], idx));
+          }
+        }
+
+        if (changed) {
+          markMemoDirty("four-t-qno-fragments");
+        }
       }
 
       function renderTwoThreeCards() {
@@ -5063,9 +7031,16 @@
       function renderActiveMemoPane() {
         const tab = getActiveMemoTab();
         const isTwoThree = !!tab && tab.type === "two_three";
+        const isFourT = !!tab && tab.type === "four_t";
+        const isWalkthrough = !!tab && tab.type === "walkthrough";
         rebuildWordMeaningMap();
-        overlayBlankPane.hidden = isTwoThree;
+        overlayBlankPane.hidden = isTwoThree || isFourT || isWalkthrough;
         overlayTwoThreePane.hidden = !isTwoThree;
+        overlayFourTPane.hidden = !isFourT;
+        overlayWalkthroughPane.hidden = !isWalkthrough;
+        if (!isFourT && fourTZoomboxState.open) {
+          closeFourTZoombox(false);
+        }
 
         if (!tab) {
           updateBlankPenUi();
@@ -5076,6 +7051,12 @@
         if (isTwoThree) {
           ensureTwoThreeData(tab);
           renderTwoThreeCards();
+        } else if (isFourT) {
+          ensureFourTData(tab);
+          renderFourTCards();
+          refreshDictPanel();
+        } else if (isWalkthrough) {
+          refreshDictPanel();
         } else {
           overlayMemoText.value = tab.blankText || "";
           refreshDictPanel();
@@ -5130,7 +7111,7 @@
       function addMemoTab(tabType) {
         stopThreePenDrawing();
         saveActiveMemoText();
-        const type = tabType === "two_three" ? "two_three" : "blank";
+        const type = tabType === "walkthrough" ? "walkthrough" : (tabType === "four_t" ? "four_t" : (tabType === "two_three" ? "two_three" : "blank"));
         memoTabs.push({
           id: nextMemoTabId,
           type,
@@ -5139,6 +7120,12 @@
           twoThree: type === "two_three" ? {
             words: makeDefaultTwoTCards(),
             sentences: makeDefaultThreeTCards()
+          } : null,
+          fourT: type === "four_t" ? {
+            bank: makeDefaultFourTBankRows(),
+            sourceQNo: 0,
+            sourceMode: FOUR_T_SOURCE_MODE,
+            fragments: []
           } : null
         });
         nextMemoTabId += 1;
@@ -5162,6 +7149,7 @@
           memoTabs[0].blankText = "";
           memoTabs[0].blankInk = [];
           memoTabs[0].twoThree = null;
+          memoTabs[0].fourT = null;
           renderActiveMemoPane();
           markMemoDirty("tab-reset-last");
           return;
@@ -5513,6 +7501,7 @@
           type: "blank",
           blankText: "",
           twoThree: null,
+          fourT: null,
           blankInk: []
         });
         nextMemoTabId = 2;
@@ -5629,6 +7618,32 @@
               sentences
             });
           }
+          if (safeTab.type === "four_t") {
+            const fourT = ensureFourTData(safeTab) || {};
+            const bank = Array.isArray(fourT.bank) ? fourT.bank.map(function (row, idx) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return {
+                text: toSafeText(safeRow.text),
+                meaning: toSafeText(safeRow.meaning),
+                color: normalizeHexColor(safeRow.color, FOUR_T_ZOOMBOX_BANK_COLORS[idx % FOUR_T_ZOOMBOX_BANK_COLORS.length])
+              };
+            }) : [];
+            const fragments = Array.isArray(fourT.fragments) ? fourT.fragments.map(function (row, idx) {
+              return normalizeFourTRow(row, idx + 1);
+            }) : [];
+            return attachQuestionMeta({
+              type: "four_t",
+              bank,
+              sourceQNo: parseQNoForPayload(fourT.sourceQNo),
+              sourceMode: FOUR_T_SOURCE_MODE,
+              fragments
+            });
+          }
+          if (safeTab.type === "walkthrough") {
+            return attachQuestionMeta({
+              type: "walkthrough"
+            });
+          }
           return attachQuestionMeta({
             type: "blank",
             blankText: toSafeText(safeTab.blankText),
@@ -5677,6 +7692,20 @@
           }
           return false;
         }
+        if (safeTab.type === "four_t") {
+          const bank = Array.isArray(safeTab.bank) ? safeTab.bank : [];
+          for (let i = 0; i < bank.length; i += 1) {
+            const row = bank[i] && typeof bank[i] === "object" ? bank[i] : {};
+            if (hasMeaningfulText(row.text)) return true;
+          }
+          const fragments = Array.isArray(safeTab.fragments) ? safeTab.fragments : [];
+          for (let i = 0; i < fragments.length; i += 1) {
+            const row = fragments[i] && typeof fragments[i] === "object" ? fragments[i] : {};
+            if (hasMeaningfulText(row.answer) || hasMeaningfulText(row.translation) || hasMeaningfulText(row.response) || hasFourTChunkContent(row)) return true;
+          }
+          return false;
+        }
+        if (safeTab.type === "walkthrough") return false;
 
         if (hasMeaningfulText(safeTab.blankText)) return true;
         return hasInkStrokeList(safeTab.blankInk);
@@ -5733,7 +7762,7 @@
 
       function buildPayloadJsonForTemplatePage(tab, templatePage, submitMeta) {
         const safeTab = tab && typeof tab === "object" ? tab : { type: "blank", blankText: "", blankInk: [] };
-        const tabType = safeTab.type === "two_three" ? "two_three" : "blank";
+        const tabType = safeTab.type === "four_t" ? "four_t" : (safeTab.type === "two_three" ? "two_three" : "blank");
         const page = Math.max(1, Math.trunc(Number(templatePage) || 1));
         const mode = submitMeta && submitMeta.mode === "all" ? "all" : "active";
         const order = Math.max(1, Math.trunc(Number(submitMeta && submitMeta.order) || 1));
@@ -5755,7 +7784,7 @@
           : (hasTabLap ? tabLap : (hasMetaLap ? metaLap : DEFAULT_PAYLOAD_LAP));
 
         const payload = {
-          template: tabType === "two_three" ? "단어찾고번역" : "blank",
+          template: tabType === "two_three" ? "단어찾고번역" : (tabType === "four_t" ? "Chunks & Fragments" : "blank"),
           tabs: [safeTab],
           activeTabIndex: 0,
           overlaySide: overlaySide === "left" ? "left" : "right",
@@ -5803,6 +7832,37 @@
           }
           if (sentences.length) {
             payload.sentences = sentences;
+          }
+        } else if (tabType === "four_t") {
+          const bank = Array.isArray(safeTab.bank)
+            ? safeTab.bank.filter(function (row) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return hasMeaningfulText(safeRow.text) || hasMeaningfulText(safeRow.meaning);
+            })
+            : [];
+          const fragments = Array.isArray(safeTab.fragments)
+            ? safeTab.fragments.filter(function (row) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return hasMeaningfulText(safeRow.answer) || hasMeaningfulText(safeRow.translation) || hasMeaningfulText(safeRow.response) || hasFourTChunkContent(safeRow);
+            })
+            : [];
+          payload.sourceQNo = parseQNoForPayload(safeTab.sourceQNo);
+          payload.sourceMode = FOUR_T_SOURCE_MODE;
+          if (bank.length) {
+            payload.bank = bank;
+          }
+          if (fragments.length) {
+            payload.fragments = fragments;
+            payload.sentences = fragments.map(function (row, idx) {
+              const safeRow = row && typeof row === "object" ? row : {};
+              return {
+                sentence: toSafeText(safeRow.text || safeRow.sentence),
+                answer: toSafeText(safeRow.answer || safeRow.translation || safeRow.response),
+                no: Math.max(0, Math.trunc(Number(safeRow.no) || idx + 1)),
+                wordRefs: normalizeFourTWordRefs(safeRow.wordRefs || safeRow.word_refs),
+                chunkBanks: normalizeFourTChunkBanks(safeRow.chunkBanks)
+              };
+            });
           }
         } else {
           const text = toSafeText(safeTab.blankText).trim();
@@ -6006,15 +8066,44 @@
         overlayQuestionBar.textContent = `Question No. ${label}`;
       }
 
+      function getActiveTabEffectiveQNo(tab) {
+        const direct = parseQNoForPayload(tab && typeof tab === "object" ? getRawQNoFromAny(tab) : null);
+        if (direct > 0) return direct;
+        const selectedSession = findSelectedSessionByKey();
+        const fromSession = getSessionQNoFromAny(selectedSession);
+        return fromSession > 0 ? fromSession : 0;
+      }
+
+      function applyEffectiveQNoToTab(tab) {
+        if (!tab || typeof tab !== "object") return 0;
+        const qNo = getActiveTabEffectiveQNo(tab);
+        if (qNo > 0 && parseQNoForPayload(getRawQNoFromAny(tab)) <= 0) {
+          tab.QNo = qNo;
+          tab.qNo = qNo;
+        }
+        return qNo;
+      }
+
       function setActiveTabQuestionNoFromWordHit(rawQNo) {
         const qNo = parseQNoForPayload(rawQNo);
         if (qNo <= 0) return false;
         const tab = getActiveMemoTab();
         if (!tab || typeof tab !== "object") return false;
         const prev = parseQNoForPayload(getRawQNoFromAny(tab));
-        if (prev === qNo) return false;
+        if (prev === qNo) {
+          if (tab.type === "four_t" && syncFourTFragmentsFromQuestion(tab)) {
+            renderFourTCards();
+            markMemoDirty("four-t-qno-refresh");
+            return true;
+          }
+          return false;
+        }
         tab.QNo = qNo;
         tab.qNo = qNo;
+        if (tab.type === "four_t") {
+          syncFourTFragmentsFromQuestion(tab);
+          renderFourTCards();
+        }
         updateOverlayQuestionNoBar();
         markMemoDirty("qno-from-word-hit");
         trace("info", `active tab qno set from word-hit: Q${qNo}`);
@@ -6610,15 +8699,44 @@
         const map = new Map();
         for (let i = 0; i < memoTabs.length; i += 1) {
           const tab = memoTabs[i];
-          if (!tab || tab.type !== "two_three") continue;
-          const twoThree = tab.twoThree && typeof tab.twoThree === "object" ? tab.twoThree : null;
-          const words = twoThree && Array.isArray(twoThree.words) ? twoThree.words : [];
-          for (let j = 0; j < words.length; j += 1) {
-            const row = words[j] || {};
-            const key = normalizeMeaningMapKey(row.word);
-            const meaning = String(row.meaning || "").trim();
-            if (!key || !meaning) continue;
-            map.set(key, meaning);
+          if (tab && tab.type === "two_three") {
+            const twoThree = tab.twoThree && typeof tab.twoThree === "object" ? tab.twoThree : null;
+            const words = twoThree && Array.isArray(twoThree.words) ? twoThree.words : [];
+            for (let j = 0; j < words.length; j += 1) {
+              const row = words[j] || {};
+              const key = normalizeMeaningMapKey(row.word);
+              const meaning = String(row.meaning || "").trim();
+              if (!key || !meaning) continue;
+              map.set(key, meaning);
+            }
+            continue;
+          }
+          if (tab && tab.type === "four_t") {
+            const fourT = tab.fourT && typeof tab.fourT === "object" ? tab.fourT : null;
+            const pageBanks = fourT && Array.isArray(fourT.bank) ? fourT.bank : [];
+            for (let b = 0; b < pageBanks.length; b += 1) {
+              const bankRow = pageBanks[b] && typeof pageBanks[b] === "object" ? pageBanks[b] : {};
+              const meaning = String(bankRow.meaning || "").trim();
+              if (!meaning) continue;
+              const words = toSafeText(bankRow.text).split(/\s+/);
+              for (let w = 0; w < words.length; w += 1) {
+                const key = normalizeMeaningMapKey(words[w]);
+                if (key && !map.has(key)) map.set(key, meaning);
+              }
+            }
+            const fragments = fourT && Array.isArray(fourT.fragments) ? fourT.fragments : [];
+            for (let f = 0; f < fragments.length; f += 1) {
+              const banks = normalizeFourTChunkBanks(fragments[f] && fragments[f].chunkBanks);
+              for (let b = 0; b < banks.length; b += 1) {
+                const meaning = String(banks[b].meaning || "").trim();
+                if (!meaning) continue;
+                const tokens = Array.isArray(banks[b].tokens) ? banks[b].tokens : [];
+                for (let t = 0; t < tokens.length; t += 1) {
+                  const key = normalizeMeaningMapKey(tokens[t] && tokens[t].word);
+                  if (key && !map.has(key)) map.set(key, meaning);
+                }
+              }
+            }
           }
         }
         wordMeaningMap = map;
@@ -6627,7 +8745,11 @@
       function findMeaningForWord(word) {
         const key = normalizeMeaningMapKey(word);
         if (!key) return "";
-        return wordMeaningMap.get(key) || "";
+        if (wordMeaningMap.has(key)) return wordMeaningMap.get(key) || "";
+        const meanings = activeWordIndex && activeWordIndex.meanings && typeof activeWordIndex.meanings === "object"
+          ? activeWordIndex.meanings
+          : null;
+        return meanings ? toSafeText(meanings[key]) : "";
       }
 
       function ensureWordTooltip() {
@@ -6773,6 +8895,10 @@
           const by = Math.max(y0, y1);
           const qNo = getWordIndexQNoFromObject(row);
           const hit = { word: text, x1: lx, y1: ty, x2: rx, y2: by };
+          const idx = normalizeWordIndexIdx(row.idx);
+          const meaning = toSafeText(row.meaning).trim();
+          if (idx != null) hit.idx = idx;
+          if (meaning) hit.meaning = meaning;
           if (qNo > 0) {
             hit.qNo = qNo;
           }
@@ -7041,6 +9167,7 @@
             pagesScrollHeight: previewPages.scrollHeight
           });
         }
+        syncFourTZoomboxHighlightsForActiveTab();
         lockPreviewViewportHeight("after-render");
         return {
           jumpedToPreferredDuringRender
@@ -7107,7 +9234,7 @@
         const sourceTabs = Array.isArray(rawTabs) && rawTabs.length ? rawTabs : [{ type: "blank", blankText: "" }];
         return sourceTabs.map(function (raw, idx) {
           const safeRaw = raw && typeof raw === "object" ? raw : {};
-          const type = safeRaw.type === "two_three" ? "two_three" : "blank";
+          const type = safeRaw.type === "walkthrough" ? "walkthrough" : (safeRaw.type === "four_t" ? "four_t" : (safeRaw.type === "two_three" ? "two_three" : "blank"));
           const parsedQNo = parseQNoForPayload(getRawQNoFromAny(safeRaw));
           const rawLap = getRawLapFromAny(safeRaw);
           const hasRawLap = hasMeaningfulText(rawLap);
@@ -7154,7 +9281,47 @@
               type: "two_three",
               blankText: "",
               blankInk: [],
-              twoThree: { words, sentences }
+              twoThree: { words, sentences },
+              fourT: null
+            });
+          }
+          if (type === "four_t") {
+            const sourceBank = Array.isArray(safeRaw.bank)
+              ? safeRaw.bank
+              : (safeRaw.fourT && Array.isArray(safeRaw.fourT.bank) ? safeRaw.fourT.bank : []);
+            const sourceFragments = Array.isArray(safeRaw.fragments)
+              ? safeRaw.fragments
+              : (safeRaw.fourT && Array.isArray(safeRaw.fourT.fragments) ? safeRaw.fourT.fragments : []);
+            const fourTTab = applyTabMeta({
+              id: idx + 1,
+              type: "four_t",
+              blankText: "",
+              blankInk: [],
+              twoThree: null,
+              fourT: {
+                bank: normalizeFourTBankRows(sourceBank),
+                sourceQNo: parseQNoForPayload(
+                  safeRaw.sourceQNo != null
+                    ? safeRaw.sourceQNo
+                    : (safeRaw.fourT && safeRaw.fourT.sourceQNo != null ? safeRaw.fourT.sourceQNo : parsedQNo)
+                ),
+                sourceMode: safeRaw.sourceMode || (safeRaw.fourT && safeRaw.fourT.sourceMode) || "",
+                fragments: sourceFragments.map(function (row, rowIdx) {
+                  return normalizeFourTRow(row, rowIdx + 1);
+                })
+              }
+            });
+            ensureFourTData(fourTTab);
+            return fourTTab;
+          }
+          if (type === "walkthrough") {
+            return applyTabMeta({
+              id: idx + 1,
+              type: "walkthrough",
+              blankText: "",
+              blankInk: [],
+              twoThree: null,
+              fourT: null
             });
           }
           const blankTab = {
@@ -7162,7 +9329,8 @@
             type: "blank",
             blankText: typeof safeRaw.blankText === "string" ? safeRaw.blankText : "",
             blankInk: Array.isArray(safeRaw.blankInk) ? safeRaw.blankInk : [],
-            twoThree: null
+            twoThree: null,
+            fourT: null
           };
           ensureBlankInk(blankTab);
           return applyTabMeta(blankTab);
@@ -7286,6 +9454,63 @@
       function getObjectValueByAliases(source, aliases) {
         const found = findObjectValueByAliases(source, aliases);
         return found ? found.value : undefined;
+      }
+
+      function getFourTSourceSentenceText(source) {
+        const direct = getObjectValueByAliases(source, [
+          "text",
+          "sentence",
+          "sentence_text",
+          "sentenceText",
+          "full_text",
+          "fullText",
+          "content",
+          "english",
+          "en",
+          "source_text",
+          "sourceText"
+        ]);
+        return toSafeText(direct).replace(/\s+/g, " ").trim();
+      }
+
+      function isFourTSourceSentenceRow(source) {
+        const safe = source && typeof source === "object" ? source : null;
+        if (!safe) return false;
+        const text = getFourTSourceSentenceText(safe);
+        if (!text) return false;
+        if (safe.is_instruction === true || safe.isInstruction === true) return false;
+        if (/^\s*\*/.test(text)) return false;
+        const choiceNo = getObjectValueByAliases(safe, [
+          "choice_no",
+          "choiceNo",
+          "option_no",
+          "optionNo",
+          "answer_no",
+          "answerNo"
+        ]);
+        if (choiceNo != null && toSafeText(choiceNo).trim()) return false;
+        const tag = [
+          safe.kind,
+          safe.type,
+          safe.role,
+          safe.category,
+          safe.sentence_type,
+          safe.sentenceType,
+          safe.sentence_role,
+          safe.sentenceRole,
+          safe.card_type,
+          safe.cardType,
+          safe.zone,
+          safe.detail_code,
+          safe.detailCode
+        ].map(function (value) {
+          return toSafeText(value).toLowerCase();
+        }).join(" ");
+        if (/\b(choice|option|answer|directive|instruction|question|prompt|problem|word|vocab|vocabulary|title|header)\b/.test(tag)) {
+          return false;
+        }
+        if (!/\s/.test(text) && text.length < 18) return false;
+        return true;
       }
 
       function getRawQNoFromAny(source) {
@@ -7515,12 +9740,98 @@
         return 0;
       }
 
+      function getWordIndexProblemQNoFromObject(source) {
+        const safe = source && typeof source === "object" ? source : null;
+        if (!safe) return 0;
+        const direct = getObjectValueByAliases(safe, [
+          "problem_number",
+          "problemNumber",
+          "problem_no",
+          "problemNo",
+          "problem",
+          "QNo",
+          "qNo",
+          "question_no",
+          "questionNo",
+          "q_no",
+          "pno"
+        ]);
+        const directParsed = parseWordIndexQNo(direct);
+        if (directParsed > 0) return directParsed;
+        const meta = safe.meta && typeof safe.meta === "object" ? safe.meta : null;
+        if (!meta) return 0;
+        return parseWordIndexQNo(getObjectValueByAliases(meta, [
+          "problem_number",
+          "problemNumber",
+          "problem_no",
+          "problemNo",
+          "problem",
+          "QNo",
+          "qNo",
+          "question_no",
+          "questionNo",
+          "q_no",
+          "pno"
+        ]));
+      }
+
+      function getWordIndexPageFromObject(source, fallbackPage) {
+        const safe = source && typeof source === "object" ? source : null;
+        if (!safe) return normalizeWordIndexPage(fallbackPage);
+        const direct = getObjectValueByAliases(safe, [
+          "page",
+          "page_no",
+          "pageNo",
+          "page_number",
+          "pageNumber",
+          "actual_pdf_page",
+          "actualPdfPage",
+          "printed_page",
+          "printedPage"
+        ]);
+        return normalizeWordIndexPage(direct != null ? direct : fallbackPage);
+      }
+
+      function getWordIndexMeaningFromObject(source) {
+        const safe = source && typeof source === "object" ? source : null;
+        if (!safe) return "";
+        const direct = getObjectValueByAliases(safe, [
+          "meaning",
+          "mean",
+          "definition",
+          "gloss",
+          "translation",
+          "kor",
+          "ko",
+          "korean",
+          "kr",
+          "note",
+          "memo"
+        ]);
+        return toSafeText(direct).trim();
+      }
+
+      function getWordIndexSentenceIdFromObject(source) {
+        const value = getObjectValueByAliases(source, [
+          "sentence_id",
+          "sentenceId",
+          "sentence_no",
+          "sentenceNo",
+          "sentence_key",
+          "sentenceKey",
+          "line_id",
+          "lineId",
+          "id"
+        ]);
+        return toSafeText(value).trim();
+      }
+
       function parseWordIndexRow(value, fallbackPage) {
         const pageFallback = normalizeWordIndexPage(fallbackPage);
         if (value && typeof value === "object") {
           const text = normalizeCapturedWord(value.text != null ? value.text : value.word);
           const bbox = normalizeWordIndexBBox(value.bbox);
-          const page = normalizeWordIndexPage(value.page != null ? value.page : pageFallback);
+          const page = getWordIndexPageFromObject(value, pageFallback);
           const idx = normalizeWordIndexIdx(getObjectValueByAliases(value, [
             "idx",
             "word_index",
@@ -7530,8 +9841,9 @@
             "index"
           ]));
           const qNo = getWordIndexQNoFromObject(value);
+          const meaning = getWordIndexMeaningFromObject(value);
           if (text && bbox && page) {
-            return { text, bbox, page, idx, qNo };
+            return { text, bbox, page, idx, qNo, meaning };
           }
         }
         if (Array.isArray(value) && value.length >= 5) {
@@ -7540,8 +9852,9 @@
           const page = pageFallback;
           const qNo = parseWordIndexQNo(value.length >= 6 ? value[5] : null);
           const idx = normalizeWordIndexIdx(value.length >= 7 ? value[6] : null);
+          const meaning = value.length >= 8 ? toSafeText(value[7]).trim() : "";
           if (text && bbox && page) {
-            return { text, bbox, page, idx, qNo };
+            return { text, bbox, page, idx, qNo, meaning };
           }
         }
         return null;
@@ -7565,8 +9878,11 @@
       function normalizeWordIndexData(rawData) {
         const objects = extractWordIndexObjects(rawData);
         const pages = {};
+        const sentencesByQNo = {};
+        const meanings = {};
         const dedupe = new Set();
         const dedupeRowByKey = new Map();
+        const sentenceDedupe = new Set();
 
         const makeWordRefKey = function (page, idx) {
           const pageNum = normalizeWordIndexPage(page);
@@ -7586,7 +9902,13 @@
           const safeObj = obj && typeof obj === "object" ? obj : {};
           const wordToProblem = new Map();
           const wordToLine = new Map();
+          const wordToSentence = new Map();
           const lineToProblem = new Map();
+          const sentenceToProblem = new Map();
+
+          const makeSentenceRefKey = function (value) {
+            return toSafeText(value).trim();
+          };
 
           const addWordToProblemMap = function (mapValue) {
             if (!mapValue || typeof mapValue !== "object") return;
@@ -7619,6 +9941,24 @@
             }
           };
 
+          const addWordToSentenceMap = function (mapValue) {
+            if (!mapValue || typeof mapValue !== "object") return;
+            const keys = Object.keys(mapValue);
+            for (let i = 0; i < keys.length; i += 1) {
+              const key = keys[i];
+              const pair = parseWordIndexTupleRef(key);
+              if (!pair) continue;
+              const wordKey = makeWordRefKey(pair[0], pair[1]);
+              if (!wordKey) continue;
+              const mapTarget = mapValue[key];
+              const sentenceKey = mapTarget && typeof mapTarget === "object"
+                ? getWordIndexSentenceIdFromObject(mapTarget)
+                : makeSentenceRefKey(mapTarget);
+              if (!sentenceKey) continue;
+              wordToSentence.set(wordKey, sentenceKey);
+            }
+          };
+
           const addLineToProblemMap = function (mapValue) {
             if (!mapValue || typeof mapValue !== "object") return;
             const keys = Object.keys(mapValue);
@@ -7633,17 +9973,38 @@
             }
           };
 
+          const addSentenceToProblemMap = function (mapValue) {
+            if (!mapValue || typeof mapValue !== "object") return;
+            const keys = Object.keys(mapValue);
+            for (let i = 0; i < keys.length; i += 1) {
+              const key = keys[i];
+              const sentenceKey = makeSentenceRefKey(key);
+              if (!sentenceKey) continue;
+              let qNo = parseWordIndexQNo(mapValue[key]);
+              if (qNo <= 0 && mapValue[key] && typeof mapValue[key] === "object") {
+                qNo = getWordIndexQNoFromObject(mapValue[key]);
+              }
+              sentenceToProblem.set(sentenceKey, qNo > 0 ? qNo : 0);
+            }
+          };
+
           addWordToProblemMap(safeObj.word_to_problem);
           addWordToProblemMap(safeObj.wordToProblem);
           addWordToLineMap(safeObj.word_to_line);
           addWordToLineMap(safeObj.wordToLine);
+          addWordToSentenceMap(safeObj.word_to_sentence);
+          addWordToSentenceMap(safeObj.wordToSentence);
           addLineToProblemMap(safeObj.line_to_problem);
           addLineToProblemMap(safeObj.lineToProblem);
+          addSentenceToProblemMap(safeObj.sentence_to_problem);
+          addSentenceToProblemMap(safeObj.sentenceToProblem);
 
           return {
             wordToProblem,
             wordToLine,
-            lineToProblem
+            wordToSentence,
+            lineToProblem,
+            sentenceToProblem
           };
         };
 
@@ -7654,8 +10015,29 @@
           const direct = parseWordIndexQNo(lookup.wordToProblem.get(wordKey));
           if (direct > 0) return direct;
           const lineKey = lookup.wordToLine.get(wordKey);
-          if (!lineKey) return 0;
-          return parseWordIndexQNo(lookup.lineToProblem.get(lineKey));
+          if (lineKey) {
+            const fromLine = parseWordIndexQNo(lookup.lineToProblem.get(lineKey));
+            if (fromLine > 0) return fromLine;
+          }
+          const sentenceKey = lookup.wordToSentence.get(wordKey);
+          if (sentenceKey) {
+            const fromSentence = parseWordIndexQNo(lookup.sentenceToProblem.get(sentenceKey));
+            if (fromSentence > 0) return fromSentence;
+          }
+          return 0;
+        };
+
+        const getSentenceQNoFromLookup = function (cardObj, lookup) {
+          if (!cardObj || !lookup) return 0;
+          const sentenceKey = getWordIndexSentenceIdFromObject(cardObj);
+          if (!sentenceKey) return 0;
+          return parseWordIndexQNo(lookup.sentenceToProblem.get(sentenceKey));
+        };
+
+        const addMeaning = function (word, meaning) {
+          const key = normalizeMeaningMapKey(word);
+          const value = toSafeText(meaning).trim();
+          if (key && value && !meanings[key]) meanings[key] = value;
         };
 
         const addParsedRow = function (rowObj) {
@@ -7674,15 +10056,49 @@
                 existingRow.qNo = qNo;
               }
             }
+            const existingRow = dedupeRowByKey.get(key);
+            if (existingRow) {
+              if (existingRow.idx == null && rowObj.idx != null) existingRow.idx = rowObj.idx;
+              if (!existingRow.meaning && rowObj.meaning) existingRow.meaning = rowObj.meaning;
+              addMeaning(existingRow.text, existingRow.meaning || rowObj.meaning);
+            }
             return;
           }
           dedupe.add(key);
           const pageKey = String(page);
           if (!Array.isArray(pages[pageKey])) pages[pageKey] = [];
           const row = { text, bbox };
+          if (rowObj.idx != null) row.idx = rowObj.idx;
+          if (rowObj.meaning) row.meaning = toSafeText(rowObj.meaning).trim();
           if (qNo > 0) row.qNo = qNo;
+          addMeaning(text, row.meaning);
           pages[pageKey].push(row);
           dedupeRowByKey.set(key, row);
+        };
+
+        const addSentenceForQNo = function (qNoValue, textValue, meta) {
+          const qNo = parseWordIndexQNo(qNoValue);
+          const text = toSafeText(textValue).replace(/\s+/g, " ").trim();
+          if (qNo <= 0 || !text) return;
+          const key = `${qNo}|${text.toLowerCase()}`;
+          if (sentenceDedupe.has(key)) return;
+          sentenceDedupe.add(key);
+          const page = normalizeWordIndexPage(meta && meta.page);
+          const noRaw = meta && (meta.no != null ? meta.no : meta.index);
+          const no = Math.max(0, Math.trunc(Number(noRaw) || 0));
+          const row = {
+            text,
+            no: no || (Array.isArray(sentencesByQNo[String(qNo)]) ? sentencesByQNo[String(qNo)].length + 1 : 1),
+            source: toSafeText(meta && meta.source).slice(0, 40)
+          };
+          const wordRefs = normalizeFourTWordRefs(meta && meta.wordRefs);
+          if (wordRefs.length) row.wordRefs = wordRefs;
+          if (page) row.page = page;
+          const qKey = String(qNo);
+          if (!Array.isArray(sentencesByQNo[qKey])) {
+            sentencesByQNo[qKey] = [];
+          }
+          sentencesByQNo[qKey].push(row);
         };
 
         const addRowsFromCollection = function (rows, fallbackPage, options) {
@@ -7718,35 +10134,304 @@
           }
         };
 
-        const addCardRows = function (cardList, options) {
-          const opts = options && typeof options === "object" ? options : {};
-          const fallbackQNo = parseWordIndexQNo(opts.fallbackQNo);
-          const lookup = opts.lookup || null;
-          if (!Array.isArray(cardList)) return;
-          for (let i = 0; i < cardList.length; i += 1) {
-            const card = cardList[i] && typeof cardList[i] === "object" ? cardList[i] : null;
-            if (!card) continue;
-            const cardPage = normalizeWordIndexPage(card.page);
-            const cardOwnQNo = parseWordIndexQNo(getWordIndexQNoFromObject(card));
-            const cardQNo = cardOwnQNo > 0 ? cardOwnQNo : fallbackQNo;
-            addRowsFromCollection(card.tokens, cardPage, {
-              fallbackQNo: cardQNo,
-              lookup
-            });
+        const addPageDetailMap = function (pageData, lookup) {
+          if (!pageData) return;
+          const visitDetail = function (detail, fallbackPage) {
+            if (!detail || typeof detail !== "object") return;
+            const page = getWordIndexPageFromObject(detail, fallbackPage);
+            addRowsFromCollection(detail.tokens, page, { lookup });
+            addRowsFromCollection(detail.words, page, { lookup });
+          };
 
-            const lineText = normalizeCapturedWord(
-              card.text != null
-                ? card.text
-                : (card.sentence != null ? card.sentence : "")
-            );
-            const lineBBox = normalizeWordIndexBBox(card.bbox);
-            if (lineText && lineBBox && cardPage) {
-              addParsedRow({
-                text: lineText,
-                bbox: lineBBox,
-                page: cardPage,
-                qNo: cardQNo
+          if (Array.isArray(pageData)) {
+            for (let i = 0; i < pageData.length; i += 1) {
+              const detail = pageData[i];
+              visitDetail(detail, i + 1);
+            }
+            return;
+          }
+
+          if (typeof pageData === "object") {
+            const keys = Object.keys(pageData);
+            for (let i = 0; i < keys.length; i += 1) {
+              const key = keys[i];
+              visitDetail(pageData[key], normalizeWordIndexPage(key));
+            }
+          }
+        };
+
+        const makeObjectIdMap = function (rows, aliases) {
+          const map = new Map();
+          if (!Array.isArray(rows)) return map;
+          for (let i = 0; i < rows.length; i += 1) {
+            const row = rows[i] && typeof rows[i] === "object" ? rows[i] : null;
+            if (!row) continue;
+            const id = toSafeText(getObjectValueByAliases(row, aliases)).trim();
+            if (id && !map.has(id)) map.set(id, row);
+          }
+          return map;
+        };
+
+        const collectObjectIds = function (source, aliases) {
+          const out = [];
+          const pushValue = function (value) {
+            if (Array.isArray(value)) {
+              for (let i = 0; i < value.length; i += 1) pushValue(value[i]);
+              return;
+            }
+            const text = toSafeText(value).trim();
+            if (text && out.indexOf(text) < 0) out.push(text);
+          };
+          for (let i = 0; i < aliases.length; i += 1) {
+            pushValue(getObjectValueByAliases(source, [aliases[i]]));
+          }
+          return out;
+        };
+
+        const addRowsToRefIdMap = function (map, value, aliases) {
+          if (!map || value == null) return;
+          if (Array.isArray(value)) {
+            for (let i = 0; i < value.length; i += 1) {
+              addRowsToRefIdMap(map, value[i], aliases);
+            }
+            return;
+          }
+          if (typeof value !== "object") return;
+          const directId = toSafeText(getObjectValueByAliases(value, aliases)).trim();
+          if (directId && !map.has(directId)) map.set(directId, value);
+          const keys = Object.keys(value);
+          for (let i = 0; i < keys.length; i += 1) {
+            const key = keys[i];
+            const child = value[key];
+            if (child && typeof child === "object") {
+              const keyText = toSafeText(key).trim();
+              if (keyText && !Array.isArray(child) && !map.has(keyText)) map.set(keyText, child);
+              addRowsToRefIdMap(map, child, aliases);
+            }
+          }
+        };
+
+        const buildWordRefIdMap = function (obj) {
+          const map = new Map();
+          const aliases = [
+            "word_id",
+            "wordId",
+            "token_id",
+            "tokenId",
+            "word_card_id",
+            "wordCardId",
+            "token_card_id",
+            "tokenCardId",
+            "id",
+            "key",
+            "uid"
+          ];
+          addRowsToRefIdMap(map, obj.word_cards, aliases);
+          addRowsToRefIdMap(map, obj.wordCards, aliases);
+          addRowsToRefIdMap(map, obj.token_cards, aliases);
+          addRowsToRefIdMap(map, obj.tokenCards, aliases);
+          addRowsToRefIdMap(map, obj.words, aliases);
+          addRowsToRefIdMap(map, obj.tokens, aliases);
+          addRowsToRefIdMap(map, obj.page_words, aliases);
+          addRowsToRefIdMap(map, obj.pageWords, aliases);
+          addRowsToRefIdMap(map, obj.pages, aliases);
+          return map;
+        };
+
+        const collectWordRefsFromIndexObject = function (source, fallbackPage, idMap) {
+          const refs = [];
+          const refSeen = new Set();
+          const fallback = normalizeWordIndexPage(fallbackPage);
+          const pushRef = function (ref) {
+            if (!ref) return;
+            if (!ref.page && fallback) ref.page = fallback;
+            const key = [
+              normalizeWordIndexPage(ref.page) || "",
+              normalizeWordIndexIdx(ref.idx) != null ? normalizeWordIndexIdx(ref.idx) : "",
+              normalizeCapturedWord(ref.word).toLowerCase()
+            ].join("|");
+            if (refSeen.has(key)) return;
+            refSeen.add(key);
+            refs.push(ref);
+          };
+          const visitRefValue = function (value) {
+            if (value == null) return;
+            if (typeof value === "number" || typeof value === "string") {
+              const ref = normalizeFourTWordRef(value);
+              pushRef(ref);
+              return;
+            }
+            if (Array.isArray(value)) {
+              if (value.length && (typeof value[0] === "number" || typeof value[0] === "string") && value.length <= 3) {
+                pushRef(normalizeFourTWordRef(value));
+                return;
+              }
+              for (let i = 0; i < value.length; i += 1) visitRefValue(value[i]);
+              return;
+            }
+            if (typeof value === "object") {
+              const parsed = parseWordIndexRow(value, fallback);
+              if (parsed) {
+                pushRef({ page: parsed.page, idx: parsed.idx, word: parsed.text });
+                addParsedRow(parsed);
+                return;
+              }
+              pushRef(normalizeFourTWordRef(value));
+            }
+          };
+          const visitIdValue = function (value) {
+            if (value == null) return;
+            if (Array.isArray(value)) {
+              for (let i = 0; i < value.length; i += 1) visitIdValue(value[i]);
+              return;
+            }
+            if (typeof value === "object") {
+              visitRefValue(value);
+              return;
+            }
+            const id = toSafeText(value).trim();
+            const row = id && idMap && idMap.get(id);
+            if (row) {
+              visitRefValue(row);
+            }
+          };
+          const directRefs = [
+            getObjectValueByAliases(source, ["word_refs", "wordRefs"]),
+            getObjectValueByAliases(source, ["token_refs", "tokenRefs"]),
+            getObjectValueByAliases(source, ["word_indices", "wordIndices"]),
+            getObjectValueByAliases(source, ["token_indices", "tokenIndices"])
+          ];
+          const directIds = [
+            getObjectValueByAliases(source, ["word_ids", "wordIds"]),
+            getObjectValueByAliases(source, ["token_ids", "tokenIds"]),
+            getObjectValueByAliases(source, ["word_card_ids", "wordCardIds"]),
+            getObjectValueByAliases(source, ["token_card_ids", "tokenCardIds"]),
+            getObjectValueByAliases(source, ["word_ref_ids", "wordRefIds"]),
+            getObjectValueByAliases(source, ["token_ref_ids", "tokenRefIds"]),
+            getObjectValueByAliases(source, ["words"]),
+            getObjectValueByAliases(source, ["tokens"])
+          ];
+          for (let i = 0; i < directRefs.length; i += 1) visitRefValue(directRefs[i]);
+          for (let i = 0; i < directIds.length; i += 1) visitIdValue(directIds[i]);
+          return refs;
+        };
+
+        const buildProblemContextList = function (value) {
+          const list = [];
+          if (Array.isArray(value)) {
+            for (let i = 0; i < value.length; i += 1) {
+              if (value[i] && typeof value[i] === "object") list.push({ key: "", item: value[i] });
+            }
+            return list;
+          }
+          if (value && typeof value === "object") {
+            const keys = Object.keys(value);
+            for (let i = 0; i < keys.length; i += 1) {
+              const item = value[keys[i]];
+              if (item && typeof item === "object") list.push({ key: keys[i], item });
+            }
+          }
+          return list;
+        };
+
+        const buildObjectRowList = function () {
+          const rows = [];
+          const visit = function (value) {
+            if (!value) return;
+            if (Array.isArray(value)) {
+              for (let i = 0; i < value.length; i += 1) {
+                if (value[i] && typeof value[i] === "object") rows.push(value[i]);
+              }
+              return;
+            }
+            if (typeof value === "object") {
+              const keys = Object.keys(value);
+              for (let i = 0; i < keys.length; i += 1) {
+                const row = value[keys[i]];
+                if (row && typeof row === "object" && !Array.isArray(row)) rows.push(row);
+              }
+            }
+          };
+          for (let i = 0; i < arguments.length; i += 1) visit(arguments[i]);
+          return rows;
+        };
+
+        const addFourTSentencesFromProblemContexts = function (obj) {
+          const sentenceMap = makeObjectIdMap(buildObjectRowList(obj.sentence_cards, obj.sentenceCards), ["sentence_id", "sentenceId", "id"]);
+          const paragraphMap = makeObjectIdMap(buildObjectRowList(obj.paragraphs, obj.paragraph_cards, obj.paragraphCards), ["paragraph_id", "paragraphId", "id"]);
+          const viewMap = makeObjectIdMap(buildObjectRowList(obj.view_blocks, obj.viewBlocks), ["view_id", "viewId", "block_id", "blockId", "id"]);
+          const wordRefIdMap = buildWordRefIdMap(obj);
+          const contexts = []
+            .concat(buildProblemContextList(obj.problem_contexts))
+            .concat(buildProblemContextList(obj.problemContexts))
+            .concat(buildProblemContextList(obj.problem_context_by_no))
+            .concat(buildProblemContextList(obj.problemContextByNo));
+
+          const addSentenceId = function (qNo, sentenceId, orderNo) {
+            const card = sentenceMap.get(sentenceId);
+            if (!card || !isFourTSourceSentenceRow(card)) return;
+            const page = getWordIndexPageFromObject(card, null);
+            addRowsFromCollection(card.tokens, page, { fallbackQNo: qNo, lookup: null });
+            addRowsFromCollection(card.words, page, { fallbackQNo: qNo, lookup: null });
+            addSentenceForQNo(qNo, getFourTSourceSentenceText(card), {
+              page,
+              no: orderNo,
+              source: "problem-paragraph",
+              wordRefs: collectWordRefsFromIndexObject(card, page, wordRefIdMap)
+            });
+          };
+
+          const addParagraph = function (qNo, paragraphId, counter) {
+            const paragraph = paragraphMap.get(paragraphId);
+            if (!paragraph) return counter;
+            const sentenceIds = collectObjectIds(paragraph, ["sentence_ids", "sentenceIds"]);
+            if (sentenceIds.length) {
+              for (let i = 0; i < sentenceIds.length; i += 1) {
+                counter += 1;
+                addSentenceId(qNo, sentenceIds[i], counter);
+              }
+              return counter;
+            }
+            if (isFourTSourceSentenceRow(paragraph)) {
+              counter += 1;
+              const page = getWordIndexPageFromObject(paragraph, null);
+              addRowsFromCollection(paragraph.tokens, page, { fallbackQNo: qNo, lookup: null });
+              addRowsFromCollection(paragraph.words, page, { fallbackQNo: qNo, lookup: null });
+              addSentenceForQNo(qNo, getFourTSourceSentenceText(paragraph), {
+                page,
+                no: counter,
+                source: "problem-paragraph",
+                wordRefs: collectWordRefsFromIndexObject(paragraph, page, wordRefIdMap)
               });
+            }
+            return counter;
+          };
+
+          for (let i = 0; i < contexts.length; i += 1) {
+            const entry = contexts[i];
+            const context = entry.item;
+            const qNo = parseWordIndexQNo(getWordIndexProblemQNoFromObject(context)) || parseWordIndexQNo(context.number) || parseWordIndexQNo(entry.key);
+            if (qNo <= 0) continue;
+            let counter = 0;
+            const paragraphIds = collectObjectIds(context, ["paragraph_ids", "paragraphIds", "primary_paragraph_id", "primaryParagraphId"]);
+            for (let j = 0; j < paragraphIds.length; j += 1) {
+              counter = addParagraph(qNo, paragraphIds[j], counter);
+            }
+            if (counter > 0) continue;
+
+            const viewIds = collectObjectIds(context, ["view_ids", "viewIds"]);
+            for (let j = 0; j < viewIds.length; j += 1) {
+              const view = viewMap.get(viewIds[j]);
+              if (!view) continue;
+              const viewParagraphIds = collectObjectIds(view, ["paragraph_ids", "paragraphIds", "primary_paragraph_id", "primaryParagraphId"]);
+              for (let k = 0; k < viewParagraphIds.length; k += 1) {
+                counter = addParagraph(qNo, viewParagraphIds[k], counter);
+              }
+              const viewSentenceIds = collectObjectIds(view, ["sentence_ids", "sentenceIds"]);
+              for (let k = 0; k < viewSentenceIds.length; k += 1) {
+                counter += 1;
+                addSentenceId(qNo, viewSentenceIds[k], counter);
+              }
             }
           }
         };
@@ -7770,10 +10455,6 @@
             const fromItem = parseWordIndexQNo(getWordIndexQNoFromObject(item));
             const fromKey = entry ? parseWordIndexQNo(entry.key) : 0;
             const payloadQNo = fromItem > 0 ? fromItem : fromKey;
-            addCardRows(item.sentence_cards, { fallbackQNo: payloadQNo, lookup });
-            addCardRows(item.choice_cards, { fallbackQNo: payloadQNo, lookup });
-            addCardRows(item.paragraph_cards, { fallbackQNo: payloadQNo, lookup });
-            addCardRows(item.cards, { fallbackQNo: payloadQNo, lookup });
             addRowsFromCollection(item.tokens, normalizeWordIndexPage(item.page), {
               fallbackQNo: payloadQNo,
               lookup
@@ -7788,14 +10469,12 @@
           addPageMap(obj.pages, lookup);
           addPageMap(obj.page_words, lookup);
           addPageMap(obj.pageWords, lookup);
+          addPageDetailMap(obj.pages, lookup);
           const hasWordMapLookup = lookup.wordToProblem.size > 0 || lookup.wordToLine.size > 0;
-          if (dedupe.size > beforePageMapRows && hasWordMapLookup) {
-            continue;
+          if (!(dedupe.size > beforePageMapRows && hasWordMapLookup)) {
+            addRowsFromCollection(obj.words, null, { lookup });
           }
-          addRowsFromCollection(obj.words, null, { lookup });
-          addCardRows(obj.sentence_cards, { lookup });
-          addCardRows(obj.choice_cards, { lookup });
-          addCardRows(obj.paragraph_cards, { lookup });
+          addFourTSentencesFromProblemContexts(obj);
           addProblemPayloads(obj.problems, lookup);
           addProblemPayloads(obj.problem_payloads, lookup);
           addProblemPayloads(obj.problemPayloads, lookup);
@@ -7816,7 +10495,9 @@
 
         return {
           raw: rawData,
-          pages
+          pages,
+          sentencesByQNo,
+          meanings
         };
       }
 
@@ -8128,6 +10809,21 @@
           return normalizeSessionTabs(safe.tabs);
         }
 
+        const templateText = String(safe.template || "").toLowerCase();
+        if (templateText === "walkthrough" || safe.type === "walkthrough") {
+          return normalizeSessionTabs([{ type: "walkthrough" }]);
+        }
+
+        if (templateText === "chunks & fragments" || templateText === "chunks&fragments" || safe.type === "four_t") {
+          return normalizeSessionTabs([{
+            type: "four_t",
+            bank: Array.isArray(safe.bank) ? safe.bank : [],
+            sourceQNo: safe.sourceQNo != null ? safe.sourceQNo : getRawQNoFromAny(safe),
+            sourceMode: safe.sourceMode || FOUR_T_SOURCE_MODE,
+            fragments: Array.isArray(safe.fragments) ? safe.fragments : (Array.isArray(safe.sentences) ? safe.sentences : [])
+          }]);
+        }
+
         const blankText = toSafeText(safe.text || safe.blankText);
         if (String(safe.template || "").toLowerCase() === "blank" || blankText) {
           return normalizeSessionTabs([{ type: "blank", blankText }]);
@@ -8173,6 +10869,7 @@
         if (/^blank$/i.test(template)) return "1st Try ( Skim / Scan / Brainstorm )";
         const compactTemplate = template.replace(/\s+/g, "");
         if (compactTemplate === "단어찾고번역") return "2nd & 3rd Try ( Vocab + Translation)";
+        if (/^chunks&fragments$/i.test(compactTemplate)) return "4th Try ( Chunks & Fragments )";
         return "";
       }
 
@@ -8799,40 +11496,59 @@
         const pdfFilename = String(fileInfo.filename);
         const stem = pdfFilename.replace(/\.pdf$/i, "");
         if (!stem || stem === pdfFilename) return null;
-        const indexName = `${stem}_wordsx.json`;
         const pdfUrl = String(fileInfo.url || "").trim();
-        const indexUrl = pdfUrl && /\.pdf($|[?#])/i.test(pdfUrl)
-          ? pdfUrl.replace(/\.pdf(?=($|[?#]))/i, "_wordsx.json")
-          : buildPublicUrl(indexName, fileInfo.grade);
-
-        try {
-          const res = await fetch(indexUrl);
-          if (!res.ok) {
-            trace("warn", `word-index request failed: ${indexUrl} (HTTP ${res.status})`);
-            return null;
-          }
-          const data = await res.json();
-          const normalized = normalizeWordIndexData(data);
-          const normalizedPages = normalized && normalized.pages && typeof normalized.pages === "object"
-            ? normalized.pages
-            : {};
-          const pageCount = Object.keys(normalizedPages).length;
-          if (!pageCount) {
-            trace("warn", `word-index empty: ${indexUrl}`);
-            return null;
-          }
-          const rowCount = Object.keys(normalizedPages).reduce(function (acc, key) {
-            const rows = Array.isArray(normalizedPages[key]) ? normalizedPages[key].length : 0;
-            return acc + rows;
-          }, 0);
-          activeWordIndex = normalized;
-          trace("info", `word-index loaded: ${indexUrl} (${pageCount}p / ${rowCount} rows)`);
-          return normalized;
-        } catch (err) {
-          const message = err && err.message ? err.message : "unknown error";
-          trace("warn", `word-index load failed: ${indexUrl} (${message})`);
-          return null;
+        const suffixes = ["_wordsx.json", ".wordsx.json", "_words.json", ".words.json"];
+        const indexCandidates = [];
+        const seenCandidates = new Set();
+        for (let i = 0; i < suffixes.length; i += 1) {
+          const suffix = suffixes[i];
+          const indexUrl = pdfUrl && /\.pdf($|[?#])/i.test(pdfUrl)
+            ? pdfUrl.replace(/\.pdf(?=($|[?#]))/i, suffix)
+            : buildPublicUrl(`${stem}${suffix}`, fileInfo.grade);
+          if (!indexUrl || seenCandidates.has(indexUrl)) continue;
+          seenCandidates.add(indexUrl);
+          indexCandidates.push(indexUrl);
         }
+
+        for (let i = 0; i < indexCandidates.length; i += 1) {
+          const indexUrl = indexCandidates[i];
+          try {
+            const res = await fetch(indexUrl);
+            if (!res.ok) {
+              trace("warn", `word-index request failed: ${indexUrl} (HTTP ${res.status})`);
+              continue;
+            }
+            const data = await res.json();
+            const normalized = normalizeWordIndexData(data);
+            const normalizedPages = normalized && normalized.pages && typeof normalized.pages === "object"
+              ? normalized.pages
+              : {};
+            const pageCount = Object.keys(normalizedPages).length;
+            const rowCount = Object.keys(normalizedPages).reduce(function (acc, key) {
+              const rows = Array.isArray(normalizedPages[key]) ? normalizedPages[key].length : 0;
+              return acc + rows;
+            }, 0);
+            const sentenceMap = normalized && normalized.sentencesByQNo && typeof normalized.sentencesByQNo === "object"
+              ? normalized.sentencesByQNo
+              : {};
+            const sentenceQuestionCount = Object.keys(sentenceMap).length;
+            const sentenceRowCount = Object.keys(sentenceMap).reduce(function (acc, key) {
+              const rows = Array.isArray(sentenceMap[key]) ? sentenceMap[key].length : 0;
+              return acc + rows;
+            }, 0);
+            if (!pageCount && !sentenceRowCount) {
+              trace("warn", `word-index empty: ${indexUrl}`);
+              continue;
+            }
+            activeWordIndex = normalized;
+            trace("info", `word-index loaded: ${indexUrl} (${pageCount}p / ${rowCount} rows / ${sentenceQuestionCount}q ${sentenceRowCount} sentences)`);
+            return normalized;
+          } catch (err) {
+            const message = err && err.message ? err.message : "unknown error";
+            trace("warn", `word-index load failed: ${indexUrl} (${message})`);
+          }
+        }
+        return null;
       }
 
       function buildFilename(grade, year, examKey, typeLabel) {
@@ -8927,6 +11643,11 @@
           const renderResult = await renderPdfPagesWithTextLayer(pdfBlob, {
             preferredPage: selectedSessionTargetPage
           });
+          const activeTab = getActiveMemoTab();
+          if (activeTab && activeTab.type === "four_t") {
+            syncFourTFragmentsFromQuestion(activeTab);
+            renderFourTCards();
+          }
           if (DEBUG_SCROLL_DIAG) {
             trace("info", "diag/post-load", {
               pagesHidden: previewPages.hidden,
@@ -9102,11 +11823,38 @@
         if (!url) return;
         window.open(url, "_blank", "noopener,noreferrer");
       });
+      overlayFourZoomboxCloseBtn.addEventListener("click", function () {
+        closeFourTZoombox(true);
+      });
+      overlayFourZoomboxAnswer.addEventListener("input", saveFourTZoomboxAnswer);
+      overlayFourZoombox.addEventListener("pointerdown", function (event) {
+        debugFourTZoombox("zoombox pointerdown capture", getFourTZoomboxEventDebug(event));
+      }, true);
+      overlayFourZoombox.addEventListener("pointerup", function (event) {
+        debugFourTZoombox("zoombox pointerup capture", getFourTZoomboxEventDebug(event));
+      }, true);
+      overlayFourZoombox.addEventListener("click", function (event) {
+        debugFourTZoombox("zoombox click capture", getFourTZoomboxEventDebug(event));
+      }, true);
+      overlayFourZoomboxSentence.addEventListener("pointerdown", handleFourTZoomboxSentenceTokenClick, true);
+      overlayFourZoomboxSentence.addEventListener("pointerup", handleFourTZoomboxSentenceTokenClick, true);
+      overlayFourZoomboxSentence.addEventListener("click", handleFourTZoomboxSentenceTokenClick, true);
+      document.addEventListener("pointerdown", function (event) {
+        if (!fourTZoomboxState.open) return;
+        debugFourTZoombox("document pointerdown while open", getFourTZoomboxEventDebug(event));
+      }, true);
+      document.addEventListener("click", function (event) {
+        if (!fourTZoomboxState.open) return;
+        debugFourTZoombox("document click while open", getFourTZoomboxEventDebug(event));
+      }, true);
 
       pagePenFab.addEventListener("click", function () {
         setPageInkEnabled(!pageInkState.enabled);
       });
-      pagePenCloseBtn.addEventListener("click", function () {
+      pagePenCloseBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        stopPagePenPaletteDrag();
         setPageInkEnabled(false);
       });
       pagePenToolBtns.forEach(function (btn) {
@@ -9122,6 +11870,13 @@
           setPagePenColor(btn.dataset.pageInkColor || PAGE_INK_COLOR);
         });
       });
+      pagePenColorScrollBtns.forEach(function (btn) {
+        btn.addEventListener("click", function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          scrollPagePenInkColors(btn.dataset.pageColorScroll || 1);
+        });
+      });
       pageHighlightColorBtns.forEach(function (btn) {
         btn.addEventListener("click", function () {
           setPageHighlightColor(btn.dataset.pageHighlightColor || PAGE_INK_HIGHLIGHT_COLOR);
@@ -9130,10 +11885,10 @@
       pagePenUndoBtn.addEventListener("click", undoCurrentPageInk);
       pagePenRedoBtn.addEventListener("click", redoCurrentPageInk);
       pagePenClearBtn.addEventListener("click", clearCurrentPageInk);
-      pagePenDragHandle.addEventListener("pointerdown", handlePagePenPaletteDragStart, { passive: false });
-      pagePenDragHandle.addEventListener("pointermove", handlePagePenPaletteDragMove, { passive: false });
-      pagePenDragHandle.addEventListener("pointerup", stopPagePenPaletteDrag, { passive: false });
-      pagePenDragHandle.addEventListener("pointercancel", stopPagePenPaletteDrag, { passive: false });
+      pagePenPalette.addEventListener("pointerdown", handlePagePenPaletteDragStart, { passive: false });
+      pagePenPalette.addEventListener("pointermove", handlePagePenPaletteDragMove, { passive: false });
+      pagePenPalette.addEventListener("pointerup", stopPagePenPaletteDrag, { passive: false });
+      pagePenPalette.addEventListener("pointercancel", stopPagePenPaletteDrag, { passive: false });
 
       newTabBtn.addEventListener("click", function () {
         const target = lastPdfUrl;
@@ -9214,6 +11969,10 @@
         }
         if (!overlayTabTypePopup.hidden) {
           closeTabTypePopup();
+          return;
+        }
+        if (fourTZoomboxState.open) {
+          closeFourTZoombox(true);
           return;
         }
         if (pageInkState.enabled) {

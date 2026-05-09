@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>간접의문문 종합 문제</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f5f1e8;
+      color: #2d241b;
+      font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+      line-height: 1.6;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+
+    header {
+      background: #fffaf1;
+      border: 2px solid #d7c2a3;
+      border-radius: 22px;
+      padding: 24px;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 20px rgba(70, 45, 20, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    h2 {
+      margin: 34px 0 14px;
+      font-size: 22px;
+      border-left: 8px solid #8fbfa8;
+      padding-left: 12px;
+    }
+
+    .note {
+      margin: 0;
+      color: #6b5b48;
+      font-size: 15px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 16px 0 22px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 15px;
+      background: #4f8f72;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover { filter: brightness(0.96); }
+
+    button:disabled {
+      background: #b8b1a7;
+      cursor: default;
+      filter: none;
+    }
+
+    .score-box {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 14px;
+      background: #fff;
+      border: 1px solid #d7c2a3;
+      border-radius: 999px;
+      font-weight: 800;
+      color: #3c6f58;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #fffaf1;
+      border: 1.5px solid #d7c2a3;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 5px 14px rgba(70, 45, 20, 0.06);
+    }
+
+    .qnum {
+      display: inline-block;
+      min-width: 34px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 999px;
+      background: #e6d4b9;
+      color: #3d3024;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .sentence {
+      font-size: 17px;
+      font-weight: 800;
+      margin: 4px 0 6px;
+    }
+
+    .meaning {
+      font-size: 14px;
+      color: #6f604f;
+      margin-bottom: 12px;
+    }
+
+    .blank {
+      display: inline-block;
+      min-width: 110px;
+      border-bottom: 3px solid #4f8f72;
+      transform: translateY(-2px);
+    }
+
+    .choices {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    label.choice {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      background: #ffffff;
+      border: 1px solid #e5d8c8;
+      border-radius: 12px;
+      padding: 9px 10px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    label.choice:hover { background: #f1f8f4; }
+
+    label.choice.locked {
+      cursor: default;
+      opacity: 0.85;
+    }
+
+    label.choice.selected-correct {
+      border-color: #2f9b6c;
+      background: #f0fff7;
+    }
+
+    label.choice.selected-wrong {
+      border-color: #c84b41;
+      background: #fff1ef;
+    }
+
+    input[type="radio"]:disabled {
+      cursor: default;
+    }
+
+    .result {
+      margin-top: 10px;
+      min-height: 24px;
+      font-weight: 800;
+    }
+
+    .correct { color: #23805a; }
+    .wrong { color: #b13b32; }
+
+    .writing-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .writing-card {
+      background: #fffaf1;
+      border: 1.5px solid #d7c2a3;
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .writing-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    input.text-answer {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1.5px solid #ccb898;
+      border-radius: 12px;
+      font-size: 16px;
+      background: #fff;
+    }
+
+    input.text-answer.ok {
+      border-color: #2f9b6c;
+      background: #f0fff7;
+    }
+
+    input.text-answer.no {
+      border-color: #c84b41;
+      background: #fff1ef;
+    }
+
+    input.text-answer:disabled {
+      color: #2d241b;
+      opacity: 1;
+    }
+
+    .mini-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .condition {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #eadbc5;
+      color: #4d3c2b;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .submit-panel {
+      margin-top: 28px;
+      padding: 18px;
+      background: #fffaf1;
+      border: 1.5px solid #d7c2a3;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .submit-panel .submit-status {
+      min-height: 22px;
+      font-weight: 800;
+      color: #4d3c2b;
+    }
+
+    @media (max-width: 780px) {
+      .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+      .wrap { padding: 18px 12px 48px; }
+    }
+
+    @media print {
+      body { background: white; }
+
+      .toolbar,
+      button {
+        display: none !important;
+      }
+
+      .card,
+      .writing-card,
+      header {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>간접의문문 종합 문제</h1>
+      <p class="note">
+        선다형은 선택지를 누르면 바로 채점됩니다. 서술형은 답을 쓴 뒤 채점 버튼을 누르세요.
+      </p>
+    </header>
+
+    <h2>Ⅰ. 선다형 40문항</h2>
+
+    <div class="toolbar">
+      <span id="mcScore" class="score-box">선다형 점수: 0 / 0 완료</span>
+    </div>
+
+    <section id="mcContainer" class="grid"></section>
+
+    <h2>Ⅱ. 서술형: 문장을 직접 완성하세요</h2>
+
+    <div class="toolbar">
+      <button id="directAllBtn" onclick="gradeWriting('direct')">서술형 전체 채점</button>
+      <span id="directScore" class="score-box">점수: - / 12</span>
+    </div>
+
+    <section id="directContainer" class="writing-list"></section>
+
+    <h2>Ⅲ. 빈칸 조건에 맞게 쓰세요</h2>
+
+    <div class="toolbar">
+      <button id="conditionAllBtn" onclick="gradeWriting('condition')">조건형 전체 채점</button>
+      <span id="conditionScore" class="score-box">점수: - / 12</span>
+    </div>
+
+    <section id="conditionContainer" class="writing-list"></section>
+    <section class="submit-panel">
+      <button id="submitBtn" type="button" disabled>&#51228;&#52636;</button>
+      <div id="submitStatus" class="submit-status" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <script>
+    const mcQuestions = [
+      {
+        sentence: "I don't know ____.",
+        meaning: "나는 그가 어디 사는지 모른다.",
+        choices: ["where does he live", "where he live", "where he lives", "where is he living", "he lives where"],
+        answer: 2
+      },
+      {
+        sentence: "Do you know ____?",
+        meaning: "그녀가 오는지 아니?",
+        choices: ["if she is coming", "if is she coming", "does she come", "she is coming if", "whether she coming"],
+        answer: 0
+      },
+      {
+        sentence: "Tell me ____.",
+        meaning: "네가 무엇을 샀는지 말해줘.",
+        choices: ["what did you buy", "what you buy", "what do you bought", "you bought what", "what you bought"],
+        answer: 4
+      },
+      {
+        sentence: "I wonder ____.",
+        meaning: "나는 그가 동의할지 궁금하다.",
+        choices: ["whether will he agree", "whether he will agree", "he will whether agree", "whether he agree", "if will he agree"],
+        answer: 1
+      },
+      {
+        sentence: "Can you explain ____?",
+        meaning: "이 기계가 어떻게 작동하는지 설명해 줄 수 있니?",
+        choices: ["how does this machine work", "how this machine work", "this machine how works", "how this machine works", "how works this machine"],
+        answer: 3
+      },
+      {
+        sentence: "I'm not sure ____.",
+        meaning: "나는 그 제안을 받아들여야 할지 확실하지 않다.",
+        choices: ["if to accept the offer", "whether accepting the offer", "whether to accept the offer", "whether accept the offer", "to whether accept the offer"],
+        answer: 2
+      },
+      {
+        sentence: "It depends on ____.",
+        meaning: "그것은 우리에게 시간이 충분한지에 달려 있다.",
+        choices: ["whether we have enough time", "if do we have enough time", "whether have we enough time", "we have whether enough time", "if we enough time have"],
+        answer: 0
+      },
+      {
+        sentence: "____ is still unclear.",
+        meaning: "그가 왜 떠났는지는 아직도 불분명하다.",
+        choices: ["Why did he leave", "If he left why", "Why he leave", "He left why", "Why he left"],
+        answer: 4
+      },
+      {
+        sentence: "The problem is ____.",
+        meaning: "문제는 우리가 그것을 어떻게 해결할 수 있느냐이다.",
+        choices: ["how can we solve it", "how we can solve it", "how we solve can it", "we can how solve it", "how solve we can it"],
+        answer: 1
+      },
+      {
+        sentence: "I asked him ____.",
+        meaning: "나는 그에게 열쇠를 어디에 두었는지 물었다.",
+        choices: ["where had he put the key", "where he puts the key", "where did he put the key", "where he had put the key", "he had put where the key"],
+        answer: 3
+      },
+      {
+        sentence: "Do you remember ____?",
+        meaning: "회의가 언제 시작하는지 기억하니?",
+        choices: ["when the meeting starts", "when does the meeting start", "when the meeting start", "the meeting when starts", "when starts the meeting"],
+        answer: 0
+      },
+      {
+        sentence: "Nobody knows ____.",
+        meaning: "아무도 누가 창문을 깼는지 모른다.",
+        choices: ["who did break the window", "who the window broke", "who broke the window", "who did the window break", "who breaking the window"],
+        answer: 2
+      },
+      {
+        sentence: "She asked me ____.",
+        meaning: "그녀는 내가 그녀를 도와줄 수 있는지 물었다.",
+        choices: ["could I help her", "if could I help her", "whether I help can her", "if I can helped her", "if I could help her"],
+        answer: 4
+      },
+      {
+        sentence: "I can't decide ____.",
+        meaning: "나는 어느 책을 고를지 결정할 수 없다.",
+        choices: ["which book choose", "which book to choose", "which to choose book", "which book I to choose", "which book choosing"],
+        answer: 1
+      },
+      {
+        sentence: "Let me know ____.",
+        meaning: "네가 도움이 필요한지 알려줘.",
+        choices: ["whether do you need help", "if need you help", "you need if help", "if you need help", "if you help need"],
+        answer: 3
+      },
+      {
+        sentence: "We talked about ____.",
+        meaning: "우리는 그가 말한 것에 대해 이야기했다.",
+        choices: ["what did he say", "what he say", "what he said", "he said what", "what does he say"],
+        answer: 2
+      },
+      {
+        sentence: "I don't care ____.",
+        meaning: "나는 그가 나를 좋아하든 아니든 신경 쓰지 않는다.",
+        choices: ["whether he likes me or not", "if or not he likes me", "whether does he like me or not", "he likes me whether or not", "whether he like me or not"],
+        answer: 0
+      },
+      {
+        sentence: "Could you tell me ____?",
+        meaning: "그녀가 몇 살인지 말해 주실 수 있나요?",
+        choices: ["how old is she", "how she old is", "how old she be", "how old does she is", "how old she is"],
+        answer: 4
+      },
+      {
+        sentence: "I don't understand ____.",
+        meaning: "나는 그들이 왜 규칙을 바꿨는지 이해하지 못한다.",
+        choices: ["why did they change the rule", "why they changed the rule", "why they change did the rule", "they changed why the rule", "why changed they the rule"],
+        answer: 1
+      },
+      {
+        sentence: "What do you think ____?",
+        meaning: "너는 그가 무엇을 원한다고 생각하니?",
+        choices: ["does he want", "what does he want", "he does want", "he wants", "wants he"],
+        answer: 3
+      },
+      {
+        sentence: "Where do you think ____?",
+        meaning: "너는 그녀가 어디에 갔다고 생각하니?",
+        choices: ["did she go", "where she went", "she went", "she did go", "went she"],
+        answer: 2
+      },
+      {
+        sentence: "I don't know ____.",
+        meaning: "나는 기차가 몇 시에 출발하는지 모른다.",
+        choices: ["what time the train leaves", "what time does the train leave", "what time leaves the train", "the train what time leaves", "what time the train leave"],
+        answer: 0
+      },
+      {
+        sentence: "Please ask her ____.",
+        meaning: "그녀가 일을 끝냈는지 물어봐 주세요.",
+        choices: ["has she finished the work", "if has she finished the work", "whether she finish the work", "she has finished if the work", "if she has finished the work"],
+        answer: 4
+      },
+      {
+        sentence: "I'm curious ____.",
+        meaning: "나는 얼마나 많은 사람들이 동아리에 가입했는지 궁금하다.",
+        choices: ["how many people did join the club", "how many people joined the club", "how many joined people the club", "how many people join did the club", "people joined how many the club"],
+        answer: 1
+      },
+      {
+        sentence: "We must decide ____.",
+        meaning: "우리는 머물지 떠날지 결정해야 한다.",
+        choices: ["if to stay or leave", "whether stay or leave", "whether to staying or leaving", "whether to stay or leave", "whether we to stay or leave"],
+        answer: 3
+      },
+      {
+        sentence: "Tell me ____.",
+        meaning: "이것이 누구의 가방인지 말해줘.",
+        choices: ["whose bag is this", "whose is this bag", "whose bag this is", "whose this bag is it", "whose bag does this is"],
+        answer: 2
+      },
+      {
+        sentence: "I wonder ____.",
+        meaning: "나는 무슨 일이 일어났는지 궁금하다.",
+        choices: ["what happened", "what did happen", "what it happened", "what was happened", "what happen did"],
+        answer: 0
+      },
+      {
+        sentence: "Do you know ____?",
+        meaning: "그가 어느 것을 골랐는지 아니?",
+        choices: ["which one did he choose", "which one he choose", "which did he choose one", "he chose which one", "which one he chose"],
+        answer: 4
+      },
+      {
+        sentence: "I have no idea ____.",
+        meaning: "나는 그녀가 왜 울고 있었는지 전혀 모르겠다.",
+        choices: ["why was she crying", "why she was crying", "why she crying was", "she was why crying", "why did she was crying"],
+        answer: 1
+      },
+      {
+        sentence: "Can you find out ____?",
+        meaning: "가게가 열려 있는지 알아봐 줄 수 있니?",
+        choices: ["whether is the store open", "if the store open", "the store is whether open", "whether the store is open", "if is open the store"],
+        answer: 3
+      },
+      {
+        sentence: "The question is ____.",
+        meaning: "문제는 우리가 그를 믿어야 하는지이다.",
+        choices: ["should we trust him", "whether should we trust him", "whether we should trust him", "whether we trust should him", "we should whether trust him"],
+        answer: 2
+      },
+      {
+        sentence: "I was surprised by ____.",
+        meaning: "나는 그녀가 내게 말한 것에 놀랐다.",
+        choices: ["what she told me", "what did she tell me", "what she tell me", "she told what me", "what told she me"],
+        answer: 0
+      },
+      {
+        sentence: "Please show me ____.",
+        meaning: "이 앱을 어떻게 사용하는지 보여주세요.",
+        choices: ["how use this app", "how using this app", "how to using this app", "how this app to use", "how to use this app"],
+        answer: 4
+      },
+      {
+        sentence: "I can't remember ____.",
+        meaning: "나는 내 차를 어디에 주차했는지 기억할 수 없다.",
+        choices: ["where did I park my car", "where I parked my car", "where I did park my car", "I parked where my car", "where parked I my car"],
+        answer: 1
+      },
+      {
+        sentence: "Who do you think ____?",
+        meaning: "너는 누가 그 경기에서 이길 것이라고 생각하니?",
+        choices: ["who will win the game", "does win the game", "will he win the game", "will win the game", "who wins will the game"],
+        answer: 3
+      },
+      {
+        sentence: "I don't know ____.",
+        meaning: "나는 그가 진실을 말했는지 아닌지 모른다.",
+        choices: ["if or not he told the truth", "whether did he tell the truth or not", "whether or not he told the truth", "whether he tell the truth or not", "he told whether the truth or not"],
+        answer: 2
+      },
+      {
+        sentence: "She wanted to know ____.",
+        meaning: "그녀는 내가 언제 도착할지 알고 싶어 했다.",
+        choices: ["when I would arrive", "when would I arrive", "when I arrive would", "I would when arrive", "when did I would arrive"],
+        answer: 0
+      },
+      {
+        sentence: "Could you tell me ____?",
+        meaning: "그가 어떤 종류의 영화를 좋아하는지 말해 주실 수 있나요?",
+        choices: ["what kind of movies does he like", "what kind movies he likes of", "what kind of movies he like", "he likes what kind of movies", "what kind of movies he likes"],
+        answer: 4
+      },
+      {
+        sentence: "____ doesn't matter to me.",
+        meaning: "그들이 동의하든 아니든 내게는 중요하지 않다.",
+        choices: ["If they agree or not", "Whether they agree or not", "Whether do they agree or not", "They agree whether or not", "Whether they agrees or not"],
+        answer: 1
+      },
+      {
+        sentence: "I don't know ____.",
+        meaning: "나는 여기서 얼마나 먼지 모른다.",
+        choices: ["how far is it from here", "how far from here it", "how far does it from here", "how far it is from here", "it is how far from here"],
+        answer: 3
+      }
+    ];
+
+    const directQuestions = [
+      {
+        sentence: "Where does he live? → I don't know ____.",
+        meaning: "그가 어디에 사는지",
+        answers: ["where he lives"]
+      },
+      {
+        sentence: "Is she busy? → Do you know ____?",
+        meaning: "그녀가 바쁜지",
+        answers: ["if she is busy", "whether she is busy"]
+      },
+      {
+        sentence: "What did he buy? → Tell me ____.",
+        meaning: "그가 무엇을 샀는지",
+        answers: ["what he bought"]
+      },
+      {
+        sentence: "Who broke the window? → I don't know ____.",
+        meaning: "누가 창문을 깼는지",
+        answers: ["who broke the window"]
+      },
+      {
+        sentence: "How old is she? → Can you tell me ____?",
+        meaning: "그녀가 몇 살인지",
+        answers: ["how old she is"]
+      },
+      {
+        sentence: "Should we go or stay? → We must decide ____.",
+        meaning: "갈지 머물지",
+        answers: ["whether to go or stay", "whether we should go or stay"]
+      },
+      {
+        sentence: "Where did she go? → Where do you think ____?",
+        meaning: "그녀가 갔다고 생각하니",
+        answers: ["she went"]
+      },
+      {
+        sentence: "Why did he lie? → Why do you think ____?",
+        meaning: "그가 거짓말했다고 생각하니",
+        answers: ["he lied"]
+      },
+      {
+        sentence: "Can I trust him? → It depends on ____.",
+        meaning: "내가 그를 믿을 수 있는지",
+        answers: ["whether i can trust him"]
+      },
+      {
+        sentence: "What should I do? → I don't know ____.",
+        meaning: "무엇을 해야 할지",
+        answers: ["what to do"]
+      },
+      {
+        sentence: "How many students are in the room? → Do you know ____?",
+        meaning: "방에 학생이 몇 명 있는지",
+        answers: ["how many students are in the room"]
+      },
+      {
+        sentence: "What time does the movie start? → I remember ____.",
+        meaning: "영화가 몇 시에 시작하는지",
+        answers: ["what time the movie starts"]
+      }
+    ];
+
+    const conditionQuestions = [
+      {
+        sentence: "I know ____.",
+        meaning: "나는 그가 어디에서 일하는지 안다.",
+        condition: "where / he / work",
+        answers: ["where he works"]
+      },
+      {
+        sentence: "Please tell me ____.",
+        meaning: "그녀가 숙제를 끝냈는지 말해줘.",
+        condition: "if / she / finish the homework",
+        answers: ["if she finished the homework", "if she has finished the homework"]
+      },
+      {
+        sentence: "I don't know ____.",
+        meaning: "그가 동의할지 아닐지 모르겠다.",
+        condition: "whether / he / agree / or not",
+        answers: ["whether he will agree or not", "whether or not he will agree"]
+      },
+      {
+        sentence: "Can you show me ____?",
+        meaning: "그것을 어떻게 사용하는지 보여줄 수 있니?",
+        condition: "how + to부정사",
+        answers: ["how to use it"]
+      },
+      {
+        sentence: "I wonder ____.",
+        meaning: "그가 어느 책을 골랐는지 궁금하다.",
+        condition: "which book / he / choose",
+        answers: ["which book he chose"]
+      },
+      {
+        sentence: "Do you know ____?",
+        meaning: "이것이 누구의 휴대폰인지 아니?",
+        condition: "whose phone / this / be",
+        answers: ["whose phone this is"]
+      },
+      {
+        sentence: "Tell me ____.",
+        meaning: "그들이 언제 도착할지 말해줘.",
+        condition: "when / they / arrive",
+        answers: ["when they will arrive", "when they arrive"]
+      },
+      {
+        sentence: "Nobody knows ____.",
+        meaning: "그녀가 왜 떠났는지 아무도 모른다.",
+        condition: "why / she / leave",
+        answers: ["why she left"]
+      },
+      {
+        sentence: "I can't decide ____.",
+        meaning: "그것을 받아들일지 결정할 수 없다.",
+        condition: "whether + to부정사",
+        answers: ["whether to accept it"]
+      },
+      {
+        sentence: "I don't understand ____.",
+        meaning: "무슨 일이 일어났는지 이해하지 못하겠다.",
+        condition: "what / happen",
+        answers: ["what happened"]
+      },
+      {
+        sentence: "The problem is ____.",
+        meaning: "우리가 그 문제를 어떻게 풀 수 있느냐이다.",
+        condition: "how / we / can / solve the problem",
+        answers: ["how we can solve the problem"]
+      },
+      {
+        sentence: "____ surprised everyone.",
+        meaning: "그가 말한 것이 모두를 놀라게 했다.",
+        condition: "what / he / say",
+        answers: ["what he said"]
+      }
+    ];
+
+    const HWPLUS_API_URL = "https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWPlus";
+    const SUBMIT_MARKER_KEY = "imsi_bitnalee_hw_3_submit_marker_v1";
+    const DIRECT_SUBCATEGORY = "\uACF5\uC0AC\uC911";
+    const DIRECT_HWTYPE = "doneinweb";
+    const DIRECT_COMMENT = "imsi_bitnalee_hw_3 answers";
+
+    let submittedToday = false;
+    let isSubmitting = false;
+    let submitStatus = "";
+
+    function getCurrentUserId() {
+      try {
+        return String(new URLSearchParams(window.location.search || "").get("id") || "").trim();
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function getKstTodayString() {
+      const now = new Date(Date.now() + (9 * 60 * 60 * 1000));
+      return now.toISOString().slice(0, 10);
+    }
+
+    function readSubmitMarker() {
+      try {
+        const raw = localStorage.getItem(SUBMIT_MARKER_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === "object" ? parsed : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function writeSubmitMarker(userId, dateStr) {
+      localStorage.setItem(SUBMIT_MARKER_KEY, JSON.stringify({
+        userId: String(userId || ""),
+        date: String(dateStr || "")
+      }));
+    }
+
+    function clearSubmitMarker() {
+      localStorage.removeItem(SUBMIT_MARKER_KEY);
+    }
+
+    function hasLocalSubmittedToday(userId) {
+      const marker = readSubmitMarker();
+      if (!marker) return false;
+      return String(marker.userId || "") === String(userId || "") && String(marker.date || "") === getKstTodayString();
+    }
+
+    async function fetchSubmittedTodayFromServer(userId) {
+      const res = await fetch(`${HWPLUS_API_URL.replace("/saveHWPlus", "/getHWPlus")}?userId=${encodeURIComponent(userId)}`);
+      if (!res.ok) throw new Error(String(res.status));
+
+      const data = await res.json();
+      if (!Array.isArray(data)) return false;
+
+      const todayStr = getKstTodayString();
+      return data.some((item) => {
+        const timestamp = String(item.Timestamp || item.timestamp || "");
+        const subcategory = String(item.Subcategory || item.subcategory || "").trim();
+        const hwType = String(item.HWType || item.hwtype || "").trim();
+        const comment = String(item.Comment || item.comment || "").trim();
+        return (
+          timestamp.startsWith(todayStr) &&
+          subcategory === DIRECT_SUBCATEGORY &&
+          hwType === DIRECT_HWTYPE &&
+          comment === DIRECT_COMMENT
+        );
+      });
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function waitForServerSubmission(userId, attempts = 4, delayMs = 450) {
+      for (let i = 0; i < attempts; i += 1) {
+        try {
+          if (await fetchSubmittedTodayFromServer(userId)) return true;
+        } catch (_) {
+        }
+
+        if (i < attempts - 1) await wait(delayMs);
+      }
+      return false;
+    }
+
+    async function checkSubmittedToday() {
+      const userId = getCurrentUserId();
+      if (!userId) return false;
+
+      const hasLocalMarker = hasLocalSubmittedToday(userId);
+      try {
+        const hasServerRecord = await fetchSubmittedTodayFromServer(userId);
+        if (hasServerRecord) {
+          if (!hasLocalMarker) writeSubmitMarker(userId, getKstTodayString());
+          return true;
+        }
+        if (hasLocalMarker) clearSubmitMarker();
+        return false;
+      } catch (_) {
+        return hasLocalMarker;
+      }
+    }
+
+    function buildTrayUrl() {
+      const userId = getCurrentUserId();
+      const target = new URL("homework-tray_v1.html", window.location.href);
+      if (userId) target.searchParams.set("id", userId);
+      return target.toString();
+    }
+
+    function showToast(kind, message, options) {
+      if (window.ImsiToastFX && typeof window.ImsiToastFX.show === "function") {
+        window.ImsiToastFX.show(kind, message, options);
+      }
+    }
+
+    function renderSubmitStatus() {
+      const statusEl = document.getElementById("submitStatus");
+      const submitBtn = document.getElementById("submitBtn");
+      if (statusEl) statusEl.textContent = submitStatus;
+      if (submitBtn) {
+        submitBtn.disabled = isSubmitting || submittedToday;
+        submitBtn.textContent = submittedToday ? "\uC81C\uCD9C \uC644\uB8CC" : "\uC81C\uCD9C";
+      }
+    }
+
+    function getStatusLabel(isAnswered, isCorrect) {
+      if (!isAnswered) return "\uBBF8\uC751\uB2F5";
+      return isCorrect ? "\uC815\uB2F5" : "\uC624\uB2F5";
+    }
+
+    function getMCSelectedIndex(index) {
+      const selected = document.querySelector(`input[name="mc${index}"]:checked`);
+      return selected ? Number(selected.value) : null;
+    }
+
+    function getMCChoiceLabel(question, choiceIndex) {
+      if (!Number.isInteger(choiceIndex) || choiceIndex < 0 || choiceIndex >= question.choices.length) {
+        return "\uBBF8\uC751\uB2F5";
+      }
+      return `${choiceIndex + 1}. ${question.choices[choiceIndex]}`;
+    }
+
+    function getWritingInputValue(type, index) {
+      const input = document.getElementById(`${type}Input${index}`);
+      return input ? String(input.value || "").trim() : "";
+    }
+
+    function isWritingAnswerCorrect(question, userValue) {
+      if (!normalize(userValue)) return false;
+      return question.answers.map(normalize).includes(normalize(userValue));
+    }
+
+    function pushSubmissionBlock(lines, heading, question, enteredAnswer, correctAnswer, statusLabel) {
+      lines.push(heading);
+      lines.push(`\uBB38\uC81C: ${question.sentence}`);
+      if (question.meaning) lines.push(`\uC758\uBBF8: ${question.meaning}`);
+      if (question.condition) lines.push(`\uC870\uAC74: ${question.condition}`);
+      lines.push(`\uC785\uB825 \uB2F5: ${enteredAnswer || "\uBBF8\uC751\uB2F5"}`);
+      lines.push(`\uC815\uB2F5\uC5EC\uBD80: ${statusLabel}`);
+      lines.push(`\uC815\uB2F5: ${correctAnswer}`);
+      lines.push("");
+    }
+
+    function buildSubmissionText(userId) {
+      let total = 0;
+      let correct = 0;
+      const lines = [
+        `userId: ${userId}`,
+        `date: ${getKstTodayString()}`,
+        ""
+      ];
+
+      mcQuestions.forEach((question, index) => {
+        total++;
+        const selectedIndex = getMCSelectedIndex(index);
+        const isAnswered = Number.isInteger(selectedIndex);
+        const isCorrect = selectedIndex === question.answer;
+        if (isCorrect) correct++;
+
+        pushSubmissionBlock(
+          lines,
+          `[multiple choice ${index + 1}]`,
+          question,
+          getMCChoiceLabel(question, selectedIndex),
+          getMCChoiceLabel(question, question.answer),
+          getStatusLabel(isAnswered, isCorrect)
+        );
+      });
+
+      [
+        ["direct", directQuestions, "direct writing"],
+        ["condition", conditionQuestions, "condition writing"]
+      ].forEach(([type, data, label]) => {
+        data.forEach((question, index) => {
+          total++;
+          const userValue = getWritingInputValue(type, index);
+          const isAnswered = Boolean(normalize(userValue));
+          const isCorrect = isWritingAnswerCorrect(question, userValue);
+          if (isCorrect) correct++;
+
+          pushSubmissionBlock(
+            lines,
+            `[${label} ${index + 1}]`,
+            question,
+            userValue,
+            question.answers.join(" / "),
+            getStatusLabel(isAnswered, isCorrect)
+          );
+        });
+      });
+
+      lines.splice(2, 0, `score: ${correct} / ${total}`);
+      return lines.join("\n");
+    }
+
+    async function submitAllAnswers() {
+      if (isSubmitting) return;
+      if (submittedToday) {
+        submitStatus = "\uC624\uB298\uC740 \uC774\uBBF8 \uC81C\uCD9C\uD588\uC2B5\uB2C8\uB2E4.";
+        renderSubmitStatus();
+        showToast("no", submitStatus);
+        return;
+      }
+
+      const userId = getCurrentUserId();
+      if (!userId) {
+        submitStatus = "id\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.";
+        renderSubmitStatus();
+        showToast("no", submitStatus);
+        return;
+      }
+
+      isSubmitting = true;
+      submitStatus = "\uC81C\uCD9C \uC911...";
+      renderSubmitStatus();
+
+      try {
+        const txtContent = buildSubmissionText(userId);
+        const file = new File(
+          [txtContent],
+          `imsi_bitnalee_hw_3_${userId}.txt`,
+          { type: "text/plain" }
+        );
+
+        const formData = new FormData();
+        formData.append("UserId", userId);
+        formData.append("Subcategory", DIRECT_SUBCATEGORY);
+        formData.append("HWType", DIRECT_HWTYPE);
+        formData.append("LessonNo", 0);
+        formData.append("Comment", DIRECT_COMMENT);
+        formData.append("HWImage", file);
+
+        const res = await fetch(HWPLUS_API_URL, {
+          method: "POST",
+          body: formData
+        });
+        const result = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(result && result.message ? String(result.message) : String(res.status));
+        }
+
+        submitStatus = "\uC81C\uCD9C \uD655\uC778 \uC911...";
+        renderSubmitStatus();
+
+        const confirmed = await waitForServerSubmission(userId);
+        if (!confirmed) {
+          clearSubmitMarker();
+          submittedToday = false;
+          submitStatus = "\uC81C\uCD9C \uC2E4\uD328";
+          renderSubmitStatus();
+          showToast("no", submitStatus);
+          return;
+        }
+
+        writeSubmitMarker(userId, getKstTodayString());
+        submittedToday = true;
+        submitStatus = "\uC81C\uCD9C \uC644\uB8CC!";
+        renderSubmitStatus();
+        showToast("ok", submitStatus);
+        setTimeout(() => {
+          window.location.replace(buildTrayUrl());
+        }, 620);
+      } catch (err) {
+        console.error(err);
+        submitStatus = "\uC81C\uCD9C \uC2E4\uD328";
+        renderSubmitStatus();
+        showToast("no", submitStatus);
+      } finally {
+        isSubmitting = false;
+        renderSubmitStatus();
+      }
+    }
+    function renderMC() {
+      const container = document.getElementById("mcContainer");
+      container.innerHTML = "";
+
+      mcQuestions.forEach((q, i) => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const choiceHTML = q.choices.map((choice, idx) => `
+          <label class="choice" id="mcLabel${i}_${idx}">
+            <input 
+              type="radio" 
+              name="mc${i}" 
+              value="${idx}" 
+              onchange="checkOneMC(${i})"
+            >
+            <span>${idx + 1}. ${choice}</span>
+          </label>
+        `).join("");
+
+        card.innerHTML = `
+          <span class="qnum">${i + 1}</span>
+          <div class="sentence">${q.sentence.replace("____", '<span class="blank"></span>')}</div>
+          <div class="meaning">${q.meaning}</div>
+          <div class="choices">${choiceHTML}</div>
+          <div id="mcResult${i}" class="result"></div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function checkOneMC(index) {
+      const selected = document.querySelector(`input[name="mc${index}"]:checked`);
+      const result = document.getElementById(`mcResult${index}`);
+
+      if (!selected) return false;
+
+      const chosen = Number(selected.value);
+      const answer = mcQuestions[index].answer;
+
+      if (chosen === answer) {
+        result.innerHTML = `<span class="correct">정답</span>`;
+        document.getElementById(`mcLabel${index}_${chosen}`).classList.add("selected-correct");
+      } else {
+        result.innerHTML = `<span class="wrong">오답</span>`;
+        document.getElementById(`mcLabel${index}_${chosen}`).classList.add("selected-wrong");
+      }
+
+      document.querySelectorAll(`input[name="mc${index}"]`).forEach(input => {
+        input.disabled = true;
+      });
+
+      mcQuestions[index].choices.forEach((_, idx) => {
+        document.getElementById(`mcLabel${index}_${idx}`).classList.add("locked");
+      });
+
+      updateMCScore();
+      return chosen === answer;
+    }
+
+    function updateMCScore() {
+      let answered = 0;
+      let correct = 0;
+
+      mcQuestions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="mc${i}"]:checked`);
+        if (!selected) return;
+
+        answered++;
+
+        if (Number(selected.value) === q.answer) {
+          correct++;
+        }
+      });
+
+      document.getElementById("mcScore").textContent =
+        `선다형 점수: ${correct} / ${answered} 완료`;
+    }
+
+    function renderWriting(type, data, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+
+      data.forEach((q, i) => {
+        const card = document.createElement("article");
+        card.className = "writing-card";
+
+        const conditionHTML = q.condition
+          ? `<div class="condition">조건: ${q.condition}</div>`
+          : "";
+
+        card.innerHTML = `
+          <span class="qnum">${i + 1}</span>
+          <div class="sentence">${q.sentence.replace("____", '<span class="blank"></span>')}</div>
+          <div class="meaning">${q.meaning}</div>
+          ${conditionHTML}
+          <div class="writing-row">
+            <input class="text-answer" id="${type}Input${i}" placeholder="정답을 입력하세요">
+          </div>
+          <div class="mini-actions">
+            <button id="${type}Btn${i}" onclick="checkOneWriting('${type}', ${i})">채점</button>
+          </div>
+          <div id="${type}Result${i}" class="result"></div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function normalize(text) {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/[?.!,]/g, "")
+        .replace(/\s+/g, " ");
+    }
+
+    function getWritingData(type) {
+      return type === "direct" ? directQuestions : conditionQuestions;
+    }
+
+    function checkOneWriting(type, index) {
+      const data = getWritingData(type);
+      const input = document.getElementById(`${type}Input${index}`);
+      const result = document.getElementById(`${type}Result${index}`);
+      const btn = document.getElementById(`${type}Btn${index}`);
+
+      const user = normalize(input.value);
+      const answers = data[index].answers.map(normalize);
+
+      input.classList.remove("ok", "no");
+
+      if (!user) {
+        result.innerHTML = `<span class="wrong">미응답</span>`;
+        input.classList.add("no");
+        return false;
+      }
+
+      const isCorrect = answers.includes(user);
+
+      if (isCorrect) {
+        result.innerHTML = `<span class="correct">정답</span>`;
+        input.classList.add("ok");
+      } else {
+        result.innerHTML = `<span class="wrong">오답</span>`;
+        input.classList.add("no");
+      }
+
+      input.disabled = true;
+      btn.disabled = true;
+
+      return isCorrect;
+    }
+
+    function gradeWriting(type) {
+      const data = getWritingData(type);
+      let score = 0;
+
+      data.forEach((_, i) => {
+        const input = document.getElementById(`${type}Input${i}`);
+        const result = document.getElementById(`${type}Result${i}`);
+        const btn = document.getElementById(`${type}Btn${i}`);
+
+        if (input.disabled) {
+          if (input.classList.contains("ok")) score++;
+          return;
+        }
+
+        if (!normalize(input.value)) {
+          result.innerHTML = `<span class="wrong">미응답</span>`;
+          input.classList.add("no");
+          input.disabled = true;
+          btn.disabled = true;
+          return;
+        }
+
+        if (checkOneWriting(type, i)) score++;
+      });
+
+      const scoreId = type === "direct" ? "directScore" : "conditionScore";
+      const btnId = type === "direct" ? "directAllBtn" : "conditionAllBtn";
+
+      document.getElementById(scoreId).textContent = `점수: ${score} / ${data.length}`;
+      document.getElementById(btnId).disabled = true;
+    }
+
+    renderMC();
+    renderWriting("direct", directQuestions, "directContainer");
+    renderWriting("condition", conditionQuestions, "conditionContainer");
+
+    document.getElementById("submitBtn").addEventListener("click", submitAllAnswers);
+
+    (async function initSubmitState() {
+      submittedToday = await checkSubmittedToday();
+      if (submittedToday) {
+        submitStatus = "\uC624\uB298\uC740 \uC774\uBBF8 \uC81C\uCD9C\uD588\uC2B5\uB2C8\uB2E4.";
+      }
+      renderSubmitStatus();
+    })();
+  </script>
+</body>
+</html>
