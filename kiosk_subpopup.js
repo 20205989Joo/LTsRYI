@@ -77,12 +77,33 @@ function isSameSelectionItem(a, b) {
   );
 }
 
+function getProgressRouteMeta(temp, lessonNo) {
+  const dm = getDayManager();
+  const canonicalSub = resolveSubcategoryName(temp?.Subcategory);
+  const level = temp?.Level ?? null;
+  const lesson = Number(lessonNo);
+
+  if (!dm || !canonicalSub || !level || !Number.isFinite(lesson)) return {};
+  if (typeof dm.getLessonPageRoute !== 'function') return {};
+
+  const route = dm.getLessonPageRoute(canonicalSub, level, lesson);
+  if (!route) return {};
+
+  return {
+    Day: route.day ?? null,
+    Path: route.path || null,
+    QuizKey: route.quizKey || null,
+    LessonTag: route.lessonTag || null
+  };
+}
+
 function buildProgressEntry(temp, lessonNo) {
   return {
     label: temp.label,
     Subcategory: temp.Subcategory,
     Level: temp.Level,
-    LessonNo: lessonNo
+    LessonNo: lessonNo,
+    ...getProgressRouteMeta(temp, lessonNo)
   };
 }
 

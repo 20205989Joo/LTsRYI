@@ -77,7 +77,9 @@ function showReceiptFromQordered(latestLabel = null) {
     let line = "";
     if (entryLevel && entryLessonNo !== undefined && entryLessonNo !== null) {
       const meta = getDayMeta(entrySub, entryLevel, entryLessonNo);
-      const dayStr = meta.day != null ? `Day ${meta.day}` : `Lesson ${entryLessonNo}`;
+      const storedDay = entry.Day != null ? Number(entry.Day) : null;
+      const day = Number.isFinite(storedDay) ? storedDay : meta.day;
+      const dayStr = day != null ? `Day ${day}` : `Lesson ${entryLessonNo}`;
       line = `${entrySub} > ${entryLevel} > ${dayStr}`;
     } else if (entryLevel) {
       line = `${entrySub} > ${entryLevel}`;

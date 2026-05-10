@@ -134,8 +134,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // ✅ 부제목용 Level / Day 계산
     const meta = getLevelDayMeta(canonicalSub, item.Level, item.LessonNo);
-    const level = meta.level;
-    const day = meta.day;
+    const level = meta.level || item.Level;
+    const storedDay = item.Day != null ? Number(item.Day) : null;
+    const day = Number.isFinite(storedDay) ? storedDay : meta.day;
 
     let subtitleText = '';
     if (level && day != null) {
@@ -268,6 +269,9 @@ window.addEventListener('DOMContentLoaded', () => {
       Subcategory: canonicalSub,
       Level: level,
       QuizKey: quizKey,
+      Day: entry.Day ?? null,
+      Path: entry.Path || null,
+      LessonTag: entry.LessonTag || null,
       HWType: entry.HWType || 'pdf사진',
       LessonNo: lessonNo,
       Status: 'readyToBeSent',
@@ -313,6 +317,9 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
       const target = qordered.find(item => {
         try {
+          const storedQuizKey = String(item.QuizKey || '').trim();
+          if (storedQuizKey && storedQuizKey === autoQuizKey) return true;
+
           const filename = window.buildFilename(item);
           if (filename) {
             const keyWithoutExt = filename.replace(/\.pdf$/, '');

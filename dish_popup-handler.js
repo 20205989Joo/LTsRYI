@@ -51,14 +51,39 @@ function inferLevelIfNeeded(subcategory, level, lessonNo) {
 
 function getLessonRouteInfo(item) {
   const dm = getDayManager();
-  if (!dm || typeof dm.getLessonPageRoute !== "function") return null;
+  const canonicalSubcategory = resolveSubcategory(item?.Subcategory);
+  const lessonNo = Number(item?.LessonNo);
+  const level = inferLevelIfNeeded(canonicalSubcategory, item?.Level, lessonNo);
+  const storedDay = Number(item?.Day);
+  const storedPath = String(item?.Path || "").trim();
+  const storedQuizKey = String(item?.QuizKey || "").trim();
+  const storedLessonTag = String(item?.LessonTag || "").trim();
 
-  const canonicalSubcategory = resolveSubcategory(item.Subcategory);
-  const lessonNo = Number(item.LessonNo);
-  const level = inferLevelIfNeeded(canonicalSubcategory, item.Level, lessonNo);
-  if (!canonicalSubcategory || !level || !Number.isFinite(lessonNo)) return null;
+  let route = null;
+  if (
+    dm &&
+    typeof dm.getLessonPageRoute === "function" &&
+    canonicalSubcategory &&
+    level &&
+    Number.isFinite(lessonNo)
+  ) {
+    route = dm.getLessonPageRoute(canonicalSubcategory, level, lessonNo);
+  }
 
-  return dm.getLessonPageRoute(canonicalSubcategory, level, lessonNo);
+  if (!route && !storedPath && !storedQuizKey && !storedLessonTag && !Number.isFinite(storedDay)) {
+    return null;
+  }
+
+  return {
+    ...(route || {}),
+    subcategory: route?.subcategory || canonicalSubcategory || null,
+    level: route?.level || level || item?.Level || null,
+    lessonNo: route?.lessonNo ?? (Number.isFinite(lessonNo) ? lessonNo : null),
+    day: Number.isFinite(storedDay) ? storedDay : route?.day ?? null,
+    lessonTag: storedLessonTag || route?.lessonTag || "",
+    path: storedPath || route?.path || "",
+    quizKey: storedQuizKey || route?.quizKey || ""
+  };
 }
 
 function getLessonPageDefinitionForItem(item) {
@@ -170,8 +195,9 @@ function buildFilename(item) {
   const lessonNo = Number(item.LessonNo);
   const level = inferLevelIfNeeded(canonicalSubcategory, item.Level, lessonNo);
 
-  let day = null;
-  if (dm && level && typeof dm.getDay === "function") {
+  const storedDay = Number(item?.Day);
+  let day = Number.isFinite(storedDay) ? storedDay : null;
+  if (day == null && dm && level && typeof dm.getDay === "function") {
     day = dm.getDay(canonicalSubcategory, level, lessonNo);
   }
   if (day == null && Number.isFinite(lessonNo)) {
@@ -386,10 +412,10 @@ window.showDishPopup = function (item) {
   const downloaded = localStorage.getItem(key) === "true";
   const lessonRouteInfo = getLessonRouteInfo(item);
   const lessonPageDef = getLessonPageDefinitionForItem(item);
-  const isCustomLessonModule = !!lessonPageDef;
-  const fallbackDay = dm && typeof dm.getDay === "function"
+  const isCustomLessonModule = !!lessonPageDef || !!lessonRouteInfo?.path;
+  const fallbackDay = item.Day ?? (dm && typeof dm.getDay === "function"
     ? dm.getDay(hw, item.Level, item.LessonNo)
-    : null;
+    : null);
 
   let content = `<div style="font-weight:bold; font-size: 15px; margin-bottom: 10px;">📥 ${hw}</div>`;
 
@@ -640,6 +666,9 @@ window.showDishPopup = function (item) {
       Subcategory: item.Subcategory,
       Level: resolvedLevelForPending || item.Level || null,
       QuizKey: pendingQuizKey || null,
+      Day: lessonRouteInfo?.day ?? item.Day ?? null,
+      Path: lessonRouteInfo?.path || item.Path || null,
+      LessonTag: lessonRouteInfo?.lessonTag || item.LessonTag || null,
       HWType: hwType,
       LessonNo: item.LessonNo,
       Status: "readyToBeSent",

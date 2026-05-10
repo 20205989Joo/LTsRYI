@@ -65,14 +65,19 @@ window.handleFinalOrder = function () {
     // Level/Day를 가진 일반 진도형
     if (entry.Subcategory && entry.Level && entry.LessonNo !== undefined && entry.LessonNo !== null) {
       const canonicalSub = resolveSubcategoryName(entry.Subcategory);
+      const meta = inferLevel(canonicalSub, entry.Level, entry.LessonNo);
+      const day = entry.Day ?? meta?.day ?? null;
       hwPlusEntries.push({
         Subcategory: canonicalSub,
         Level: entry.Level,
-        LessonNo: entry.LessonNo
+        LessonNo: entry.LessonNo,
+        Day: day,
+        Path: entry.Path || null,
+        QuizKey: entry.QuizKey || null,
+        LessonTag: entry.LessonTag || null
       });
 
-      const meta = inferLevel(canonicalSub, entry.Level, entry.LessonNo);
-      const dayStr = meta ? `Day ${meta.day}` : `Lesson ${entry.LessonNo}`;
+      const dayStr = day != null ? `Day ${day}` : `Lesson ${entry.LessonNo}`;
       receiptText += `${entry.label || canonicalSub} > ${entry.Level} > ${dayStr}\n`;
       return;
     }
@@ -258,7 +263,8 @@ window.showReceiptFromHWPlus = function () {
     if (entry.Subcategory && entry.Level && entry.LessonNo !== undefined && entry.LessonNo !== null) {
       const canonicalSub = resolveSubcategoryName(entry.Subcategory);
       const meta = inferLevel(canonicalSub, entry.Level, entry.LessonNo);
-      const dayStr = meta ? `Day ${meta.day}` : `Day ${entry.LessonNo}`;
+      const day = entry.Day ?? meta?.day ?? null;
+      const dayStr = day != null ? `Day ${day}` : `Day ${entry.LessonNo}`;
       receiptText += `${canonicalSub} > ${entry.Level} > ${dayStr}\n`;
     } else {
       receiptText += `${entry.Subcategory || entry.label || '기타'}\n`;

@@ -287,6 +287,10 @@
     return Number.isInteger(value) && value > 0;
   }
 
+  function isNonNegativeInt(value) {
+    return Number.isInteger(value) && value >= 0;
+  }
+
   function normalizeRange(range) {
     if (!Array.isArray(range) || range.length < 2) return null;
     const start = Number(range[0]);
@@ -522,9 +526,9 @@
         const exerciseRaw = String(m[2]);
         const parsedExercise = Number(exerciseRaw.replace(/[^0-9]/g, ""));
 
-        if (isPositiveInt(parsedBook)) book = parsedBook;
+        if (isNonNegativeInt(parsedBook)) book = parsedBook;
         if (isPositiveInt(parsedExercise)) exercise = parsedExercise;
-        if (isPositiveInt(parsedBook)) lessonTag = `${parsedBook}-${exerciseRaw}`;
+        if (isNonNegativeInt(parsedBook)) lessonTag = `${parsedBook}-${exerciseRaw}`;
       }
 
       if (!lessonTag) lessonTag = `Day ${day}`;
