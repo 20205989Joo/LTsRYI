@@ -929,50 +929,70 @@
       title: "S-V-T-D : \uD558\uB098\uB85C \uB05D.",
       steps: [
         {
-          title: "\uAE34 \uBB38\uC7A5\uB3C4 \uC77C\uB2E8 \uB124 \uCE78\uC73C\uB85C \uB098\uB220\uBCFC \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
-          body: "S / V / T / D",
+          title: "\uc8fc\uc5b4-\ub3d9\uc0ac \ub4a4\uc5d4 \ubb50\uac00 \uc62c\uae4c\uc694?",
+          titleHtml: buildSvtdStackedTitleHtml(1, [
+            { text: "\uc8fc\uc5b4", role: "subject" },
+            "-",
+            { text: "\ub3d9\uc0ac", role: "verb" },
+            " \ub4a4\uc5d4 \ubb50\uac00 \uc62c\uae4c\uc694?",
+          ]),
+          body: "",
           rows: [
-            ["S"],
-            ["V"],
-            ["Point"],
+            [
+              { label: "S", caption: "\ub204\uac00", role: "subject" },
+              { label: "\u2192", role: "arrow" },
+              { label: "V", caption: "\ud588\ub2e4", role: "verb" },
+              { label: "\u2192", role: "arrow" },
+              { label: "?", caption: "\ub2e4\uc74c\uc740?", role: "pending" },
+            ],
           ],
         },
         {
-          title: "S\uB294 \uB204\uAC00, \uBB34\uC5C7\uC774 \uD558\uB294\uC9C0\uC785\uB2C8\uB2E4.",
-          body: "\uC608: I, She, They",
+          title: "'\ub204\uad6c\ud55c\ud14c \ud588\uac8c\uc694?' \ubd80\ud130 \uc368\uc90d\ub2c8\ub2e4. \ubaa9\ud45c \uc870\uc900!",
+          titleHtml: buildSvtdStackedTitleHtml(2, [
+            "'",
+            { text: "\ub204\uad6c\ud55c\ud14c \ud588\uac8c\uc694?", role: "target" },
+            "' \ubd80\ud130 \uc368\uc90d\ub2c8\ub2e4. ",
+            { text: "\ubaa9\ud45c \uc870\uc900!", role: "target" },
+          ]),
+          body: "",
+          exampleHtml: buildSvtdTargetingHtml(),
+        },
+        {
+          title: "'\uc5b4\ub5bb\uac8c \ud588\ub294 \uc9c0' \ub4a4\uc5d0 \uc124\uba85\ud569\ub2c8\ub2e4. \ucd94\uac00 \uc124\uba85!",
+          titleHtml: buildSvtdStackedTitleHtml(3, [
+            "'",
+            { text: "\uc5b4\ub5bb\uac8c \ud588\ub294 \uc9c0", role: "detail" },
+            "' \ub4a4\uc5d0 \uc124\uba85\ud569\ub2c8\ub2e4. ",
+            { text: "\ucd94\uac00 \uc124\uba85!", role: "detail" },
+          ]),
+          body: "",
           rows: [
-            ["I"],
-            ["She"],
-            ["They"],
+            [
+              { label: "S", caption: "\ub204\uac00", role: "subject" },
+              { label: "\u2192", role: "arrow" },
+              { label: "V", caption: "\ud588\ub2e4", role: "verb" },
+              { label: "\u2192", role: "arrow" },
+              { label: "T", caption: "\ub204\uad6c\ud55c\ud14c", role: "target" },
+              { label: "\u2192", role: "arrow" },
+              { label: "D", caption: "\uc5b4\ub5bb\uac8c", role: "detail" },
+            ],
           ],
         },
         {
-          title: "V\uB294 \uD558\uB294 \uC77C\uC785\uB2C8\uB2E4.",
-          body: "\uC608: wake up, laugh, study, make",
-          rows: [
-            ["wake up"],
-            ["laugh"],
-            ["study"],
-            ["make"],
-          ],
-        },
-        {
-          title: "T\uB294 \uADF8 \uD589\uB3D9\uC774 \uD5A5\uD558\uB294 \uB300\uC0C1\uC785\uB2C8\uB2E4.",
-          body: "\uC608: English, the room, this",
-          rows: [
-            ["English"],
-            ["the room"],
-            ["this"],
-          ],
-        },
-        {
-          title: "D\uB294 \uC2DC\uAC04, \uC7A5\uC18C, \uBC29\uBC95, \uC774\uC720 \uAC19\uC740 \uC790\uC138\uD55C \uC815\uBCF4\uC785\uB2C8\uB2E4.",
-          body: "\uC608: at 7, loudly, in the room",
-          rows: [
-            ["at 7"],
-            ["loudly"],
-            ["in the room"],
-          ],
+          title: "S(\ub204\uac00) - V(\ud588\ub2e4) - T(\ub204\uad6c\ud55c\ud14c) - D(\uc5b4\ub5bb\uac8c)\uc758 \uc21c\uc11c\uc5d0 \uc775\uc219\ud574\uc838\ubcf4\uc138\uc694!",
+          titleHtml: buildSvtdStackedTitleHtml(4, [
+            { text: "S(\ub204\uac00)", role: "subject" },
+            " - ",
+            { text: "V(\ud588\ub2e4)", role: "verb" },
+            " - ",
+            { text: "T(\ub204\uad6c\ud55c\ud14c)", role: "target" },
+            " - ",
+            { text: "D(\uc5b4\ub5bb\uac8c)", role: "detail" },
+            "\uc758 \uc21c\uc11c\uc5d0 \uc775\uc219\ud574\uc838\ubcf4\uc138\uc694!",
+          ]),
+          body: "",
+          exampleHtml: buildSvtdFlipSentenceHtml(),
         },
       ],
     },
@@ -1522,16 +1542,147 @@
       .replaceAll("'", "&#039;");
   }
 
-  function tokenClass(index) {
+  function tokenRole(cell) {
+    return cell && typeof cell === "object" ? String(cell.role || "") : "";
+  }
+
+  function tokenLabel(cell) {
+    return cell && typeof cell === "object" ? cell.label : cell;
+  }
+
+  function tokenCaption(cell) {
+    return cell && typeof cell === "object" ? String(cell.caption || "") : "";
+  }
+
+  function tokenClass(index, cell) {
+    const role = tokenRole(cell);
+    if (role === "subject") return " is-subject";
+    if (role === "verb") return " is-verb";
+    if (role) return "";
     return index === 0 ? " is-subject" : index === 1 ? " is-verb" : "";
+  }
+
+  function svtdRoleStyleRules(role) {
+    if (role === "subject") {
+      return ["border-color:#2f8f55", "background:#e2f7e8", "color:#17643c"];
+    }
+    if (role === "verb") {
+      return ["border-color:#d5aa00", "background:#fff1a6", "color:#5d4a00"];
+    }
+    if (role === "target") {
+      return ["border-color:#dc3f3f", "background:#ffe1e1", "color:#a91f1f"];
+    }
+    if (role === "detail") {
+      return ["border-color:#111", "background:#1f1f1f", "color:#fff"];
+    }
+    if (role === "pending") {
+      return ["border-color:rgba(126,49,6,0.18)", "background:rgba(255,255,255,0.82)", "color:rgba(126,49,6,0.62)"];
+    }
+    return [];
+  }
+
+  function styleAttr(styles) {
+    return styles.length ? ` style="${styles.join(";")}"` : "";
+  }
+
+  function roleStyleAttr(role, extraStyles = []) {
+    return styleAttr([...svtdRoleStyleRules(role), ...extraStyles]);
+  }
+
+  function tokenStyle(cell) {
+    const styles = [];
+    if (tokenCaption(cell)) {
+      styles.push("flex-direction:column", "gap:1px", "min-width:38px", "min-height:30px", "padding:4px 6px", "font-size:13px", "line-height:1.05");
+    }
+    styles.push(...svtdRoleStyleRules(tokenRole(cell)));
+    return styleAttr(styles);
+  }
+
+  function buildTokenHtml(cell, index) {
+    const role = tokenRole(cell);
+    const label = String(tokenLabel(cell) ?? "");
+    if (role === "arrow") {
+      return `<span class="lip-example-symbol" style="font-size:13px;line-height:1;">${escapeHtml(label || "\u2192")}</span>`;
+    }
+    const caption = tokenCaption(cell);
+    const captionHtml = caption
+      ? `<span style="font-size:9px;line-height:1;font-weight:800;opacity:0.78;">${escapeHtml(caption)}</span>`
+      : "";
+    return `<span class="lip-example-token${tokenClass(index, cell)}"${tokenStyle(cell)}><span>${escapeHtml(label)}</span>${captionHtml}</span>`;
   }
 
   function buildExampleHtml(rows) {
     if (!Array.isArray(rows) || !rows.length) return "";
     return rows.map((row) => {
       const cells = Array.isArray(row) ? row : [row];
-      return `<div class="lip-example-row">${cells.map((cell, index) => `<span class="lip-example-token${tokenClass(index)}">${escapeHtml(cell)}</span>`).join("")}</div>`;
+      return `<div class="lip-example-row">${cells.map((cell, index) => buildTokenHtml(cell, index)).join("")}</div>`;
     }).join("");
+  }
+
+  function buildSvtdInlinePart(part) {
+    if (!part || typeof part !== "object") return escapeHtml(part ?? "");
+    return `<span${roleStyleAttr(part.role, ["display:inline-flex", "align-items:center", "justify-content:center", "min-height:1.5em", "padding:0.04em 0.42em", "border-radius:999px", "border-width:1px", "border-style:solid"])}>${escapeHtml(part.text ?? "")}</span>`;
+  }
+
+  function buildSvtdStackedTitleHtml(stepNumber, parts) {
+    return [
+      `<span style="display:block;font-size:12px;line-height:1.2;color:rgba(126,49,6,0.72);margin-bottom:5px;">${stepNumber}\uB2E8\uACC4</span>`,
+      `<span style="display:block;">${(parts || []).map(buildSvtdInlinePart).join("")}</span>`,
+    ].join("");
+  }
+
+  function buildSvtdTargetingHtml() {
+    const flow = [
+      { label: "S", caption: "\ub204\uac00", role: "subject" },
+      { label: "\u2192", role: "arrow" },
+      { label: "V", caption: "\ud588\ub2e4", role: "verb" },
+    ].map((cell, index) => buildTokenHtml(cell, index)).join("");
+
+    return `
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 14px 58px;gap:5px;align-items:center;">
+        <div class="lip-example-row" style="gap:5px;margin-bottom:0;">${flow}</div>
+        <span class="lip-example-symbol" style="font-size:16px;line-height:1;color:#dc3f3f;">\u2192</span>
+        <div style="position:relative;width:58px;height:58px;border:2px solid #dc3f3f;border-radius:50%;background:radial-gradient(circle,#dc3f3f 0 10%,#fff 11% 25%,#ffe1e1 26% 43%,#fff 44% 58%,#ffe1e1 59% 100%);box-shadow:0 6px 12px rgba(220,63,63,0.16);">
+          <span style="position:absolute;left:50%;top:5px;bottom:5px;border-left:2px solid rgba(169,31,31,0.55);transform:translateX(-50%);"></span>
+          <span style="position:absolute;left:5px;right:5px;top:50%;border-top:2px solid rgba(169,31,31,0.55);transform:translateY(-50%);"></span>
+          <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#dc3f3f;color:#fff;font-size:13px;font-weight:900;">T</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildSvtdFlipChip(fromLabel, fromCaption, toLabel, role, delay) {
+    const styles = [
+      `--lip-delay:${delay.toFixed(2)}s`,
+      "min-height:36px",
+      "padding:5px 6px",
+      "border-width:1px",
+      "border-style:solid",
+      "font-size:12px",
+    ];
+    styles.push(...svtdRoleStyleRules(role));
+    const fromHtml = `
+      <span class="lip-morph-word is-from" style="flex-direction:column;gap:2px;">
+        <span>${escapeHtml(fromLabel)}</span>
+        <span style="font-size:8.5px;line-height:1;font-weight:800;opacity:0.82;">${escapeHtml(fromCaption)}</span>
+      </span>
+    `;
+    const toHtml = `<span class="lip-morph-word is-to">${escapeHtml(toLabel)}</span>`;
+    return `<div class="lip-morph-chip" style="${styles.join(";")}">${fromHtml}${toHtml}</div>`;
+  }
+
+  function buildSvtdFlipSentenceHtml() {
+    return `
+      <div class="lip-example-stack">
+        <div style="font-size:13px;line-height:1.35;font-weight:900;color:#3c2d22;">I made Mina happy.</div>
+        <div class="lip-morph-grid" style="gap:5px;">
+          ${buildSvtdFlipChip("S", "\ub204\uac00", "I", "subject", 0)}
+          ${buildSvtdFlipChip("V", "\ud588\ub2e4", "made", "verb", 0.22)}
+          ${buildSvtdFlipChip("T", "\ub204\uad6c\ud55c\ud14c", "Mina", "target", 0.44)}
+          ${buildSvtdFlipChip("D", "\uc5b4\ub5bb\uac8c", "happy", "detail", 0.66)}
+        </div>
+      </div>
+    `;
   }
 
   function renumberStepTitle(title, index) {
@@ -1539,12 +1690,21 @@
     return `${index + 1}\uB2E8\uACC4: ${clean}`;
   }
 
+  function buildStackedStepTitleHtml(title, index) {
+    const clean = String(title || "").replace(/^\s*\d+\uB2E8\uACC4:?\s*/, "").trim();
+    return [
+      `<span style="display:block;font-size:12px;line-height:1.2;color:rgba(126,49,6,0.72);margin-bottom:5px;">${index + 1}\uB2E8\uACC4</span>`,
+      `<span style="display:block;">${escapeHtml(clean)}</span>`,
+    ].join("");
+  }
+
   function normalizeSteps(entry) {
     const rawSteps = (Array.isArray(entry?.steps) ? entry.steps : []).slice(0, 5);
     return rawSteps.map((step, index) => ({
       title: renumberStepTitle(step.title, index),
+      titleHtml: step.titleLayout === "stacked" ? buildStackedStepTitleHtml(step.title, index) : step.titleHtml,
       body: step.body,
-      exampleHtml: buildExampleHtml(step.rows),
+      exampleHtml: step.exampleHtml ? String(step.exampleHtml) : buildExampleHtml(step.rows),
     }));
   }
 

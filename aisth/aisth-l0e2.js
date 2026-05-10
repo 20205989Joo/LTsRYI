@@ -5,7 +5,7 @@ const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 0;
 const TARGET_EXERCISE = 2;
 const PAGE_LABEL = "Aisth L0-E2";
-const MAX_QUESTIONS = 0; // 0 = unlimited
+const MAX_QUESTIONS = 6; // 0 = unlimited
 
 const DEFAULT_INSTRUCTION = "주어진 단어로 문장을 완성해보세요.";
 

@@ -47,6 +47,8 @@ let questions = [];
 let currentIndex = 0;
 let results = [];
 let isCurrentLocked = false;
+let hintTimerId = 0;
+let activeHintRole = "S";
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
 
@@ -157,6 +159,43 @@ function injectRuntimeStyles() {
       box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
       color: #7e3106;
       font-weight: 900;
+    }
+
+    .svtd-inline-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 1.45em;
+      padding: 0.02em 0.4em;
+      border-width: 1px;
+      border-style: solid;
+      border-radius: 999px;
+      vertical-align: -0.08em;
+      font-weight: 900;
+    }
+
+    .svtd-inline-tag.is-subject {
+      border-color: #2f8f55;
+      background: #e2f7e8;
+      color: #17643c;
+    }
+
+    .svtd-inline-tag.is-verb {
+      border-color: #d5aa00;
+      background: #fff1a6;
+      color: #5d4a00;
+    }
+
+    .svtd-inline-tag.is-target {
+      border-color: #dc3f3f;
+      background: #ffe1e1;
+      color: #a91f1f;
+    }
+
+    .svtd-inline-tag.is-detail {
+      border-color: #111;
+      background: #1f1f1f;
+      color: #fff;
     }
 
     .svtd-table {
@@ -325,6 +364,7 @@ function injectRuntimeStyles() {
 
 
     .btn-row {
+      position: relative;
       display: flex;
       gap: 10px;
       margin-top: 10px;
@@ -335,11 +375,49 @@ function injectRuntimeStyles() {
       margin-top: 0;
     }
 
+    .quiz-btn.hint-mode {
+      background: #ffd45a;
+      color: #5d4200;
+      box-shadow: 0 8px 16px rgba(213, 170, 0, 0.18);
+    }
+
     .feedback {
       margin-top: 8px;
       font-weight: 900;
       font-size: 13px;
       line-height: 1.6;
+    }
+
+    .hint-tooltip {
+      display: none;
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 8px);
+      max-width: 230px;
+      padding: 8px 10px;
+      border: 1px solid #e6c09a;
+      border-radius: 10px;
+      background: #fffaf2;
+      color: #3c2d22;
+      box-shadow: 0 10px 24px rgba(126, 49, 6, 0.16);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.45;
+      z-index: 5;
+    }
+
+    .hint-tooltip.is-visible {
+      display: block;
+    }
+
+    .hint-tooltip::after {
+      content: "";
+      position: absolute;
+      right: 24px;
+      top: 100%;
+      border-width: 7px 6px 0 6px;
+      border-style: solid;
+      border-color: #fffaf2 transparent transparent transparent;
     }
 
     .ok { color: #2e7d32; }
@@ -571,10 +649,12 @@ function renderQuestion() {
 
   isCurrentLocked = false;
 
-  const qTypeLabel = q.type === "blank" ? TEXT.QTYPE_BLANK : TEXT.QTYPE_REWRITE;
   const isSVTD = /\([SVTD]\)/i.test(String(q.question || ""));
   const qBody = renderSVTDTable(q.question);
   const svtdVisibleRoles = isSVTD ? getSVTDVisibleRoles(q.question) : null;
+  const displayInstruction = isSVTD
+    ? "SVTD\uC5D0 \uB9DE\uCD94\uC5B4 \uB2E8\uC5B4\uB97C \uC785\uB825\uD574\uBCF4\uC138\uC694!"
+    : (q.instruction || TEXT.INPUT_HINT_FALLBACK);
 
   const placeholder = q.type === "blank"
     ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
@@ -592,10 +672,7 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;">
-        <span class="pill">${escapeHtml(qTypeLabel)}</span>
-      </div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
+      <div style="font-size:13px; color:#7e3106; font-weight:900;">${renderInstructionWithSVTDColors(displayInstruction)}</div>
       <div class="sentence${isSVTD ? " svtd-mode" : ""}">${qBody}</div>
     </div>
 
@@ -606,7 +683,8 @@ function renderQuestion() {
 
     <div class="btn-row">
       <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn hint-mode" id="next-btn" type="button">\uD78C\uD2B8</button>
+      <div class="hint-tooltip" id="hint-tooltip" role="status" aria-live="polite"></div>
     </div>
   `;
 
@@ -621,11 +699,15 @@ function renderQuestion() {
   ].filter(Boolean);
 
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
+  if (nextBtn) nextBtn.addEventListener("click", handleNextOrHint);
 
   if (svtdInputs.length) {
-    svtdInputs[0].focus();
     svtdInputs.forEach((el) => {
+      const role = String(el.id || "").replace("svtd-input-", "").toUpperCase();
+      el.addEventListener("focus", () => {
+        activeHintRole = role;
+        hideHintTooltip();
+      });
       el.addEventListener("keydown", (ev) => {
         if (ev.key === "Enter") {
           ev.preventDefault();
@@ -633,6 +715,7 @@ function renderQuestion() {
         }
       });
     });
+    svtdInputs[0].focus();
   } else if (input) {
     input.focus();
     input.addEventListener("keydown", (ev) => {
@@ -705,7 +788,12 @@ function submitCurrentAnswer() {
     if (input) input.disabled = true;
   }
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
+  if (nextBtn) {
+    nextBtn.disabled = false;
+    nextBtn.textContent = "\uB2E4\uC74C";
+    nextBtn.classList.remove("hint-mode");
+  }
+  hideHintTooltip();
 
   results.push({
     no: currentIndex + 1,
@@ -725,6 +813,202 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function hideHintTooltip() {
+  const tooltip = document.getElementById("hint-tooltip");
+  if (hintTimerId) {
+    window.clearTimeout(hintTimerId);
+    hintTimerId = 0;
+  }
+  if (tooltip) {
+    tooltip.classList.remove("is-visible");
+    tooltip.innerHTML = "";
+  }
+}
+
+function showHintTooltip(role = activeHintRole) {
+  const tooltip = document.getElementById("hint-tooltip");
+  const q = questions[currentIndex];
+  if (!tooltip || !q) return;
+
+  tooltip.innerHTML = buildHintHtml(q, role);
+  tooltip.classList.add("is-visible");
+
+  if (hintTimerId) window.clearTimeout(hintTimerId);
+  hintTimerId = window.setTimeout(hideHintTooltip, 5200);
+}
+
+function buildHintHtml(q, role = activeHintRole) {
+  const isSVTD = /\([SVTD]\)/i.test(String(q.question || ""));
+  if (isSVTD) return buildSVTDHintHtml(q, role);
+
+  const answer = clipExample(stripEmphasisMarkers(String(q.answer || "")));
+  if (answer) return `${escapeHtml("\uD78C\uD2B8")}: ${escapeHtml(answer)}`;
+  return escapeHtml("\uC9C8\uBB38\uC758 \uD45C\uC2DC\uB97C \uBA3C\uC800 \uD655\uC778\uD574\uBCF4\uC138\uC694.");
+}
+
+function svtdRoleClass(role) {
+  if (role === "S") return "subject";
+  if (role === "V") return "verb";
+  if (role === "T") return "target";
+  if (role === "D") return "detail";
+  return "";
+}
+
+function svtdRoleLabel(role) {
+  if (role === "S") return "S";
+  if (role === "V") return "V";
+  if (role === "T") return "T";
+  if (role === "D") return "D";
+  return role;
+}
+
+function svtdAnswerPart(answerRaw, role) {
+  const order = ["S", "V", "T", "D"];
+  const idx = order.indexOf(role);
+  if (idx < 0) return "";
+  return normalizeEscapedBreaks(String(answerRaw || ""))
+    .split(/\s*-\s*/)
+    .map((x) => String(x || "").trim())[idx] || "";
+}
+
+function firstSVTDHintCore(expectedPart) {
+  if (!expectedPart || expectedPart.empty) return "";
+  const candidates = (expectedPart.candidates || [])
+    .map((x) => stripEmphasisMarkers(String(x || "")).replace(/\([^)]*\)/g, "").replace(/\s+/g, " ").trim())
+    .filter((x) => x && x !== "\uC5C6\uC74C" && x !== "_");
+  return candidates.sort((a, b) => a.length - b.length)[0] || "";
+}
+
+function normalizeHintEnglish(value, role) {
+  let text = stripEmphasisMarkers(String(value || ""))
+    .replace(/\([^)]*\)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return "";
+
+  text = text.replace(/^(a|an|the)\s+/i, "");
+
+  if (role !== "V") return text;
+
+  const irregular = {
+    am: "be",
+    are: "be",
+    is: "be",
+    was: "be",
+    were: "be",
+    has: "have",
+    had: "have",
+    does: "do",
+    did: "do",
+    goes: "go",
+    went: "go",
+    made: "make",
+    gave: "give",
+    got: "get",
+    took: "take",
+    wrote: "write",
+    saw: "see",
+    ate: "eat",
+    ran: "run",
+    bought: "buy",
+    taught: "teach",
+    thought: "think",
+    brought: "bring",
+    laughed: "laugh",
+    opened: "open",
+    cleaned: "clean",
+    walked: "walk",
+    played: "play",
+    smiled: "smile",
+    liked: "like",
+    used: "use",
+    closed: "close",
+    watched: "watch",
+    looked: "look",
+  };
+  const lower = text.toLowerCase();
+  if (irregular[lower]) return irregular[lower];
+  if (/ied$/i.test(text)) return text.replace(/ied$/i, "y");
+  if (/([sxz]|ch|sh)es$/i.test(text)) return text.replace(/es$/i, "");
+  if (/[^s]s$/i.test(text)) return text.replace(/s$/i, "");
+  if (/ed$/i.test(text)) {
+    const stem = text.replace(/ed$/i, "");
+    if (/[^aeiou][aeiou][^aeiouwxy]$/i.test(stem)) return stem.slice(0, -1);
+    if (/e$/i.test(stem)) return stem;
+    return `${stem}e`;
+  }
+  return text;
+}
+
+function guessKoreanVerbBase(value) {
+  const text = String(value || "")
+    .replace(/\([^)]*\)/g, "")
+    .replace(/[_*]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return "";
+  if (/했다$/.test(text)) return text.replace(/했다$/, "하다");
+  if (/하였다$/.test(text)) return text.replace(/하였다$/, "하다");
+  if (/되었다$/.test(text)) return text.replace(/되었다$/, "되다");
+  if (/렸다$/.test(text)) return text.replace(/렸다$/, "리다");
+  if (/았다$/.test(text)) return text.replace(/았다$/, "다");
+  if (/었다$/.test(text)) return text.replace(/었다$/, "다");
+  if (/였다$/.test(text)) return text.replace(/였다$/, "이다");
+  if (/갔다$/.test(text)) return text.replace(/갔다$/, "가다");
+  if (/왔다$/.test(text)) return text.replace(/왔다$/, "오다");
+  return text;
+}
+
+function normalizeHintKorean(value, role) {
+  const text = String(value || "")
+    .replace(/\([^)]*\)/g, "")
+    .replace(/[_*]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (role === "V") return guessKoreanVerbBase(text) || text;
+  return text.replace(/[은는이가을를]$/u, "");
+}
+
+function chooseSVTDHintRole(expectedSlots, preferredRole = activeHintRole) {
+  const order = ["S", "V", "T", "D"];
+  if (order.includes(preferredRole)) return preferredRole;
+  return order.find((role) => !(expectedSlots[role] || {}).empty) || "S";
+}
+
+function buildSVTDHintText(q, role, expectedSlots) {
+  const answerPart = svtdAnswerPart(q.answer, role);
+  const guide = parseSVTDGuidePart(answerPart);
+  const rawCore = guide.core || firstSVTDHintCore(expectedSlots[role]);
+  const core = normalizeHintEnglish(rawCore, role);
+  const questionSlot = stripEmphasisMarkers(String(parseSVTDSlots(q.question)[role] || ""))
+    .replace(/_+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const clue = normalizeHintKorean(questionSlot || guide.prefix, role);
+
+  if ((expectedSlots[role] || {}).empty) return "\uBE44\uC6CC\uB3C4 \uB428";
+  if (guide.prefix && core) return `${guide.prefix} = ${core}`;
+  if (clue && core) return `${clue} = ${core}`;
+  if (core) return core;
+  return "\uD78C\uD2B8 \uC5C6\uC74C";
+}
+
+function buildSVTDHintHtml(q, preferredRole = activeHintRole) {
+  const expectedSlots = parseSVTDAnswerSlots(q.answer);
+  const role = chooseSVTDHintRole(expectedSlots, preferredRole);
+  const roleClass = svtdRoleClass(role);
+  const roleTag = roleClass ? renderSVTDInlineTag(svtdRoleLabel(role), roleClass) : escapeHtml(role);
+  return `${roleTag} <span>${escapeHtml(buildSVTDHintText(q, role, expectedSlots))}</span>`;
+}
+
+function handleNextOrHint() {
+  if (isCurrentLocked) {
+    goNext();
+    return;
+  }
+  showHintTooltip(activeHintRole);
 }
 
 function goNext() {
@@ -854,6 +1138,60 @@ function renderTextWithEmphasis(value) {
   }
 
   out += escapeHtml(text.slice(last));
+  return out;
+}
+
+function svtdRoleFromText(value) {
+  const text = String(value || "");
+  const lower = text.toLowerCase();
+  if (/^s/i.test(text) || text.includes("\uC8FC\uC5B4") || text.includes("\uB204\uAC00")) return "subject";
+  if (/^v/i.test(text) || text.includes("\uB3D9\uC0AC") || text.includes("\uD588\uB2E4")) return "verb";
+  if (/^t/i.test(text) || lower.includes("target") || text.includes("\uB204\uAD6C\uD55C\uD14C")) return "target";
+  if (/^d/i.test(text) || lower.includes("detail") || text.includes("\uC5B4\uB5BB\uAC8C")) return "detail";
+  return "";
+}
+
+function renderSVTDInlineTag(value, role) {
+  return `<span class="svtd-inline-tag is-${role}">${escapeHtml(value)}</span>`;
+}
+
+function renderSVTDColoredSegment(value) {
+  const text = String(value ?? "");
+  const re = /(SVTD|S\s*\([^)]*\)|V\s*\([^)]*\)|T\s*\([^)]*\)|D\s*\([^)]*\)|\b[SVTD]\b|\uC8FC\uC5B4|\uB3D9\uC0AC|target|Target|detail|Detail|\uB204\uAC00|\uD588\uB2E4|\uB204\uAD6C\uD55C\uD14C|\uC5B4\uB5BB\uAC8C)/g;
+  let out = "";
+  let last = 0;
+  let m;
+
+  while ((m = re.exec(text)) !== null) {
+    const token = String(m[0] || "");
+    const role = svtdRoleFromText(token);
+    out += escapeHtml(text.slice(last, m.index));
+    if (token === "SVTD") {
+      out += ["S", "V", "T", "D"].map((x) => renderSVTDInlineTag(x, svtdRoleClass(x))).join("");
+    } else {
+      out += role ? renderSVTDInlineTag(token, role) : escapeHtml(token);
+    }
+    last = re.lastIndex;
+  }
+
+  out += escapeHtml(text.slice(last));
+  return out;
+}
+
+function renderInstructionWithSVTDColors(value) {
+  const text = normalizeEscapedBreaks(String(value ?? ""));
+  const re = /\*\*(.*?)\*\*/gs;
+  let out = "";
+  let last = 0;
+  let m;
+
+  while ((m = re.exec(text)) !== null) {
+    out += renderSVTDColoredSegment(text.slice(last, m.index));
+    out += `<span class="focus-token">${renderSVTDColoredSegment(String(m[1] ?? "").trim())}</span>`;
+    last = re.lastIndex;
+  }
+
+  out += renderSVTDColoredSegment(text.slice(last));
   return out;
 }
 
