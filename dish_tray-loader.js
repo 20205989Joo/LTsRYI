@@ -55,6 +55,43 @@ window.addEventListener('DOMContentLoaded', () => {
     );
   }
 
+  function syncStoredLessonRoutes() {
+    const dm = getDayManager();
+    if (!dm || typeof dm.getLessonPageRoute !== 'function') return;
+
+    let changed = false;
+
+    qordered.forEach(item => {
+      if (!item || !item.Subcategory || !item.Level || item.LessonNo == null) return;
+
+      const canonicalSub = resolveSubcategoryName(item.Subcategory);
+      const lessonNo = Number(item.LessonNo);
+      if (!canonicalSub || !Number.isFinite(lessonNo)) return;
+
+      const route = dm.getLessonPageRoute(canonicalSub, item.Level, lessonNo);
+      if (!route) return;
+
+      const next = {
+        Subcategory: canonicalSub,
+        Day: route.day ?? null,
+        Path: route.path || null,
+        QuizKey: route.quizKey || null,
+        LessonTag: route.lessonTag || null
+      };
+
+      Object.entries(next).forEach(([key, value]) => {
+        if ((item[key] ?? null) !== value) {
+          item[key] = value;
+          changed = true;
+        }
+      });
+    });
+
+    if (changed) {
+      localStorage.setItem('HWPlus', JSON.stringify(qordered));
+    }
+  }
+
   function removeHwPlusEntry(target) {
     const list = JSON.parse(localStorage.getItem('HWPlus') || '[]');
     const targetSub = resolveSubcategoryName(target.Subcategory);
@@ -116,6 +153,8 @@ window.addEventListener('DOMContentLoaded', () => {
       inner.appendChild(sub);
     }
   }
+
+  syncStoredLessonRoutes();
 
   qordered.forEach((item, index) => {
     const canonicalSub = resolveSubcategoryName(item.Subcategory);

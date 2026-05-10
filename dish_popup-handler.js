@@ -79,10 +79,10 @@ function getLessonRouteInfo(item) {
     subcategory: route?.subcategory || canonicalSubcategory || null,
     level: route?.level || level || item?.Level || null,
     lessonNo: route?.lessonNo ?? (Number.isFinite(lessonNo) ? lessonNo : null),
-    day: Number.isFinite(storedDay) ? storedDay : route?.day ?? null,
-    lessonTag: storedLessonTag || route?.lessonTag || "",
-    path: storedPath || route?.path || "",
-    quizKey: storedQuizKey || route?.quizKey || ""
+    day: route?.day ?? (Number.isFinite(storedDay) ? storedDay : null),
+    lessonTag: route?.lessonTag || storedLessonTag || "",
+    path: route?.path || storedPath || "",
+    quizKey: route?.quizKey || storedQuizKey || ""
   };
 }
 
