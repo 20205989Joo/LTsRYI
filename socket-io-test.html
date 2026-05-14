@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Socket.IO Relay Test</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      color-scheme: dark;
+      --bg: #101418;
+      --panel: #171d23;
+      --panel-2: #202832;
+      --line: #33404d;
+      --text: #edf2f7;
+      --muted: #9aa8b6;
+      --accent: #2fb47c;
+      --warn: #f0b429;
+      --bad: #ff6b6b;
+      --ink: #f0b429;
+    }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); }
+    body { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+    header { display: grid; gap: 12px; padding: 14px; border-bottom: 1px solid var(--line); background: var(--panel); }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0; }
+    #status { min-width: 180px; text-align: right; font-size: 13px; color: var(--muted); }
+    #status.good { color: var(--accent); }
+    #status.bad { color: var(--bad); }
+    .controls { display: grid; grid-template-columns: minmax(220px, 1.4fr) minmax(140px, 1fr) minmax(120px, 0.6fr) repeat(6, auto); gap: 8px; align-items: end; }
+    label { display: grid; gap: 5px; font-size: 12px; color: var(--muted); }
+    input, select, button { height: 36px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); color: var(--text); font: inherit; }
+    input, select { width: 100%; padding: 0 10px; }
+    button { min-width: 78px; padding: 0 12px; cursor: pointer; }
+    button:hover { border-color: var(--accent); }
+    button.primary { background: #1c6b4d; border-color: #289268; }
+    button.warn { background: #5d4614; border-color: #8c681e; }
+    main { display: grid; grid-template-columns: minmax(320px, 1fr) 360px; min-height: 0; height: 100%; overflow: hidden; }
+    .stage { position: relative; min-height: 0; overflow: hidden; background: #f7f8fa; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; user-select: none; }
+    aside { display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 10px; min-height: 0; height: 100%; overflow: hidden; padding: 12px; border-left: 1px solid var(--line); background: var(--panel); }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat { padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); }
+    .stat b { display: block; margin-bottom: 4px; font-size: 11px; color: var(--muted); font-weight: 600; }
+    .stat span { font-size: 14px; word-break: break-word; }
+    textarea { width: 100%; height: 82px; min-height: 74px; resize: none; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); color: var(--text); padding: 10px; font: inherit; }
+    pre { min-height: 0; max-height: 100%; margin: 0; padding: 10px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; background: #0c1014; color: #d8eef7; font-size: 12px; line-height: 1.4; white-space: pre-wrap; }
+    @media (max-width: 900px) {
+      .controls { grid-template-columns: 1fr 1fr; }
+      .controls button { min-width: 0; }
+      main { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) minmax(220px, 38vh); }
+      aside { border-left: 0; border-top: 1px solid var(--line); }
+      #status { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topline">
+      <h1>Socket.IO Relay Test</h1>
+      <div id="status">idle</div>
+    </div>
+    <div class="controls">
+      <label>Server URL
+        <input id="serverUrl" autocomplete="off" placeholder="https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app">
+      </label>
+      <label>Room ID
+        <input id="roomId" value="demo-room" autocomplete="off">
+      </label>
+      <label>Role
+        <select id="role">
+          <option value="teacher">teacher</option>
+          <option value="student">student</option>
+          <option value="viewer">viewer</option>
+        </select>
+      </label>
+      <button id="connect" class="primary">Connect</button>
+      <button id="health">Health</button>
+      <button id="event">Event</button>
+      <button id="sendState">Send</button>
+      <button id="star" class="warn">Star</button>
+      <button id="clear">Clear</button>
+    </div>
+  </header>
+  <main>
+    <section class="stage">
+      <canvas id="ink"></canvas>
+    </section>
+    <aside>
+      <div class="stat-grid">
+        <div class="stat"><b>Socket ID</b><span id="socketId">-</span></div>
+        <div class="stat"><b>Remote Count</b><span id="remoteCount">0</span></div>
+        <div class="stat"><b>Last Ack</b><span id="lastAck">-</span></div>
+        <div class="stat"><b>Last Remote</b><span id="lastRemote">-</span></div>
+      </div>
+      <textarea id="payload">{"type":"ping","text":"hello from LTsRYI socket-io-test"}</textarea>
+      <pre id="log"></pre>
+    </aside>
+  </main>
+
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script>
+    const CLOUDTYPE_SOCKET_SERVER = 'https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app';
+    const socketParams = new URLSearchParams(window.location.search);
+    const storedServerUrl = localStorage.getItem('socketTestServerUrl');
+    const defaultServerUrl = socketParams.get('server') || socketParams.get('backend') || (
+      storedServerUrl && storedServerUrl !== 'http://localhost:3000'
+        ? storedServerUrl
+        : CLOUDTYPE_SOCKET_SERVER
+    );
+    const serverUrlInput = document.getElementById('serverUrl');
+    const roomInput = document.getElementById('roomId');
+    const roleInput = document.getElementById('role');
+    const statusEl = document.getElementById('status');
+    const socketIdEl = document.getElementById('socketId');
+    const remoteCountEl = document.getElementById('remoteCount');
+    const lastAckEl = document.getElementById('lastAck');
+    const lastRemoteEl = document.getElementById('lastRemote');
+    const payloadInput = document.getElementById('payload');
+    const logEl = document.getElementById('log');
+    const canvas = document.getElementById('ink');
+    const ctx = canvas.getContext('2d');
+
+    let socket = null;
+    let drawing = false;
+    let localLast = null;
+    let strokeId = '';
+    let lastEmitAt = 0;
+    let remoteCount = 0;
+    const remoteLastByStroke = new Map();
+
+    serverUrlInput.value = defaultServerUrl;
+
+    function cleanBaseUrl() {
+      return serverUrlInput.value.trim().replace(/\/+$/, '');
+    }
+
+    function setStatus(text, mode) {
+      statusEl.textContent = text;
+      statusEl.className = mode || '';
+    }
+
+    function compactForLog(data) {
+      if (!data || typeof data !== 'object') return data;
+      const copy = { ...data };
+      if (copy.image) copy.image = `[image ${String(copy.image).length} chars]`;
+      if (copy.dataUrl) copy.dataUrl = `[dataUrl ${String(copy.dataUrl).length} chars]`;
+      return copy;
+    }
+
+    function log(text, data) {
+      const stamp = new Date().toLocaleTimeString();
+      const suffix = data === undefined ? '' : ' ' + JSON.stringify(compactForLog(data));
+      logEl.textContent = `${stamp} ${text}${suffix}\n${logEl.textContent}`.slice(0, 9000);
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+    }
+
+    function pointFromEvent(evt) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (evt.clientX - rect.left) / rect.width,
+        y: (evt.clientY - rect.top) / rect.height,
+        t: Date.now()
+      };
+    }
+
+    function denorm(point) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: point.x * rect.width, y: point.y * rect.height };
+    }
+
+    function drawLine(a, b, color, size) {
+      const p1 = denorm(a);
+      const p2 = denorm(b);
+      ctx.strokeStyle = color || '#f0b429';
+      ctx.lineWidth = size || 4;
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+    }
+
+    function drawDot(point, color, size) {
+      const p = denorm(point);
+      ctx.fillStyle = color || '#f0b429';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(2, (size || 4) * 0.65), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawStar(point, color) {
+      const p = denorm(point);
+      ctx.save();
+      ctx.fillStyle = color || '#f0b429';
+      ctx.strokeStyle = '#5d4614';
+      ctx.lineWidth = 1.5;
+      ctx.font = '30px Arial, Helvetica, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('*', p.x, p.y);
+      ctx.strokeText('*', p.x, p.y);
+      ctx.restore();
+    }
+    function drawCanvasSnapshot(data) {
+      if (!data || !data.image) return;
+      const img = new Image();
+      img.onload = function () {
+        const rect = canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      };
+      img.src = data.image;
+    }
+
+    function sendCanvasSnapshot() {
+      const image = canvas.toDataURL('image/png');
+      emit('live-event', {
+        type: 'canvas-snapshot',
+        image,
+        width: canvas.width,
+        height: canvas.height,
+        clientTime: Date.now()
+      });
+      log('sent canvas-snapshot', { width: canvas.width, height: canvas.height, image });
+    }
+
+    function incrementRemote(name, data) {
+      remoteCount += 1;
+      remoteCountEl.textContent = String(remoteCount);
+      lastRemoteEl.textContent = name;
+      log(`remote ${name}`, data);
+    }
+
+    function emit(eventName, payload) {
+      if (!socket || !socket.connected) {
+        log('emit skipped: not connected');
+        return;
+      }
+      socket.emit(eventName, { roomId: roomInput.value, ...payload }, function (ack) {
+        lastAckEl.textContent = ack && ack.ok ? `${eventName} ok` : `${eventName} failed`;
+        log(`ack ${eventName}`, ack);
+      });
+    }
+
+    function bindSocketEvents() {
+      socket.on('connect', function () {
+        socketIdEl.textContent = socket.id;
+        setStatus(`connected to ${cleanBaseUrl()}`, 'good');
+        socket.emit('join-room', { roomId: roomInput.value }, function (ack) {
+          lastAckEl.textContent = ack && ack.ok ? 'join ok' : 'join failed';
+          log('join-room', ack);
+        });
+      });
+      socket.on('disconnect', function (reason) {
+        socketIdEl.textContent = '-';
+        setStatus(`disconnected: ${reason}`, 'bad');
+        log('disconnect', { reason });
+      });
+      socket.on('connect_error', function (err) {
+        setStatus(`connect error: ${err.message}`, 'bad');
+        log('connect_error', { message: err.message });
+      });
+      socket.on('live-ink:ready', function (data) { log('ready', data); });
+      socket.on('live-ink:presence', function (data) { log('presence', data); });
+      socket.on('live-ink:error', function (data) { log('error', data); });
+      socket.on('live-event', function (data) {
+        if (data && data.type === 'canvas-snapshot') drawCanvasSnapshot(data);
+        incrementRemote('live-event', data);
+      });
+      socket.on('clear-ink', function (data) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        incrementRemote('clear-ink', data);
+      });
+      socket.on('star', function (data) {
+        drawStar(data, data.color);
+        incrementRemote('star', data);
+      });
+      socket.on('ink-start', function (data) {
+        const key = data.strokeId || data.senderId || 'remote';
+        remoteLastByStroke.set(key, data);
+        drawDot(data, data.color, data.size);
+        incrementRemote('ink-start', data);
+      });
+      socket.on('ink-move', function (data) {
+        const key = data.strokeId || data.senderId || 'remote';
+        const previous = remoteLastByStroke.get(key);
+        if (previous) drawLine(previous, data, data.color, data.size);
+        else drawDot(data, data.color, data.size);
+        remoteLastByStroke.set(key, data);
+        incrementRemote('ink-move', data);
+      });
+      socket.on('ink-end', function (data) {
+        const key = data.strokeId || data.senderId || 'remote';
+        const previous = remoteLastByStroke.get(key);
+        if (previous) drawLine(previous, data, data.color, data.size);
+        remoteLastByStroke.delete(key);
+        incrementRemote('ink-end', data);
+      });
+    }
+
+    function connect() {
+      if (!window.io) {
+        setStatus('socket.io client not loaded', 'bad');
+        return;
+      }
+      if (socket) socket.disconnect();
+      const base = cleanBaseUrl();
+      localStorage.setItem('socketTestServerUrl', base);
+      setStatus('connecting', '');
+      socket = io(base, {
+        query: { roomId: roomInput.value, role: roleInput.value },
+        reconnection: true,
+        reconnectionDelay: 500,
+        timeout: 8000
+      });
+      bindSocketEvents();
+    }
+
+    async function healthCheck() {
+      const base = cleanBaseUrl();
+      try {
+        const res = await fetch(`${base}/api/live-ink/health`, { cache: 'no-store' });
+        const json = await res.json();
+        log('health', json);
+        lastAckEl.textContent = json.ok ? 'health ok' : 'health failed';
+      } catch (err) {
+        log('health failed', { message: err.message });
+        lastAckEl.textContent = 'health failed';
+      }
+    }
+
+    function sendLiveEvent() {
+      let payload = {};
+      try {
+        payload = JSON.parse(payloadInput.value || '{}');
+      } catch (err) {
+        log('payload parse failed', { message: err.message });
+        return;
+      }
+      emit('live-event', { ...payload, clientTime: Date.now() });
+    }
+
+    canvas.addEventListener('pointerdown', function (evt) {
+      evt.preventDefault();
+      drawing = true;
+      canvas.setPointerCapture(evt.pointerId);
+      strokeId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      localLast = pointFromEvent(evt);
+      drawDot(localLast, '#f0b429', 4);
+      emit('ink-start', { strokeId, tool: 'pen', color: '#f0b429', size: 4, ...localLast });
+    });
+
+    canvas.addEventListener('pointermove', function (evt) {
+      if (!drawing) return;
+      evt.preventDefault();
+      const now = Date.now();
+      const point = pointFromEvent(evt);
+      drawLine(localLast, point, '#f0b429', 4);
+      localLast = point;
+      if (now - lastEmitAt >= 33) {
+        lastEmitAt = now;
+        emit('ink-move', { strokeId, tool: 'pen', color: '#f0b429', size: 4, ...point });
+      }
+    });
+
+    function finishStroke(evt) {
+      if (!drawing) return;
+      evt.preventDefault();
+      drawing = false;
+      const point = pointFromEvent(evt);
+      emit('ink-end', { strokeId, tool: 'pen', color: '#f0b429', size: 4, ...point });
+      localLast = null;
+      strokeId = '';
+    }
+
+    canvas.addEventListener('pointerup', finishStroke);
+    canvas.addEventListener('pointercancel', finishStroke);
+    canvas.addEventListener('dblclick', function (evt) {
+      evt.preventDefault();
+      const point = pointFromEvent(evt);
+      drawStar(point, '#f0b429');
+      emit('star', { color: '#f0b429', ...point });
+    });
+
+    document.getElementById('connect').addEventListener('click', connect);
+    document.getElementById('health').addEventListener('click', healthCheck);
+    document.getElementById('event').addEventListener('click', sendLiveEvent);
+    document.getElementById('sendState').addEventListener('click', sendCanvasSnapshot);
+    document.getElementById('clear').addEventListener('click', function () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      emit('clear-ink', { t: Date.now() });
+    });
+    document.getElementById('star').addEventListener('click', function () {
+      const point = { x: 0.5, y: 0.5, t: Date.now() };
+      drawStar(point, '#f0b429');
+      emit('star', { color: '#f0b429', ...point });
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    connect();
+  </script>
+</body>
+</html>
