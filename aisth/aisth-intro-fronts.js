@@ -3,46 +3,38 @@
 
   const INTRO_MAP = {
     "2-1": {
-      title: "\uC2DC\uC81C",
+      title: "시제",
+      maxSteps: 6,
       steps: [
         {
-          title: "\uC601\uC5B4 \uB3D9\uC0AC\uB294 \u201C\uC5B8\uC81C \uC77C\uC5B4\uB098\uB294 \uC77C\uC778\uC9C0\u201D\uC5D0 \uB530\uB77C \uBAA8\uC591\uC774 \uBC14\uB01D\uB2C8\uB2E4.",
-          body: "\uC9C0\uAE08\uC778\uC9C0, \uC5B4\uC81C\uC778\uC9C0, \uB0B4\uC77C\uC778\uC9C0 \uBD10\uC57C \uD569\uB2C8\uB2E4.",
-          rows: [
-            ["\uC5B8\uC81C \uC77C\uC5B4\uB098\uB294 \uC77C\uC778\uC9C0"],
-          ],
+          title: "시간 표현은 어떻게 쓸까요?",
+          body: "",
+          exampleHtml: buildTenseTimeExpressionHtml(),
         },
         {
-          title: "\uB9E4\uC77C \uD558\uB294 \uC77C\uC740 \uBCF4\uD1B5 \uAE30\uBCF8 \uB3D9\uC0AC\uB97C \uC501\uB2C8\uB2E4.",
-          body: "\uC608: I go to school every day.",
-          rows: [
-            ["I go to school every day"],
-          ],
+          title: "지금 하는 건(현재), 그냥 동사를 그대로 써줍시다.",
+          body: "",
+          exampleHtml: buildLonelyWalkHtml(),
         },
         {
-          title: "\uACFC\uAC70 \uC77C\uC740 \uB3D9\uC0AC\uAC00 \uACFC\uAC70 \uBAA8\uC591\uC73C\uB85C \uBC14\uB01D\uB2C8\uB2E4.",
-          body: "\uC608: watch \u2192 watched, go \u2192 went",
-          rows: [
-            ["watch"],
-            ["watched, go"],
-            ["went"],
-          ],
+          title: "과거라면 'ed'를 더해줍시다. 어제 난 걸었다!",
+          body: "",
+          exampleHtml: buildTenseFormulaHtml("past"),
         },
         {
-          title: "\uBBF8\uB798\uB294 \uBCF4\uD1B5 will + \uB3D9\uC0AC \uAE30\uBCF8\uBAA8\uC591\uC73C\uB85C \uB9D0\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
-          body: "\uC608: I will go.",
-          rows: [
-            ["will"],
-            ["I will go"],
-          ],
+          title: "미래라면 'will'을 더해줍시다. 내일 난 걸을거야!",
+          body: "",
+          exampleHtml: buildTenseFormulaHtml("future"),
         },
         {
-          title: "\uC9C0\uAE08 \uD558\uACE0 \uC788\uB294 \uC911\uC774\uBA74 am/are/is + -ing\uB97C \uC501\uB2C8\uB2E4.",
-          body: "\uC608: She is watching TV now.",
-          rows: [
-            ["am", "are", "is"],
-            ["She is watching TV now"],
-          ],
+          title: "'하고있는 중이야!!'를 강조하고 싶다면, be V ing로 바꿔버리세요.",
+          body: "",
+          exampleHtml: buildTenseFormulaHtml("progressive"),
+        },
+        {
+          title: "이제 시점에 따라 적당한 형태를 바꿔보세요!",
+          body: "",
+          exampleHtml: buildTenseRotationHtml(),
         },
       ],
     },
@@ -1619,16 +1611,156 @@
     }).join("");
   }
 
+  function buildTenseTimeExpressionHtml() {
+    const items = [
+      { lead: "어제 ", mark: "했", tail: "다" },
+      { lead: "내일 ", mark: "할 거", tail: "야" },
+      { lead: "지금 ", mark: "하고있", tail: "어" },
+    ];
+
+    return `
+      <div class="lip-example-stack">
+        ${items.map((item) => `
+          <div class="lip-example-row" style="justify-content:center;gap:5px;margin-bottom:0;">
+            ${buildTenseText(item.lead)}
+            ${buildTenseMarker(item.mark)}
+            ${buildTenseText(item.tail)}
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function buildLonelyWalkHtml() {
+    return `
+      <div class="lip-example-stack">
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;gap:10px;">
+          ${buildTenseStateLabel("현재:")}
+          ${buildTenseChip("walk", "verb", "hero")}
+        </div>
+      </div>
+    `;
+  }
+
+  function buildTenseFormulaHtml(type) {
+    const formulas = {
+      past: {
+        label: "과거:",
+        parts: [
+          buildTenseChip("walk", "verb", "boss"),
+          buildTenseMarker("ed"),
+        ],
+      },
+      future: {
+        label: "미래:",
+        parts: [
+          buildTenseMarker("will"),
+          buildTenseChip("walk", "verb", "boss"),
+        ],
+      },
+      progressive: {
+        label: "진행:",
+        parts: [
+          buildTenseMarker("be"),
+          buildTenseChip("walk", "verb", "boss"),
+          buildTenseMarker("ing"),
+        ],
+      },
+    };
+    const formula = formulas[type] || { label: "", parts: [] };
+
+    return `
+      <div class="lip-example-stack">
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;gap:10px;">
+          ${buildTenseStateLabel(formula.label)}
+          ${formula.parts.join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function buildTenseRotationHtml() {
+    const states = [
+      { label: "현재", before: "", after: "" },
+      { label: "과거", before: "", after: "ed" },
+      { label: "미래", before: "will", after: "" },
+      { label: "진행", before: "be", after: "ing" },
+    ];
+
+    return `
+      <div class="lip-example-stack">
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;">
+          <div class="lip-rotator-window" style="flex:0 0 236px;width:236px;height:48px;">
+            ${states.map((state, index) => `
+              <span class="lip-rotator-item" style="--lip-delay:${(index * 1.4).toFixed(1)}s;align-items:center;justify-content:center;gap:8px;">
+                ${buildTenseStateLabel(state.label)}
+                ${state.before ? buildTenseMarker(state.before) : buildTenseGhostMarker()}
+                ${buildTenseChip("walk", "verb", "boss")}
+                ${state.after ? buildTenseMarker(state.after) : buildTenseGhostMarker()}
+              </span>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildTenseText(text) {
+    return `<span style="font-size:15px;line-height:1.35;font-weight:900;color:#3c2d22;">${escapeHtml(text)}</span>`;
+  }
+
+  function buildTenseSymbol(symbol) {
+    return `<span class="lip-example-symbol" style="font-size:13px;line-height:1;color:#7e3106;">${escapeHtml(symbol)}</span>`;
+  }
+
+  function buildTenseMarker(text) {
+    return `<span style="display:inline-flex;align-items:center;justify-content:center;font-size:15px;line-height:1;font-weight:950;color:#f17b2a;white-space:nowrap;">${escapeHtml(text)}</span>`;
+  }
+
+  function buildTenseGhostMarker() {
+    return `<span style="width:24px;height:1px;flex:0 0 24px;"></span>`;
+  }
+
+  function buildTenseStateLabel(text) {
+    return `<span style="font-size:12px;line-height:1;font-weight:950;color:#7e3106;white-space:nowrap;">${escapeHtml(text)}</span>`;
+  }
+
+  function buildTenseChip(text, variant, size) {
+    const variants = {
+      verb: ["border-color:#f1c18e", "background:#fff", "color:#7e3106"],
+      adv: ["border-color:rgba(43,103,199,0.24)", "background:rgba(235,243,255,0.98)", "color:#2b67c7"],
+      adj: ["border-color:rgba(255,187,74,0.26)", "background:rgba(255,247,228,0.98)", "color:#7e5a06"],
+    };
+    const sizes = {
+      hero: ["min-width:116px", "min-height:54px", "padding:5px 18px", "font-size:28px"],
+      boss: ["min-width:86px", "min-height:42px", "padding:5px 15px", "font-size:20px"],
+      normal: ["min-height:30px", "padding:4px 10px", "font-size:13px"],
+      compact: ["min-height:26px", "padding:3px 8px", "font-size:13px"],
+      small: ["min-height:22px", "padding:2px 7px", "font-size:11px"],
+    };
+    const styles = [
+      "display:inline-flex",
+      "align-items:center",
+      "justify-content:center",
+      "border-radius:999px",
+      "border:1px solid transparent",
+      "font-weight:900",
+      "line-height:1",
+      "white-space:nowrap",
+      ...(variants[variant] || variants.verb),
+      ...(sizes[size] || sizes.normal),
+    ];
+
+    return `<span style="${styles.join(";")}">${escapeHtml(text)}</span>`;
+  }
+
   function buildSvtdInlinePart(part) {
     if (!part || typeof part !== "object") return escapeHtml(part ?? "");
     return `<span${roleStyleAttr(part.role, ["display:inline-flex", "align-items:center", "justify-content:center", "min-height:1.5em", "padding:0.04em 0.42em", "border-radius:999px", "border-width:1px", "border-style:solid"])}>${escapeHtml(part.text ?? "")}</span>`;
   }
 
   function buildSvtdStackedTitleHtml(stepNumber, parts) {
-    return [
-      `<span style="display:block;font-size:12px;line-height:1.2;color:rgba(126,49,6,0.72);margin-bottom:5px;">${stepNumber}\uB2E8\uACC4</span>`,
-      `<span style="display:block;">${(parts || []).map(buildSvtdInlinePart).join("")}</span>`,
-    ].join("");
+    return `<span style="display:block;">${(parts || []).map(buildSvtdInlinePart).join("")}</span>`;
   }
 
   function buildSvtdTargetingHtml() {
@@ -1685,23 +1817,20 @@
     `;
   }
 
-  function renumberStepTitle(title, index) {
-    const clean = String(title || "").replace(/^\s*\d+\uB2E8\uACC4:\s*/, "").trim();
-    return `${index + 1}\uB2E8\uACC4: ${clean}`;
+  function cleanStepTitle(title) {
+    return String(title || "").replace(/^\s*\d+단계\s*[:：.]?\s*/, "").trim();
   }
 
   function buildStackedStepTitleHtml(title, index) {
-    const clean = String(title || "").replace(/^\s*\d+\uB2E8\uACC4:?\s*/, "").trim();
-    return [
-      `<span style="display:block;font-size:12px;line-height:1.2;color:rgba(126,49,6,0.72);margin-bottom:5px;">${index + 1}\uB2E8\uACC4</span>`,
-      `<span style="display:block;">${escapeHtml(clean)}</span>`,
-    ].join("");
+    const clean = cleanStepTitle(title);
+    return `<span style="display:block;">${escapeHtml(clean)}</span>`;
   }
 
   function normalizeSteps(entry) {
-    const rawSteps = (Array.isArray(entry?.steps) ? entry.steps : []).slice(0, 5);
+    const maxSteps = Number.isInteger(entry?.maxSteps) ? entry.maxSteps : 5;
+    const rawSteps = (Array.isArray(entry?.steps) ? entry.steps : []).slice(0, maxSteps);
     return rawSteps.map((step, index) => ({
-      title: renumberStepTitle(step.title, index),
+      title: cleanStepTitle(step.title),
       titleHtml: step.titleLayout === "stacked" ? buildStackedStepTitleHtml(step.title, index) : step.titleHtml,
       body: step.body,
       exampleHtml: step.exampleHtml ? String(step.exampleHtml) : buildExampleHtml(step.rows),

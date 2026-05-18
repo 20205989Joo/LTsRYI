@@ -305,13 +305,62 @@ function normalizeQuizKeyAlias(quizKey) {
   return Array.from(aliases);
 }
 
+function computeStoredQuizScore(result) {
+  const explicitScore = Number(result?.score);
+  if (Number.isFinite(explicitScore)) return explicitScore;
+
+  const rows = Array.isArray(result?.testspecific) ? result.testspecific : [];
+  if (!rows.length) return null;
+
+  const correctCount = rows.filter(row => row && row.correct).length;
+  return Math.round((correctCount / rows.length) * 100);
+}
+
+function isStoredQuizSubmitReady(result) {
+  if (!result || result.teststatus !== "done") return false;
+
+  const score = computeStoredQuizScore(result);
+  if (Number.isFinite(score)) return score >= 80;
+
+  return true;
+}
+
 function isStoredQuizDoneForKey(quizKey) {
   const aliases = normalizeQuizKeyAlias(quizKey);
   for (const key of aliases) {
     const result = getStoredQuizResultByKey(key);
-    if (result && result.teststatus === "done") return true;
+    if (isStoredQuizSubmitReady(result)) return true;
   }
   return false;
+}
+
+function isStoredQuizStage1Ready(result) {
+  if (result?.stage1 && isStoredQuizStage1Ready(result.stage1)) return true;
+  if (!result || result.teststatus !== "stage1") return false;
+  if (result.stage && result.stage !== "dish-quiz1") return false;
+  if (result.canSubmit === true) return true;
+
+  const score = computeStoredQuizScore(result);
+  if (Number.isFinite(score)) return score >= 80;
+
+  return true;
+}
+
+function isStoredQuizStage1ReadyForKey(quizKey) {
+  const aliases = normalizeQuizKeyAlias(quizKey);
+  for (const key of aliases) {
+    const result = getStoredQuizResultByKey(key);
+    if (isStoredQuizStage1Ready(result)) return true;
+  }
+  return false;
+}
+
+function findStage1ReadyQuizKey(...quizKeys) {
+  for (const quizKey of quizKeys) {
+    const key = String(quizKey || "").trim();
+    if (key && isStoredQuizStage1ReadyForKey(key)) return key;
+  }
+  return "";
 }
 
 window.showDishPopup = function (item) {
@@ -461,6 +510,8 @@ window.showDishPopup = function (item) {
       (routeQuizKey && isStoredQuizDoneForKey(routeQuizKey)) ||
       (customQuizKey && isStoredQuizDoneForKey(customQuizKey))
     );
+    const stage1ReadyQuizKey = findStage1ReadyQuizKey(customQuizKey, routeQuizKey);
+    const isStage1Ready = !!stage1ReadyQuizKey;
 
     if (lessonRouteInfo?.path) {
       if (isDone) {
@@ -470,6 +521,11 @@ window.showDishPopup = function (item) {
             <button class="room-btn" style="background: #2e7d32; flex: 1;" id="custom-quiz-btn">🔁 다시 학습/시험</button>
             <button class="room-btn" style="background: #1976d2; flex: 1;" id="upload-btn">✅ 완료했어요</button>
           </div>
+        `;
+      } else if (isStage1Ready) {
+        content += `
+          <div style="margin-bottom: 10px;">1단계 시험을 완료했어요. 2단계로 이어갈 수 있어요.</div>
+          <button class="room-btn" style="background: #6f4bb8; color: #fff; width: 100%;" id="custom-quiz-btn">🧩 scramble!</button>
         `;
       } else {
         content += `
@@ -486,6 +542,7 @@ window.showDishPopup = function (item) {
   } else if (isRegularHW) {
     const quizKey = baseFile;
     const isDone = !!(quizKey && isStoredQuizDoneForKey(quizKey));
+    const isStage1Ready = !!(quizKey && isStoredQuizStage1ReadyForKey(quizKey));
 
     if (isDone) {
       content += `
@@ -506,7 +563,7 @@ window.showDishPopup = function (item) {
             <a href="${fileURL}" download class="room-btn" id="download-a"
               style="flex: 1; text-decoration: none; height: 18px;
             display: inline-flex; align-items: center; justify-content: center;">📂 다시 다운로드</a>
-            <button class="room-btn" style="background: #2e7d32; flex: 1;" id="quiz-btn">📝 시험볼게요</button>
+            <button class="room-btn" style="background: ${isStage1Ready ? "#6f4bb8" : "#2e7d32"}; flex: 1;" id="quiz-btn">${isStage1Ready ? "🧩 scramble!" : "📝 시험볼게요"}</button>
           </div>
         `;
       } else {
@@ -627,8 +684,28 @@ window.showDishPopup = function (item) {
 
   popup.querySelector("#quiz-btn")?.addEventListener("click", () => {
     const quizKey = buildFilename(item).replace(/\.pdf$/, "");
-    window.location.href =
-      `dish-quiz.html?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(quizKey)}`;
+    const shouldResumeStage2 = isStoredQuizStage1ReadyForKey(quizKey);
+    const routeLevel = inferLevelIfNeeded(item.Subcategory, item.Level, item.LessonNo) || item.Level || "";
+    const routeDay = fallbackDay ?? "";
+    const targetUrl = shouldResumeStage2
+      ? `dish-quiz2.html?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(quizKey)}&level=${encodeURIComponent(routeLevel)}&day=${encodeURIComponent(routeDay)}`
+      : `dish-quiz.html?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(quizKey)}`;
+
+    if (
+      !shouldResumeStage2 &&
+      window.DishRetakeLock?.showLockPopup?.({
+        quizKey,
+        onStudy: () => {
+          if (window.DishRetakeLock?.buildStudyUrlFromQuizKey) {
+            window.location.href = window.DishRetakeLock.buildStudyUrlFromQuizKey(quizKey, userId || "");
+          }
+        }
+      })
+    ) {
+      return;
+    }
+
+    window.location.href = targetUrl;
   });
 
   popup.querySelector("#custom-quiz-btn")?.addEventListener("click", () => {
@@ -638,6 +715,15 @@ window.showDishPopup = function (item) {
     }
 
     const dishQuizKey = filename ? filename.replace(/\.pdf$/, "") : "";
+    const stage1ReadyQuizKey = findStage1ReadyQuizKey(dishQuizKey, lessonRouteInfo.quizKey);
+    if (stage1ReadyQuizKey) {
+      const routeLevel = lessonRouteInfo?.level || inferLevelIfNeeded(item.Subcategory, item.Level, item.LessonNo) || item.Level || "";
+      const routeDay = lessonRouteInfo?.day ?? fallbackDay ?? "";
+      window.location.href =
+        `dish-quiz2.html?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(stage1ReadyQuizKey)}&level=${encodeURIComponent(routeLevel)}&day=${encodeURIComponent(routeDay)}`;
+      return;
+    }
+
     const targetUrl = buildTargetUrl(lessonRouteInfo.path, {
       id: userId || "",
       key: lessonRouteInfo.quizKey || "",
@@ -653,8 +739,9 @@ window.showDishPopup = function (item) {
     const levelKey = String(item.Level || "").trim().toLowerCase();
     const isWebGrammarModule = ["herma", "pleks", "aisth"].includes(levelKey);
     const resolvedLevelForPending = inferLevelIfNeeded(item.Subcategory, item.Level, item.LessonNo);
+    const filenameQuizKey = filename ? filename.replace(/\.pdf$/, "") : "";
     const pendingQuizKey = isCustomLessonModule
-      ? (lessonRouteInfo?.quizKey || (filename ? filename.replace(/\.pdf$/, "") : ""))
+      ? (isWord ? (filenameQuizKey || lessonRouteInfo?.quizKey || "") : (lessonRouteInfo?.quizKey || filenameQuizKey))
       : (baseFile || "");
     const hwType = (isWord || isWebGrammarModule) ? "doneinweb" : "pdf사진";
 

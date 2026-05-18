@@ -312,12 +312,48 @@
   </div>
 
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="dish-retake-lock.js"></script>
   <script>
     (async function () {
       const params = new URLSearchParams(window.location.search);
       const userId = params.get("id") || "";
       const routingKey = params.get("key") || "quiz_Words_A1_Day1";
       const dishQuizKey = params.get("dishQuizKey") || "Vocabulary_Words_A1_Day1_Lesson1_v1";
+      function readStoredQuizResult(quizKey) {
+        const key = String(quizKey || "").trim();
+        if (!key) return null;
+
+        try {
+          const rawMap = localStorage.getItem("QuizResultsMap");
+          const map = rawMap ? JSON.parse(rawMap) : {};
+          if (map && typeof map === "object" && map[key]) return map[key];
+        } catch (_) {}
+
+        try {
+          const raw = localStorage.getItem("QuizResults");
+          const parsed = raw ? JSON.parse(raw) : null;
+          const parsedKey = String(parsed?.quiztitle || parsed?.quizTitle || "").trim();
+          if (parsedKey === key) return parsed;
+        } catch (_) {}
+
+        return null;
+      }
+
+      function hasStage1Ready(result) {
+        if (result?.stage1 && hasStage1Ready(result.stage1)) return true;
+        if (!result || result.teststatus !== "stage1") return false;
+        if (result.stage && result.stage !== "dish-quiz1") return false;
+        if (result.canSubmit === true) return true;
+        const rows = Array.isArray(result.testspecific) ? result.testspecific : [];
+        if (!rows.length) return false;
+        const correct = rows.filter(row => row && row.correct).length;
+        return Math.round((correct / rows.length) * 100) >= 80;
+      }
+
+      const quizTarget = () =>
+        hasStage1Ready(readStoredQuizResult(dishQuizKey))
+          ? `dish-quiz2.html?id=${encodeURIComponent(userId)}&key=${encodeURIComponent(dishQuizKey)}&level=${encodeURIComponent(level)}&day=${encodeURIComponent(dayNo)}`
+          : `dish-quiz.html?id=${encodeURIComponent(userId)}&key=${encodeURIComponent(dishQuizKey)}`;
 
       const levelMatch = routingKey.match(/_([ABC][12])_/i);
       const dayMatch = routingKey.match(/Day(\d+)/i);
@@ -334,6 +370,20 @@
 
       let isMeaningHidden = false;
       let hasShownQuickTip = false;
+
+      function openQuizWithRetakeGate() {
+        if (
+          window.DishRetakeLock?.showLockPopup?.({
+            quizKey: dishQuizKey,
+            studyLabel: "계속 외우기",
+            onStudy: () => {}
+          })
+        ) {
+          return;
+        }
+
+        window.location.href = quizTarget();
+      }
 
       function setMeaningHidden(hidden) {
         isMeaningHidden = !!hidden;
@@ -501,8 +551,7 @@
       });
 
       document.getElementById("quiz-btn")?.addEventListener("click", () => {
-        const target = `dish-quiz.html?id=${encodeURIComponent(userId)}&key=${encodeURIComponent(dishQuizKey)}`;
-        window.location.href = target;
+        openQuizWithRetakeGate();
       });
     })();
   </script>

@@ -41,10 +41,10 @@
     try {
       var path = String(window.location.pathname || "");
       var file = path.split("/").pop() || "";
-      var m = file.match(/^herma-(l\d+e\d+)\.html$/i);
+      var m = file.match(/^aisth-(l\d+e\d+)\.html$/i);
       if (!m) return false;
       var slug = String(m[1]).toLowerCase();
-      var expected = "herma-" + slug + "_round2.js";
+      var expected = "aisth-" + slug + "_round2.js";
       return !!document.querySelector('script[src$="' + expected + '"]');
     } catch (_) {
       return false;

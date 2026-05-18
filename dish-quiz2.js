@@ -1,6 +1,5 @@
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
 const QUIZ_SIZE = 20;
-const TIME_LIMIT_MS = 10000;
 const PREFS_KEY = 'DishSpellingQuizPrefs';
 
 const workbookCache = new Map();
@@ -11,10 +10,13 @@ let currentRows = [];
 let currentQuestions = [];
 let currentResults = [];
 let currentIndex = 0;
-let currentTimer = null;
 let currentPuzzle = null;
 let isAnswered = false;
 let setupToken = 0;
+let directMode = false;
+let quizTitle = '';
+let userId = '';
+let debugAutoCompleting = false;
 let currentConfig = {
   level: 'A1',
   day: '',
@@ -33,6 +35,53 @@ function readPrefs() {
 
 function storePrefs() {
   localStorage.setItem(PREFS_KEY, JSON.stringify(currentConfig));
+}
+
+function readQuizResultsMap() {
+  try {
+    const raw = localStorage.getItem('QuizResultsMap');
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function getStoredQuizResult(quizKey) {
+  const key = String(quizKey || '').trim();
+  if (!key) return null;
+
+  const map = readQuizResultsMap();
+  const mapped = map[key];
+  if (mapped && typeof mapped === 'object' && !Array.isArray(mapped)) {
+    return mapped;
+  }
+
+  try {
+    const raw = localStorage.getItem('QuizResults');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const parsedKey = String(parsed?.quiztitle || parsed?.quizTitle || '').trim();
+    if (parsedKey === key && parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch (_) {
+    return null;
+  }
+
+  return null;
+}
+
+function storeQuizResultWithMap(resultObject) {
+  localStorage.setItem('QuizResults', JSON.stringify(resultObject));
+
+  const quizKey = String(resultObject?.quiztitle || resultObject?.quizTitle || '').trim();
+  if (!quizKey) return;
+
+  const map = readQuizResultsMap();
+  map[quizKey] = resultObject;
+  localStorage.setItem('QuizResultsMap', JSON.stringify(map));
 }
 
 function escapeHtml(value) {
@@ -72,20 +121,79 @@ function normalizeAnswer(value) {
     .replace(/\s+/g, ' ');
 }
 
-function clearTimer() {
-  if (currentTimer) {
-    window.clearTimeout(currentTimer);
-    currentTimer = null;
-  }
+function describeResultSource(result) {
+  if (result?.source !== 'review') return '본시험';
+  const level = result.reviewLevel ? ` ${result.reviewLevel}` : '';
+  const day = result.reviewDay ? ` Day ${result.reviewDay}` : '';
+  return `복습${level}${day}`;
 }
 
-function freezeTimerBar() {
-  const bar = document.getElementById('timer-bar');
-  if (!bar) return;
-  const currentWidth = getComputedStyle(bar).width;
-  bar.style.transition = 'none';
-  bar.style.width = currentWidth;
-  bar.style.opacity = '0.85';
+function toSubmitSpecificRows(rows, stageLabel) {
+  if (!Array.isArray(rows)) return [];
+
+  return rows.map((result, index) => {
+    const sourceLabel = describeResultSource(result);
+    const word = result.word || result.answer || '';
+    const selected = result.selected || result.attempt || '';
+
+    return {
+      no: index + 1,
+      stage: stageLabel,
+      source: result.source || 'main',
+      reviewLevel: result.reviewLevel || null,
+      reviewDay: result.reviewDay || null,
+      meaning: result.meaning || '',
+      answer: result.answer || result.word || '',
+      word: `[${stageLabel} ${sourceLabel}] ${word}`,
+      selected,
+      correct: !!result.correct,
+    };
+  });
+}
+
+function cloneResultRows(rows) {
+  return Array.isArray(rows) ? rows.map(row => ({ ...row })) : [];
+}
+
+function isTesterUser() {
+  return String(userId || '').trim().toLowerCase() === 'tester';
+}
+
+function renderTesterDebugControls() {
+  if (!isTesterUser() || document.getElementById('dish2-debug-controls')) return;
+
+  const controls = document.createElement('div');
+  controls.id = 'dish2-debug-controls';
+  controls.style.cssText = `
+    position: fixed;
+    right: 10px;
+    top: 96px;
+    z-index: 10020;
+    width: 88px;
+  `;
+  controls.innerHTML = `
+    <button type="button" id="dish2-debug-correct" style="
+      width: 100%;
+      border: 0;
+      border-radius: 6px;
+      padding: 7px 6px;
+      background: #2e7d32;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    ">다맞기</button>
+  `;
+
+  controls.querySelector('#dish2-debug-correct')?.addEventListener('click', () => {
+    completeQuizForDebug().catch(error => {
+      console.error(error);
+      alert('Failed to complete the quiz.');
+    });
+  });
+
+  document.body.appendChild(controls);
 }
 
 async function loadWorkbookRows(level) {
@@ -202,6 +310,29 @@ function syncActiveSlot(puzzle) {
   puzzle.activeSlotIndex = findNextEmptySlotIndex(puzzle, 0);
 }
 
+function updateAnswerChipScale(answerEl, puzzle) {
+  const itemCount = Math.max(1, puzzle.layout.length);
+  const styles = getComputedStyle(answerEl);
+  const padding =
+    parseFloat(styles.paddingLeft || '0') +
+    parseFloat(styles.paddingRight || '0');
+  const measuredWidth = answerEl.clientWidth || answerEl.parentElement?.clientWidth || 0;
+  const innerWidth = Math.max(0, measuredWidth - padding - 2);
+  const gap = itemCount > 10 ? 2 : itemCount > 7 ? 3 : 7;
+  const chipWidth = Math.max(
+    14,
+    Math.min(42, Math.floor((innerWidth - gap * (itemCount - 1)) / itemCount))
+  );
+  const chipHeight = Math.max(28, Math.min(52, Math.round(chipWidth * 1.24)));
+  const fontSize = Math.max(11, Math.min(25, Math.round(chipWidth * 0.6)));
+
+  answerEl.style.setProperty('--answer-chip-gap', `${gap}px`);
+  answerEl.style.setProperty('--answer-chip-width', `${chipWidth}px`);
+  answerEl.style.setProperty('--answer-chip-height', `${chipHeight}px`);
+  answerEl.style.setProperty('--answer-chip-font', `${fontSize}px`);
+  answerEl.style.setProperty('--answer-separator-font', `${Math.max(10, Math.min(20, fontSize))}px`);
+}
+
 function buildAttemptString(puzzle, emptyPlaceholder = '') {
   return puzzle.layout
     .map(part => {
@@ -222,20 +353,19 @@ function hasAllSlotsFilled(puzzle) {
 
 function renderSetupShell() {
   quizArea.innerHTML = `
-    <div style="
-      background: #fff3e0;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-      font-size: 14px;
-    ">
-      <div style="font-size:18px; font-weight:bold; color:#7e3106; margin-bottom:12px;">Spelling Scramble Quiz</div>
-      <ul style="margin-bottom: 14px; padding-left: 20px; line-height: 1.6;">
-        <li>Choose a level and day directly.</li>
-        <li>The first letter is given for every word.</li>
-        <li>Tap the scrambled letters and fill the slots.</li>
-      </ul>
+    <div class="start-card">
+      <div class="start-title">Spelling Scramble Quiz</div>
+      <div class="start-subtitle">뜻을 보고 알맞은 영어 단어를 글자 단위로 조립합니다.</div>
+      <div class="start-guide">
+        <div class="start-guide-item">
+          <span class="start-guide-number">1</span>
+          <span>아래에 섞여 나온 글자를 하나씩 눌러 빈칸을 채워보세요.</span>
+        </div>
+        <div class="start-guide-item">
+          <span class="start-guide-number">2</span>
+          <span>잘못 넣은 글자는 채워진 칸을 다시 누르면 아래로 돌아갑니다.</span>
+        </div>
+      </div>
       <div class="setup-grid">
         <label class="setup-field">
           Level
@@ -256,6 +386,53 @@ function renderSetupShell() {
     .map(level => `<option value="${level}">${level}</option>`)
     .join('');
   levelSelect.value = currentConfig.level;
+}
+
+function renderDirectStartShell() {
+  quizArea.innerHTML = `
+    <div class="start-card">
+      <div class="start-title">Spelling Scramble Quiz</div>
+      <div class="start-subtitle">뜻을 보고 알맞은 영어 단어를 글자 단위로 조립합니다.</div>
+      <div class="start-summary-card">
+        <div class="start-badge-row">
+          <span class="start-badge">Level ${escapeHtml(currentConfig.level)}</span>
+          <span class="start-badge day">Day ${escapeHtml(currentConfig.day)}</span>
+        </div>
+        <div class="start-stat-grid">
+          <div class="start-stat">
+            <strong>30</strong>
+            <span>Total</span>
+          </div>
+          <div class="start-stat">
+            <strong>20</strong>
+            <span>Current</span>
+          </div>
+          <div class="start-stat review">
+            <strong>10</strong>
+            <span>Review</span>
+          </div>
+        </div>
+      </div>
+      <div class="start-guide">
+        <div class="start-guide-item">
+          <span class="start-guide-number">1</span>
+          <span>아래에 섞여 나온 글자를 하나씩 눌러 빈칸을 채워보세요.</span>
+        </div>
+        <div class="start-guide-item">
+          <span class="start-guide-number">2</span>
+          <span>잘못 넣은 글자는 채워진 칸을 다시 누르면 아래로 돌아갑니다.</span>
+        </div>
+      </div>
+      <button class="quiz-btn" style="width: 100%;" id="direct-start-btn" type="button">Start Quiz</button>
+    </div>
+  `;
+
+  document.getElementById('direct-start-btn')?.addEventListener('click', () => {
+    startQuiz().catch(error => {
+      console.error(error);
+      alert('Failed to start the quiz.');
+    });
+  });
 }
 
 async function hydrateSetupOptions() {
@@ -334,23 +511,41 @@ async function hydrateSetupOptions() {
   await applyDays(currentConfig.day);
 }
 
-function buildQuestions(rows, dayNumber) {
+function mapQuestion(row) {
+  return {
+    word: String(row.Word).trim(),
+    meaning: String(row['Korean Meaning']).trim(),
+    partOfSpeech: String(row['Part of Speech'] ?? '').trim(),
+    source: row.__review ? 'review' : 'main',
+    reviewLevel: row.__reviewLevel || null,
+    reviewDay: row.__reviewDay || null,
+  };
+}
+
+async function buildQuestions(rows, dayNumber) {
   const selectedRows = rows
     .filter(row => parseDayNumber(row.Day) === dayNumber)
     .filter(row => String(row.Word ?? '').trim() && String(row['Korean Meaning'] ?? '').trim());
 
-  return shuffle(selectedRows)
-    .slice(0, Math.min(QUIZ_SIZE, selectedRows.length))
-    .map(row => ({
-      word: String(row.Word).trim(),
-      meaning: String(row['Korean Meaning']).trim(),
-      partOfSpeech: String(row['Part of Speech'] ?? '').trim(),
-    }));
+  const mainRows = shuffle(selectedRows)
+    .slice(0, Math.min(QUIZ_SIZE, selectedRows.length));
+  const excludeWords = new Set(
+    mainRows.map(row => String(row.Word || '').trim().toLowerCase()).filter(Boolean)
+  );
+  const reviewRows = await window.DishReview?.buildReviewRows?.({
+    userId,
+    quizKey: quizTitle,
+    level: currentConfig.level,
+    day: dayNumber,
+    loadRows: loadWorkbookRows,
+    excludeWords
+  }) || [];
+
+  return shuffle([...mainRows, ...reviewRows]).map(mapQuestion);
 }
 
-async function startQuiz() {
+async function startQuiz(options = {}) {
   closeResultPopup();
-  clearTimer();
 
   const dayNumber = Number(currentConfig.day);
   if (!Number.isFinite(dayNumber)) {
@@ -359,7 +554,7 @@ async function startQuiz() {
   }
 
   const rows = currentRows.length > 0 ? currentRows : await loadWorkbookRows(currentConfig.level);
-  const questions = buildQuestions(rows, dayNumber);
+  const questions = await buildQuestions(rows, dayNumber);
 
   if (!questions.length) {
     alert('No quiz data was found for that day.');
@@ -370,27 +565,46 @@ async function startQuiz() {
   currentResults = [];
   currentIndex = 0;
   isAnswered = false;
-  renderQuestion();
+  if (options.render !== false) {
+    renderQuestion();
+  }
 }
 
-function startTimer() {
-  const bar = document.getElementById('timer-bar');
-  if (bar) {
-    bar.style.transition = 'none';
-    bar.style.width = '100%';
-    void bar.offsetWidth;
-    bar.style.transition = `width ${TIME_LIMIT_MS}ms linear`;
-    bar.style.width = '0%';
-  }
+async function completeQuizForDebug() {
+  if (!isTesterUser() || debugAutoCompleting) return;
+  debugAutoCompleting = true;
 
-  currentTimer = window.setTimeout(() => {
-    submitCurrentPuzzle(true, false);
-  }, TIME_LIMIT_MS);
+  try {
+    if (!currentQuestions.length) {
+      await startQuiz({ render: false });
+    }
+
+    if (!currentQuestions.length) {
+      alert('No quiz data was found.');
+      return;
+    }
+
+    currentResults = currentQuestions.map((question, index) => ({
+      no: index + 1,
+      meaning: question.meaning,
+      selected: question.word,
+      answer: question.word,
+      source: question.source || 'main',
+      reviewLevel: question.reviewLevel || null,
+      reviewDay: question.reviewDay || null,
+      correct: true,
+    }));
+
+    currentIndex = currentQuestions.length;
+    currentPuzzle = null;
+    isAnswered = true;
+    showResults();
+  } finally {
+    debugAutoCompleting = false;
+  }
 }
 
 function renderQuestion() {
-  clearTimer();
-
   if (currentIndex >= currentQuestions.length) {
     showResults();
     return;
@@ -401,27 +615,21 @@ function renderQuestion() {
   currentPuzzle = createPuzzle(question.word);
 
   quizArea.innerHTML = `
-    <div class="question-top">
-      <div>${currentIndex + 1}. ${escapeHtml(currentConfig.level)} / Day ${escapeHtml(currentConfig.day)}</div>
-      <div>${currentIndex + 1} / ${currentQuestions.length}</div>
+    <div class="quiz-question-screen">
+      <div class="question-top">
+        <div>${currentIndex + 1}. ${escapeHtml(currentConfig.level)} / Day ${escapeHtml(currentConfig.day)}</div>
+        <div>${currentIndex + 1} / ${currentQuestions.length}</div>
+      </div>
+      <div class="meaning-card">
+        <div class="question-wording">${escapeHtml(question.meaning)}</div>
+      </div>
+      <div id="scramble-answer" class="scramble-wrap"></div>
+      <div class="bank-label">Scrambled letters</div>
+      <div id="scramble-bank" class="bank-grid"></div>
+      <div id="feedback"></div>
+      <button class="quiz-btn check-btn" id="check-btn" type="button">Check</button>
+      <div id="answer-toast" class="answer-toast"></div>
     </div>
-    <div class="question-wording">${escapeHtml(question.meaning)}</div>
-    <div class="question-note">
-      ${question.partOfSpeech ? `${escapeHtml(question.partOfSpeech)} / ` : ''}First letter is fixed.
-    </div>
-    <div class="timer-track">
-      <div id="timer-bar" class="timer-bar"></div>
-    </div>
-    <div class="scramble-help">Tap a letter below. Tap a filled slot to pull that letter back out.</div>
-    <div id="scramble-answer" class="scramble-wrap"></div>
-    <div class="bank-label">Scrambled letters</div>
-    <div id="scramble-bank" class="bank-grid"></div>
-    <button class="quiz-btn" id="check-btn" type="button" style="width: 100%;">Check</button>
-    <div class="action-row">
-      <button class="quiz-btn secondary" id="reset-btn" type="button">Reset</button>
-      <button class="quiz-btn secondary" id="skip-btn" type="button">Skip</button>
-    </div>
-    <div id="feedback"></div>
   `;
 
   document.getElementById('scramble-answer')?.addEventListener('click', event => {
@@ -463,22 +671,10 @@ function renderQuestion() {
   });
 
   document.getElementById('check-btn')?.addEventListener('click', () => {
-    submitCurrentPuzzle(false, false);
-  });
-
-  document.getElementById('reset-btn')?.addEventListener('click', () => {
-    if (isAnswered || !currentPuzzle) return;
-    currentPuzzle.slotValues = Array(currentPuzzle.slotAnswers.length).fill(null);
-    currentPuzzle.activeSlotIndex = currentPuzzle.slotAnswers.length > 0 ? 0 : -1;
-    renderPuzzleState();
-  });
-
-  document.getElementById('skip-btn')?.addEventListener('click', () => {
-    submitCurrentPuzzle(false, true);
+    submitCurrentPuzzle();
   });
 
   renderPuzzleState();
-  startTimer();
 }
 
 function renderPuzzleState() {
@@ -488,6 +684,8 @@ function renderPuzzleState() {
   const answerEl = document.getElementById('scramble-answer');
   const bankEl = document.getElementById('scramble-bank');
   if (!answerEl || !bankEl) return;
+
+  updateAnswerChipScale(answerEl, currentPuzzle);
 
   answerEl.innerHTML = currentPuzzle.layout
     .map(part => {
@@ -531,11 +729,22 @@ function renderPuzzleState() {
     .join('');
 }
 
-function submitCurrentPuzzle(timedOut, skipped) {
+function showAnswerToast(message, tone = 'success') {
+  const toast = document.getElementById('answer-toast');
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.classList.remove('show', 'error');
+  if (tone === 'error') {
+    toast.classList.add('error');
+  }
+  void toast.offsetWidth;
+  toast.classList.add('show');
+}
+
+function submitCurrentPuzzle() {
   if (isAnswered) return;
   isAnswered = true;
-  clearTimer();
-  freezeTimerBar();
 
   const question = currentQuestions[currentIndex];
   if (!question || !currentPuzzle) return;
@@ -543,29 +752,31 @@ function submitCurrentPuzzle(timedOut, skipped) {
   const attemptDisplay = buildAttemptString(currentPuzzle, '_');
   const attemptValue = buildAttemptString(currentPuzzle, '');
   const fullyFilled = hasAllSlotsFilled(currentPuzzle);
-  const correct = !skipped && fullyFilled && normalizeAnswer(attemptValue) === normalizeAnswer(question.word);
-
-  let selectedLabel = attemptDisplay || 'EMPTY';
-  if (skipped) {
-    selectedLabel = 'SKIPPED';
-  } else if (timedOut) {
-    selectedLabel = `${selectedLabel} / TIME OUT`;
-  }
+  const correct = fullyFilled && normalizeAnswer(attemptValue) === normalizeAnswer(question.word);
+  const selectedLabel = attemptDisplay || 'EMPTY';
 
   currentResults.push({
     no: currentIndex + 1,
     meaning: question.meaning,
     selected: selectedLabel,
     answer: question.word,
+    source: question.source || 'main',
+    reviewLevel: question.reviewLevel || null,
+    reviewDay: question.reviewDay || null,
     correct,
   });
 
   const feedback = document.getElementById('feedback');
   if (feedback) {
-    feedback.textContent = correct
-      ? `Correct: ${question.word}`
-      : `${timedOut ? 'Time out' : skipped ? 'Skipped' : 'Incorrect'}: ${question.word}`;
-    feedback.style.color = correct ? '#2e7d32' : '#c62828';
+    feedback.textContent = '';
+  }
+
+  if (correct) {
+    document.getElementById('scramble-answer')?.classList.add('correct-glow');
+    showAnswerToast('Correct!');
+  } else {
+    document.getElementById('scramble-answer')?.classList.add('incorrect-glow');
+    showAnswerToast(`Answer: ${question.word}`, 'error');
   }
 
   document.querySelectorAll('#quiz-area button').forEach(button => {
@@ -575,7 +786,7 @@ function submitCurrentPuzzle(timedOut, skipped) {
   window.setTimeout(() => {
     currentIndex += 1;
     renderQuestion();
-  }, 900);
+  }, correct ? 1150 : 900);
 }
 
 function buildResultsTable() {
@@ -583,11 +794,12 @@ function buildResultsTable() {
     <table style="width:100%; border-collapse: collapse; font-size: 13px;">
       <thead>
         <tr style="background:#f6f6f6;">
-          <th style="padding: 6px; border-bottom: 1px solid #ccc;">No</th>
-          <th style="padding: 6px; border-bottom: 1px solid #ccc;">Meaning</th>
-          <th style="padding: 6px; border-bottom: 1px solid #ccc;">Your Answer</th>
-          <th style="padding: 6px; border-bottom: 1px solid #ccc;">Word</th>
-          <th style="padding: 6px; border-bottom: 1px solid #ccc;">OK</th>
+          <th style="padding: 6px; border-bottom: 1px solid #ccc;">번호</th>
+          <th style="padding: 6px; border-bottom: 1px solid #ccc;">구분</th>
+          <th style="padding: 6px; border-bottom: 1px solid #ccc;">뜻</th>
+          <th style="padding: 6px; border-bottom: 1px solid #ccc;">내 답안</th>
+          <th style="padding: 6px; border-bottom: 1px solid #ccc;">정답</th>
+          <th style="padding: 6px; border-bottom: 1px solid #ccc;">결과</th>
         </tr>
       </thead>
       <tbody>
@@ -595,6 +807,7 @@ function buildResultsTable() {
           .map(result => `
             <tr>
               <td style="padding:6px; border-bottom: 1px solid #eee;">${result.no}</td>
+              <td style="padding:6px; border-bottom: 1px solid #eee;">${describeResultSource(result)}</td>
               <td style="padding:6px; border-bottom: 1px solid #eee;">${escapeHtml(result.meaning)}</td>
               <td style="padding:6px; border-bottom: 1px solid #eee;">${escapeHtml(result.selected)}</td>
               <td style="padding:6px; border-bottom: 1px solid #eee;">${escapeHtml(result.answer)}</td>
@@ -608,25 +821,72 @@ function buildResultsTable() {
 }
 
 function showResults() {
-  clearTimer();
   isAnswered = true;
 
   const total = currentResults.length;
   const correctCount = currentResults.filter(result => result.correct).length;
   const score = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const canSubmit = score >= 80;
+
+  if (quizTitle) {
+    const storedStage1 = getStoredQuizResult(quizTitle);
+    const resultDay = currentConfig.day ? `Day${currentConfig.day}` : '';
+    const stage1Rows = storedStage1?.stage === 'dish-quiz1' || storedStage1?.teststatus === 'stage1'
+      ? cloneResultRows(storedStage1.testspecific)
+      : cloneResultRows(storedStage1?.stage1?.testspecific);
+    const stage2Rows = cloneResultRows(currentResults);
+    const finalSpecificRows = [
+      ...toSubmitSpecificRows(stage1Rows, 'Quiz1'),
+      ...toSubmitSpecificRows(stage2Rows, 'Quiz2')
+    ].map((row, index) => ({ ...row, no: index + 1 }));
+
+    storeQuizResultWithMap({
+      quiztitle: quizTitle,
+      subcategory: 'Words',
+      level: currentConfig.level,
+      day: resultDay,
+      teststatus: canSubmit ? 'done' : 'stage2',
+      stage: 'dish-quiz2',
+      score,
+      correctCount,
+      totalQuestions: total,
+      canSubmit,
+      testspecific: finalSpecificRows.length ? finalSpecificRows : toSubmitSpecificRows(stage2Rows, 'Quiz2'),
+      stage1: stage1Rows.length
+        ? {
+            ...(storedStage1?.stage === 'dish-quiz1' || storedStage1?.teststatus === 'stage1' ? storedStage1 : storedStage1?.stage1 || {}),
+            testspecific: stage1Rows
+          }
+        : null,
+      stage2: {
+        score,
+        correctCount,
+        totalQuestions: total,
+        canSubmit,
+        testspecific: stage2Rows
+      }
+    });
+  }
 
   resultPopup.innerHTML = `
     <div class="popup-content">
-      <div style="font-weight: bold; font-size:16px; margin-bottom: 8px;">Spelling Scramble Result</div>
+      <div style="font-weight: bold; font-size:16px; margin-bottom: 8px;">📄 단어 조립 결과</div>
       <div style="margin-bottom: 8px; font-size: 14px;">
-        Score: <b>${score}</b> (${correctCount} / ${total})
+        총 점수: <b>${score}점</b> (${correctCount} / ${total})
+      </div>
+      <div style="margin-bottom: 10px; font-size: 12px; color:${canSubmit ? '#2e7d32' : '#c62828'}; font-weight: bold;">
+        ${canSubmit ? '80점 이상입니다. 제출하러 갈 수 있어요.' : '80점 이상부터 제출할 수 있어요. 다시 한 번 풀어볼까요?'}
       </div>
       <div style="max-height: 260px; overflow-y: auto; margin-bottom: 14px;">
         ${buildResultsTable()}
       </div>
       <div style="display:flex; justify-content: space-between; gap: 10px; margin-top:8px;">
-        <button class="quiz-btn secondary" id="setup-btn" type="button" style="flex: 1; margin-top: 0;">Change Set</button>
-        <button class="quiz-btn" id="retry-btn" type="button" style="flex: 1; margin-top: 0;">Retry</button>
+        <button class="quiz-btn" id="retry-btn" type="button" style="flex: 1; margin-top: 0;">재도전</button>
+        ${
+          directMode
+            ? `<button class="quiz-btn" id="submit-btn" type="button" style="flex: 1; margin-top: 0; background:#1976d2;" ${canSubmit && quizTitle ? '' : 'disabled'}>제출하러 가기</button>`
+            : `<button class="quiz-btn secondary" id="setup-btn" type="button" style="flex: 1; margin-top: 0;">Change Set</button>`
+        }
       </div>
     </div>
   `;
@@ -641,6 +901,16 @@ function showResults() {
     });
   });
 
+  const submitBtn = document.getElementById('submit-btn');
+  if (submitBtn && (!canSubmit || !quizTitle)) {
+    submitBtn.style.opacity = '0.5';
+    submitBtn.style.cursor = 'not-allowed';
+  }
+
+  submitBtn?.addEventListener('click', () => {
+    returnToTray();
+  });
+
   document.getElementById('setup-btn')?.addEventListener('click', () => {
     closeResultPopup();
     hydrateSetupOptions().catch(error => {
@@ -650,14 +920,25 @@ function showResults() {
   });
 }
 
+function returnToTray() {
+  const url = `homework-tray_v1.html?id=${encodeURIComponent(userId)}&quizKey=${encodeURIComponent(quizTitle)}`;
+  window.location.replace(url);
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   quizArea = document.getElementById('quiz-area');
   resultPopup = document.getElementById('result-popup');
 
   const params = new URLSearchParams(window.location.search);
   const prefs = readPrefs();
-  const requestedLevel = String(params.get('level') || prefs.level || currentConfig.level).toUpperCase();
-  const requestedDay = params.get('day') || prefs.day || '';
+  userId = params.get('id') || '';
+  quizTitle = String(params.get('key') || '').trim();
+  directMode = Boolean(quizTitle);
+  renderTesterDebugControls();
+
+  const keyMeta = window.DishReview?.parseQuizKey?.(quizTitle) || {};
+  const requestedLevel = String(params.get('level') || keyMeta.level || prefs.level || currentConfig.level).toUpperCase();
+  const requestedDay = parseDayNumber(params.get('day') || keyMeta.day || prefs.day || '');
 
   currentConfig.level = LEVELS.includes(requestedLevel) ? requestedLevel : 'A1';
   currentConfig.day = requestedDay ? String(requestedDay) : '';
@@ -674,7 +955,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 
   try {
-    await hydrateSetupOptions();
+    if (directMode && currentConfig.day) {
+      currentRows = await loadWorkbookRows(currentConfig.level);
+      renderDirectStartShell();
+    } else {
+      await hydrateSetupOptions();
+    }
   } catch (error) {
     console.error(error);
     quizArea.innerHTML = `

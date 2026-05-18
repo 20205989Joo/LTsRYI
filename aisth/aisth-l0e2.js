@@ -531,7 +531,7 @@ function renderQuestion() {
 
     <div class="box">
       <div style="margin-bottom:8px;"><span class="pill">${escapeHtml(TEXT.QTYPE)}</span></div>
-      <div id="stage-instruction" style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(TEXT.STEP1_INST)}</div>
+      <div id="stage-instruction" style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(cleanStageInstruction(TEXT.STEP1_INST))}</div>
 
       <div class="keyword-panel">
         <div class="keyword-wrap" id="keyword-wrap">${chipsHtml}</div>
@@ -687,7 +687,11 @@ function openBlankStage(q) {
 function updateStageInstruction(text) {
   const el = document.getElementById("stage-instruction");
   if (!el) return;
-  el.textContent = String(text ?? "");
+  el.textContent = cleanStageInstruction(text);
+}
+
+function cleanStageInstruction(text) {
+  return String(text ?? "").replace(/^\s*\d+\uB2E8\uACC4\s*[:：.]?\s*/, "").trim();
 }
 
 function renderBlankStageHtml(plan) {

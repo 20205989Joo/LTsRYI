@@ -2,25 +2,22 @@
 // Same structure and wording as dish-quiz.js result popup.
 
 (function () {
-  const FLOW_STORAGE_KEY = "HermaRound2FlowMap";
-  const FULL_TOUR_STORAGE_KEY = "HermaFullTourState";
+  const FLOW_STORAGE_KEY = "AisthRound2FlowMap";
+  const FULL_TOUR_STORAGE_KEY = "AisthFullTourState";
   const RELEARN_MIN_COUNT = 6;
   const ROUND2_PASS_SCORE = 80;
-  const HERMA_ROUND2_SLUGS = new Set([
-    "l1e2", "l1e3", "l1e4",
-    "l2e1", "l2e2", "l2e3", "l2e4",
-    "l3e1", "l3e2", "l3e3", "l3e4", "l3e6",
-    "l4e1", "l4e2", "l4e3",
-    "l5e1", "l5e2",
-    "l6e1", "l6e2", "l6e3"
-  ]);
+  const AISTH_ROUND2_SLUGS = new Set([]);
   const FULL_TOUR_SEQUENCE = [
+    "l0e1", "l0e2",
     "l1e1", "l1e2", "l1e3", "l1e4",
-    "l2e1", "l2e2", "l2e3", "l2e4",
-    "l3e1", "l3e2", "l3e3", "l3e4", "l3e5", "l3e6",
+    "l2e1", "l2e2", "l2e3",
+    "l3e1", "l3e2", "l3e3", "l3e4", "l3e5",
     "l4e1", "l4e2", "l4e3",
-    "l5e1", "l5e1b", "l5e2",
-    "l6e1", "l6e2", "l6e3", "l6e4", "l6e5"
+    "l5e1", "l5e2", "l5e3", "l5e4",
+    "l6e1", "l6e2", "l6e3", "l6e4", "l6e5",
+    "l7e1", "l7e2", "l7e3", "l7e4", "l7e5",
+    "l8e1", "l8e2", "l8e3", "l8e4", "l8e5", "l8e6", "l8e7",
+    "l9e1"
   ];
 
   function readQuizResultsMap() {
@@ -134,14 +131,14 @@
   function getCurrentPageSlug() {
     const path = String(window.location.pathname || "");
     const file = path.split("/").pop() || "";
-    const m = file.match(/^herma-(l\d+e\d+[a-z]*)\.html$/i);
+    const m = file.match(/^aisth-(l\d+e\d+[a-z]*)\.html$/i);
     return m ? String(m[1]).toLowerCase() : "";
   }
 
   function hasRound2ForSlug(slug) {
     const s = String(slug || "").toLowerCase();
     if (!s) return false;
-    return HERMA_ROUND2_SLUGS.has(s);
+    return AISTH_ROUND2_SLUGS.has(s);
   }
 
   function hasRound2ForCurrentPage() {
@@ -151,7 +148,7 @@
   function getRound2ScriptForSlug(slug) {
     const s = String(slug || "").toLowerCase();
     if (!s || !hasRound2ForSlug(s)) return "";
-    return `herma-${s}_round2.js`;
+    return `aisth-${s}_round2.js`;
   }
 
   function getRound2ScriptForCurrentPage() {
@@ -202,7 +199,7 @@
   function buildPageUrlBySlug(slug, nextParams) {
     const s = String(slug || "").toLowerCase();
     if (!s) return "";
-    const target = new URL(`herma-${s}.html`, window.location.href);
+    const target = new URL(`aisth-${s}.html`, window.location.href);
     const params = nextParams || {};
     Object.keys(params).forEach((k) => {
       const v = params[k];
@@ -242,7 +239,7 @@
     clearFullTourState();
     const params = getCurrentParamsSafe();
     const userId = String(params.get("id") || "").trim();
-    const target = new URL("herma-round1_leveljump.html", window.location.href);
+    const target = new URL("aisth-round1_leveljump.html", window.location.href);
     if (userId) target.searchParams.set("id", userId);
     window.location.replace(target.toString());
     return true;

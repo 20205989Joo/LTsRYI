@@ -21,7 +21,7 @@
     questionCapLastLabel: "",
     tourQCapValue: 1,
     panelControlsVisible: true,
-    round2TargetPath: "herma-l1e2.html?round2=1&round2Script=herma-l1e2_round2.js",
+    round2TargetPath: "aisth-l1e2.html?round2=1&round2Script=aisth-l1e2_round2.js",
     round2JumpCount: 0,
     lastRound2Url: ""
   };
@@ -42,7 +42,7 @@
   function readTourStateSafe() {
     try {
       if (!window.sessionStorage) return null;
-      var raw = sessionStorage.getItem("HermaFullTourState");
+      var raw = sessionStorage.getItem("AisthFullTourState");
       if (!raw) return null;
       var parsed = JSON.parse(raw);
       if (!parsed || typeof parsed !== "object") return null;
@@ -88,7 +88,7 @@
       saved.qcap = qcap;
       saved.updatedAt = nowIso();
       try {
-        sessionStorage.setItem("HermaFullTourState", JSON.stringify(saved));
+        sessionStorage.setItem("AisthFullTourState", JSON.stringify(saved));
       } catch (_) {}
     }
 
@@ -219,7 +219,7 @@
 
     var stored = String(getStorageSafe("alphaRound2TargetPath") || "").trim();
     if (stored) return stored;
-    return String(alphaState.round2TargetPath || "herma-l1e2.html?round2=1&round2Script=herma-l1e2_round2.js");
+    return String(alphaState.round2TargetPath || "aisth-l1e2.html?round2=1&round2Script=aisth-l1e2_round2.js");
   }
 
   function getQuestionDisplayWord(question, index) {
@@ -389,7 +389,7 @@
   function getCurrentFlowStateSafe(baseKey) {
     var key = toBaseQuizKeySafe(baseKey);
     if (!key) return null;
-    var map = readStorageJsonObjectSafe("HermaRound2FlowMap");
+    var map = readStorageJsonObjectSafe("AisthRound2FlowMap");
     var entry = map[key];
     return entry && typeof entry === "object" ? entry : null;
   }
@@ -410,7 +410,7 @@
     if (resolvedKey && keys.indexOf(resolvedKey) < 0) keys.push(resolvedKey);
 
     if (baseKey) {
-      clearMapEntrySafe("HermaRound2FlowMap", baseKey);
+      clearMapEntrySafe("AisthRound2FlowMap", baseKey);
     }
     clearMapEntrySafe("QuizResultsMap", keys);
     clearLegacyQuizResultsSafe(keys);
@@ -831,8 +831,8 @@
     } catch (_) {}
 
     try {
-      if (window.HermaRound2LifeUI && typeof window.HermaRound2LifeUI.sync === "function") {
-        setTimeout(function () { window.HermaRound2LifeUI.sync(); }, 0);
+      if (window.AisthRound2LifeUI && typeof window.AisthRound2LifeUI.sync === "function") {
+        setTimeout(function () { window.AisthRound2LifeUI.sync(); }, 0);
       }
     } catch (_) {}
 

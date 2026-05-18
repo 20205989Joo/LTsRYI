@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var FLOW_STORAGE_KEY = "HermaRound2FlowMap";
+  var FLOW_STORAGE_KEY = "AisthRound2FlowMap";
   var DEFAULT_RELEARN_LIMIT = 6;
 
   var state = {

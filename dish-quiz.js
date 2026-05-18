@@ -11,6 +11,9 @@ let results = [];
 let quizData = [];
 let selectedDay = '';
 let quizTitle = '';
+let userId = '';
+const workbookCache = new Map();
+let debugAutoCompleting = false;
 
 // 🔧 이 문제에서 이미 답을 처리했는지 여부
 let isAnswered = false;
@@ -37,10 +40,127 @@ function storeQuizResultWithMap(resultObject) {
   localStorage.setItem('QuizResultsMap', JSON.stringify(map));
 }
 
+function isTesterUser() {
+  return String(userId || '').trim().toLowerCase() === 'tester';
+}
+
+function renderTesterDebugControls() {
+  if (!isTesterUser() || document.getElementById('dish-debug-controls')) return;
+
+  const controls = document.createElement('div');
+  controls.id = 'dish-debug-controls';
+  controls.style.cssText = `
+    position: fixed;
+    right: 10px;
+    top: 96px;
+    z-index: 10020;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 104px;
+  `;
+  controls.innerHTML = `
+    <button type="button" data-debug-result="correct" style="
+      border: 0;
+      border-radius: 6px;
+      padding: 7px 6px;
+      background: #2e7d32;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    ">다 맞게 하기</button>
+    <button type="button" data-debug-result="wrong" style="
+      border: 0;
+      border-radius: 6px;
+      padding: 7px 6px;
+      background: #b3261e;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    ">다 틀리게 하기</button>
+  `;
+
+  controls.querySelector('[data-debug-result="correct"]')?.addEventListener('click', () => {
+    completeQuizForDebug(true).catch(error => {
+      console.error(error);
+      alert('Failed to complete the quiz.');
+    });
+  });
+  controls.querySelector('[data-debug-result="wrong"]')?.addEventListener('click', () => {
+    completeQuizForDebug(false).catch(error => {
+      console.error(error);
+      alert('Failed to complete the quiz.');
+    });
+  });
+
+  document.body.appendChild(controls);
+}
+
+function getDishLearnUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('id') || '';
+  if (window.DishRetakeLock?.buildStudyUrlFromQuizKey) {
+    return window.DishRetakeLock.buildStudyUrlFromQuizKey(quizTitle, userId);
+  }
+
+  return `dish-learn.html?id=${encodeURIComponent(userId)}&dishQuizKey=${encodeURIComponent(quizTitle)}`;
+}
+
+async function loadWorkbookRows(workbookLevel) {
+  const normalizedLevel = String(workbookLevel || '').toUpperCase();
+  if (workbookCache.has(normalizedLevel)) {
+    return workbookCache.get(normalizedLevel);
+  }
+
+  const response = await fetch(`${normalizedLevel}.xlsx`, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`Failed to load ${normalizedLevel}.xlsx (${response.status})`);
+  }
+
+  const data = await response.arrayBuffer();
+  const workbook = XLSX.read(data, { type: 'array' });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+  workbookCache.set(normalizedLevel, rows);
+  return rows;
+}
+
+function getDayNumber(value) {
+  if (window.DishReview?.parseDayNumber) {
+    return window.DishReview.parseDayNumber(value);
+  }
+  const digits = String(value ?? '').replace(/[^0-9]/g, '');
+  return digits ? Number(digits) : null;
+}
+
+function createChoiceQuestion(entry, sourceRows) {
+  const answer = entry['Korean Meaning'];
+  const wrongs = sourceRows
+    .filter(q => q['Korean Meaning'] !== answer)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 4)
+    .map(q => q['Korean Meaning']);
+
+  const options = [...wrongs, answer].sort(() => 0.5 - Math.random());
+
+  return {
+    word: entry['Word'],
+    answer,
+    options,
+    source: entry.__review ? 'review' : 'main',
+    reviewLevel: entry.__reviewLevel || null,
+    reviewDay: entry.__reviewDay || null
+  };
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const key = params.get('key');
-  const id = params.get('id'); // 필요하면 나중에 사용
+  userId = params.get('id') || '';
 
   if (!key) return alert('시험 key 정보가 없습니다.');
 
@@ -52,21 +172,46 @@ window.addEventListener('DOMContentLoaded', async () => {
   level = parts[2];
   day = parts[3];
   console.log('✅ 파싱된 값:', { subcategory, level, day });
+  document.getElementById('back-btn')?.addEventListener('click', () => history.back());
+
+  if (window.DishRetakeLock?.isLocked?.(quizTitle)) {
+    const quizArea = document.getElementById('quiz-area');
+    if (quizArea) {
+      quizArea.innerHTML = `
+        <div style="
+          background: #fff3e0;
+          padding: 16px;
+          border-radius: 12px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+          font-size: 14px;
+          line-height: 1.45;
+          color: #5a3a24;
+          font-weight: bold;
+        ">
+          재시험 준비 시간이 남아 있어요.
+        </div>
+      `;
+    }
+
+    window.DishRetakeLock.showLockPopup({
+      quizKey: quizTitle,
+      onStudy: () => {
+        window.location.href = getDishLearnUrl();
+      }
+    });
+    return;
+  }
 
   try {
-    const res = await fetch(`${level}.xlsx`);
-    const data = await res.arrayBuffer();
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    quizData = XLSX.utils.sheet_to_json(sheet);
+    quizData = await loadWorkbookRows(level);
   } catch (e) {
     console.error(e);
     alert('문제 파일을 불러오는 중 오류가 발생했습니다.');
     return;
   }
 
+  renderTesterDebugControls();
   renderInstruction();
-  document.getElementById('back-btn')?.addEventListener('click', () => history.back());
 });
 
 function renderInstruction() {
@@ -92,39 +237,88 @@ function renderInstruction() {
       <button class="quiz-btn" style="width: 100%;" onclick="startQuiz()">🚀 시험 시작</button>
     </div>
   `;
+
+  const infoItems = quizArea.querySelectorAll('li');
+  if (infoItems[0]) infoItems[0].textContent = 'Total 30 questions: 20 current + 10 review.';
+
+  const startBtn = quizArea.querySelector('button.quiz-btn');
+  startBtn?.removeAttribute('onclick');
+  startBtn?.addEventListener('click', () => {
+    startQuiz().catch(error => {
+      console.error(error);
+      alert('Failed to start the quiz.');
+    });
+  });
 }
 
-function startQuiz() {
-  const dayNormalized = day.replace(/[^0-9]/g, '');
-  let dayData = quizData.filter(q => {
-    const qDay = String(q['Day']).replace(/[^0-9]/g, '');
-    return qDay === dayNormalized;
-  });
+async function startQuiz(options = {}) {
+  const dayNumber = getDayNumber(day);
+  let dayData = quizData.filter(q => getDayNumber(q['Day']) === dayNumber);
 
-  // ✅ 문제 순서를 랜덤하게 섞기
-  dayData.sort(() => 0.5 - Math.random());
+  dayData = dayData.sort(() => 0.5 - Math.random()).slice(0, 20);
 
   if (dayData.length === 0) return alert('해당 Day의 문제가 없습니다.');
 
-  questions = dayData.map(entry => {
-    const wrongs = quizData
-      .filter(q => q['Korean Meaning'] !== entry['Korean Meaning'])
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 4)
-      .map(q => q['Korean Meaning']);
+  const excludeWords = new Set(
+    dayData.map(entry => String(entry.Word || '').trim().toLowerCase()).filter(Boolean)
+  );
+  const reviewRows = await window.DishReview?.buildReviewRows?.({
+    userId,
+    quizKey: quizTitle,
+    level,
+    day: dayNumber,
+    loadRows: loadWorkbookRows,
+    excludeWords
+  }) || [];
 
-    const options = [...wrongs, entry['Korean Meaning']].sort(() => 0.5 - Math.random());
-
-    return {
-      word: entry['Word'],
-      answer: entry['Korean Meaning'],
-      options
-    };
-  });
+  const sourceRows = [...quizData, ...reviewRows];
+  questions = [...dayData, ...reviewRows]
+    .map(entry => createChoiceQuestion(entry, sourceRows))
+    .sort(() => 0.5 - Math.random());
 
   currentIndex = 0;
   results = [];
-  renderQuestion();
+  if (options.render !== false) {
+    renderQuestion();
+  }
+}
+
+async function completeQuizForDebug(makeCorrect) {
+  if (!isTesterUser() || debugAutoCompleting) return;
+  debugAutoCompleting = true;
+
+  try {
+    if (currentTimer) {
+      clearTimeout(currentTimer);
+      currentTimer = null;
+    }
+
+    if (!questions.length) {
+      await startQuiz({ render: false });
+    }
+
+    if (!questions.length) {
+      alert('문제를 만들 수 없습니다.');
+      return;
+    }
+
+    results = questions.map((q, index) => ({
+      no: index + 1,
+      word: q.word,
+      answer: q.answer,
+      selected: makeCorrect ? (q.answer || '맞는 답') : '틀린 답',
+      source: q.source || 'main',
+      reviewLevel: q.reviewLevel || null,
+      reviewDay: q.reviewDay || null,
+      correct: !!makeCorrect
+    }));
+
+    currentIndex = questions.length;
+    isAnswered = true;
+    showResultPopup();
+  } finally {
+    debugAutoCompleting = false;
+  }
 }
 
 function renderQuestion() {
@@ -214,7 +408,11 @@ function checkAnswer(selected) {
   results.push({
     no: currentIndex + 1,
     word: q.word,
+    answer: q.answer,
     selected: selected || '시간 초과',
+    source: q.source || 'main',
+    reviewLevel: q.reviewLevel || null,
+    reviewDay: q.reviewDay || null,
     correct
   });
 
@@ -249,12 +447,27 @@ function showResultPopup() {
   const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   const canSubmit = score >= 80;
 
+  if (canSubmit) {
+    window.DishRetakeLock?.clearLock?.(quizTitle);
+  } else {
+    window.DishRetakeLock?.setLock?.(quizTitle, undefined, {
+      score,
+      correctCount,
+      totalQuestions
+    });
+  }
+
   const resultObject = {
     quiztitle: quizTitle,
     subcategory,
     level,
     day,
-    teststatus: 'done',
+    teststatus: 'stage1',
+    stage: 'dish-quiz1',
+    score,
+    correctCount,
+    totalQuestions,
+    canSubmit,
     testspecific: results
   };
 
@@ -267,6 +480,7 @@ function showResultPopup() {
       <thead>
         <tr style="background:#f6f6f6;">
           <th style="padding: 6px; border-bottom: 1px solid #ccc;">번호</th>
+          <th style="padding: 6px; border-bottom: 1px solid #ccc;">Type</th>
           <th style="padding: 6px; border-bottom: 1px solid #ccc;">문제</th>
           <th style="padding: 6px; border-bottom: 1px solid #ccc;">내 답안</th>
           <th style="padding: 6px; border-bottom: 1px solid #ccc;">정답 여부</th>
@@ -278,6 +492,7 @@ function showResultPopup() {
             r => `
           <tr>
             <td style="padding:6px; border-bottom: 1px solid #eee;">${r.no}</td>
+            <td style="padding:6px; border-bottom: 1px solid #eee;">${r.source === 'review' ? `Review ${r.reviewLevel || ''} Day ${r.reviewDay || ''}` : 'Main'}</td>
             <td style="padding:6px; border-bottom: 1px solid #eee;">${r.word}</td>
             <td style="padding:6px; border-bottom: 1px solid #eee;">${r.selected}</td>
             <td style="padding:6px; border-bottom: 1px solid #eee;">${r.correct ? '⭕' : '❌'}</td>
@@ -325,13 +540,27 @@ function showResultPopup() {
 
   // 🔧 점수 미달 시 버튼 비주얼 비활성화 처리
   const submitBtn = document.getElementById('submit-btn');
-  if (submitBtn && !canSubmit) {
-    submitBtn.style.opacity = '0.5';
-    submitBtn.style.cursor = 'not-allowed';
+  if (submitBtn) {
+    submitBtn.textContent = '다음 단계로!';
+    if (!canSubmit) {
+      submitBtn.style.opacity = '0.5';
+      submitBtn.style.cursor = 'not-allowed';
+    }
   }
 }
 
 function restartQuiz() {
+  if (
+    window.DishRetakeLock?.showLockPopup?.({
+      quizKey: quizTitle,
+      onStudy: () => {
+        window.location.href = getDishLearnUrl();
+      }
+    })
+  ) {
+    return;
+  }
+
   window.location.reload();
 }
 
@@ -340,7 +569,7 @@ function returnToTray() {
   const userId = params.get('id') || '';
 
   // ✅ quizKey(=quizTitle)를 같이 들고 트레이로 복귀
-  const url = `homework-tray_v1.html?id=${encodeURIComponent(userId)}&quizKey=${encodeURIComponent(quizTitle)}`;
+  const url = `dish-quiz2.html?id=${encodeURIComponent(userId)}&key=${encodeURIComponent(quizTitle)}&level=${encodeURIComponent(level)}&day=${encodeURIComponent(day)}`;
 
   // ✅ 뒤로 가기로 다시 퀴즈로 못 돌아오게 history 교체
   window.location.replace(url);

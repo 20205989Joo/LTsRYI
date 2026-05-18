@@ -31,6 +31,19 @@ let exerciseTitle = "";
 let stageChunks = [];
 let activeChunkId = null;
 let draggingChunkId = null;
+let activeChunkDragGhost = null;
+let activeChunkDragGhostMoveHandler = null;
+let activeTransparentDragImage = null;
+let pointerChunkDrag = {
+  active: false,
+  pointerId: null,
+  chunkId: null,
+  chip: null,
+  startX: 0,
+  startY: 0,
+  dragging: false,
+};
+let suppressChunkClick = false;
 let bankTokens = [];
 let selectedTokens = [];
 let midUnits = [];
@@ -217,6 +230,231 @@ function resolveChunkIdFromDragEvent(ev) {
   return Number.isInteger(chunkId) ? chunkId : null;
 }
 
+function isLandscapeMimicerActive() {
+  const host = document.getElementById("cafe_int");
+  return !!host?.classList.contains("landscape-mimicer-active");
+}
+
+function clearLandscapeChunkDragGhost() {
+  if (activeChunkDragGhostMoveHandler) {
+    document.removeEventListener("drag", activeChunkDragGhostMoveHandler, true);
+    document.removeEventListener("dragover", activeChunkDragGhostMoveHandler, true);
+    activeChunkDragGhostMoveHandler = null;
+  }
+  if (activeChunkDragGhost?.parentNode) {
+    activeChunkDragGhost.parentNode.removeChild(activeChunkDragGhost);
+  }
+  activeChunkDragGhost = null;
+  if (activeTransparentDragImage?.parentNode) {
+    activeTransparentDragImage.parentNode.removeChild(activeTransparentDragImage);
+  }
+  activeTransparentDragImage = null;
+}
+
+function setTransparentNativeDragImage(ev) {
+  if (!ev?.dataTransfer) return;
+  const canvas = document.createElement("canvas");
+  canvas.width = 1;
+  canvas.height = 1;
+  canvas.style.position = "fixed";
+  canvas.style.left = "-10000px";
+  canvas.style.top = "-10000px";
+  document.body.appendChild(canvas);
+  activeTransparentDragImage = canvas;
+  ev.dataTransfer.setDragImage(canvas, 0, 0);
+}
+
+function positionLandscapeChunkDragGhost(clientX, clientY) {
+  if (!activeChunkDragGhost) return;
+  if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return;
+  if (clientX === 0 && clientY === 0) return;
+
+  activeChunkDragGhost.style.left = `${Math.round(clientX)}px`;
+  activeChunkDragGhost.style.top = `${Math.round(clientY)}px`;
+}
+
+function startLandscapeChunkDragGhost(ev, chip) {
+  if (!ev?.dataTransfer || !chip || !isLandscapeMimicerActive()) return;
+
+  clearLandscapeChunkDragGhost();
+
+  const rect = chip.getBoundingClientRect();
+  const width = Math.max(1, Math.round(chip.offsetWidth || rect.width));
+  const height = Math.max(1, Math.round(chip.offsetHeight || rect.height));
+
+  const ghost = document.createElement("div");
+  ghost.setAttribute("aria-hidden", "true");
+  ghost.style.position = "fixed";
+  ghost.style.left = "-10000px";
+  ghost.style.top = "-10000px";
+  ghost.style.width = `${width}px`;
+  ghost.style.height = `${height}px`;
+  ghost.style.display = "flex";
+  ghost.style.alignItems = "center";
+  ghost.style.justifyContent = "center";
+  ghost.style.pointerEvents = "none";
+  ghost.style.zIndex = "2147483647";
+  ghost.style.transform = "translate(-50%, -50%) rotate(90deg)";
+  ghost.style.transformOrigin = "center center";
+
+  const chipStyle = getComputedStyle(chip);
+  const surface = document.createElement("div");
+  surface.className = chip.className.replace(/\bpreview-react\b/g, "").trim();
+  surface.innerHTML = chip.innerHTML;
+  surface.style.width = `${width}px`;
+  surface.style.height = `${height}px`;
+  surface.style.margin = "0";
+  surface.style.padding = chipStyle.padding;
+  surface.style.border = chipStyle.border;
+  surface.style.borderRadius = chipStyle.borderRadius;
+  surface.style.background = chipStyle.background;
+  surface.style.color = chipStyle.color;
+  surface.style.textAlign = chipStyle.textAlign;
+  surface.style.boxSizing = "border-box";
+  surface.style.pointerEvents = "none";
+  surface.style.opacity = "0.94";
+  surface.style.boxShadow = "0 8px 18px rgba(0,0,0,0.22)";
+  surface.style.animation = "none";
+  surface.style.transform = "none";
+  surface.style.transformOrigin = "center center";
+
+  ghost.appendChild(surface);
+  document.body.appendChild(ghost);
+  activeChunkDragGhost = ghost;
+
+  setTransparentNativeDragImage(ev);
+  positionLandscapeChunkDragGhost(
+    ev.clientX || rect.left + rect.width / 2,
+    ev.clientY || rect.top + rect.height / 2
+  );
+
+  activeChunkDragGhostMoveHandler = (moveEv) => {
+    positionLandscapeChunkDragGhost(moveEv.clientX, moveEv.clientY);
+  };
+  document.addEventListener("drag", activeChunkDragGhostMoveHandler, true);
+  document.addEventListener("dragover", activeChunkDragGhostMoveHandler, true);
+}
+
+function resetPointerChunkDrag() {
+  pointerChunkDrag = {
+    active: false,
+    pointerId: null,
+    chunkId: null,
+    chip: null,
+    startX: 0,
+    startY: 0,
+    dragging: false,
+  };
+}
+
+function startPointerChunkDragGhost(chip, clientX, clientY) {
+  if (!chip) return;
+
+  clearLandscapeChunkDragGhost();
+
+  const rect = chip.getBoundingClientRect();
+  const width = Math.max(1, Math.round(chip.offsetWidth || rect.width));
+  const height = Math.max(1, Math.round(chip.offsetHeight || rect.height));
+
+  const ghost = document.createElement("div");
+  ghost.setAttribute("aria-hidden", "true");
+  ghost.style.position = "fixed";
+  ghost.style.left = "-10000px";
+  ghost.style.top = "-10000px";
+  ghost.style.width = `${width}px`;
+  ghost.style.height = `${height}px`;
+  ghost.style.display = "flex";
+  ghost.style.alignItems = "center";
+  ghost.style.justifyContent = "center";
+  ghost.style.pointerEvents = "none";
+  ghost.style.zIndex = "2147483647";
+  ghost.style.transform = isLandscapeMimicerActive()
+    ? "translate(-50%, -50%) rotate(90deg)"
+    : "translate(-50%, -50%)";
+  ghost.style.transformOrigin = "center center";
+
+  const chipStyle = getComputedStyle(chip);
+  const surface = document.createElement("div");
+  surface.className = chip.className.replace(/\bpreview-react\b/g, "").trim();
+  surface.innerHTML = chip.innerHTML;
+  surface.style.width = `${width}px`;
+  surface.style.height = `${height}px`;
+  surface.style.margin = "0";
+  surface.style.padding = chipStyle.padding;
+  surface.style.border = chipStyle.border;
+  surface.style.borderRadius = chipStyle.borderRadius;
+  surface.style.background = chipStyle.background;
+  surface.style.color = chipStyle.color;
+  surface.style.textAlign = chipStyle.textAlign;
+  surface.style.boxSizing = "border-box";
+  surface.style.pointerEvents = "none";
+  surface.style.opacity = "0.94";
+  surface.style.boxShadow = "0 8px 18px rgba(0,0,0,0.22)";
+  surface.style.animation = "none";
+  surface.style.transform = "none";
+  surface.style.transformOrigin = "center center";
+
+  ghost.appendChild(surface);
+  document.body.appendChild(ghost);
+  activeChunkDragGhost = ghost;
+  positionLandscapeChunkDragGhost(clientX, clientY);
+}
+
+function findSentenceTokenIdxFromPoint(clientX, clientY) {
+  const sentenceArea = document.getElementById("sentence-area");
+  if (!sentenceArea || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return null;
+
+  const el = document.elementFromPoint(clientX, clientY);
+  const tok = el?.closest?.("[data-token-idx]");
+  if (!tok || !sentenceArea.contains(tok)) return null;
+
+  const tokenIdx = Number(tok.getAttribute("data-token-idx"));
+  return Number.isInteger(tokenIdx) ? tokenIdx : null;
+}
+
+function updatePointerChunkDragPreview(clientX, clientY) {
+  if (!pointerChunkDrag.active || !Number.isInteger(pointerChunkDrag.chunkId)) return;
+
+  const tokenIdx = findSentenceTokenIdxFromPoint(clientX, clientY);
+  const changed = Number.isInteger(tokenIdx)
+    ? updatePreviewState(pointerChunkDrag.chunkId, tokenIdx)
+    : updatePreviewState(null, null);
+  if (changed) applyPreviewFeedback();
+}
+
+function finishPointerChunkDrag(ev, canceled = false) {
+  if (!pointerChunkDrag.active || pointerChunkDrag.pointerId !== ev.pointerId) return;
+
+  const state = pointerChunkDrag;
+  const didDrag = !!state.dragging;
+  const tokenIdx = didDrag && !canceled ? findSentenceTokenIdxFromPoint(ev.clientX, ev.clientY) : null;
+
+  if (state.chip?.hasPointerCapture?.(state.pointerId)) {
+    try {
+      state.chip.releasePointerCapture(state.pointerId);
+    } catch (_) {}
+  }
+
+  resetPointerChunkDrag();
+  draggingChunkId = null;
+  clearLandscapeChunkDragGhost();
+  clearPreviewState();
+
+  if (!didDrag) return;
+
+  suppressChunkClick = true;
+  window.setTimeout(() => {
+    suppressChunkClick = false;
+  }, 300);
+
+  ev.preventDefault();
+  if (Number.isInteger(tokenIdx)) {
+    attemptChunkDrop(state.chunkId, tokenIdx);
+  } else {
+    activeChunkId = state.chunkId;
+    renderStage();
+  }
+}
 function getChunkById(chunkId) {
   return stageChunks.find((x) => Number(x.id) === Number(chunkId)) || null;
 }
@@ -248,7 +486,8 @@ function captureSentenceLineMap() {
   if (!sentenceArea) return out;
 
   const tokens = Array.from(sentenceArea.querySelectorAll("[data-token-idx]"));
-  let prevTop = null;
+  const useVisualXAsLineAxis = isLandscapeMimicerActive();
+  let prevLinePos = null;
   let lineNo = 0;
 
   tokens.forEach((node) => {
@@ -256,12 +495,12 @@ function captureSentenceLineMap() {
     if (!Number.isInteger(idx)) return;
 
     const rect = node.getBoundingClientRect();
-    const top = Math.round(rect.top);
-    if (prevTop == null) {
-      prevTop = top;
-    } else if (Math.abs(top - prevTop) > 4) {
+    const linePos = Math.round(useVisualXAsLineAxis ? rect.left : rect.top);
+    if (prevLinePos == null) {
+      prevLinePos = linePos;
+    } else if (Math.abs(linePos - prevLinePos) > 4) {
       lineNo += 1;
-      prevTop = top;
+      prevLinePos = linePos;
     }
     out[idx] = lineNo;
   });
@@ -496,8 +735,6 @@ function renderZoomOverlay() {
   const anchorSet = new Set(ch.targetIndices || []);
   const start = Math.max(0, Number(zoomState.contextStart));
   const end = Math.min(q.sentenceTokens.length - 1, Number(zoomState.contextEnd));
-  const lineByIdx = zoomState.lineByIdx || {};
-
   if (!Number.isInteger(start) || !Number.isInteger(end) || end < start) {
     overlay.classList.remove("open");
     sentence.innerHTML = "";
@@ -505,44 +742,28 @@ function renderZoomOverlay() {
     return;
   }
 
-  const lines = [];
-  let prevLine = null;
+  const tokenHtml = [];
 
   for (let idx = start; idx <= end; idx += 1) {
-    const tokenLine = Number.isInteger(lineByIdx[idx]) ? Number(lineByIdx[idx]) : null;
-    if (lines.length === 0) {
-      lines.push([]);
-      prevLine = tokenLine;
-    } else if (tokenLine != null && prevLine != null && tokenLine !== prevLine) {
-      lines.push([]);
-      prevLine = tokenLine;
-    }
-
     const classes = ["z-tok"];
     if (anchorSet.has(idx)) classes.push("anchor");
     if (scopeSet.has(idx)) {
-      const prevInScopeSameLine =
-        scopeSet.has(idx - 1) &&
-        Number.isInteger(lineByIdx[idx - 1]) &&
-        Number(lineByIdx[idx - 1]) === tokenLine;
-      const nextInScopeSameLine =
-        scopeSet.has(idx + 1) &&
-        Number.isInteger(lineByIdx[idx + 1]) &&
-        Number(lineByIdx[idx + 1]) === tokenLine;
+      const prevInScope = scopeSet.has(idx - 1);
+      const nextInScope = scopeSet.has(idx + 1);
 
       classes.push("scope-fence");
       classes.push(zoomState.dragging ? "scope-preview" : "scope-final");
-      if (!prevInScopeSameLine) classes.push("scope-start");
-      if (!nextInScopeSameLine) classes.push("scope-end");
+      if (!prevInScope) classes.push("scope-start");
+      if (!nextInScope) classes.push("scope-end");
     }
     if (zoomState.dragging && zoomState.dragCurrentIdx === idx) classes.push("drag-focus");
 
-    lines[lines.length - 1].push(
+    tokenHtml.push(
       `<span class="${classes.join(" ")}" data-zoom-idx="${idx}">${escapeHtml(q.sentenceTokens[idx])}</span>`
     );
   }
 
-  sentence.innerHTML = lines.map((tokens) => `<div class="z-line">${tokens.join("")}</div>`).join("");
+  sentence.innerHTML = tokenHtml.join("");
 
   overlay.classList.add("open");
   updateZoomLassoVisual();
@@ -2103,8 +2324,65 @@ function wireStageInteractions() {
   const sentenceArea = document.getElementById("sentence-area");
   const chunkTray = document.getElementById("chunk-tray");
   if (!sentenceArea || !chunkTray) return;
+  chunkTray.addEventListener("pointerdown", (ev) => {
+    if (isLocked || ev.pointerType === "mouse") return;
+    const chip = ev.target.closest("[data-chunk-id]");
+    if (!chip) return;
+
+    const chunkId = Number(chip.getAttribute("data-chunk-id"));
+    const ch = stageChunks.find((x) => x.id === chunkId);
+    if (!Number.isInteger(chunkId) || !ch || ch.matched) return;
+
+    pointerChunkDrag = {
+      active: true,
+      pointerId: ev.pointerId,
+      chunkId,
+      chip,
+      startX: ev.clientX,
+      startY: ev.clientY,
+      dragging: false,
+    };
+    activeChunkId = chunkId;
+
+    try {
+      chip.setPointerCapture(ev.pointerId);
+    } catch (_) {}
+  });
+
+  chunkTray.addEventListener(
+    "pointermove",
+    (ev) => {
+      if (!pointerChunkDrag.active || pointerChunkDrag.pointerId !== ev.pointerId) return;
+      if (isLocked) {
+        finishPointerChunkDrag(ev, true);
+        return;
+      }
+
+      const dx = ev.clientX - pointerChunkDrag.startX;
+      const dy = ev.clientY - pointerChunkDrag.startY;
+      if (!pointerChunkDrag.dragging && dx * dx + dy * dy < 36) return;
+
+      if (!pointerChunkDrag.dragging) {
+        pointerChunkDrag.dragging = true;
+        draggingChunkId = pointerChunkDrag.chunkId;
+        startPointerChunkDragGhost(pointerChunkDrag.chip, ev.clientX, ev.clientY);
+      }
+
+      ev.preventDefault();
+      positionLandscapeChunkDragGhost(ev.clientX, ev.clientY);
+      updatePointerChunkDragPreview(ev.clientX, ev.clientY);
+    },
+    { passive: false }
+  );
+
+  chunkTray.addEventListener("pointerup", (ev) => finishPointerChunkDrag(ev, false));
+  chunkTray.addEventListener("pointercancel", (ev) => finishPointerChunkDrag(ev, true));
 
   chunkTray.addEventListener("dragstart", (ev) => {
+    if (pointerChunkDrag.active) {
+      ev.preventDefault();
+      return;
+    }
     if (isLocked) return;
     const chip = ev.target.closest("[data-chunk-id]");
     if (!chip) return;
@@ -2121,10 +2399,12 @@ function wireStageInteractions() {
     if (ev.dataTransfer) {
       ev.dataTransfer.effectAllowed = "move";
       ev.dataTransfer.setData("text/plain", String(chunkId));
+      startLandscapeChunkDragGhost(ev, chip);
     }
   });
 
   chunkTray.addEventListener("dragend", () => {
+    clearLandscapeChunkDragGhost();
     draggingChunkId = null;
     if (previewChunkId != null || previewTokenIdx >= 0) {
       clearPreviewState();
@@ -2133,6 +2413,11 @@ function wireStageInteractions() {
   });
 
   chunkTray.addEventListener("click", (ev) => {
+    if (suppressChunkClick) {
+      suppressChunkClick = false;
+      ev.preventDefault();
+      return;
+    }
     if (isLocked) return;
     const chip = ev.target.closest("[data-chunk-id]");
     if (!chip) return;
@@ -2190,6 +2475,7 @@ function wireStageInteractions() {
     if (!Number.isInteger(chunkId)) return;
 
     draggingChunkId = null;
+    clearLandscapeChunkDragGhost();
     clearPreviewState();
     attemptChunkDrop(chunkId, tokenIdx);
   });
@@ -3178,7 +3464,7 @@ function syncStageHeights() {
   const tray = document.getElementById("chunk-tray");
   if (!leftPane || !stageBank || !tray) return;
 
-  const h = Math.ceil(leftPane.getBoundingClientRect().height);
+  const h = Math.ceil(leftPane.offsetHeight);
   if (!Number.isFinite(h) || h <= 0) return;
 
   stageBank.style.height = `${h}px`;
