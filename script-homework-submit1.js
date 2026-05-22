@@ -126,7 +126,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   const FALLBACK_RANGES = {
     '단어': { 'A1': [1, 45], 'A2': [46, 89], 'B1': [90, 130], 'B2': [131, 201], 'C1': [202, 266] },
-    '연어': { '900핵심연어': [1, 42] },
+    '연어': { '연어뼈 700': [1, 36] },
     '문법': { 'Basic': [1, 50] },
     '단계별 독해': { 'RCStepper': [1, 50] }
   };

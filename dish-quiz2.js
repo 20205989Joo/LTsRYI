@@ -615,20 +615,20 @@ function renderQuestion() {
   currentPuzzle = createPuzzle(question.word);
 
   quizArea.innerHTML = `
-    <div class="quiz-question-screen">
+    <div class="quiz-question-screen notranslate" translate="no">
       <div class="question-top">
-        <div>${currentIndex + 1}. ${escapeHtml(currentConfig.level)} / Day ${escapeHtml(currentConfig.day)}</div>
+        <div class="notranslate" translate="no">${currentIndex + 1}. ${escapeHtml(currentConfig.level)} / Day ${escapeHtml(currentConfig.day)}</div>
         <div>${currentIndex + 1} / ${currentQuestions.length}</div>
       </div>
       <div class="meaning-card">
-        <div class="question-wording">${escapeHtml(question.meaning)}</div>
+        <div class="question-wording notranslate" translate="no">${escapeHtml(question.meaning)}</div>
       </div>
-      <div id="scramble-answer" class="scramble-wrap"></div>
-      <div class="bank-label">Scrambled letters</div>
-      <div id="scramble-bank" class="bank-grid"></div>
+      <div id="scramble-answer" class="scramble-wrap notranslate" translate="no"></div>
+      <div class="bank-label notranslate" translate="no">Scrambled letters</div>
+      <div id="scramble-bank" class="bank-grid notranslate" translate="no"></div>
       <div id="feedback"></div>
-      <button class="quiz-btn check-btn" id="check-btn" type="button">Check</button>
-      <div id="answer-toast" class="answer-toast"></div>
+      <button class="quiz-btn check-btn notranslate" id="check-btn" type="button" translate="no">Check</button>
+      <div id="answer-toast" class="answer-toast notranslate" translate="no"></div>
     </div>
   `;
 
@@ -690,22 +690,22 @@ function renderPuzzleState() {
   answerEl.innerHTML = currentPuzzle.layout
     .map(part => {
       if (part.type === 'fixed') {
-        return `<span class="slot-chip fixed">${escapeHtml(String(part.char).toUpperCase())}</span>`;
+        return `<span class="slot-chip fixed notranslate" translate="no">${escapeHtml(String(part.char).toUpperCase())}</span>`;
       }
 
       if (part.type === 'separator') {
-        return `<span class="slot-chip separator">${escapeHtml(part.char)}</span>`;
+        return `<span class="slot-chip separator notranslate" translate="no">${escapeHtml(part.char)}</span>`;
       }
 
       const itemId = currentPuzzle.slotValues[part.slotIndex];
       const item = itemId == null ? null : getBankItemById(currentPuzzle, itemId);
       const isFilled = Boolean(item);
-      const classes = ['slot-chip'];
+      const classes = ['slot-chip', 'notranslate'];
       if (!isFilled) classes.push('empty');
       if (!isFilled && currentPuzzle.activeSlotIndex === part.slotIndex) classes.push('active');
 
       return `
-        <button class="${classes.join(' ')}" type="button" data-slot-index="${part.slotIndex}">
+        <button class="${classes.join(' ')}" type="button" data-slot-index="${part.slotIndex}" translate="no">
           ${isFilled ? escapeHtml(String(item.char).toUpperCase()) : '&nbsp;'}
         </button>
       `;
@@ -717,9 +717,10 @@ function renderPuzzleState() {
       const used = currentPuzzle.slotValues.includes(item.id);
       return `
         <button
-          class="bank-letter${used ? ' used' : ''}"
+          class="bank-letter notranslate${used ? ' used' : ''}"
           type="button"
           data-bank-id="${item.id}"
+          translate="no"
           ${used ? 'disabled' : ''}
         >
           ${escapeHtml(String(item.char).toUpperCase())}

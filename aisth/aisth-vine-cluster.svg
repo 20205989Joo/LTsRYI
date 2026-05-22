@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 210">
+  <defs>
+    <linearGradient id="stem" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d3a34"/>
+      <stop offset=".38" stop-color="#2b8f82"/>
+      <stop offset=".72" stop-color="#61ead7"/>
+      <stop offset="1" stop-color="#956ee9"/>
+    </linearGradient>
+    <linearGradient id="leafFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c8fff4"/>
+      <stop offset=".46" stop-color="#55d7b5"/>
+      <stop offset="1" stop-color="#8167d8"/>
+    </linearGradient>
+    <radialGradient id="bloomFill" cx=".42" cy=".42" r=".72">
+      <stop offset="0" stop-color="#ecfff9"/>
+      <stop offset=".42" stop-color="#71efe0"/>
+      <stop offset="1" stop-color="#8667df"/>
+    </radialGradient>
+    <filter id="softGlow" x="-24%" y="-24%" width="148%" height="148%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.8" flood-color="#7cf4e7" flood-opacity=".34"/>
+    </filter>
+
+    <g id="leaf">
+      <path d="M0 0 C10 -16 35 -23 72 -4 C44 20 13 17 0 0 Z" fill="url(#leafFill)"/>
+      <path d="M6 0 C25 -5 48 -6 69 -4" fill="none" stroke="#dcfff9" stroke-width="1.2" stroke-linecap="round" opacity=".42"/>
+      <path d="M22 -3 L14 -10 M35 -5 L25 -14 M48 -5 L38 -14 M26 1 L17 8 M40 0 L31 9 M54 -2 L45 7" fill="none" stroke="#dcfff9" stroke-width=".65" stroke-linecap="round" opacity=".24"/>
+    </g>
+    <g id="leafSmall">
+      <path d="M0 0 C8 -11 27 -15 52 -3 C32 13 9 11 0 0 Z" fill="url(#leafFill)"/>
+      <path d="M5 0 C19 -4 35 -4 50 -3" fill="none" stroke="#dcfff9" stroke-width=".9" stroke-linecap="round" opacity=".36"/>
+      <path d="M19 -2 L12 -7 M31 -3 L23 -9 M22 1 L14 6 M35 -1 L28 6" fill="none" stroke="#dcfff9" stroke-width=".55" stroke-linecap="round" opacity=".20"/>
+    </g>
+    <g id="bloom">
+      <path d="M0 -21 C13 -15 15 -4 7 0 C18 2 21 13 11 20 C2 13 -2 7 0 1 C-5 11 -17 13 -24 3 C-15 -6 -8 -8 -2 -4 C-11 -13 -8 -23 0 -21 Z" fill="url(#bloomFill)"/>
+      <circle cx="0" cy="0" r="5.8" fill="#1d171d" opacity=".72"/>
+      <circle cx="1.6" cy="-1.8" r="2.1" fill="#cffff8" opacity=".58"/>
+    </g>
+  </defs>
+
+  <g filter="url(#softGlow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M42 198 C32 168 34 140 42 116" stroke="url(#stem)" stroke-width="4.8" opacity=".82"/>
+    <path d="M42 116 C51 82 74 58 106 43" stroke="url(#stem)" stroke-width="3.8" opacity=".72"/>
+    <path d="M106 43 C141 27 184 23 229 27" stroke="url(#stem)" stroke-width="2.5" opacity=".50"/>
+    <path d="M229 27 C250 28 270 30 288 31" stroke="url(#stem)" stroke-width="1.15" opacity=".22"/>
+
+    <path d="M42 198 C63 165 95 143 136 130" stroke="url(#stem)" stroke-width="3.8" opacity=".70"/>
+    <path d="M136 130 C180 116 225 115 260 121" stroke="url(#stem)" stroke-width="2.25" opacity=".42"/>
+    <path d="M260 121 C273 122 284 123 290 124" stroke="url(#stem)" stroke-width="1.05" opacity=".18"/>
+
+    <path d="M46 194 C49 158 48 125 42 96" stroke="url(#stem)" stroke-width="3.4" opacity=".62"/>
+    <path d="M42 96 C36 66 25 39 9 18" stroke="url(#stem)" stroke-width="1.55" opacity=".26"/>
+
+    <path d="M58 139 C43 129 29 129 17 139 C8 146 6 158 15 164 C25 171 37 164 35 153" stroke="url(#stem)" stroke-width="2.1" opacity=".60"/>
+    <path d="M52 182 C32 177 14 186 12 202 C10 216 30 221 35 206 C38 196 28 192 23 200" stroke="url(#stem)" stroke-width="1.85" opacity=".54"/>
+    <path d="M73 162 C67 184 82 203 105 200 C123 198 128 179 113 173 C101 168 92 178 98 188" stroke="url(#stem)" stroke-width="1.85" opacity=".52"/>
+    <path d="M73 110 C56 91 55 68 73 50 C88 35 107 36 113 49 C119 64 104 75 94 65" stroke="url(#stem)" stroke-width="2.1" opacity=".62"/>
+    <path d="M91 92 C121 83 145 96 143 118 C141 132 124 138 115 128 C107 119 113 108 123 111" stroke="url(#stem)" stroke-width="1.75" opacity=".48"/>
+    <path d="M102 48 C102 26 118 9 139 8 C156 8 166 19 161 31 C156 42 142 42 139 32" stroke="url(#stem)" stroke-width="2" opacity=".55"/>
+    <path d="M151 29 C172 7 207 4 236 16 C254 24 260 39 251 49 C241 60 223 52 225 38" stroke="url(#stem)" stroke-width="1.95" opacity=".56"/>
+    <path d="M174 32 C190 49 189 70 171 82 C158 90 145 82 149 70 C153 60 165 61 167 70" stroke="url(#stem)" stroke-width="1.5" opacity=".40"/>
+    <path d="M205 28 C229 40 249 58 265 82 C275 98 273 113 261 117 C249 121 239 108 246 97" stroke="url(#stem)" stroke-width="1.85" opacity=".50"/>
+    <path d="M130 131 C126 155 137 174 160 183 C180 191 198 184 199 170 C200 156 183 150 176 162" stroke="url(#stem)" stroke-width="2" opacity=".54"/>
+    <path d="M194 119 C214 139 241 151 279 153" stroke="url(#stem)" stroke-width="1.8" opacity=".48"/>
+    <path d="M221 139 C230 123 246 116 266 119 C285 122 296 136 292 148 C288 160 271 160 268 148" stroke="url(#stem)" stroke-width="1.65" opacity=".44"/>
+    <path d="M244 131 C260 146 265 166 255 178 C245 190 228 181 233 168 C237 158 250 160 250 170" stroke="url(#stem)" stroke-width="1.2" opacity=".30"/>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <use href="#bloom" transform="translate(60 160) rotate(-18) scale(1.10)" opacity=".70"/>
+    <use href="#bloom" transform="translate(106 78) rotate(18) scale(.88)" opacity=".62"/>
+    <use href="#bloom" transform="translate(168 126) rotate(-12) scale(.72)" opacity=".50"/>
+
+    <use href="#leaf" transform="translate(35 198) rotate(-112) scale(.52 .78)" opacity=".58"/>
+    <use href="#leaf" transform="translate(47 188) rotate(-84) scale(.58 .82)" opacity=".66"/>
+    <use href="#leafSmall" transform="translate(62 178) rotate(-48) scale(.58 .74)" opacity=".58"/>
+    <use href="#leafSmall" transform="translate(35 169) rotate(-146) scale(.52 .68)" opacity=".48"/>
+    <use href="#leaf" transform="translate(39 145) rotate(-124) scale(.48 .72)" opacity=".52"/>
+    <use href="#leafSmall" transform="translate(61 136) rotate(-72) scale(.56 .70)" opacity=".54"/>
+    <use href="#leaf" transform="translate(43 102) rotate(-96) scale(.52 .78)" opacity=".56"/>
+    <use href="#leafSmall" transform="translate(55 85) rotate(-58) scale(.50 .64)" opacity=".46"/>
+    <use href="#leafSmall" transform="translate(22 57) rotate(-122) scale(.58 .74)" opacity=".45"/>
+
+    <use href="#leaf" transform="translate(75 106) rotate(-48) scale(.64 .86)" opacity=".66"/>
+    <use href="#leaf" transform="translate(113 42) rotate(-24) scale(.62 .82)" opacity=".58"/>
+    <use href="#leafSmall" transform="translate(142 30) rotate(-7) scale(.56 .68)" opacity=".48"/>
+    <use href="#leaf" transform="translate(179 23) rotate(8) scale(.70 .86)" opacity=".58"/>
+    <use href="#leafSmall" transform="translate(226 24) rotate(24) scale(.54 .66)" opacity=".30"/>
+    <use href="#leafSmall" transform="translate(259 39) rotate(54) scale(.48 .60)" opacity=".20"/>
+
+    <use href="#leaf" transform="translate(95 145) rotate(-20) scale(.62 .76)" opacity=".58"/>
+    <use href="#leafSmall" transform="translate(136 132) rotate(-8) scale(.52 .62)" opacity=".46"/>
+    <use href="#leaf" transform="translate(178 121) rotate(10) scale(.62 .76)" opacity=".52"/>
+    <use href="#leafSmall" transform="translate(220 122) rotate(22) scale(.52 .62)" opacity=".42"/>
+    <use href="#leafSmall" transform="translate(252 128) rotate(44) scale(.44 .56)" opacity=".22"/>
+
+    <use href="#leafSmall" transform="translate(146 178) rotate(35) scale(.54 .66)" opacity=".42"/>
+    <use href="#leafSmall" transform="translate(194 154) rotate(28) scale(.52 .64)" opacity=".40"/>
+    <use href="#leafSmall" transform="translate(259 153) rotate(11) scale(.46 .58)" opacity=".20"/>
+  </g>
+</svg>

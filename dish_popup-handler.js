@@ -483,8 +483,9 @@ window.showDishPopup = function (item) {
 
   const isRegularHW = hasCurriculumLevels(hw);
   const isWordCategory = item.label === "단어";
+  const isBaseWordSubcategory = resolveSubcategory(item.Subcategory) === "단어";
   const shouldUseWordSupabasePreview =
-    isCustomLessonModule && isWordCategory && !!previewImageURL;
+    isCustomLessonModule && isBaseWordSubcategory && !!previewImageURL;
 
   if (shouldUseWordSupabasePreview) {
     content += `
@@ -528,9 +529,13 @@ window.showDishPopup = function (item) {
           <button class="room-btn" style="background: #6f4bb8; color: #fff; width: 100%;" id="custom-quiz-btn">🧩 scramble!</button>
         `;
       } else {
+        const actionLabel = isBaseWordSubcategory ? "📒 외우러 갑시다!" : "풀러갑시다!";
+        const actionStyle = isBaseWordSubcategory
+          ? "background: #f2c94c; color: #5a4300;"
+          : "background: #b8ead8; color: #124235; border: 1px solid #79cbb4;";
         content += `
           <div style="margin-bottom: 10px;">전용 학습 페이지로 이동합니다.</div>
-          <button class="room-btn" style="background: #f2c94c; color: #5a4300; width: 100%;" id="custom-quiz-btn">📒 외우러 갑시다!</button>
+          <button class="room-btn" style="${actionStyle} width: 100%;" id="custom-quiz-btn">${actionLabel}</button>
         `;
       }
     } else {
@@ -728,6 +733,10 @@ window.showDishPopup = function (item) {
       id: userId || "",
       key: lessonRouteInfo.quizKey || "",
       dishQuizKey,
+      subcategory: lessonRouteInfo?.subcategory || item.Subcategory || "",
+      level: lessonRouteInfo?.level || inferLevelIfNeeded(item.Subcategory, item.Level, item.LessonNo) || item.Level || "",
+      day: lessonRouteInfo?.day ?? fallbackDay ?? "",
+      lessonNo: lessonRouteInfo?.lessonNo ?? item.LessonNo ?? "",
       round2: null,
       round2Script: null
     });
