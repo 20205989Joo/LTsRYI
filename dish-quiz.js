@@ -14,6 +14,7 @@ let quizTitle = '';
 let userId = '';
 const workbookCache = new Map();
 let debugAutoCompleting = false;
+let assistWheelMode = false;
 
 // 🔧 이 문제에서 이미 답을 처리했는지 여부
 let isAnswered = false;
@@ -42,6 +43,91 @@ function storeQuizResultWithMap(resultObject) {
 
 function isTesterUser() {
   return String(userId || '').trim().toLowerCase() === 'tester';
+}
+
+function isReviewItem(item) {
+  return String(item?.source || '').toLowerCase() === 'review';
+}
+
+function getScoredResults(resultRows) {
+  const mainRows = resultRows.filter(row => !isReviewItem(row));
+  return mainRows.length ? mainRows : resultRows;
+}
+
+function renderAssistWheelButton() {
+  if (document.getElementById('assist-wheel-toggle')) return;
+
+  if (!document.getElementById('assist-wheel-style')) {
+    const style = document.createElement('style');
+    style.id = 'assist-wheel-style';
+    style.textContent = `
+      #assist-wheel-toggle{
+        position:fixed;
+        right:14px;
+        bottom:18px;
+        z-index:10010;
+        width:54px;
+        height:54px;
+        border:1px solid rgba(33,45,42,.28);
+        border-radius:50%;
+        background:#fffaf0;
+        box-shadow:0 8px 22px rgba(0,0,0,.18);
+        display:grid;
+        place-items:center;
+        cursor:pointer;
+        transition:transform .14s ease, background .14s ease, box-shadow .14s ease;
+      }
+      #assist-wheel-toggle:hover{
+        transform:translateY(-1px);
+        box-shadow:0 10px 26px rgba(0,0,0,.22);
+      }
+      #assist-wheel-toggle.active{
+        background:#dff3e8;
+        border-color:#3b7c5b;
+      }
+      #assist-wheel-toggle .assist-wheel-icon{
+        width:32px;
+        height:32px;
+        border:5px solid #2f3a35;
+        border-radius:50%;
+        background:
+          radial-gradient(circle at center, #fffaf0 0 18%, transparent 19%),
+          conic-gradient(from 0deg, #7c8b7d 0 16deg, transparent 16deg 60deg, #7c8b7d 60deg 76deg, transparent 76deg 120deg, #7c8b7d 120deg 136deg, transparent 136deg 180deg, #7c8b7d 180deg 196deg, transparent 196deg 240deg, #7c8b7d 240deg 256deg, transparent 256deg 300deg, #7c8b7d 300deg 316deg, transparent 316deg 360deg);
+        box-sizing:border-box;
+        position:relative;
+      }
+      #assist-wheel-toggle .assist-wheel-icon::after{
+        content:"";
+        position:absolute;
+        left:50%;
+        top:50%;
+        width:9px;
+        height:9px;
+        border-radius:50%;
+        background:#2f3a35;
+        transform:translate(-50%,-50%);
+      }
+      #assist-wheel-toggle.active .assist-wheel-icon{
+        border-color:#246445;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  const button = document.createElement('button');
+  button.id = 'assist-wheel-toggle';
+  button.type = 'button';
+  button.title = 'Assist wheel';
+  button.setAttribute('aria-label', 'Assist wheel');
+  button.setAttribute('aria-pressed', 'false');
+  button.innerHTML = '<span class="assist-wheel-icon" aria-hidden="true"></span>';
+  button.addEventListener('click', () => {
+    assistWheelMode = !assistWheelMode;
+    button.classList.toggle('active', assistWheelMode);
+    button.setAttribute('aria-pressed', assistWheelMode ? 'true' : 'false');
+  });
+
+  document.body.appendChild(button);
 }
 
 function renderTesterDebugControls() {
@@ -211,6 +297,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderTesterDebugControls();
+  renderAssistWheelButton();
   renderInstruction();
 });
 
@@ -310,7 +397,8 @@ async function completeQuizForDebug(makeCorrect) {
       source: q.source || 'main',
       reviewLevel: q.reviewLevel || null,
       reviewDay: q.reviewDay || null,
-      correct: !!makeCorrect
+      correct: !!makeCorrect || (assistWheelMode && isReviewItem(q)),
+      assistWheel: assistWheelMode && isReviewItem(q)
     }));
 
     currentIndex = questions.length;
@@ -403,7 +491,8 @@ function checkAnswer(selected) {
     return;
   }
 
-  const correct = q.answer === selected;
+  const assistPass = assistWheelMode && isReviewItem(q);
+  const correct = assistPass || q.answer === selected;
 
   results.push({
     no: currentIndex + 1,
@@ -413,7 +502,8 @@ function checkAnswer(selected) {
     source: q.source || 'main',
     reviewLevel: q.reviewLevel || null,
     reviewDay: q.reviewDay || null,
-    correct
+    correct,
+    assistWheel: assistPass
   });
 
   const feedback = document.getElementById('feedback');
@@ -442,8 +532,9 @@ function showResultPopup() {
   isAnswered = true;
 
   // ✅ 점수 계산
-  const totalQuestions = results.length;
-  const correctCount = results.filter(r => r.correct).length;
+  const scoreRows = getScoredResults(results);
+  const totalQuestions = scoreRows.length;
+  const correctCount = scoreRows.filter(r => r.correct).length;
   const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   const canSubmit = score >= 80;
 

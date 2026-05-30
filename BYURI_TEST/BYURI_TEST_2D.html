@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>벼리 황무지 디펜스 2D</title>
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<div id="gameDesk">
+<aside id="leftPanel" class="sidePanel leftPanel" aria-label="Loadout panel">
+  <div class="sidePanelHead">LOADOUT</div>
+  <div class="panelStat"><span>CORE</span><b id="panelCoreText">100</b></div>
+  <div class="panelSectionTitle">CANNONS</div>
+  <div id="panelCannonList" class="panelList"></div>
+</aside>
+<div id="gameViewport">
+<button id="leftPanelToggle" class="panelToggle leftToggle" type="button" aria-label="Toggle loadout panel">BAG</button>
+<button id="rightPanelToggle" class="panelToggle rightToggle" type="button" aria-label="Toggle info panel">INFO</button>
+<div id="gameShell">
+<canvas id="game"></canvas>
+<button id="pauseBtn" type="button" aria-label="Pause">II</button>
+
+<div id="hud">
+  <div class="title">BYURI WASTELAND DEFENSE 2D</div>
+  <div>코어 내구도: <b id="coreHpText">100</b></div>
+  <div>처치한 슬라임: <b id="killText">0</b></div>
+  <div>흐른 시간: <b id="timeText">0</b>s</div>
+  <div>포탑 상태: <b id="levelText">10시 Lv.1 / 12시 Lv.1 / 2시 Lv.1</b></div>
+  <div id="cannonHudBars"></div>
+</div>
+
+<div id="hint">포탑 클릭 → 문제 풀이 → 에너지 충전 · 각 포탑은 자기 방향만 자동조준</div>
+<div id="toast"></div>
+
+<div id="statusWindow">
+  <div class="windowHeader">
+    <div id="windowTitle">상태창</div>
+    <button id="closeWindow">×</button>
+  </div>
+  <div id="questionText"></div>
+  <div id="choices"></div>
+</div>
+
+<div id="upgradeWindow">
+  <div id="upgradePanel">
+    <div id="upgradeTitle">포탑 진화</div>
+    <div id="upgradeSub">강화 요소를 하나 선택하세요.</div>
+    <div id="upgradeCards"></div>
+  </div>
+</div>
+
+<div id="gameOver">
+  <div class="box">
+    <h2>상상력 코어가 무너졌습니다</h2>
+    <p>벼리들이 빛을 잃었습니다. 다시 황무지를 지켜주세요.</p>
+    <button id="restartBtn">다시 시작</button>
+  </div>
+</div>
+
+</div>
+</div>
+<aside id="rightPanel" class="sidePanel rightPanel" aria-label="Field panel">
+  <div class="sidePanelHead">FIELD</div>
+  <div class="panelStat"><span>KILL</span><b id="panelKillText">0</b></div>
+  <div class="panelStat"><span>TIME</span><b id="panelTimeText">0</b></div>
+  <div class="panelSectionTitle">SLIME</div>
+  <div id="panelEnemyInfo" class="panelNote">HP 15</div>
+</aside>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/state.js"></script>
+<script src="js/setup.js"></script>
+<script src="js/interaction.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/update.js"></script>
+<script src="js/render.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/boot.js"></script>
+</body>
+</html>
