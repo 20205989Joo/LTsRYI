@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aisth Frame</title>
+
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="styles-room.css" />
+  <link rel="stylesheet" href="styles-Aisth.css" />
+</head>
+
+<body>
+  <div class="main-page" data-aisth-page>
+    <main id="cafe_int" data-aisth-stage>
+      <section id="quiz-area" data-aisth-quiz-area aria-live="polite"></section>
+    </main>
+
+    <div class="aisth-frame-jump" data-aisth-frame-jump>
+      <label class="aisth-frame-jump-label" for="aisth-frame-lesson-select">Jump</label>
+      <select id="aisth-frame-lesson-select" class="aisth-frame-lesson-select" aria-label="Aisth lesson jump"></select>
+    </div>
+
+    <button id="back-btn" type="button" data-aisth-action="back">돌아가기</button>
+  </div>
+  <aside class="aisth-dev-panel" id="aisth-dev-question-list" data-aisth-dev-panel aria-live="polite">
+    <div class="aisth-dev-panel-head">
+      <div class="aisth-dev-panel-title">문제 - 답</div>
+      <div class="aisth-dev-panel-meta" data-aisth-dev-meta>dev</div>
+    </div>
+    <div class="aisth-dev-panel-body" data-aisth-dev-body>
+      <div class="aisth-dev-empty">문제 로드 대기 중</div>
+    </div>
+  </aside>
+
+  <div class="popup-overlay" id="result-popup" aria-hidden="true" data-aisth-result-popup>
+    <div class="popup-content" id="result-content" data-aisth-result-content></div>
+  </div>
+
+  <template id="aisth-question-shell-template">
+    <section class="aisth-question-shell" data-aisth-question-shell>
+      <div class="q-label" data-aisth-q-label></div>
+
+      <div class="box aisth-question-box" data-aisth-question-box>
+        <div class="aisth-question-meta" data-aisth-question-meta></div>
+        <div class="aisth-question-instruction" data-aisth-question-instruction></div>
+        <div class="aisth-question-body" data-aisth-question-body></div>
+      </div>
+
+      <div class="box aisth-answer-box" data-aisth-answer-box>
+        <div class="aisth-answer-body" data-aisth-answer-body></div>
+        <div class="feedback" data-aisth-feedback></div>
+      </div>
+
+      <div class="btn-row" data-aisth-actions>
+        <button class="quiz-btn" type="button" data-aisth-action="submit">제출</button>
+        <button class="quiz-btn" type="button" data-aisth-action="next" disabled>다음</button>
+      </div>
+    </section>
+  </template>
+
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="herma-toastfx.js"></script>
+  <script src="dishquiz_resultstable.js"></script>
+  <script src="../lesson-intro-player.js"></script>
+  <script src="aisth-intro-fronts.js"></script>
+  <script src="aisth-input-slots.js"></script>
+  <script src="aisth-frame-loader.js"></script>
+  <script src="imsi_questions_compressor.js"></script>
+  <script src="Imsi_resultstable_bridge.js"></script>
+  <script src="Alpha_tester.js"></script>
+</body>
+</html>

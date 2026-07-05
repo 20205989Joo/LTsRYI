@@ -426,7 +426,6 @@ function renderQuestion() {
 
   isCurrentLocked = false;
 
-  const qTypeLabel = q.type === "blank" ? TEXT.QTYPE_BLANK : TEXT.QTYPE_REWRITE;
   const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
 
   const placeholder = q.type === "blank"
@@ -441,11 +440,8 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;">
-        <span class="pill">${escapeHtml(qTypeLabel)}</span>
-      </div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence">${qBody}</div>
+      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
     </div>
 
     <div class="box" style="background:#fff;">
@@ -462,12 +458,16 @@ function renderQuestion() {
   const submitBtn = document.getElementById("submit-btn");
   const nextBtn = document.getElementById("next-btn");
   const input = document.getElementById("user-answer");
+  const slotInputControl = input && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
+    : null;
 
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
   if (nextBtn) nextBtn.addEventListener("click", goNext);
 
   if (input) {
-    input.focus();
+    if (slotInputControl) slotInputControl.focus();
+    else input.focus();
     input.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" && q.type === "blank") {
         ev.preventDefault();
@@ -510,6 +510,7 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   input.disabled = true;
+  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) nextBtn.disabled = false;
 

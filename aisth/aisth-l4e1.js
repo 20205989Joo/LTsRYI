@@ -495,11 +495,8 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;">
-        <span class="pill">${escapeHtml(TEXT.QTYPE)}</span>
-      </div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(FIXED_INSTRUCTION)}</div>
-      <div class="sentence">${renderQuestionWithBaseHighlight(q.questionRaw)}</div>
+      <div class="question-instruction">${escapeHtml(FIXED_INSTRUCTION)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center">${renderQuestionWithBaseHighlight(q.questionRaw)}</div>
     </div>
 
     <div class="box" style="background:#fff;">

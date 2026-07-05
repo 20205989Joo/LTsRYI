@@ -1,11 +1,494 @@
 ﻿// aisth-l1e1.js
 // Independent runtime for Aisth Lesson 1 Exercise 1
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 1;
 const TARGET_EXERCISE = 1;
 const PAGE_LABEL = "Aisth L1-E1";
 const MAX_QUESTIONS = 0; // 0 = unlimited
+const MAX_PAIR_QUESTIONS = 20;
+
+const L1E1_ROWS = [
+    {
+        "QNumber":  "1",
+        "Question":  "나는 슬픔이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "나는 슬프다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "2",
+        "Question":  "I ___ sad.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "am",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "3",
+        "Question":  "너는 피곤함이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "너는 피곤하다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "4",
+        "Question":  "You ___ tired.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "are",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "5",
+        "Question":  "그는 배고픔이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "그는 배고프다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "6",
+        "Question":  "He ___ hungry.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "is",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "7",
+        "Question":  "우리는 기쁨이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "우리는 기쁘다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "8",
+        "Question":  "We ___ happy.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "are",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "9",
+        "Question":  "내 이름은 민수이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "내 이름은 민수다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "10",
+        "Question":  "My name ___ Minsu.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "is",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "11",
+        "Question":  "이 책은 여기이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "이 책은 여기에 있다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "12",
+        "Question":  "The book ___ here.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "is",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "13",
+        "Question":  "그녀는 선생님이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "그녀는 선생님이다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "14",
+        "Question":  "She ___ a teacher.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "is",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "15",
+        "Question":  "날씨는 추움이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "날씨는 춥다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "16",
+        "Question":  "It ___ cold.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "is",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "17",
+        "Question":  "나는 무서움이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "나는 무섭다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "18",
+        "Question":  "I ___ scared.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "am",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "19",
+        "Question":  "방들은 깨끗함이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "방들은 깨끗하다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "20",
+        "Question":  "The rooms ___ clean.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "are",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "21",
+        "Question":  "너희는 준비됨이다",
+        "Instruction":  "너희는 준비됐다",
+        "Answer":  "너희는 준비됐다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "22",
+        "Question":  "You ___ ready.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "are",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "23",
+        "Question":  "그들은 멋짐이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "그들은 멋지다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "24",
+        "Question":  "They ___ cool.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "are",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "25",
+        "Question":  "그녀는 친절함이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "그녀는 친절하다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "26",
+        "Question":  "She ___ kind.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "is",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "27",
+        "Question":  "나는 학생이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "나는 학생이다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "28",
+        "Question":  "I ___ a student.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "am",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "29",
+        "Question":  "그는 의사이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "그는 의사이다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "30",
+        "Question":  "He ___ a doctor.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "is",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "31",
+        "Question":  "우리는 가족이다",
+        "Instruction":  "우리는 가족이다",
+        "Answer":  "우리는 가족이다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "32",
+        "Question":  "We ___ family.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "are",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "33",
+        "Question":  "오늘은 월요일이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "오늘은 월요일이다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "34",
+        "Question":  "Today ___ Monday.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "is",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "35",
+        "Question":  "나는 집에 있음이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "나는 집에 있다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "36",
+        "Question":  "I ___ at home.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "am",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "37",
+        "Question":  "고양이들은 귀여움이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "고양이들은 귀엽다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "38",
+        "Question":  "The cats ___ cute.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "are",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "39",
+        "Question":  "사과들은 빨강이다",
+        "Instruction":  "영어스러운 표현을 자연스럽게 바꿔보세요.",
+        "Answer":  "사과들은 빨갛다",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    },
+    {
+        "QNumber":  "40",
+        "Question":  "The apples ___ red.",
+        "Instruction":  "빈칸에 알맞은 be동사를 넣어보세요.",
+        "Answer":  "are",
+        "Exercise":  "1",
+        "ClauseRole":  "",
+        "KoreanHint":  "",
+        "Title":  "Be = ‘이다’, 근데…",
+        "RevisionNote":  "",
+        "Lesson":  "1"
+    }
+];
 
 const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
 const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요.";
@@ -25,7 +508,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -50,7 +532,7 @@ let isCurrentLocked = false;
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
 
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener("DOMContentLoaded", () => {
   injectRuntimeStyles();
 
   if (window.HermaToastFX) {
@@ -61,14 +543,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   wireBackButton();
   wirePopupEvents();
 
-  try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
-  } catch (err) {
-    console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
-    return;
-  }
-
+  rawRows = L1E1_ROWS.map((row) => ({ ...row }));
   buildQuestionsFromRows();
   renderIntro();
 });
@@ -144,6 +619,376 @@ function injectRuntimeStyles() {
       margin: 0 2px;
     }
 
+    .pair-stack {
+      display: grid;
+      gap: 0;
+    }
+
+    .pair-stack.is-step2 {
+      gap: 0;
+    }
+
+    .pair-ko-stage {
+      display: grid;
+      gap: 10px;
+      max-height: 240px;
+      overflow: hidden;
+      transition: max-height 0.42s ease, gap 0.34s ease;
+    }
+
+    .pair-ko-stage.is-solved {
+      gap: 0;
+      opacity: 0;
+      transform: translateY(-22px);
+      max-height: 0;
+      pointer-events: none;
+    }
+
+    .pair-ko-stage.is-morphing {
+      gap: 0;
+      max-height: 330px;
+      pointer-events: auto;
+    }
+
+    .pair-ko-stage.is-gone {
+      display: none;
+    }
+
+    .pair-source {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 950;
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: 112px;
+      overflow: hidden;
+      transition: opacity 0.32s ease, transform 0.32s ease, max-height 0.38s ease, padding 0.38s ease, margin 0.38s ease, border-color 0.26s ease, border-width 0.38s ease, background 0.24s ease, box-shadow 0.24s ease;
+    }
+
+    .pair-answer-box {
+      background: #fff;
+      border: 1.5px solid rgba(126, 49, 6, 0.26);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+      max-height: 120px;
+      overflow: hidden;
+      box-sizing: border-box;
+      transition: opacity 0.32s ease, transform 0.32s ease, max-height 0.38s ease, padding 0.38s ease, margin 0.38s ease, border-color 0.26s ease, border-width 0.38s ease;
+    }
+
+    .pair-ko-stage.is-morphing .pair-source {
+      opacity: 0;
+      transform: translateY(-24px);
+      pointer-events: none;
+    }
+
+    .pair-ko-stage.is-solved .pair-source,
+    .pair-ko-stage.is-solved .pair-answer-box {
+      opacity: 0;
+      transform: translateY(-24px);
+      min-height: 0 !important;
+      height: 0 !important;
+      max-height: 0 !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      border-color: transparent !important;
+      border-width: 0 !important;
+      pointer-events: none;
+    }
+
+    .pair-answer-box.is-plain {
+      min-height: 62px;
+      max-height: 92px;
+      padding: 16px 12px 18px;
+      background: #fff;
+      border-color: rgba(126, 49, 6, 0.26) !important;
+      border-width: 1.5px !important;
+      box-shadow: 0 7px 14px rgba(126, 49, 6, 0.06);
+      transform: translateY(0);
+    }
+
+    .pair-answer-box.is-plain.is-lifting {
+      margin-top: calc(-1 * var(--pair-source-lift, 0px));
+      transform: translateY(0);
+    }
+
+    .pair-answer-box.is-expanded {
+      max-height: 320px;
+      padding: 16px 12px 14px;
+    }
+
+    .pair-ko-plain-line {
+      text-align: center;
+      font-size: 23px;
+      font-weight: 950;
+      color: #1f1a16;
+      line-height: 1.24;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .pair-answer-box.is-plain.is-in .pair-ko-plain-line {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.18s ease, transform 0.28s cubic-bezier(.2,.75,.24,1);
+    }
+
+    .pair-ko-complete {
+      min-height: 44px;
+      max-height: 70px;
+      opacity: 0;
+      overflow: hidden;
+      text-align: center;
+      font-size: 23px;
+      font-weight: 950;
+      color: #1f1a16;
+      transform: translateY(18px);
+      margin: 4px auto 14px;
+      padding: 8px 0 10px;
+    }
+
+    .pair-ko-complete.is-in {
+      opacity: 1;
+      animation: pairKoSlideUp 0.48s cubic-bezier(.2,.75,.24,1) both;
+    }
+
+    @keyframes pairKoSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(-4px);
+      }
+    }
+
+    .pair-en-rest {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(10px);
+      margin-top: 0;
+      transition: max-height 0.42s ease 0.12s, opacity 0.28s ease 0.16s, transform 0.32s ease 0.16s, margin-top 0.28s ease;
+    }
+
+    .pair-answer-box.is-expanded .pair-en-rest {
+      max-height: 190px;
+      opacity: 1;
+      transform: translateY(0);
+      margin-top: 12px;
+    }
+
+    .pair-card {
+      background: #fff;
+      border: 1.5px solid rgba(126, 49, 6, 0.26);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .pair-card-title {
+      font-size: 13px;
+      font-weight: 950;
+      color: #7e3106;
+      margin: 0 0 12px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(126, 49, 6, 0.15);
+      border-bottom: 1px solid rgba(126, 49, 6, 0.15);
+    }
+
+    .pair-ko-source {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 900;
+      color: #3c2d22;
+      line-height: 1.45;
+    }
+
+    .pair-ko-template {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 23px;
+      font-weight: 950;
+      line-height: 1.4;
+    }
+
+    .pair-fixed {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      color: #1f1a16;
+    }
+
+    .pair-fixed-subject {
+      margin-right: -2px;
+    }
+
+    .pair-pass-button {
+      min-height: 42px;
+      padding: 9px 16px;
+      border-radius: 9px;
+      border: 1.5px solid rgba(241, 123, 42, 0.42);
+      border-bottom: 3px solid rgba(241, 123, 42, 0.68);
+      background: linear-gradient(180deg, #fffaf4 0%, #ffe9d6 100%);
+      color: #7e3106;
+      font-size: 17px;
+      font-weight: 950;
+      cursor: pointer;
+      box-shadow: 0 5px 10px rgba(126, 49, 6, 0.10);
+    }
+
+    .pair-pass-button:active {
+      transform: translateY(1px);
+      border-bottom-width: 2px;
+    }
+
+    .pair-pass-sentence {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      width: auto;
+      padding: 9px 12px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #1f1a16;
+      font-size: 23px;
+      font-weight: 950;
+      line-height: 1.35;
+      cursor: pointer;
+      box-shadow: none;
+      animation: pairPassHum 1.8s ease-in-out infinite;
+    }
+
+    .pair-pass-sentence:active {
+      transform: translateY(1px) scale(0.99);
+      animation-play-state: paused;
+    }
+
+    .pair-pass-sentence:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+      animation-play-state: paused;
+    }
+
+    .pair-tap-pill {
+      position: absolute;
+      top: -17px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      height: 22px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: #145a68;
+      color: #dcfbff;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0;
+      box-shadow: 0 3px 7px rgba(20, 90, 104, 0.22);
+      animation: pairTapBounce 1.05s cubic-bezier(.2,.8,.28,1) infinite;
+      pointer-events: none;
+    }
+
+    @keyframes pairPassHum {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+        text-shadow: 0 0 0 rgba(241,123,42,0);
+      }
+      50% {
+        transform: translateY(-1px) scale(1.018);
+        text-shadow: 0 0 9px rgba(241,123,42,0.22);
+      }
+    }
+
+    @keyframes pairTapBounce {
+      0%, 100% {
+        transform: translate(-50%, 0);
+      }
+      45% {
+        transform: translate(-50%, -7px);
+      }
+    }
+
+    .pair-ko-template .aisth-slot-control {
+      width: auto;
+      display: inline-flex;
+      flex-wrap: nowrap;
+      padding: 0;
+      gap: 5px;
+      vertical-align: middle;
+    }
+
+    .pair-ko-template .aisth-slot-cell {
+      width: 32px;
+      height: 42px;
+      font-size: 19px;
+    }
+
+    .pair-en-question {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 22px;
+      font-weight: 950;
+      color: #1f1a16;
+      line-height: 1.35;
+    }
+
+    .pair-be-input {
+      width: 76px;
+      min-height: 42px;
+      border: 1.5px solid rgba(217, 192, 167, 0.9);
+      border-bottom: 3px solid #d9c0a7;
+      border-radius: 9px 9px 5px 5px;
+      background: rgba(255, 248, 228, 0.68);
+      color: #3c2d22;
+      font-size: 20px;
+      font-weight: 950;
+      text-align: center;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .pair-be-input:focus {
+      border-color: rgba(241, 123, 42, 0.72);
+      border-bottom-color: #f17b2a;
+      background: rgba(255, 247, 238, 0.94);
+      box-shadow: 0 4px 10px rgba(241, 123, 42, 0.14);
+    }
+
+    .pair-en-hint {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #7e6b5d;
+      line-height: 1.45;
+    }
+
+    .pair-ida-chip {
+      font-size: 12px;
+      padding: 1px 6px;
+      vertical-align: baseline;
+    }
+
     .focus-token {
       background: rgba(255, 208, 90, 0.45);
       border-radius: 6px;
@@ -151,6 +996,19 @@ function injectRuntimeStyles() {
       box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
       color: #7e3106;
       font-weight: 900;
+    }
+
+    .focus-token.pair-subject-highlight {
+      background: rgba(136, 84, 208, 0.16);
+      box-shadow: inset 0 0 0 1px rgba(136, 84, 208, 0.24);
+      color: #6c3ac7;
+    }
+
+    .focus-token.pair-subject-s {
+      font-size: 1.22em;
+      line-height: 1;
+      padding: 0 4px;
+      vertical-align: -0.03em;
     }
     textarea,
     .short-input {
@@ -248,69 +1106,93 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
-}
-
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
-}
 
 function buildQuestionsFromRows() {
-  let filtered = rawRows
+  const filtered = rawRows
     .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === TARGET_EXERCISE)
     .sort((a, b) => Number(a["QNumber"]) - Number(b["QNumber"]));
 
-  if (MAX_QUESTIONS > 0) filtered = filtered.slice(0, MAX_QUESTIONS);
+  const pairs = [];
+  for (let i = 0; i < filtered.length - 1; i += 2) {
+    const koRow = filtered[i];
+    const enRow = filtered[i + 1];
+    if (!koRow || !enRow) continue;
+    pairs.push({ koRow, enRow });
+  }
 
-  const modeByType = deriveInstructionModeByType(filtered);
+  const limit = MAX_QUESTIONS > 0 ? MAX_QUESTIONS : MAX_PAIR_QUESTIONS;
+  const selectedPairs = pairs.slice(0, limit);
 
-  const firstRowAnswer = normalizeEscapedBreaks(String(filtered[0]?.["Answer"] ?? "").trim());
-  const firstRewriteAnswer = normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "rewrite")?.["Answer"] ?? "").trim());
-  const firstBlankAnswer = normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "blank")?.["Answer"] ?? "").trim());
+  const firstPair = selectedPairs[0] || null;
+  rewritePlaceholderExample = clipExample(stripEmphasisMarkers(normalizeEscapedBreaks(String(firstPair?.koRow?.["Answer"] ?? ""))) || "example");
+  blankPlaceholderExample = clipExample(stripEmphasisMarkers(normalizeEscapedBreaks(String(firstPair?.enRow?.["Answer"] ?? ""))) || "answer");
 
-  rewritePlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstRewriteAnswer || "example"));
-  blankPlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstBlankAnswer || "answer"));
-
-  questions = filtered.map((row, idx) => {
-    const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
-    const answer = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
-    const title = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Title"] ?? "").trim()));
-    const type = detectType(question);
-
-    const fallbackInst = type === "blank" ? DEFAULT_BLANK_INSTRUCTION : DEFAULT_REWRITE_INSTRUCTION;
-    const modeInst = modeByType[type] || fallbackInst;
-
-    const qNumber = Number(row["QNumber"]) || idx + 1;
-    const rawInstruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
-
-    let instruction = rawInstruction || modeInst;
-    if (qNumber === 1 && modeInst) instruction = modeInst;
-    if (isInstructionLeakingAnswer(instruction, answer, type)) instruction = modeInst;
+  questions = selectedPairs.map(({ koRow, enRow }, idx) => {
+    const koQuestion = normalizeEscapedBreaks(String(koRow["Question"] ?? "").trim());
+    const koAnswer = stripEmphasisMarkers(normalizeEscapedBreaks(String(koRow["Answer"] ?? "").trim()));
+    const enQuestion = normalizeEscapedBreaks(String(enRow["Question"] ?? "").trim());
+    const enAnswer = stripEmphasisMarkers(normalizeEscapedBreaks(String(enRow["Answer"] ?? "").trim()));
+    const title = stripEmphasisMarkers(normalizeEscapedBreaks(String(koRow["Title"] || enRow["Title"] || "").trim()));
+    const qNumber = idx + 1;
+    const sourceQNumbers = [
+      Number(koRow["QNumber"]) || idx * 2 + 1,
+      Number(enRow["QNumber"]) || idx * 2 + 2,
+    ];
+    const koParts = splitKoreanBeAnswer(koAnswer);
+    const koPassThrough = isKoreanPassThrough(koQuestion, koAnswer);
+    const pairAnswer = `${koPassThrough ? koQuestion : koAnswer} / ${enAnswer}`;
 
     return {
       no: idx + 1,
       qNumber,
-      question,
-      answer,
-      instruction,
+      sourceQNumbers,
+      question: `${koQuestion}\n${enQuestion}`,
+      answer: pairAnswer,
+      instruction: DEFAULT_REWRITE_INSTRUCTION,
       title,
-      type,
+      type: "bePair",
+      koQuestion,
+      koAnswer,
+      koParts,
+      koPassThrough,
+      enQuestion,
+      enAnswer,
+      enInstruction: normalizeEscapedBreaks(String(enRow["Instruction"] ?? "").trim()) || DEFAULT_BLANK_INSTRUCTION,
     };
   });
+}
+
+function isKoreanPassThrough(question, answer) {
+  const q = stripEmphasisMarkers(normalizeEscapedBreaks(String(question ?? ""))).replace(/\s+/g, " ").trim();
+  const a = stripEmphasisMarkers(normalizeEscapedBreaks(String(answer ?? ""))).replace(/\s+/g, " ").trim();
+  if (!q || !a) return false;
+  if (normalizeLoose(q, "rewrite") === normalizeLoose(a, "rewrite")) return true;
+
+  const qCore = getKoreanCopulaCore(q);
+  const aCore = getKoreanCopulaCore(a);
+  return !!qCore && !!aCore && normalizeLoose(qCore, "rewrite") === normalizeLoose(aCore, "rewrite");
+}
+
+function getKoreanCopulaCore(value) {
+  const text = String(value ?? "").trim();
+  if (text.endsWith("이다")) return text.slice(0, -2).trim();
+  if (text.endsWith("다")) return text.slice(0, -1).trim();
+  return "";
+}
+
+function splitKoreanBeAnswer(answer) {
+  const text = stripEmphasisMarkers(normalizeEscapedBreaks(String(answer ?? ""))).replace(/\s+/g, " ").trim();
+  const match = text.match(/^(.+?)([은는])\s+(.+)$/);
+  if (!match) {
+    const body = text.endsWith("다") ? text.slice(0, -1).trim() : text;
+    return { subject: "", particle: "는", body, ending: "다" };
+  }
+
+  const subject = match[1].trim();
+  const particle = match[2];
+  const predicate = match[3].trim();
+  const body = predicate.endsWith("다") ? predicate.slice(0, -1).trim() : predicate;
+  return { subject, particle, body, ending: "다" };
 }
 
 function deriveInstructionModeByType(rows) {
@@ -531,7 +1413,11 @@ function renderQuestion() {
 
   isCurrentLocked = false;
 
-  const qTypeLabel = q.type === "blank" ? TEXT.QTYPE_BLANK : TEXT.QTYPE_REWRITE;
+  if (q.type === "bePair") {
+    renderBePairQuestion(area, q);
+    return;
+  }
+
   const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
 
   const placeholder = q.type === "blank"
@@ -546,11 +1432,8 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;">
-        <span class="pill">${escapeHtml(qTypeLabel)}</span>
-      </div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence">${qBody}</div>
+      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
     </div>
 
     <div class="box" style="background:#fff;">
@@ -560,19 +1443,22 @@ function renderQuestion() {
 
     <div class="btn-row">
       <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
   const submitBtn = document.getElementById("submit-btn");
   const nextBtn = document.getElementById("next-btn");
   const input = document.getElementById("user-answer");
-
+  const slotInputControl = input && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
+    : null;
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
   if (nextBtn) nextBtn.addEventListener("click", goNext);
 
   if (input) {
-    input.focus();
+    if (slotInputControl) slotInputControl.focus();
+    else input.focus();
     input.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" && q.type === "blank") {
         ev.preventDefault();
@@ -586,10 +1472,262 @@ function renderQuestion() {
   }
 }
 
+function renderBePairQuestion(area, q) {
+  const ko = q.koParts || splitKoreanBeAnswer(q.koAnswer);
+  const enParts = splitBlankSentence(q.enQuestion);
+  const hint = renderKoreanBeHint(q.koQuestion);
+  const koInputHtml = q.koPassThrough
+    ? `
+              <button id="ko-pass-btn" class="pair-pass-sentence" type="button">
+                <span class="pair-tap-pill">그대로!</span>
+                <span>${escapeHtml(q.koQuestion)}</span>
+              </button>
+            `
+    : renderKoreanAnswerTemplate(q, ko);
+  q.pairStage = "ko";
+  q.koSolved = "";
+
+  area.innerHTML = `
+    <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
+
+    <div class="box">
+      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
+      <div class="pair-stack">
+        <div class="pair-ko-stage" id="pair-ko-stage">
+          <div class="sentence aisth-question-surface aisth-question-center pair-source">${escapeHtml(q.koQuestion)}</div>
+          <div class="pair-answer-box" id="pair-answer-box">
+            <div class="pair-ko-template" id="pair-ko-template">
+              ${koInputHtml}
+            </div>
+            <div id="pair-en-rest" class="pair-en-rest" aria-hidden="true">
+              <div class="pair-card-title">${escapeHtml(q.enInstruction || DEFAULT_BLANK_INSTRUCTION)}</div>
+              <div class="pair-en-question">
+                <span>${renderPairEnglishSubject(enParts.before)}</span>
+                <input id="en-answer" class="pair-be-input" type="text" autocomplete="off" inputmode="text" lang="en" autocapitalize="none" spellcheck="false" placeholder="${escapeHtmlAttr(q.qNumber === 1 ? q.enAnswer : "")}" disabled />
+                <span>${escapeHtml(enParts.after)}</span>
+              </div>
+              <div class="pair-en-hint">${hint}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
+    </div>
+  `;
+
+  const submitBtn = document.getElementById("submit-btn");
+  const nextBtn = document.getElementById("next-btn");
+  const bodyInputs = Array.from(document.querySelectorAll(".pair-ko-slot-input"));
+  const enInput = document.getElementById("en-answer");
+  const passBtn = document.getElementById("ko-pass-btn");
+
+  const bodySlotControls = !q.koPassThrough && window.AisthInputSlots
+    ? bodyInputs
+        .map((input) => window.AisthInputSlots.enhance(input, {
+          modelText: input.dataset.modelText || "",
+          placeholderText: input.dataset.placeholder || "",
+          onEnter: submitCurrentAnswer,
+        }))
+        .filter(Boolean)
+    : [];
+
+  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
+  if (nextBtn) nextBtn.addEventListener("click", goNext);
+  if (passBtn) passBtn.addEventListener("click", submitCurrentAnswer);
+  [...bodyInputs, enInput].forEach((input) => {
+    if (!input) return;
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        submitCurrentAnswer();
+      }
+    });
+  });
+
+  if (passBtn) passBtn.focus();
+  else if (bodySlotControls[0]) bodySlotControls[0].focus();
+  else if (bodyInputs[0]) bodyInputs[0].focus();
+}
+
+function renderKoreanAnswerTemplate(q, ko) {
+  const bodyParts = buildKoreanBodyTemplateParts(ko.body);
+  const bodyHtml = bodyParts.map((part, index) => {
+    if (part.kind === "fixed") {
+      return `<span class="pair-fixed">${escapeHtml(part.text)}</span>`;
+    }
+
+    const placeholder = q.qNumber === 1 ? part.text : "";
+    return `
+      <span class="pair-slot-source">
+        <input class="short-input pair-ko-slot-input" type="text" autocomplete="off" inputmode="text" lang="ko" autocapitalize="none" spellcheck="false" data-model-text="${escapeHtmlAttr(part.text)}" data-placeholder="${escapeHtmlAttr(placeholder)}" />
+      </span>
+    `;
+  }).join("");
+
+  return `
+              <span class="pair-fixed pair-fixed-subject">${escapeHtml(ko.subject + ko.particle)}</span>
+              ${bodyHtml}
+              <span class="pair-fixed">${escapeHtml(ko.ending)}</span>
+            `;
+}
+
+function buildKoreanBodyTemplateParts(body) {
+  const text = String(body ?? "").trim();
+  const locativeMatch = text.match(/^(.+?)에\s*있$/);
+  if (locativeMatch) {
+    return [
+      { kind: "slot", text: locativeMatch[1].trim() },
+      { kind: "fixed", text: "에" },
+      { kind: "slot", text: "있" },
+    ];
+  }
+
+  return [{ kind: "slot", text }];
+}
+
+function splitBlankSentence(sentence) {
+  const text = String(sentence ?? "");
+  const match = text.match(/_{2,}/);
+  if (!match) return { before: text, after: "" };
+  return {
+    before: text.slice(0, match.index).trimEnd(),
+    after: text.slice(match.index + match[0].length).trimStart(),
+  };
+}
+
+function renderPairEnglishSubject(value) {
+  const raw = String(value ?? "");
+  const leading = raw.match(/^\s*/)?.[0] || "";
+  const trailing = raw.match(/\s*$/)?.[0] || "";
+  const core = raw.trim();
+  if (!core) return escapeHtml(raw);
+
+  const renderedCore = renderPairEnglishSubjectCore(core);
+  return `${escapeHtml(leading)}${renderedCore}${escapeHtml(trailing)}`;
+}
+
+function renderPairEnglishSubjectCore(subject) {
+  const text = String(subject ?? "");
+  const punctuation = text.match(/[.,!?;:]+$/)?.[0] || "";
+  const core = punctuation ? text.slice(0, -punctuation.length) : text;
+  const lower = core.toLowerCase();
+
+  if (lower === "we" || lower === "they") {
+    return `<span class="focus-token pair-subject-highlight">${escapeHtml(core)}</span>${escapeHtml(punctuation)}`;
+  }
+
+  if (!isPluralSubjectText(core)) return escapeHtml(text);
+
+  const match = core.match(/([A-Za-z]+s)$/);
+  if (!match) {
+    return `<span class="focus-token pair-subject-highlight">${escapeHtml(core)}</span>${escapeHtml(punctuation)}`;
+  }
+
+  const word = match[1];
+  if (/ss$/i.test(word)) return escapeHtml(text);
+
+  const sIndex = match.index + word.length - 1;
+  return `${escapeHtml(core.slice(0, sIndex))}<span class="focus-token pair-subject-highlight pair-subject-s">${escapeHtml(core.slice(sIndex, sIndex + 1))}</span>${escapeHtml(core.slice(sIndex + 1))}${escapeHtml(punctuation)}`;
+}
+
+function isPluralSubjectText(value) {
+  const text = normalizeEscapedBreaks(String(value ?? ""))
+    .replace(/\*\*/g, "")
+    .replace(/[.,!?;:()[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
+  if (!text) return false;
+  if (/\band\b/.test(text)) return true;
+
+  const words = text.split(" ").filter(Boolean);
+  if (!words.length) return false;
+
+  const first = words[0];
+  if (["they", "we", "these", "those"].includes(first)) return true;
+  if (["he", "she", "it", "this", "that", "i", "you"].includes(first)) return false;
+
+  const determiners = new Set(["a", "an", "the", "my", "your", "his", "her", "our", "their", "this", "that", "these", "those"]);
+  const singularSWords = new Set(["news", "mathematics", "physics", "economics"]);
+  const irregularPluralNouns = new Set(["people", "children", "men", "women", "mice", "feet", "teeth", "geese", "police"]);
+
+  const contentWords = words.filter((word) => !determiners.has(word));
+  const head = contentWords.length ? contentWords[contentWords.length - 1] : words[words.length - 1];
+  if (!head) return false;
+  if (irregularPluralNouns.has(head)) return true;
+  if (singularSWords.has(head)) return false;
+
+  return /^[a-z]+s$/i.test(head) && !/ss$/i.test(head);
+}
+
+function renderKoreanBeHint(value) {
+  const text = escapeHtml(stripEmphasisMarkers(normalizeEscapedBreaks(String(value ?? ""))));
+  return text.replaceAll("이다", `<span class="blank-slot pair-ida-chip">이다</span>`);
+}
+
+// Step transition pattern: morph the previous step's answer box into the next step's container,
+// then expand its lower area. Keep this as the shared model for later multi-step exercises.
+function revealBePairEnglishStage(q, koUser) {
+  const koStage = document.getElementById("pair-ko-stage");
+  const sourceBox = koStage?.querySelector(".pair-source");
+  const answerBox = document.getElementById("pair-answer-box");
+  const koTemplate = document.getElementById("pair-ko-template");
+  const enRest = document.getElementById("pair-en-rest");
+  const enInput = document.getElementById("en-answer");
+  const stack = koStage?.closest(".pair-stack");
+
+  if (koTemplate) {
+    koTemplate.innerHTML = `<div class="pair-ko-plain-line">${escapeHtml(koUser)}</div>`;
+  }
+  if (answerBox) {
+    answerBox.classList.remove("is-in");
+    answerBox.classList.remove("is-lifting");
+    answerBox.classList.remove("is-expanded");
+    answerBox.classList.add("is-plain");
+    void answerBox.offsetWidth;
+    answerBox.classList.add("is-in");
+  }
+  if (enRest) enRest.setAttribute("aria-hidden", "true");
+  if (enInput) enInput.disabled = true;
+
+  window.setTimeout(() => {
+    if (koStage && sourceBox && answerBox) {
+      const sourceRect = sourceBox.getBoundingClientRect();
+      const answerRect = answerBox.getBoundingClientRect();
+      const lift = Math.max(0, answerRect.top - sourceRect.top);
+      koStage.style.setProperty("--pair-source-lift", `${Math.ceil(lift)}px`);
+    }
+    if (koStage) koStage.classList.add("is-morphing");
+    if (answerBox) answerBox.classList.add("is-lifting");
+  }, 120);
+
+  window.setTimeout(() => {
+    if (stack) stack.classList.add("is-step2");
+    if (answerBox) answerBox.classList.add("is-expanded");
+    if (enRest) enRest.setAttribute("aria-hidden", "false");
+    if (enInput) enInput.disabled = false;
+  }, 580);
+
+  window.setTimeout(() => {
+    if (enInput) enInput.focus();
+  }, 720);
+}
+
 function submitCurrentAnswer() {
   if (isCurrentLocked) return;
 
   const q = questions[currentIndex];
+  if (q?.type === "bePair") {
+    submitBePairAnswer(q);
+    return;
+  }
+
   const input = document.getElementById("user-answer");
   const submitBtn = document.getElementById("submit-btn");
   const nextBtn = document.getElementById("next-btn");
@@ -615,6 +1753,7 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   input.disabled = true;
+  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) nextBtn.disabled = false;
 
@@ -636,6 +1775,125 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function submitBePairAnswer(q) {
+  const bodyInputs = Array.from(document.querySelectorAll(".pair-ko-slot-input"));
+  const enInput = document.getElementById("en-answer");
+  const passBtn = document.getElementById("ko-pass-btn");
+  const submitBtn = document.getElementById("submit-btn");
+  const nextBtn = document.getElementById("next-btn");
+  const feedback = document.getElementById("feedback");
+  const ko = q.koParts || splitKoreanBeAnswer(q.koAnswer);
+
+  if (!enInput) return;
+  if (q.pairStage !== "en" && !q.koPassThrough && !bodyInputs.length) return;
+
+  if (q.pairStage !== "en") {
+    if (q.koPassThrough) {
+      const koUser = q.koQuestion || q.koAnswer;
+      q.pairStage = "en";
+      q.koSolved = koUser;
+      if (passBtn) passBtn.disabled = true;
+      if (feedback) {
+        feedback.className = "feedback";
+        feedback.innerHTML = "";
+      }
+      showToast("ok", TEXT.CORRECT);
+      revealBePairEnglishStage(q, koUser);
+      return;
+    }
+
+    const hasEmptySlot = bodyInputs.some((input) => !String(input.value || "").trim());
+    if (hasEmptySlot) {
+      showToast("no", TEXT.INPUT_REQUIRED);
+      return;
+    }
+
+    const koUser = buildKoreanUserFromSlots(ko, bodyInputs);
+    const koOk = isAnswerCorrect("rewrite", koUser, q.koAnswer);
+    if (!koOk) {
+      if (feedback) {
+        feedback.className = "feedback";
+        feedback.innerHTML = "";
+      }
+      showToast("no", TEXT.WRONG);
+      return;
+    }
+
+    q.pairStage = "en";
+    q.koSolved = koUser;
+    bodyInputs.forEach((input) => {
+      input.disabled = true;
+      if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
+    });
+    if (feedback) {
+      feedback.className = "feedback";
+      feedback.innerHTML = "";
+    }
+    showToast("ok", TEXT.CORRECT);
+    revealBePairEnglishStage(q, koUser);
+    return;
+  }
+
+  const enRaw = String(enInput.value || "").trim();
+  if (!enRaw) {
+    showToast("no", TEXT.INPUT_REQUIRED);
+    return;
+  }
+
+  const enOk = isAnswerCorrect("blank", enRaw, q.enAnswer);
+
+  if (!enOk) {
+    if (feedback) {
+      feedback.className = "feedback";
+      feedback.innerHTML = "";
+    }
+    showToast("no", TEXT.WRONG);
+    return;
+  }
+
+  isCurrentLocked = true;
+  enInput.disabled = true;
+  if (submitBtn) submitBtn.disabled = true;
+  if (nextBtn) nextBtn.disabled = true;
+
+  const koUser = q.koSolved || q.koAnswer;
+  results.push({
+    no: currentIndex + 1,
+    qNumber: q.qNumber,
+    type: q.type,
+    question: q.question,
+    selected: `${koUser} / ${enRaw}`,
+    answer: q.answer,
+    instruction: q.instruction,
+    correct: true,
+  });
+
+  if (feedback) {
+    feedback.className = "feedback";
+    feedback.innerHTML = "";
+  }
+
+  storeLatestResultSnapshot();
+  showToast("ok", TEXT.CORRECT);
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (currentIndex === solvedIndex) goNext();
+  }, 650);
+}
+
+function buildKoreanUserFromSlots(ko, inputs) {
+  const bodyParts = buildKoreanBodyTemplateParts(ko.body);
+  let slotIndex = 0;
+  const body = bodyParts.map((part) => {
+    if (part.kind === "fixed") return part.text;
+    const input = inputs[slotIndex];
+    slotIndex += 1;
+    return String(input?.value || "").trim();
+  }).join("");
+
+  return `${ko.subject}${ko.particle} ${body}${ko.ending}`;
 }
 
 function goNext() {

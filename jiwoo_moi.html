@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>고3 2026to2027 6평 요지 랜덤 퀴즈</title>
+<style>
+  :root {
+    --bg: #f7f3ee;
+    --paper: #fffdf9;
+    --ink: #222;
+    --muted: #6c6258;
+    --line: #ded2c6;
+    --accent: #c84630;
+    --accent-soft: #fde4dc;
+    --gold: #b28a4e;
+    --good: #177245;
+    --bad: #b5372f;
+    --shadow: 0 16px 40px rgba(60, 43, 28, .12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(circle at top, #fff 0, var(--bg) 48%, #efe4d8 100%);
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+    line-height: 1.65;
+  }
+  .app {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 28px 18px 60px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-end;
+    margin-bottom: 18px;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 38px);
+    letter-spacing: -0.04em;
+  }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .top-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  button, select {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 2px 0 rgba(0,0,0,.03);
+  }
+  button:hover, select:hover { border-color: var(--gold); }
+  button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  button.ghost { background: transparent; }
+  .layout { display: grid; grid-template-columns: 220px 1fr; gap: 18px; align-items: start; }
+  .side {
+    position: sticky;
+    top: 14px;
+    background: rgba(255,253,249,.78);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+  .side-title { font-size: 13px; color: var(--muted); font-weight: 800; padding: 6px 8px 10px; }
+  .nav { display: grid; gap: 6px; }
+  .nav button {
+    width: 100%; text-align: left; border-radius: 14px; padding: 10px 12px; font-size: 14px; line-height: 1.25;
+    box-shadow: none;
+  }
+  .nav button.active { background: #2a2623; color: white; border-color: #2a2623; }
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 30px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 26px 30px 18px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(90deg, rgba(200,70,48,.12), rgba(178,138,78,.07));
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  h2 { margin: 4px 0 0; font-size: clamp(22px, 3vw, 32px); letter-spacing: -0.04em; }
+  .kr-summary { margin-top: 6px; color: #4f463d; font-weight: 700; }
+  .passage {
+    padding: 30px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(18px, 2.1vw, 23px);
+    line-height: 1.78;
+    word-break: keep-all;
+  }
+  .question {
+    padding: 24px 30px 30px;
+    border-top: 1px solid var(--line);
+    background: #fffaf4;
+  }
+  .q-title {
+    font-weight: 900;
+    margin-bottom: 14px;
+    font-size: 18px;
+  }
+  .options { display: grid; gap: 10px; }
+  .option {
+    width: 100%;
+    text-align: left;
+    border: 1px solid #e3d5c7;
+    background: white;
+    border-radius: 18px;
+    padding: 13px 15px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.45;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 8px;
+    align-items: start;
+  }
+  .mark {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    background: #f1e8df;
+    font-weight: 900;
+    font-size: 13px;
+  }
+  .option.selected { border-color: var(--gold); background: #fff7e9; }
+  .option.correct { border-color: var(--good); background: #ecfff4; }
+  .option.wrong { border-color: var(--bad); background: #fff0ef; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+  .result {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px dashed var(--line);
+    display: none;
+  }
+  .result.show { display: block; }
+  .result strong { color: var(--accent); }
+  .answer-list { margin: 8px 0 0; padding-left: 22px; }
+  .print-set { margin-top: 22px; display: none; }
+  .print-set.show { display: block; }
+  .print-page {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    padding: 26px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .print-page h3 { margin: 0 0 8px; font-size: 24px; }
+  .print-passage { font-family: Georgia, "Times New Roman", serif; font-size: 18px; line-height: 1.7; }
+  .print-options { margin-top: 16px; display: grid; gap: 7px; }
+  .print-answer { color: var(--muted); font-size: 12px; margin-top: 10px; }
+  @media (max-width: 820px) {
+    header { display: block; }
+    .top-actions { justify-content: flex-start; margin-top: 12px; }
+    .layout { grid-template-columns: 1fr; }
+    .side { position: static; }
+    .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card-head, .passage, .question { padding-left: 20px; padding-right: 20px; }
+  }
+  @media print {
+    body { background: white; }
+    .app { max-width: none; padding: 0; }
+    header, .side, .card, .top-actions { display: none !important; }
+    .layout { display: block; }
+    .print-set { display: block !important; }
+    .print-page {
+      box-shadow: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      page-break-after: always;
+    }
+    .print-answer { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>요지 찾기 랜덤 퀴즈</h1>
+        <div class="sub">각 제시문: 정답 paraphrase 3개 + 오답 10개 내장 / 출제는 정답 1개 + 오답 4개 랜덤</div>
+      </div>
+      <div class="top-actions">
+        <button class="ghost" onclick="makePrintSet()">인쇄용 전체 세트 생성</button>
+        <button class="primary" onclick="window.print()">PDF/인쇄</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="side">
+        <div class="side-title">모의고사 제시문</div>
+        <div class="nav" id="nav"></div>
+      </aside>
+
+      <main>
+        <section class="card" id="quizCard">
+          <div class="card-head">
+            <div class="eyebrow" id="eyebrow"></div>
+            <h2 id="title"></h2>
+            <div class="kr-summary" id="summary"></div>
+          </div>
+          <div class="passage" id="passage"></div>
+          <div class="question">
+            <div class="q-title">이 글의 요지로 가장 적절한 것은?</div>
+            <div class="options" id="options"></div>
+            <div class="controls">
+              <button class="primary" onclick="checkAnswer()">정답 확인</button>
+              <button onclick="rerollCurrent()">이 지문 다시 출제</button>
+              <button onclick="prevItem()">이전</button>
+              <button onclick="nextItem()">다음</button>
+              <button onclick="randomItem()">전체 랜덤</button>
+            </div>
+            <div class="result" id="result"></div>
+          </div>
+        </section>
+
+        <section class="print-set" id="printSet"></section>
+      </main>
+    </div>
+  </div>
+
+<script>
+const DATA = [
+  {
+    "id": "MOI-20",
+    "title": "20번",
+    "subtitle": "체육 지도자는 참여자가 활동의 원리를 이해하고 스스로 훈련의 주인이 되도록 도와야 한다.",
+    "passage": "Instructors of physical activities often focus more on the activities themselves than on the participants who perform them. People may believe that training our bodies is unrelated to training our minds. However, participants’ minds determine their attitudes and level of effort toward physical development. In usual practice, instructors may just tell their participants to exercise regularly, warm up before exercising, or use a particular strategy. However, it is not sufficient for instructors to expect participants to blindly follow their directions in physical activities. Instructors must raise participants’ awareness of how these activities enhance their physical performance. For example, an instructor could explicitly explain how warming up before exercising improves their performances. If participants understand the principles of these activities, it enables them to gradually take fuller ownership of their own development.",
+    "correct": [
+      "Physical instructors should help participants understand the principles behind activities so they can take ownership of their development.",
+      "Effective physical training requires explaining why activities improve performance, not merely giving directions.",
+      "Participants develop better when instructors connect bodily practice with conscious understanding."
+    ],
+    "wrong": [
+      "Physical education should focus mainly on repeated practice rather than mental awareness.",
+      "Instructors should design activities according to each participant’s natural talent.",
+      "Regular warm-ups are more important than understanding training principles.",
+      "Participants improve best when they follow expert directions without questioning them.",
+      "Physical development depends mostly on choosing the right exercise strategy.",
+      "Training the body and training the mind should be treated as separate goals.",
+      "Instructors should reduce theoretical explanation to keep participants motivated.",
+      "Physical programs should prioritize convenience over long-term ownership.",
+      "Participants must compete with others to recognize their physical potential.",
+      "Exercise routines are effective only when they are performed frequently."
+    ]
+  },
+  {
+    "id": "MOI-21",
+    "title": "21번",
+    "subtitle": "동물의 유연한 행동과 문제 해결 능력을 보면 의식이 인간에게만 있다는 믿음을 버리고 동물 의식을 연구해야 한다.",
+    "passage": "In fact, scientists attributing consciousness to any animal is so recent that the internet is older. In 1976 a zoologist named Donald Griffin published The Question of Animal Awareness, a book arguing that animal cognition ought to be taken seriously. He and a colleague had been responsible in 1944 for discovering that bats navigate by echolocation. Now, after a lifetime spent watching those creatures, he became convinced they had inner worlds. They had flexible behavior, he said, or the ability to change their behavior as external circumstances changed, a hallmark of true intelligence. He’d watched bats develop clever techniques for finding food; they could clearly make decisions on the fly, and exhibited many of the same problem-solving abilities as humans did. Animal thought and reason ought to be seriously studied, he argued. After all, despite the flourishing of neuroscience, no one had yet found any part of the brain unique to humans that might be responsible for this hallowed “consciousness.” Wasn’t it time to give up the ghost?",
+    "correct": [
+      "Evidence of animals’ flexible behavior challenges the assumption that consciousness belongs only to humans.",
+      "Animal cognition deserves serious study because animals show adaptive decision-making and problem-solving abilities.",
+      "The belief in uniquely human consciousness should be reconsidered in light of intelligent animal behavior."
+    ],
+    "wrong": [
+      "Animal intelligence should be studied mainly through the structure of the human brain.",
+      "Bats became important to science because echolocation proved they lack consciousness.",
+      "Human consciousness is superior because humans alone possess true problem-solving abilities.",
+      "Neuroscience has already identified the brain region responsible for consciousness.",
+      "Animal behavior is flexible only when humans train animals to respond to change.",
+      "Donald Griffin argued that bats navigate by instinct rather than cognition.",
+      "The study of animal awareness became outdated after the rise of the internet.",
+      "Consciousness should be defined only by language-based reasoning.",
+      "Animals can solve problems, but they do not have inner worlds.",
+      "Human intelligence remains the standard by which animal behavior should be dismissed."
+    ]
+  },
+  {
+    "id": "MOI-22",
+    "title": "22번",
+    "subtitle": "자동차 회사들은 소비자가 자동차 앞모습에 감정적으로 반응한다는 점을 이용해 더 화나고 강해 보이는 디자인을 만든다.",
+    "passage": "Car manufacturers know people form emotional attachments to automobile ‘faces’ and use the fact to guide their design and marketing efforts. “In today’s hyper-competitive car market, designers are focusing on faces as part of a broader effort to design cars that appeal to buyers ― tapping psychologists, anthropologists and other experts in human behavior, and even monitoring the brain waves of focus-group participants,” the Wall Street Journal reported in a 2006 article entitled ‘Why Cars Got Angry.’ Automotive research shows “70% of drivers identify and judge vehicles by the headlights and grille,” the article reported. In the first years of the twenty-first century, the trend was toward angrier, scarier vehicles’ faces. The article hypothesized that these faces help drivers feel safer in heavier traffic amidst more oversize SUVs. Reflecting our tumultuous times, the ‘scary look’ shows no sign of slowing in the new millennium. “Buoyant sales of cars with styling which suggests power or bad temper seem to confirm that customers are happy with this look,” an international automotive site reported in 2017.",
+    "correct": [
+      "Car makers exploit emotional responses to vehicle “faces” by designing aggressive looks that appeal to buyers.",
+      "Automakers shape front-end designs around consumer psychology, making cars appear powerful or threatening.",
+      "The popularity of angry-looking cars reflects how vehicle design taps into buyers’ emotional expectations."
+    ],
+    "wrong": [
+      "Car buyers usually judge vehicles by fuel efficiency rather than appearance.",
+      "Automotive designers avoid emotional appeal because it weakens brand trust.",
+      "Angry-looking cars have declined as drivers increasingly prefer friendly designs.",
+      "Consumers choose SUVs mainly because their engines perform better in heavy traffic.",
+      "Headlights and grilles matter little in how drivers evaluate cars.",
+      "Modern car design is driven mostly by aerodynamic requirements.",
+      "Psychological research has shown that car faces rarely influence buyers.",
+      "Drivers dislike designs that suggest power or bad temper.",
+      "Vehicle marketing now focuses less on appearance and more on safety technology.",
+      "The “scary look” in cars was only a short-lived trend of the early 2000s."
+    ]
+  },
+  {
+    "id": "MOI-23",
+    "title": "23번",
+    "subtitle": "동물의 크기는 수명, 반사 속도, 학습 가능성, 생존 전략의 차이를 만든다.",
+    "passage": "A telescoping of time correlates with size. Small animals’ reflexes must be quicker in order to control much smaller limbs and respond to rapid locomotor feedback. Further, decision making must be streamlined in small species because their high metabolic rates and minimal energy reserves offer few choices in food-searching activities, defending against predators, or mating behaviors. And, perhaps most important, a short lifetime offers little time for learning from experience. As a result, being short-lived puts a premium on the effectiveness of preprogrammed behavior patterns that require little in the way of environmental fine-tuning. Large animals, in comparison, can get by with rather slower reflexes, can afford to vary their mating and food-searching behaviors in an effort to better optimize their behaviors, and may have a considerable opportunity to learn by observation and trial and error. Being longer-lived puts a greater premium on learning and memory, and less on automatic preprogrammed behaviors. In addition, living a long time or having the capacity to travel for long distances is more likely to expose an animal to significant changes in the environment.",
+    "correct": [
+      "Animal size shapes survival strategies by influencing reflex speed, lifespan, learning, and reliance on instinct.",
+      "Smaller and larger animals differ in how much they depend on automatic behavior versus learned adaptation.",
+      "Body size affects animals’ time scale, energy limits, and opportunities to learn from experience."
+    ],
+    "wrong": [
+      "Small animals survive better because they learn faster from repeated experience.",
+      "Large animals depend more on instinct because they face greater environmental change.",
+      "Animal intelligence is determined mainly by metabolic rate.",
+      "Long-lived animals avoid trial and error because it wastes too much energy.",
+      "Reflex speed matters less for small animals than for large animals.",
+      "Small species have more freedom in food-searching and mating behavior.",
+      "Environmental fine-tuning is most important for short-lived animals.",
+      "Large animals rely on preprogrammed behavior because they have slower reflexes.",
+      "Energy reserves prevent animals from needing memory or learning.",
+      "The passage mainly compares animals with different perceptions of time."
+    ]
+  },
+  {
+    "id": "MOI-24",
+    "title": "24번",
+    "subtitle": "관광 산업은 개별 서비스 판매에서 벗어나 숙박·교통·부가 서비스를 통합하는 방향으로 변화했다.",
+    "passage": "Before the 1950s, tourism was very much an industry which was fragmented; hotels, transport operators, travel agents, and tour operators all tended to work independently of each other. Hotels were largely in the business of selling bed nights. Airlines and railways were in the business of selling seats. Travel agents, of course, were selling travel and holidays, but in each case they tended to operate very much as individual businesses. From the mid-1950s onwards, particularly in the UK, the growth of tour operators began to change the nature of the industry from essentially individual business activities to more integrated activities. Hotels, for example, were beginning to see customers as wanting a range of services rather than simply buying accommodation. So hotels began to develop shopping arcades and later to offer secretarial centres to try to increase the spend of guests within the hotel complex. Transport operators, particularly in the airline business, saw the sale of transport services as being integral to a much wider need. Airlines offered insurance and accommodation booking for travellers.",
+    "correct": [
+      "Tourism shifted from fragmented businesses to integrated services responding to travelers’ broader needs.",
+      "The tourism industry evolved from separate service providers into more connected, package-like operations.",
+      "Hotels and transport operators began expanding beyond their original services as tourism became more integrated."
+    ],
+    "wrong": [
+      "Tourism declined because hotels and airlines failed to cooperate after the 1950s.",
+      "Hotels became successful by focusing only on selling accommodation.",
+      "Travel agents disappeared as tour operators took over the entire industry.",
+      "Airlines reduced extra services to concentrate on selling seats.",
+      "Tourism integration failed because customers wanted fewer services.",
+      "The tourism industry became fragmented after tour operators grew.",
+      "Hotels developed shopping arcades because accommodation demand decreased.",
+      "Transport operators rejected the idea of broader travel needs.",
+      "Tourism changed mainly because customers stopped using travel agents.",
+      "Modern tourism became less profitable due to excessive service integration."
+    ]
+  },
+  {
+    "id": "MOI-29",
+    "title": "29번",
+    "subtitle": "유럽 의복의 변화는 패션이 단순한 옷차림이 아니라 문화와 사회적 지위를 드러내는 장치임을 보여 준다.",
+    "passage": "Fashion is always deeply cultural, and an excellent example of this can be seen in the evolution of European clothing. At the beginning of the Middle Ages, clothing tended to be simple and was ①frequently made of rough wool or animal furs. With advances in cloth making, however, fashion began moving toward styles ②what were more elaborate and form-fitting. In the Renaissance and Elizabethan eras, styles became even more refined. The clothes that wealthy people were wearing became increasingly fancier, with a particular emphasis being placed on smaller waists. The connection between clothing and social status was so pronounced that laws were enacted ③to limit the wearing of certain luxury items. ④Allowed only for higher social classes, luxurious styles and decorations such as feathers, silk, or velvet were used as a means of demonstrating one’s standing in society. This was further reinforced as upperclass styles came to be explicitly incorporated into cultural ceremonies so that ⑤their wearers’ roles could be identified clearly.",
+    "correct": [
+      "The evolution of European clothing shows how fashion embodies culture and marks social status.",
+      "Fashion functions as a cultural system through which social hierarchy is visually expressed.",
+      "Changes in European dress reveal the deep connection between clothing, culture, and class distinction."
+    ],
+    "wrong": [
+      "European fashion became simpler as cloth-making techniques improved.",
+      "Middle Ages clothing was mainly designed to display wealth and luxury.",
+      "Clothing laws were enacted to make fashion accessible to all classes.",
+      "Renaissance fashion rejected social distinction in favor of comfort.",
+      "Wealthy people used plain clothing to hide their social position.",
+      "Fashion became less cultural as styles grew more refined.",
+      "European clothing evolved mainly because animal furs became unavailable.",
+      "Luxury items were banned because they were uncomfortable to wear.",
+      "Cultural ceremonies reduced the connection between clothing and status.",
+      "Fashion history shows that social class had little influence on dress."
+    ]
+  },
+  {
+    "id": "MOI-30",
+    "title": "30번",
+    "subtitle": "고전극과 뮤지컬 대본은 낯선 언어 형식과 무대 요소 때문에 의미를 파악하려면 여러 번 읽고 상상해야 한다.",
+    "passage": "Classical works by playwrights such as Shakespeare or Euripides or even American musical song lyrics contain unconventional and unrealistic methods of communicating characters’ thoughts and feelings, and take a bit more skill and patience to understand. The reader must be mindful not to let the poetic form or archaic word usage get in the way of getting meaningful information about the story, but instead see the form itself as a ①revealing stylistic technique. Scripts with complex language or unfamiliar styles may require several additional readings in order for the nuance to become ②clear. Musical theater pieces are particularly difficult to visualize when reading because of the diminished emphasis on dialogue and a ③significant emphasis on song and dance. For example, when the music and lyrics are removed from a musical theater script, what is left is the dialogue, known as the book or libretto, and it can be very ④thick. There is an emphasis on dance, movement, or action in musical theater that can be ⑤time-consuming when actually performed on stage, but can take very little space when typed into a play script.",
+    "correct": [
+      "Complex scripts require patient reading because style, archaic language, and performance elements obscure meaning.",
+      "Understanding classical and musical theater scripts demands attention to both language and staged action.",
+      "Readers must look beyond unfamiliar forms to grasp how dramatic meaning is conveyed in scripts."
+    ],
+    "wrong": [
+      "Musical theater scripts are easy to visualize because dialogue is emphasized.",
+      "Poetic form should be ignored because it prevents meaningful interpretation.",
+      "Classical works communicate characters’ feelings in realistic everyday language.",
+      "Removing music and lyrics makes a musical script richer and more detailed.",
+      "Scripts with complex language usually reveal their nuance on the first reading.",
+      "Stage action takes up much more space in a printed script than in performance.",
+      "Archaic word usage makes classical plays less valuable as literature.",
+      "Readers should focus only on plot and ignore stylistic technique.",
+      "Musical theater depends mainly on dialogue rather than song and dance.",
+      "The passage argues that difficult scripts are unsuitable for modern readers."
+    ]
+  },
+  {
+    "id": "MOI-31",
+    "title": "31번",
+    "subtitle": "보존은 원래 상태를 건드리지 않는 데, 보전은 변화를 인정하고 원하는 상태를 회복·연장하는 데 초점을 둔다.",
+    "passage": "Ever since the early Enlightenment, preservation and conservation have been closely related. Taken as near synonyms, their meaning is to maintain an object or system insofar as possible in its present state, to protect it from change, usually for contemplation, research, display, and perhaps for use. Conservationists who distinguish their activities from preservation emphasize conservation’s restorative aspects ― restoring a historical musical instrument, for example, or a painting, or a dinosaur, or an ecosystem. Conservationists acknowledge change but try to manage it in order to prolong a(n) ______ state. Preservationists (who may nonetheless call themselves conservationists) think of themselves more as protectors. They sometimes criticize conservationists for setting an additional priority on yield or harvest or use, rather than interfering as minimally as possible in order to preserve the original object or system, as they would do. Preservationists would, for example, prefer to keep a historical musical instrument “as found” in a deteriorated state, for study, rather than to restore or repair it for display or use.",
+    "correct": [
+      "Conservation manages change to prolong a desired state, whereas preservation minimizes interference with the original object.",
+      "The key difference is that conservation restores and uses, while preservation protects things as found.",
+      "Conservation and preservation both protect objects, but they disagree over restoration and intervention."
+    ],
+    "wrong": [
+      "Preservationists prefer restoring objects for display and practical use.",
+      "Conservationists reject change and try to freeze objects in their original condition.",
+      "Preservation and conservation are completely unrelated activities.",
+      "Conservationists value noninterference more than restoration.",
+      "Preservationists prioritize harvest and use over historical study.",
+      "Both groups agree that damaged objects should always be repaired.",
+      "Conservation means preventing any object from changing over time.",
+      "Preservation focuses on making old objects more useful to modern audiences.",
+      "Restoring a musical instrument is an example of strict preservation.",
+      "The passage argues that preservation is less scientific than conservation."
+    ]
+  },
+  {
+    "id": "MOI-32",
+    "title": "32번",
+    "subtitle": "사람의 의미와 감정은 비언어 행동으로 드러나므로 효과적인 청자는 이를 관찰하고 말로 확인해야 한다.",
+    "passage": "Speakers don’t always put everything that’s important to them into words. Very often you can understand a speaker’s meaning by observing their nonverbal behaviors such as a change in a vocal tone or volume, eye contact, facial expressions and gestures. As it is easy to misinterpret nonverbal behavior, effective listeners verbally confirm their interpretations of someone’s nonverbal communication. A question as simple as “Do your nods indicate a yes vote?” can make sure that everyone is on the same wavelength. If, as nonverbal research indicates, more than half of a speaker’s meaning is conveyed nonverbally, we are missing a lot of important information if we fail to “listen” to nonverbal behavior. Even Freud suggested that “he that has eyes to see and ears to hear may convince himself that no mortal can keep a secret. If his lips are silent, he chatters with his fingertips; betrayal oozes out of him at every pore.” No wonder it is difficult for most people to ______ in a face-to-face group discussion.",
+    "correct": [
+      "Effective listeners attend to nonverbal cues and verbally check their interpretations.",
+      "Much of a speaker’s meaning is revealed nonverbally, so listeners must actively interpret and confirm it.",
+      "Face-to-face communication makes feelings difficult to hide because nonverbal behavior leaks meaning."
+    ],
+    "wrong": [
+      "Speakers usually express all important meanings clearly in words.",
+      "Nonverbal behavior is easier to interpret than verbal messages.",
+      "Effective listeners should avoid asking questions about gestures or tone.",
+      "Most meaning in conversation is conveyed through spoken language alone.",
+      "Facial expressions and eye contact are unreliable and should be ignored.",
+      "People can easily conceal their feelings in group discussions.",
+      "Verbal confirmation often prevents people from staying on the same wavelength.",
+      "Nonverbal communication matters only when speakers are silent.",
+      "Freud argued that people reveal secrets only through their lips.",
+      "Listeners should focus on content rather than tone, volume, or gesture."
+    ]
+  },
+  {
+    "id": "MOI-33",
+    "title": "33번",
+    "subtitle": "감정적 몰입이 클수록 지각은 기대와 욕망에 치우쳐 적은 유사성만으로도 대상을 잘못 인식한다.",
+    "passage": "Imagination continues to function when perception is not actively discerning objects, in cases of emotion, disease, and sleep. Emotions dispose one to see the world in a distorted way. A coward’s perceptual disposition is affected by his disposition to experience fear. A lover’s expectations are affected by desire. In such cases, a small similarity between a perceived object and the thing one expects to see can lead to the misidentification of the perceived object as that thing. The coward sees the enemy, while the lover sees the object of desire everywhere. The more affected one is, ______. While the central organ of sense normally functions by comparing similarities and differences, emotions dispose one to discern objects inaccurately. The greater the emotional investment, the more biased one’s perception.",
+    "correct": [
+      "Strong emotional investment biases perception, making people see what they expect or desire.",
+      "Emotion distorts perception by lowering the threshold for misidentifying objects.",
+      "The more emotionally affected one is, the more perception is shaped by expectation rather than reality."
+    ],
+    "wrong": [
+      "Emotional people become better at comparing similarities and differences.",
+      "Desire helps people perceive objects more objectively.",
+      "Fear and love reduce the likelihood of misidentification.",
+      "Imagination stops functioning when perception is inactive.",
+      "Accurate perception depends on having stronger emotional investment.",
+      "Cowards and lovers perceive the world similarly because emotions disappear quickly.",
+      "Misidentification occurs only when perceived objects are completely identical.",
+      "The central organ of sense is unaffected by emotional states.",
+      "Emotion improves one’s ability to discern reality as it is.",
+      "People with strong emotions need greater similarity before they misidentify things."
+    ]
+  },
+  {
+    "id": "MOI-34",
+    "title": "34번",
+    "subtitle": "미술품 수집은 불안정한 현재 평가를 넘어서 자기 미적 판단과 그 작품의 역사적 의미를 믿고 선택하는 행위이다.",
+    "passage": "The dependent and shifting nature of art values, not only on the market but inherently, is uppermost in the mind of today’s art collector, whether he buys for himself or as the representative of an institution. Acquiring a work is acquiring a piece of art history, or it is acquiring nothing (beyond, that is, an object of personal enjoyment in the same class as a cat or a souvenir). In signing his check the collector asserts his belief in the future presence of the work as a significant point attained by art as a whole. History, however, is open to anything and the merit of the chosen painting or sculpture has ―at best ―only the validation of a present-day consensus. This consensus is all but certain to be displaced, as others have been in the past. In the last analysis, committing himself to a painting is the collector’s own act. Through it he courageously affirms not only his aesthetic judgment, from whatever source it be derived, but the conviction that ______.",
+    "correct": [
+      "Collecting art is an act of faith in one’s judgment and in a work’s future historical significance.",
+      "Because art value is unstable, the collector’s purchase affirms a personal belief about art history.",
+      "Buying art means committing oneself to the conviction that a work will matter beyond present consensus."
+    ],
+    "wrong": [
+      "Art collectors can accurately predict future market prices.",
+      "The value of art is fixed once present-day critics reach consensus.",
+      "Collectors buy artworks mainly for personal enjoyment, like souvenirs.",
+      "Aesthetic judgment is unnecessary when institutional representatives purchase art.",
+      "The art market provides permanent validation of artistic merit.",
+      "Historical significance can be measured immediately at the moment of purchase.",
+      "Collectors avoid personal commitment by relying on public consensus.",
+      "The passage argues that buying art is primarily a financial investment.",
+      "Artworks become historically important only when they are original.",
+      "Present consensus about art is unlikely to change over time."
+    ]
+  },
+  {
+    "id": "MOI-35",
+    "title": "35번",
+    "subtitle": "몸집이 클수록 같은 사고에서도 더 큰 에너지가 생겨 부상이 심해지며, 작은 아이들은 상대적으로 덜 다친다.",
+    "passage": "The bigger someone is, the more damage they can do to themselves through even a relatively innocuous accident. Despite toddlers falling over and bumping themselves regularly, the injuries they sustain are rarely serious. ①Their relatively thick bones in comparison to their mass mean they rarely build up enough energy, even at top speed, to do themselves much damage. ②Because of their increased mass (compounded by the fact that they are falling from a greater height and that their reactions may be slower), adults falling over will impact the ground with a much larger force. ③The nonlinear relationship between mass and bone strength means that although their bones are thicker than a toddler’s in absolute terms, they may not be relatively thick enough to compensate for the larger impact caused by their increased mass. ④The body mass index (BMI) can serve as a convenient way for non-experts to examine their health conditions in daily lives. ⑤For the same reasons, taller people have been found to suffer more fall-related injuries ― like hip breaks ― than shorter people.",
+    "correct": [
+      "Larger bodies are more vulnerable to serious injury because even minor accidents involve greater physical force.",
+      "Body size influences injury risk, making falls far more dangerous for bigger individuals than for toddlers.",
+      "The severity of accidental injury depends partly on the energy generated by body mass and scale."
+    ],
+    "wrong": [
+      "Toddlers avoid injury mainly because they move more carefully than adults.",
+      "Bigger people suffer fewer injuries because their bones are thicker.",
+      "Accidents become dangerous only when people move at high speed.",
+      "Children are rarely injured because they fall less often than adults.",
+      "Body size has little connection to the damage caused by falling.",
+      "Adult injuries are mostly caused by weak bones rather than physical energy.",
+      "Small bodies are more fragile because they cannot absorb impact.",
+      "The passage focuses on how exercise prevents accidental injury.",
+      "Injury risk depends more on age than on body scale.",
+      "Large people are safer because they have more mass to resist impact."
+    ]
+  },
+  {
+    "id": "MOI-36",
+    "title": "36번",
+    "subtitle": "식물의 방어와 곤충의 대응은 정적인 균형이 아니라 서로를 선택압으로 삼아 새 적응을 낳는 진화적 상호작용이다.",
+    "passage": "Plants have evolved defenses almost as diverse as the number of genera. Some load their tissues with harsh compounds that either are unpleasant to insects or intoxicate them, encouraging the insects to go bother another plant or at least slowing down their eating. (A) The back-and-forth is not a matter of natural balance, but more like a drawn-out evolutionary conversation. New plant defenses unintentionally select for insects with ways to get around them, which in turn help bring about more resilient and resistant plant species. New variations, shading into entire new forms and adaptations, maintain the stalemate. (B) Plants can release chemical compounds that let their same-species neighbors know that an attack is likely coming, pushing those nearby plants to start building up defensive compounds in their tissues. Some of these cues even attract insect predators, a call for an assist that benefits both the plant and its bug-eating collaborators. (C) Structural defenses like thick coats of wax on leaves may prevent some insect species from damaging the plant tissues altogether. Nor are individual plants entirely on their own while under attack.",
+    "correct": [
+      "Plant defenses and insect countermeasures form an ongoing evolutionary exchange rather than a stable balance.",
+      "The struggle between plants and insects generates continuous adaptation on both sides.",
+      "Plant-insect interactions are a drawn-out evolutionary conversation that maintains a shifting stalemate."
+    ],
+    "wrong": [
+      "Plants survive insect attacks mainly by relying on predators alone.",
+      "Insects eventually overcome all plant defenses and end the evolutionary struggle.",
+      "Plant defenses create a stable natural balance between species.",
+      "Chemical compounds protect individual plants but cannot affect nearby plants.",
+      "Structural defenses are the only reliable way for plants to resist insects.",
+      "Insect predators harm plants by intensifying attacks on plant tissues.",
+      "Plant species evolve independently of the insects that feed on them.",
+      "The passage argues that plant defenses are mostly ineffective.",
+      "Evolution stops when plants and insects reach a temporary stalemate.",
+      "Plants communicate only with insects, not with neighboring plants."
+    ]
+  },
+  {
+    "id": "MOI-37",
+    "title": "37번",
+    "subtitle": "스펙터클은 문화적 관습을 바탕으로 하되 단순한 모방을 넘어 관객을 놀라게 할 독창성을 갖추어야 한다.",
+    "passage": "Although there may be elements that trigger instinctive response, spectacle works primarily within a cultural frame and is subject to prevailing modes of perception that observers bring to bear. (A) By extension, spectacle is produced by working with the grain of a particular culture, blending the innovative with the established. Thus anyone deploying spectacle may draw on a repertoire of techniques and conventions developed from previous festivals or related activities, but imitation is not enough. (B) Spectacle must also be spectacular. A spectacle has to amaze spectators, outdoing previous efforts if it is to become part of the collective memory of those who witnessed and participated in it. (C) In saying that, we stress that creation of spectacle is neither a universal nor even an inevitable expression of culture, but is a strategy commonly used by people from many different cultures to address specific needs. The task of creating spectacle has been likened to creating new works of literature, where writers normally feel bound by the rules and traditions of their genre yet need to show sufficient originality to impress their audiences.",
+    "correct": [
+      "Spectacle draws on cultural conventions but must surpass imitation through memorable originality.",
+      "A successful spectacle blends established cultural forms with innovation that amazes spectators.",
+      "Spectacle is culturally framed, yet it must outdo previous efforts to enter collective memory."
+    ],
+    "wrong": [
+      "Spectacle is a universal and inevitable expression of every culture.",
+      "Instinctive response matters more than cultural perception in spectacle.",
+      "Spectacle succeeds by faithfully copying earlier festivals and rituals.",
+      "Cultural conventions prevent spectacle from becoming original.",
+      "Audiences remember spectacle when it follows genre rules exactly.",
+      "Spectacle is created outside cultural traditions to meet universal needs.",
+      "The purpose of spectacle is to preserve the past without innovation.",
+      "Spectators are impressed mainly by familiar techniques rather than surprise.",
+      "Spectacle rejects established forms in favor of complete novelty.",
+      "Collective memory forms when spectacle avoids competition with previous events."
+    ]
+  },
+  {
+    "id": "MOI-38",
+    "title": "38번",
+    "subtitle": "고층 건물은 바람 소용돌이를 줄이기 위해 형태와 방향을 조정해야 한다.",
+    "passage": "To minimize vortex shedding, skyscraper designers do everything in their powers to confuse the wind. To minimize building costs and maximize revenues, skyscrapers generally take the shape of squares or rectangles. These are not particularly aerodynamic shapes, and this results in a wind phenomenon called “vortex shedding.” As wind meets a rectangular skyscraper it pushes on the flat face of the building before flowing around its sides, where eventually it separates from the face of the structure. ( ①) The difference in pressures on the front and back faces of the building gives rise to vortices, or spinning currents of wind, that flow downstream from the building. ( ②) The vortices pull and push the building in a direction perpendicular to the wind at frequencies that can become dangerously self-sustaining. ( ③) Orienting the building so that the longer face of the structure is parallel with prevailing winds can help. ( ④) Chopping or rounding off corners of a building can likewise make it more aerodynamic. ( ⑤) Roughing up the corners of the building through the careful placement of balconies or stepped corners can help by disturbing or delaying the formation of strong vortices.",
+    "correct": [
+      "Skyscraper designers can reduce vortex shedding by disrupting how wind flows around rectangular buildings.",
+      "Because rectangular towers can create dangerous wind vortices, designers modify their shape and orientation to confuse the wind.",
+      "Wind-induced oscillations in skyscrapers can be limited through aerodynamic design features that break up vortex formation."
+    ],
+    "wrong": [
+      "Skyscrapers are usually built in round shapes because rectangles are too expensive to construct.",
+      "Vortex shedding occurs mainly when wind passes through the inside of tall buildings.",
+      "The best way to prevent wind damage is to make skyscrapers completely smooth on every side.",
+      "Building designers avoid changing corners because sharp edges make towers more stable.",
+      "Wind becomes dangerous only when it strikes the shortest face of a rectangular building.",
+      "Balconies increase building revenues but have little effect on wind behavior.",
+      "Skyscraper designers should strengthen walls rather than alter how wind moves around the structure.",
+      "Vortices are created by underground pressure differences rather than air moving past the building.",
+      "A tower becomes safer when its longer face is placed perpendicular to prevailing winds.",
+      "Rectangular skyscrapers are naturally aerodynamic because they maximize usable space."
+    ]
+  },
+  {
+    "id": "MOI-39",
+    "title": "39번",
+    "subtitle": "언어와 회화 관습 속에서 빨강은 ‘색’ 자체나 ‘아름다움’과 연결될 만큼 색채 문화의 핵심 위치를 차지한다.",
+    "passage": "It was also within the range of reds that they learned early on to diversify the palette and to produce varied tones and shades, as the oldest known color terms demonstrate. For thousands of years in the West, red was the only color worthy of that name, the only true color. As much on the historical as hierarchical level, it exceeded all others. ( ①) Not that they did not exist, but they had to wait a long time before they were considered colors and then played a comparable role in material culture, social codes, and systems of thought. ( ②) It was with red that humans did their first color experiments, achieved their first successes, and then constructed a chromatic universe. ( ③) Here the lexicon seems in keeping with pictorial practices and coloring techniques. ( ④) In certain languages, the same word can mean “red” or simply “colored,” depending on the context, such as coloratus in classical Latin or colorado in modern Castilian. ( ⑤) In other languages, the words meaning “red” and “beautiful” share a common root; for example, that is the case in Russian, in which the terms krasnyy (red) and krasivy (beautiful) belong to the same lexical family.",
+    "correct": [
+      "Red’s linguistic links to “color” and “beauty” show its deep cultural significance.",
+      "Across languages and pictorial traditions, red often functions as more than a mere color term.",
+      "The vocabulary of red reflects its privileged role in human visual and cultural practices."
+    ],
+    "wrong": [
+      "Red words prove that all languages classify colors in the same order.",
+      "The connection between red and beauty appears only in modern languages.",
+      "Red lost symbolic value once more colors entered the lexicon.",
+      "Pictorial practices have little relation to the vocabulary of color.",
+      "Classical languages used red only to describe natural objects.",
+      "The passage argues that color terms are independent of cultural history.",
+      "Red is linguistically important because it has no figurative meanings.",
+      "Russian separates red and beautiful into unrelated lexical families.",
+      "Words for red show that beauty is a universal biological response.",
+      "The lexicon of red developed after abstract color theory was complete."
+    ]
+  },
+  {
+    "id": "MOI-40",
+    "title": "40번",
+    "subtitle": "AI는 제약 연구 비용을 낮춰 수익성이 낮은 질병과 소외된 인구에 대한 연구 불균형을 줄일 수 있다.",
+    "passage": "In the pharmaceutical industry, algorithms are being employed to find treatments and drugs for rare diseases that to date haven’t received much attention. The hard truth has always been that pharma devotes more research and development resources to diseases that affect the rich. The definition of rare has too often been associated with poor ― that is, even if a disease is quite prevalent in a population that cannot aﬀord to pay for it (for example, people living in the developing world), the disease has been neglected compared to First World illnesses. By lowering the cost of data collection, mining, and analysis in drug development and clinical trials, AI can help oﬀset imbalances in the pharmaceutical industry that direct attention to diseases that “pay,” whether because the disease is more common or because it is prevalent among demographics that can pay more. We see the democratizing power of AI to broaden the attention of the medical and research communities to find cures to traditionally neglected health issues and among traditionally neglected populations.",
+    "correct": [
+      "AI는 제약 연구 비용을 낮춰 수익성이 낮은 질병과 소외된 인구에 대한 연구 불균형을 줄일 수 있다.",
+      "AI can democratize drug development by reducing the neglect of less profitable diseases and underserved populations.",
+      "Lower research costs through AI may broaden pharmaceutical attention beyond diseases that promise financial return."
+    ],
+    "wrong": [
+      "AI helps correct investment imbalances in medicine by making neglected diseases cheaper to study.",
+      "AI will make pharmaceutical companies focus even more on wealthy patients.",
+      "Rare diseases are neglected mainly because they are scientifically impossible to study.",
+      "The main value of AI is increasing profits from already common diseases.",
+      "Drug development should prioritize diseases affecting populations that can pay more.",
+      "AI reduces clinical trial costs but cannot affect research priorities.",
+      "Pharmaceutical imbalance exists because rare diseases are always uncommon.",
+      "Diseases in developing countries receive less attention because they spread too slowly.",
+      "AI’s role is to replace doctors rather than broaden medical research.",
+      "Medical research becomes fairer when investment follows market demand."
+    ]
+  },
+  {
+    "id": "MOI-41~42",
+    "title": "41~42번",
+    "subtitle": "유리는 고체처럼 행동하지만 분자 구조와 성질이 애매해 과학적으로도 아직 완전히 설명하기 어려운 물질이다.",
+    "passage": "The structure of glass is, frankly, a bit of a mess. Clear and perfect as it might appear to our eyes, down at the molecular level, glass looks more like a random ball-pit of atoms. The technical term for this mess depends on who you’re asking: for some scientists it is an “amorphous solid,” for others a “supercooled liquid.” In theory it’s both liquid and solid, though, given the way it behaves, in practice it’s really the latter. In fact, at room temperature glass never behaves as a (a) liquid, even an imperceptibly viscous one, even over long periods of time (though it can “sweat” if you don’t add enough lime to the mix). Those (b) misshapen sheets of glass you sometimes see in old stained-glass windows, thicker at the bottom than the top, are generally not that way because the glass is slowly sinking over time. Unless the church has endured temperatures of more than 400˚C, the chances are they are uneven because that’s the way they were blown and (c) solidified in the first place. Flat glass was only developed in the nineteenth century and we had to wait until the middle of the twentieth century for truly flat, thin sheets of glass. The (d) paradox is that, despite it being one of the very oldest human-made substances, scientists still struggle to comprehend why glass behaves the way it does. Glass seems to (e) obey most molecular laws. As one glassmaker put it, glass is not a material; it’s a state.",
+    "correct": [
+      "Glass appears simple and solid, yet its molecular nature remains scientifically puzzling.",
+      "The nature of glass is difficult to define because it behaves like a solid while possessing a disordered structure.",
+      "Glass is an ancient material whose state and behavior still challenge scientific understanding."
+    ],
+    "wrong": [
+      "Glass is actually a liquid that slowly flows downward over centuries.",
+      "Old stained-glass windows prove that glass gradually sinks at room temperature.",
+      "Scientists fully understand glass because it obeys all molecular laws.",
+      "The main mystery of glass is why it breaks so easily.",
+      "Flat glass was common long before the nineteenth century.",
+      "Glass becomes misshapen only because churches are usually too hot.",
+      "The passage focuses on modern techniques for producing thin glass.",
+      "Glass should be classified simply as a liquid, not a solid.",
+      "Old glass sheets are uneven because lime was always missing from the mix.",
+      "Glass is easy to define because it is one of the oldest human-made substances."
+    ]
+  }
+];
+let current = 0;
+let currentOptions = [];
+let selected = null;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function pick(arr, n) { return shuffle(arr).slice(0, n); }
+function makeOptions(item) {
+  const right = pick(item.correct, 1).map(text => ({text, correct: true}));
+  const wrong = pick(item.wrong, 4).map(text => ({text, correct: false}));
+  return shuffle([...right, ...wrong]);
+}
+function renderNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = DATA.map((it, idx) => `<button class="${idx===current?'active':''}" onclick="go(${idx})"><b>${it.title}</b><br><span>${it.subtitle}</span></button>`).join('');
+}
+function render() {
+  const item = DATA[current];
+  selected = null;
+  currentOptions = makeOptions(item);
+  document.getElementById('eyebrow').textContent = item.id;
+  document.getElementById('title').textContent = item.title;
+  document.getElementById('summary').textContent = item.subtitle;
+  document.getElementById('passage').textContent = item.passage;
+  const letters = ['A','B','C','D','E'];
+  document.getElementById('options').innerHTML = currentOptions.map((op, idx) => `
+    <button class="option" onclick="selectOption(${idx})" id="op${idx}">
+      <span class="mark">${letters[idx]}</span><span>${op.text}</span>
+    </button>
+  `).join('');
+  const result = document.getElementById('result');
+  result.className = 'result';
+  result.innerHTML = '';
+  renderNav();
+}
+function selectOption(idx) {
+  selected = idx;
+  document.querySelectorAll('.option').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+    el.classList.remove('correct', 'wrong');
+  });
+  document.getElementById('result').className = 'result';
+}
+function checkAnswer() {
+  if (selected === null) {
+    alert('선지를 하나 골라라.');
+    return;
+  }
+  document.querySelectorAll('.option').forEach((el, i) => {
+    el.classList.remove('selected');
+    if (currentOptions[i].correct) el.classList.add('correct');
+    else if (i === selected) el.classList.add('wrong');
+  });
+  const item = DATA[current];
+  const ok = currentOptions[selected].correct;
+  const result = document.getElementById('result');
+  result.className = 'result show';
+  result.innerHTML = `
+    <div><strong>${ok ? '정답.' : '오답.'}</strong> 한줄요약: ${item.subtitle}</div>
+    <ol class="answer-list">${item.correct.map(x => `<li>${x}</li>`).join('')}</ol>
+  `;
+}
+function go(idx) { current = idx; render(); window.scrollTo({top:0, behavior:'smooth'}); }
+function rerollCurrent() { render(); }
+function nextItem() { current = (current + 1) % DATA.length; render(); window.scrollTo({top:0, behavior:'smooth'}); }
+function prevItem() { current = (current - 1 + DATA.length) % DATA.length; render(); window.scrollTo({top:0, behavior:'smooth'}); }
+function randomItem() { current = Math.floor(Math.random() * DATA.length); render(); window.scrollTo({top:0, behavior:'smooth'}); }
+function makePrintSet() {
+  const letters = ['A','B','C','D','E'];
+  const set = document.getElementById('printSet');
+  const pages = DATA.map((item, pidx) => {
+    const ops = makeOptions(item);
+    const answerIndex = ops.findIndex(o => o.correct);
+    return `<article class="print-page">
+      <h3>${item.title}</h3>
+      <div class="kr-summary">${item.subtitle}</div>
+      <div class="print-passage">${item.passage}</div>
+      <div class="q-title">${pidx+1}. 이 글의 요지로 가장 적절한 것은?</div>
+      <div class="print-options">
+        ${ops.map((op, i) => `<div>${letters[i]}. ${op.text}</div>`).join('')}
+      </div>
+      <div class="print-answer">정답: ${letters[answerIndex]} / ${item.correct.join(' | ')}</div>
+    </article>`;
+  }).join('');
+  set.innerHTML = pages;
+  set.classList.add('show');
+  set.scrollIntoView({behavior:'smooth'});
+}
+render();
+</script>
+</body>
+</html>

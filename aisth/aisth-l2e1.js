@@ -482,9 +482,8 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;"><span class="pill">${escapeHtml(TEXT.QTYPE)}</span></div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(q.instruction || DEFAULT_INSTRUCTION)}</div>
-      <div class="sentence">
+      <div class="question-instruction">${escapeHtml(q.instruction || DEFAULT_INSTRUCTION)}</div>
+      <div class="sentence aisth-question-surface">
         <div class="en-line">${renderEnglishStemLine(q)}</div>
         ${q.koreanHint ? `<div class="ko-line">(${renderKoreanHint(q.koreanHint)})</div>` : ""}
       </div>

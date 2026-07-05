@@ -613,9 +613,8 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;"><span class="pill">${escapeHtml(TEXT.QTYPE)}</span></div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(FIXED_INSTRUCTION)}</div>
-      <div class="sentence" id="clickable-sentence">${renderClickableSentence(q.question)}</div>
+      <div class="question-instruction">${escapeHtml(FIXED_INSTRUCTION)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center" id="clickable-sentence">${renderClickableSentence(q.question)}</div>
     </div>
 
     <div class="box" id="translate-wrap" style="background:#fff; display:none;">
@@ -671,7 +670,9 @@ function wireWordClicks() {
         if (wrap) wrap.style.display = "block";
 
         const input = document.getElementById("user-ko");
-        if (input) input.focus();
+        const slotInputControl = ensureKoreanSlotInput(q);
+        if (slotInputControl) slotInputControl.focus();
+        else if (input) input.focus();
 
         showToast("ok", TEXT.CORRECT);
       } else {
@@ -680,6 +681,15 @@ function wireWordClicks() {
         showToast("no", TEXT.WRONG);
       }
     });
+  });
+}
+
+function ensureKoreanSlotInput(q) {
+  const input = document.getElementById("user-ko");
+  if (!input || !window.AisthInputSlots) return null;
+  return window.AisthInputSlots.enhance(input, {
+    modelText: q?.answerKo || "",
+    onEnter: submitCurrentAnswer,
   });
 }
 
@@ -727,6 +737,7 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   if (input) input.disabled = true;
+  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) nextBtn.disabled = false;
 

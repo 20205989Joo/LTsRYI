@@ -34,6 +34,48 @@ const TEXT = {
   CHOICE_ADJ: "형용사",
 };
 
+const WORD_MEANING_MAP = {
+  accident: "사고",
+  appointment: "약속, 예약",
+  bag: "가방",
+  big: "큰",
+  blue: "파란",
+  bored: "지루해하는",
+  careful: "조심하는",
+  celebration: "축하 행사",
+  children: "아이들",
+  class: "수업",
+  clean: "깨끗한",
+  creative: "창의적인",
+  cute: "귀여운",
+  education: "교육",
+  exciting: "신나는",
+  friend: "친구",
+  game: "게임",
+  happy: "행복한",
+  helpful: "도움이 되는",
+  hot: "뜨거운",
+  improvement: "개선",
+  information: "정보",
+  job: "일, 직업",
+  kind: "친절한",
+  movement: "움직임",
+  name: "이름",
+  nervous: "긴장한",
+  news: "소식, 뉴스",
+  noisy: "시끄러운",
+  quiet: "조용한",
+  ready: "준비된",
+  shy: "수줍은",
+  smart: "똑똑한",
+  song: "노래",
+  strong: "강한",
+  student: "학생",
+  tall: "키가 큰",
+  teacher: "선생님",
+  work: "일",
+};
+
 let subcategory = "Grammar";
 let level = "aisth";
 let day = "002";
@@ -46,6 +88,8 @@ let currentIndex = 0;
 let results = [];
 let isCurrentLocked = false;
 let selectedChoiceKey = "";
+let wrongReleaseTimer = 0;
+let autoNextTimer = 0;
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -130,6 +174,45 @@ function injectRuntimeStyles() {
       white-space: pre-wrap;
     }
 
+    .sentence-inner {
+      display: block;
+      width: 100%;
+      white-space: normal;
+    }
+
+    .word-meaning {
+      min-height: 26px;
+      margin-top: 11px;
+      color: #5b4c42;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.35;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: opacity 0.18s ease, transform 0.22s ease;
+    }
+
+    .word-meaning.is-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .word-meaning-word {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 22px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255, 248, 228, 0.92);
+      border: 1px solid rgba(217, 192, 167, 0.8);
+      color: #7e3106;
+      font-size: 12px;
+      font-weight: 950;
+      margin-right: 6px;
+      vertical-align: baseline;
+    }
+
     .focus-token {
       background: #ffe8b8;
       color: #7e3106;
@@ -141,39 +224,101 @@ function injectRuntimeStyles() {
 
     .choice-row {
       display: flex;
-      gap: 10px;
-      margin-top: 4px;
+      gap: 12px;
+      margin-top: 8px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(126,49,6,0.16);
     }
 
     .choice-btn {
       flex: 1;
-      border: 2px solid #d8bda0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 54px;
+      border: 1px solid rgba(87,184,191,0.72);
+      border-bottom: 4px solid rgba(39,133,148,0.58);
       border-radius: 12px;
-      background: #fff;
-      color: #7e3106;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(230,255,252,0.80) 45%, rgba(198,238,242,0.84) 100%);
+      color: #203736;
       font-weight: 900;
       font-size: 16px;
-      padding: 12px 8px;
+      padding: 12px 10px 13px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.86),
+        inset 0 -2px 5px rgba(28,91,102,0.14),
+        0 4px 10px rgba(0,0,0,0.09);
+      transition: transform 0.18s cubic-bezier(.2,.8,.25,1), border-color 0.15s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
 
     .choice-btn:hover {
-      border-color: #f17b2a;
       transform: translateY(-1px);
+      border-color: rgba(126,225,236,0.98);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.92),
+        inset 0 -2px 5px rgba(28,91,102,0.16),
+        0 6px 14px rgba(0,0,0,0.13);
+    }
+
+    .choice-btn:active {
+      transform: translateY(2px);
+      border-bottom-width: 2px;
+      box-shadow:
+        inset 0 3px 8px rgba(22,86,102,0.25),
+        inset 0 -1px 1px rgba(255,255,255,0.66),
+        0 1px 4px rgba(0,0,0,0.10);
     }
 
     .choice-btn.active {
-      border-color: #f17b2a;
-      background: #fff1e3;
-      box-shadow: inset 0 0 0 1px rgba(241,123,42,0.25);
+      transform: translateY(2px);
+      border-color: #7ee1ec;
+      border-bottom-width: 2px;
+      background: linear-gradient(180deg, #d7fbff 0%, #bdeef2 58%, #8fd3df 100%);
+      box-shadow:
+        inset 0 3px 8px rgba(22,86,102,0.26),
+        inset 0 -1px 1px rgba(255,255,255,0.56),
+        0 1px 4px rgba(0,0,0,0.10),
+        0 0 0 1px rgba(126,225,236,0.38);
     }
 
     .choice-btn:disabled {
       cursor: not-allowed;
-      opacity: 0.7;
-      transform: none;
+      opacity: 0.78;
     }
+
+    .choice-abbr {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      min-width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #1c7c8c 0%, #145a68 100%);
+      color: #dcfbff;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: 0;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.25),
+        0 1px 2px rgba(0,0,0,0.12);
+    }
+
+    .choice-word {
+      font-size: 17px;
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+
+    .choice-btn.active .choice-abbr {
+      background: linear-gradient(180deg, #105765 0%, #0b3e4a 100%);
+      color: #f2ffff;
+    }
+
     input::placeholder,
     textarea::placeholder {
       color: #b9b2aa;
@@ -281,6 +426,8 @@ function buildQuestionsFromRows() {
   questions = filtered.map((row, idx) => {
     const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
     const answerRaw = normalizeEscapedBreaks(String(row["Answer"] ?? "").trim());
+    const focusWord = extractFocusWord(question);
+    const koreanHint = normalizeEscapedBreaks(String(row["KoreanHint"] ?? "").trim());
 
     return {
       no: idx + 1,
@@ -288,6 +435,8 @@ function buildQuestionsFromRows() {
       title: normalizeEscapedBreaks(String(row["Title"] ?? "").trim()),
       question,
       questionPlain: stripHighlightMarkers(question),
+      focusWord,
+      koreanMeaning: koreanHint || resolveWordMeaning(focusWord),
       answerRaw,
       answerKey: normalizeChoiceKey(answerRaw),
       instruction: FIXED_INSTRUCTION,
@@ -441,49 +590,66 @@ function renderQuestion() {
 
   isCurrentLocked = false;
   selectedChoiceKey = "";
+  if (wrongReleaseTimer) {
+    window.clearTimeout(wrongReleaseTimer);
+    wrongReleaseTimer = 0;
+  }
+  if (autoNextTimer) {
+    window.clearTimeout(autoNextTimer);
+    autoNextTimer = 0;
+  }
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;">
-        <span class="pill">${escapeHtml(TEXT.QTYPE)}</span>
+      <div class="question-instruction">${escapeHtml(FIXED_INSTRUCTION)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center">
+        <div class="sentence-inner">
+          <span class="aisth-sentence-flow">${renderQuestionWithHighlight(q.question)}</span>
+          <div id="word-meaning" class="word-meaning"></div>
+        </div>
       </div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(FIXED_INSTRUCTION)}</div>
-      <div class="sentence">${renderQuestionWithHighlight(q.question)}</div>
     </div>
 
     <div class="box" style="background:#fff;">
       <div class="choice-row">
-        <button class="choice-btn" type="button" data-choice="noun">${escapeHtml(TEXT.CHOICE_NOUN)}</button>
-        <button class="choice-btn" type="button" data-choice="adjective">${escapeHtml(TEXT.CHOICE_ADJ)}</button>
+        <button class="choice-btn" type="button" data-choice="noun">
+          <span class="choice-abbr">n</span>
+          <span class="choice-word">${escapeHtml(TEXT.CHOICE_NOUN)}</span>
+        </button>
+        <button class="choice-btn" type="button" data-choice="adjective">
+          <span class="choice-abbr">adj</span>
+          <span class="choice-word">${escapeHtml(TEXT.CHOICE_ADJ)}</span>
+        </button>
       </div>
       <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>${escapeHtml(TEXT.NEXT)}</button>
     </div>
   `;
 
   wireChoiceButtons();
-
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
 }
 
 function wireChoiceButtons() {
   document.querySelectorAll(".choice-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    const activate = () => {
       if (isCurrentLocked) return;
       const key = String(btn.dataset.choice || "").trim();
       if (!key) return;
+      if (wrongReleaseTimer) {
+        window.clearTimeout(wrongReleaseTimer);
+        wrongReleaseTimer = 0;
+      }
       selectedChoiceKey = key;
       refreshChoiceUI();
+      submitCurrentAnswer();
+    };
+
+    btn.addEventListener("click", activate);
+    btn.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      activate();
     });
   });
 }
@@ -499,8 +665,6 @@ function submitCurrentAnswer() {
   if (isCurrentLocked) return;
 
   const q = questions[currentIndex];
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
 
   if (!q) return;
@@ -512,20 +676,26 @@ function submitCurrentAnswer() {
 
   const answerKey = q.answerKey || normalizeChoiceKey(q.answerRaw);
   const ok = selectedChoiceKey === answerKey;
+  revealWordMeaning(q);
 
   if (!ok) {
+    const wrongKey = selectedChoiceKey;
     if (feedback) {
       feedback.className = "feedback";
       feedback.innerHTML = "";
     }
     showToast("no", TEXT.WRONG);
+    wrongReleaseTimer = window.setTimeout(() => {
+      wrongReleaseTimer = 0;
+      if (!isCurrentLocked && selectedChoiceKey === wrongKey) {
+        selectedChoiceKey = "";
+        refreshChoiceUI();
+      }
+    }, 440);
     return;
   }
 
   isCurrentLocked = true;
-
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
 
   document.querySelectorAll(".choice-btn").forEach((btn) => {
     btn.disabled = true;
@@ -548,6 +718,11 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+  const solvedIndex = currentIndex;
+  autoNextTimer = window.setTimeout(() => {
+    autoNextTimer = 0;
+    if (currentIndex === solvedIndex) goNext();
+  }, 950);
 }
 
 function goNext() {
@@ -584,6 +759,42 @@ function labelForChoice(key) {
   if (key === "noun") return TEXT.CHOICE_NOUN;
   if (key === "adjective") return TEXT.CHOICE_ADJ;
   return "";
+}
+
+function extractFocusWord(question) {
+  const text = normalizeEscapedBreaks(String(question ?? ""));
+  const match = text.match(/\*\*(.*?)\*\*/s);
+  const raw = match ? match[1] : text;
+  return stripHighlightMarkers(raw)
+    .replace(/[“”"']/g, "")
+    .replace(/^[\s.,!?;:()[\]{}]+|[\s.,!?;:()[\]{}]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function resolveWordMeaning(word) {
+  const key = String(word ?? "")
+    .replace(/[“”"']/g, "")
+    .replace(/^[\s.,!?;:()[\]{}]+|[\s.,!?;:()[\]{}]+$/g, "")
+    .trim()
+    .toLowerCase();
+  return WORD_MEANING_MAP[key] || "";
+}
+
+function revealWordMeaning(q) {
+  const target = document.getElementById("word-meaning");
+  if (!target || !q) return;
+
+  const word = q.focusWord || extractFocusWord(q.question);
+  const meaning = q.koreanMeaning || resolveWordMeaning(word);
+  if (!word || !meaning) {
+    target.classList.remove("is-in");
+    target.innerHTML = "";
+    return;
+  }
+
+  target.innerHTML = `<span class="word-meaning-word">${escapeHtml(word)}</span>${escapeHtml(meaning)}`;
+  target.classList.add("is-in");
 }
 
 function renderQuestionWithHighlight(raw) {

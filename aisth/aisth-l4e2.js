@@ -491,9 +491,8 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;"><span class="pill">${escapeHtml(TEXT.QTYPE)}</span></div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(q.instruction || FIXED_INSTRUCTION)}</div>
-      <div class="sentence">
+      <div class="question-instruction">${escapeHtml(q.instruction || FIXED_INSTRUCTION)}</div>
+      <div class="sentence aisth-question-surface">
         <div class="en-line">${renderTextWithEmphasis(stemText).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`)}</div>
         ${q.koreanHint ? `<div class="ko-line">(${renderTextWithEmphasis(q.koreanHint)})</div>` : ""}
       </div>

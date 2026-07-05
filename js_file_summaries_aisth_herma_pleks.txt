@@ -32,8 +32,7 @@ JS 파일별 문법/학습 내용 요약: aisth / herma / pleks
 - aisth/aisth-l7e1.js: S-V-T-D 문장 골격. 주어, 동사, 대상, 디테일의 네 칸으로 문장을 분석하고 번역한다.
 - aisth/aisth-l7e2.js: 영어 문장을 S/V/T/D로 분해해 각 성분의 뜻을 확인한다. 목적어가 없는 문장과 있는 문장을 구분한다.
 - aisth/aisth-l7e3.js: that절의 명사절 기능. think/believe/know 뒤 that이 “~라는 것”으로 문장 안에 들어가는 구조를 번역한다.
-- aisth/aisth-l7e4.js: 관계대명사. who/which/that 등 선행사에 맞는 관계사를 넣어 명사를 꾸미는 절을 만든다.
-- aisth/aisth-l7e5.js: 관계부사와 관계절 연결. where/why 등으로 두 문장을 이어 장소·이유를 설명하는 관계절을 만든다.
+- aisth/aisth-lme1.js: 의문사가 무엇인지 소개하는 front-only 예비 페이지. what/who/where/when/why/how가 질문의 빈칸을 지정하는 표지임을 다룬다.
 - aisth/aisth-l8e1.js: 가정법 과거완료. If + had p.p., would have p.p.로 과거 사실과 다른 가정을 표현한다.
 - aisth/aisth-l8e2.js: 도치, 강조, 분사구문 기초. Never have I, Hardly had he 같은 부정어 도치와 고급 문장 변형을 다룬다.
 - aisth/aisth-l8e3.js: 대명사 it/that/one. 날씨/가주어 it, 앞말을 받는 that/one 등 대명사의 지시 기능을 구분한다.

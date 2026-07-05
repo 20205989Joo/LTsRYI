@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aisth LME-1</title>
+
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="styles-room.css" />
+  <link rel="stylesheet" href="styles-Aisth.css" />
+
+  <style>
+    .main-page {
+      position: relative;
+      width: 375px;
+      height: 667px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 2px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    #cafe_int {
+      position: absolute;
+      width: 340px;
+      height: 626px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fffaf2;
+      z-index: 1;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    #quiz-area {
+      width: 90%;
+      height: 470px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #fff;
+      border: 2px dashed #ccc;
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    #back-btn {
+      margin-top: 10px;
+      width: 100%;
+      height: 40px;
+      background: #7e3106;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-page">
+    <div id="cafe_int">
+      <div id="quiz-area"></div>
+      <button id="back-btn" type="button">돌아가기</button>
+    </div>
+  </div>
+
+  <script src="herma-toastfx.js"></script>
+  <script src="../lesson-intro-player.js"></script>
+  <script src="aisth-input-slots.js"></script>
+  <script src="aisth-lme1.js"></script>
+</body>
+</html>

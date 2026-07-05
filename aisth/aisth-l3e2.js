@@ -693,10 +693,7 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;">
-        <span class="pill">${escapeHtml(TEXT.QTYPE)}</span>
-      </div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${renderTextWithEmphasis(FIXED_INSTRUCTION)}</div>
+      <div class="question-instruction">${renderTextWithEmphasis(FIXED_INSTRUCTION)}</div>
       <div class="sentence">${renderDragSentenceHtml(q)}</div>
     </div>
 

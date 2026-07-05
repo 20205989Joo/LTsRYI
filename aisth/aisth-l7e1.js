@@ -672,7 +672,7 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${renderInstructionWithSVTDColors(displayInstruction)}</div>
+      <div class="question-instruction">${renderInstructionWithSVTDColors(displayInstruction)}</div>
       <div class="sentence${isSVTD ? " svtd-mode" : ""}">${qBody}</div>
     </div>
 
@@ -697,6 +697,9 @@ function renderQuestion() {
     document.getElementById("svtd-input-t"),
     document.getElementById("svtd-input-d"),
   ].filter(Boolean);
+  const slotInputControl = !svtdInputs.length && input && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
+    : null;
 
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
   if (nextBtn) nextBtn.addEventListener("click", handleNextOrHint);
@@ -717,7 +720,8 @@ function renderQuestion() {
     });
     svtdInputs[0].focus();
   } else if (input) {
-    input.focus();
+    if (slotInputControl) slotInputControl.focus();
+    else input.focus();
     input.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" && q.type === "blank") {
         ev.preventDefault();
@@ -786,6 +790,7 @@ function submitCurrentAnswer() {
   } else {
     const input = document.getElementById("user-answer");
     if (input) input.disabled = true;
+    if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   }
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) {

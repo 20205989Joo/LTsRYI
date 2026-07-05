@@ -7,18 +7,17 @@ const TARGET_EXERCISE = 1;
 const PAGE_LABEL = "Aisth L0-E1";
 const MAX_QUESTIONS = 0; // 0 = unlimited
 
-const DEFAULT_INSTRUCTION = "올바른 답에 동그라미를 쳐보세요.";
+const DEFAULT_INSTRUCTION = "올바른 답을 선택해보세요!";
 
 const TEXT = {
   START: "🚀 시작",
   INTRO_1: "프롤로그 워밍업: 괄호 보기 중 맞는 형태를 고르세요.",
-  INTRO_2: "선택지 번호에 동그라미가 생기고 전체가 강조됩니다.",
+  INTRO_2: "선택지를 누르면 전체가 강조됩니다.",
   PIN: "📌",
   NO_QUESTIONS: "해당 Lesson/Exercise의 문제가 없습니다.",
   PICK_OPTION: "선택지를 먼저 고르세요.",
   CORRECT: "정답!",
   WRONG: "오답",
-  QTYPE: "프롤로그 동그라미형",
   S_REMINDER: "기억하세요, **s**는 딱 하나만!",
   SUBMIT: "제출",
   NEXT: "다음",
@@ -45,6 +44,8 @@ let currentIndex = 0;
 let results = [];
 let isCurrentLocked = false;
 let selectedOptionIndex = -1;
+let autoNextTimer = 0;
+let wrongReleaseTimer = 0;
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -66,6 +67,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   buildQuestionsFromRows();
+  publishFrameQuestionDebugList();
   renderIntro();
 });
 
@@ -111,25 +113,45 @@ function injectRuntimeStyles() {
     }
 
     .q-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(255, 240, 207, 0.14);
+      border: 1px solid rgba(255, 226, 166, 0.28);
       font-weight: 900;
       font-size: 16px;
       margin-bottom: 10px;
-      color: #7e3106;
+      color: #f4d99b;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+    }
+
+    .question-instruction {
+      color: #111;
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 950;
+      word-break: keep-all;
+      margin: 16px 0 12px;
     }
 
     .prompt {
+      display: flex;
+      align-items: center;
       background: #fff;
-      border: 1px solid #ddd;
+      border: 1.5px solid rgba(126, 49, 6, 0.34);
       border-radius: 12px;
-      padding: 12px;
-      margin-top: 8px;
-      line-height: 1.65;
-      font-size: 14px;
-      color: #3c2d22;
+      min-height: 96px;
+      padding: 18px 14px;
+      margin-top: 12px;
+      line-height: 1.75;
+      font-size: 17px;
+      color: #203736;
       word-break: keep-all;
       white-space: pre-wrap;
+      box-sizing: border-box;
     }
-
     .blank-slot {
       display: inline-block;
       padding: 1px 8px;
@@ -139,73 +161,6 @@ function injectRuntimeStyles() {
       color: #7e3106;
       font-weight: 900;
       margin: 0 2px;
-    }
-
-    .choice-list {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .choice-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 10px 12px;
-      cursor: pointer;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-
-    .choice-item:hover {
-      border-color: #f1b884;
-    }
-
-    .choice-item.selected {
-      border-color: #f17b2a;
-      background: #fff7ee;
-      box-shadow: 0 0 0 1px rgba(241, 123, 42, 0.28), 0 0 12px rgba(241, 123, 42, 0.35);
-    }
-
-    .choice-label {
-      position: relative;
-      width: 24px;
-      height: 24px;
-      border: 1px solid #d9c0a7;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 900;
-      color: #7e3106;
-      line-height: 1;
-      flex-shrink: 0;
-      z-index: 0;
-    }
-
-    .choice-item.selected .choice-label::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 34px;
-      height: 34px;
-      transform: translate(-50%, -50%);
-      border: 2px solid #7e3106;
-      border-radius: 50%;
-      pointer-events: none;
-      box-sizing: border-box;
-    }
-
-    .choice-text {
-      font-size: 15px;
-      font-weight: 900;
-      color: #3c2d22;
-      line-height: 1.4;
     }
 
     .focus-token {
@@ -322,7 +277,7 @@ function buildQuestionsFromRows() {
     const rawQuestion = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
     const answerRaw = normalizeEscapedBreaks(String(row["Answer"] ?? "").trim());
     const title = normalizeEscapedBreaks(String(row["Title"] ?? "").trim());
-    const instruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim()) || DEFAULT_INSTRUCTION;
+    const instruction = normalizeQuestionInstruction(row["Instruction"]);
     const parsed = parseParenthesisQuestion(rawQuestion);
     const sMarkedPromptBefore = markPluralSubjectWithEmphasis(parsed.before);
     const sMarkedOptions = (parsed.options || []).map((opt) => ({
@@ -467,6 +422,22 @@ function renderIntro() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
 
+  if (window.AisthIntroFronts && typeof window.AisthIntroFronts.render === "function") {
+    try {
+      if (window.AisthIntroFronts.render(area, {
+        pageLabel: PAGE_LABEL,
+        lesson: TARGET_LESSON,
+        exercise: TARGET_EXERCISE,
+        startLabel: TEXT.START,
+        onStart: startQuiz,
+      })) {
+        return;
+      }
+    } catch (err) {
+      console.error("AisthIntroFronts render failed:", err);
+    }
+  }
+
   if (window.LessonIntroPlayer && typeof window.LessonIntroPlayer.render === "function") {
     try {
       if (window.LessonIntroPlayer.render(area, buildIntroPlayerConfig())) {
@@ -530,13 +501,20 @@ function renderQuestion() {
 
   isCurrentLocked = false;
   selectedOptionIndex = -1;
-
+  if (autoNextTimer) {
+    clearTimeout(autoNextTimer);
+    autoNextTimer = 0;
+  }
+  if (wrongReleaseTimer) {
+    clearTimeout(wrongReleaseTimer);
+    wrongReleaseTimer = 0;
+  }
   const promptHtml = `${renderTextWithEmphasis(q.promptBefore)} <span class="blank-slot">___</span> ${renderTextWithEmphasis(q.promptAfter)}`.trim();
   const optionsHtml = q.options
     .map((opt, idx) => `
-      <div class="choice-item" data-opt-index="${idx}" role="button" tabindex="0">
-        <span class="choice-label">${escapeHtml(opt.label)}</span>
-        <span class="choice-text">${renderTextWithEmphasis(opt.text)}</span>
+      <div class="aisth-choice-item" data-opt-index="${idx}" role="button" tabindex="0">
+        <span class="aisth-choice-label">${escapeHtml(opt.label)}</span>
+        <span class="aisth-choice-text">${renderTextWithEmphasis(opt.text)}</span>
       </div>
     `)
     .join("");
@@ -544,37 +522,31 @@ function renderQuestion() {
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
-    <div class="box">
-      <div style="margin-bottom:8px;"><span class="pill">${escapeHtml(TEXT.QTYPE)}</span></div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(q.instruction || DEFAULT_INSTRUCTION)}</div>
-      <div class="s-reminder" style="font-size:12px; color:#6c3ac7; font-weight:900; margin-top:4px;">${renderTextWithEmphasis(TEXT.S_REMINDER)}</div>
-      <div class="prompt">${promptHtml}</div>
-      <div class="choice-list">${optionsHtml}</div>
+    <div class="box aisth-l0e1-question-box">
+      <div class="question-instruction">${escapeHtml(q.instruction || DEFAULT_INSTRUCTION)}</div>
+      <div class="s-reminder" style="font-size:12px; color:#6c3ac7; font-weight:900; margin-top:6px;">${renderTextWithEmphasis(TEXT.S_REMINDER)}</div>
+      <div class="prompt aisth-question-surface">${promptHtml}</div>
+      <div class="aisth-choice-list">${optionsHtml}</div>
       <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>${escapeHtml(TEXT.NEXT)}</button>
     </div>
   `;
 
   wireChoiceEvents();
-
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
 }
 
 function wireChoiceEvents() {
-  document.querySelectorAll(".choice-item").forEach((el) => {
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     const activate = () => {
       if (isCurrentLocked) return;
       const idx = Number(el.dataset.optIndex ?? -1);
       if (!Number.isInteger(idx) || idx < 0) return;
+      if (wrongReleaseTimer) {
+        clearTimeout(wrongReleaseTimer);
+        wrongReleaseTimer = 0;
+      }
       selectedOptionIndex = idx;
       refreshChoiceSelection();
+      submitCurrentAnswer();
     };
 
     el.addEventListener("click", activate);
@@ -588,7 +560,7 @@ function wireChoiceEvents() {
 }
 
 function refreshChoiceSelection() {
-  document.querySelectorAll(".choice-item").forEach((el) => {
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     const idx = Number(el.dataset.optIndex ?? -1);
     el.classList.toggle("selected", idx === selectedOptionIndex);
   });
@@ -598,8 +570,6 @@ function submitCurrentAnswer() {
   if (isCurrentLocked) return;
 
   const q = questions[currentIndex];
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
 
   if (!q) return;
@@ -613,19 +583,25 @@ function submitCurrentAnswer() {
   const ok = q.correctOptionIndex >= 0 ? selectedOptionIndex === q.correctOptionIndex : fallbackOk;
 
   if (!ok) {
+    const wrongIndex = selectedOptionIndex;
     if (feedback) {
       feedback.className = "feedback";
       feedback.innerHTML = "";
     }
     showToast("no", TEXT.WRONG);
+    wrongReleaseTimer = window.setTimeout(() => {
+      wrongReleaseTimer = 0;
+      if (!isCurrentLocked && selectedOptionIndex === wrongIndex) {
+        selectedOptionIndex = -1;
+        refreshChoiceSelection();
+      }
+    }, 420);
     return;
   }
 
   isCurrentLocked = true;
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
 
-  document.querySelectorAll(".choice-item").forEach((el) => {
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     el.style.pointerEvents = "none";
   });
 
@@ -648,8 +624,26 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+  autoNextTimer = window.setTimeout(() => {
+    autoNextTimer = 0;
+    goNext();
+  }, 560);
 }
-
+function publishFrameQuestionDebugList() {
+  if (!window.AisthFrameLoader || typeof window.AisthFrameLoader.setQuestionDebugList !== "function") return;
+  const items = questions.map((q, idx) => {
+    const correctOpt = q.correctOptionIndex >= 0 ? q.options[q.correctOptionIndex] : null;
+    return {
+      no: idx + 1,
+      question: buildQuestionPlainText(q),
+      answer: correctOpt ? `${correctOpt.label}. ${stripEmphasisTokens(correctOpt.text)}` : stripEmphasisTokens(q.answerRaw),
+    };
+  });
+  window.AisthFrameLoader.setQuestionDebugList(items, {
+    label: PAGE_LABEL,
+    title: quizTitle,
+  });
+}
 function buildQuestionPlainText(q) {
   return `${stripEmphasisTokens(q.promptBefore)} ( ___ ) ${stripEmphasisTokens(q.promptAfter)}`.replace(/\s+/g, " ").trim();
 }
@@ -752,6 +746,12 @@ function storeLatestResultSnapshot() {
     };
     localStorage.setItem("QuizResults", JSON.stringify(payload));
   } catch (_) {}
+}
+
+function normalizeQuestionInstruction(value) {
+  const text = normalizeEscapedBreaks(String(value ?? "").trim());
+  if (!text || text.includes("동그라미")) return DEFAULT_INSTRUCTION;
+  return text;
 }
 
 function normalizeEscapedBreaks(value) {

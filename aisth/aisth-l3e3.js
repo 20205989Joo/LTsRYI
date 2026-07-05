@@ -881,7 +881,6 @@ function renderQuestion() {
 
   const dragEnabled = q.type !== "blank" && !!q.dragMeta?.canDrag;
 
-  const qTypeLabel = q.type === "blank" ? TEXT.QTYPE_BLANK : TEXT.QTYPE_REWRITE;
   const bodySource = q.questionEnglish || q.question;
   const qBody = dragEnabled
     ? renderDragSentenceHtml(q)
@@ -899,11 +898,8 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;">
-        <span class="pill">${escapeHtml(qTypeLabel)}</span>
-      </div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence">${qBody}${q.questionKorean ? `<div class="line-ko" id="line-ko-text">${renderKoreanLine(q)}</div>` : ""}</div>
+      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
+      <div class="sentence aisth-question-surface">${qBody}${q.questionKorean ? `<div class="line-ko" id="line-ko-text">${renderKoreanLine(q)}</div>` : ""}</div>
       ${dragEnabled ? `<div class="not-row"><span class="not-token" id="not-token-btn" draggable="true">not</span></div>` : ""}
     </div>
 
@@ -921,7 +917,9 @@ function renderQuestion() {
   const submitBtn = document.getElementById("submit-btn");
   const nextBtn = document.getElementById("next-btn");
   const input = document.getElementById("user-answer");
-
+  const slotInputControl = !dragEnabled && input && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
+    : null;
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
   if (nextBtn) nextBtn.addEventListener("click", goNext);
   if (dragEnabled) {
@@ -930,7 +928,8 @@ function renderQuestion() {
   }
 
   if (input) {
-    input.focus();
+    if (slotInputControl) slotInputControl.focus();
+    else input.focus();
     input.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" && q.type === "blank") {
         ev.preventDefault();
@@ -1291,6 +1290,7 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   input.disabled = true;
+  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) nextBtn.disabled = false;
 

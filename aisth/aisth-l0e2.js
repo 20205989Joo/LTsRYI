@@ -46,7 +46,7 @@ const TEXT = {
   WRONG: "오답",
   QTYPE: "프롤로그 작문형",
   SUBMIT: "제출",
-  NEXT: "다음",
+  SKIP: "Skip",
   PLACEHOLDER: "예시 문장처럼 자연스럽게 입력하세요.",
   LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
@@ -71,6 +71,7 @@ let currentIndex = 0;
 let results = [];
 let isCurrentLocked = false;
 let revealedKeywordFlags = [];
+let autoNextTimer = 0;
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -138,38 +139,52 @@ function injectRuntimeStyles() {
 
     .q-label {
       font-weight: 900;
-      font-size: 16px;
+      font-size: 14px;
       margin-bottom: 10px;
       color: #7e3106;
     }
 
     .keyword-wrap {
+      width: 100%;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
       gap: 6px;
-      margin-top: 2px;
+      margin-top: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
     }
 
     .keyword-panel {
-      margin-top: 8px;
+      margin-top: 12px;
+      min-height: 104px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: #fff;
-      border: 1px solid #ddd;
+      border: 1.5px solid rgba(126, 49, 6, 0.34);
       border-radius: 12px;
-      padding: 10px;
+      padding: 15px 10px;
+      box-sizing: border-box;
     }
 
     .keyword-chip {
       display: inline-flex;
       align-items: center;
-      padding: 6px 9px;
+      justify-content: center;
+      min-height: 31px;
+      padding: 7px 10px;
       border-radius: 999px;
       border: 1px solid #f1c18e;
       background: #fff;
       color: #7e3106;
-      font-size: 13px;
-      font-weight: 900;
+      font-size: 14px;
+      font-weight: 950;
       line-height: 1;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+      box-shadow: 0 4px 10px rgba(126, 49, 6, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
       user-select: none;
     }
 
@@ -178,7 +193,9 @@ function injectRuntimeStyles() {
     }
 
     .keyword-chip.tap-target:hover {
+      transform: translateY(-1px);
       border-color: #f1b884;
+      box-shadow: 0 6px 14px rgba(126, 49, 6, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.94);
     }
 
     .keyword-chip.is-en {
@@ -194,49 +211,90 @@ function injectRuntimeStyles() {
     }
 
     .answer-stage {
-      margin-top: 10px;
+      margin-top: 14px;
     }
 
     .answer-template {
+      position: relative;
+      min-height: 98px;
       background: #fff;
-      border: 1px solid #ddd;
+      border: 1.5px solid rgba(126, 49, 6, 0.34);
       border-radius: 12px;
-      padding: 10px 11px;
-      line-height: 1.9;
-      font-size: 14px;
+      padding: 15px 10px;
+      line-height: 2.15;
+      font-size: 17px;
       color: #3c2d22;
       word-break: keep-all;
       white-space: pre-wrap;
+      box-sizing: border-box;
+    }
+
+    .blank-flow-input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      opacity: 0;
+      color: transparent;
+      caret-color: transparent;
+      background: transparent;
+      outline: none;
     }
 
     .blank-inline {
       display: inline-flex;
-      align-items: flex-end;
-      margin: 0 2px;
+      align-items: center;
+      min-height: 42px;
+      margin: 0 5px;
       vertical-align: middle;
     }
 
-    .blank-input {
-      width: 60px;
-      border: none;
-      border-bottom: 2px solid #d9c0a7;
-      background: transparent;
-      padding: 0 2px 2px;
-      font-size: 14px;
-      font-weight: 900;
+    .blank-slot-shell {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      vertical-align: middle;
+      cursor: text;
+    }
+
+    .blank-char-cell {
+      width: 30px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(217, 192, 167, 0.82);
+      border-bottom: 3px solid #d9c0a7;
+      border-radius: 7px 7px 4px 4px;
+      background: rgba(255, 248, 228, 0.62);
+      padding: 0 1px 2px;
+      font-size: 18px;
+      font-weight: 950;
       color: #3c2d22;
       text-align: center;
-      outline: none;
-      line-height: 1.2;
+      line-height: 1;
+      box-sizing: border-box;
+      pointer-events: auto;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, transform 0.15s ease;
     }
 
-    .blank-input:focus {
+    .blank-char-cell.is-filled {
+      background: rgba(255, 247, 238, 0.84);
+      border-color: rgba(241, 123, 42, 0.45);
+      border-bottom-color: rgba(241, 123, 42, 0.7);
+    }
+
+    .answer-template:focus-within .blank-char-cell.is-active {
+      border-color: rgba(241, 123, 42, 0.72);
       border-bottom-color: #f17b2a;
-    }
-
-    .blank-input::placeholder {
-      color: #d1cac3;
-      opacity: 1;
+      background: rgba(255, 247, 238, 0.92);
+      box-shadow: 0 4px 10px rgba(241, 123, 42, 0.14);
+      transform: translateY(-1px);
     }
 
     textarea {
@@ -269,7 +327,7 @@ function injectRuntimeStyles() {
 
     .btn-row {
       display: flex;
-      gap: 10px;
+      gap: 6px;
       margin-top: 10px;
     }
 
@@ -516,6 +574,12 @@ function renderQuestion() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
 
+  if (autoNextTimer) {
+    window.clearTimeout(autoNextTimer);
+    autoNextTimer = 0;
+  }
+
+
   const q = questions[currentIndex];
   if (!q) {
     showResultPopup();
@@ -530,10 +594,9 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;"><span class="pill">${escapeHtml(TEXT.QTYPE)}</span></div>
-      <div id="stage-instruction" style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(cleanStageInstruction(TEXT.STEP1_INST))}</div>
+      <div id="stage-instruction" class="question-instruction">${escapeHtml(cleanStageInstruction(TEXT.STEP1_INST))}</div>
 
-      <div class="keyword-panel">
+      <div class="keyword-panel aisth-question-surface">
         <div class="keyword-wrap" id="keyword-wrap">${chipsHtml}</div>
       </div>
       <div class="answer-stage" id="answer-stage"></div>
@@ -542,7 +605,7 @@ function renderQuestion() {
 
     <div class="btn-row">
       <button class="quiz-btn" id="submit-btn" type="button" disabled>${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>${escapeHtml(TEXT.NEXT)}</button>
+      <button class="quiz-btn" id="next-btn" type="button">${escapeHtml(TEXT.SKIP)}</button>
     </div>
   `;
 
@@ -570,14 +633,15 @@ function submitCurrentAnswer() {
     return;
   }
 
-  const inputEls = [...document.querySelectorAll(".blank-input")];
-  if (!inputEls.length) {
+  const slotEls = getBlankSlotShells();
+  const inputEls = getBlankCharInputs();
+  if (!slotEls.length || !inputEls.length) {
     showToast("no", TEXT.INPUT_REQUIRED);
     return;
   }
 
-  const values = inputEls.map((el) => String(el.value || "").trim());
-  if (values.some((v) => !v)) {
+  const values = slotEls.map(readBlankSlotValue);
+  if (slotEls.some((slot) => !isBlankSlotComplete(slot))) {
     showToast("no", TEXT.INPUT_REQUIRED);
     return;
   }
@@ -595,7 +659,7 @@ function submitCurrentAnswer() {
   isCurrentLocked = true;
   inputEls.forEach((el) => { el.disabled = true; });
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
+  if (nextBtn) nextBtn.disabled = true;
 
   const userRaw = composeSentenceFromBlankPlan(q.blankPlan, values);
   results.push({
@@ -615,6 +679,10 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+  autoNextTimer = window.setTimeout(() => {
+    autoNextTimer = 0;
+    goNext();
+  }, 720);
 }
 
 function buildKeywordChipsHtml(q) {
@@ -680,7 +748,8 @@ function openBlankStage(q) {
   stage.innerHTML = html;
   if (submitBtn) submitBtn.disabled = false;
 
-  const first = stage.querySelector(".blank-input");
+  wireBlankInputEvents(stage);
+  const first = stage.querySelector("#blank-flow-input");
   if (first) first.focus();
 }
 
@@ -697,16 +766,165 @@ function cleanStageInstruction(text) {
 function renderBlankStageHtml(plan) {
   if (!plan || !Array.isArray(plan.parts) || !plan.parts.length) return "";
 
+  const offsets = getBlankSlotOffsets(plan);
+  const totalChars = getBlankFlowTotal(plan);
   const body = plan.parts.map((part) => {
     if (part.type === "blank") {
-      return `<span class="blank-inline"><input class="blank-input" data-blank-idx="${part.slotIndex}" type="text" autocomplete="off" placeholder="" /></span>`;
+      const slot = plan.slots?.[part.slotIndex] || null;
+      const charCount = getBlankSlotCharCount(slot);
+      const offset = offsets[part.slotIndex] || 0;
+      const label = `blank ${part.slotIndex + 1}`;
+      const cells = Array.from({ length: charCount }, (_, charIndex) => `<span class="blank-char-cell" data-char-idx="${charIndex}" data-flow-idx="${offset + charIndex}"></span>`).join("");
+      return `<span class="blank-inline"><span class="blank-slot-shell" data-blank-idx="${part.slotIndex}" data-offset="${offset}" data-max-chars="${charCount}" aria-label="${escapeHtmlAttr(label)}">${cells}</span></span>`;
     }
     return escapeHtml(part.text);
   }).join("");
 
-  return `<div class="answer-template">${body}</div>`;
+  return `<div class="answer-template"><input id="blank-flow-input" class="blank-flow-input" type="text" autocomplete="off" inputmode="text" maxlength="${totalChars}" aria-label="answer" />${body}</div>`;
 }
 
+function getBlankSlotCharCount(slot) {
+  const text = String(slot?.displayText || slot?.keyword || slot?.answers?.[0] || "").replace(/\s+/g, "");
+  return Math.max(1, Array.from(text).length || 1);
+}
+
+function getBlankSlotOffsets(plan) {
+  const offsets = [];
+  let cursor = 0;
+  for (const slot of (plan?.slots || [])) {
+    offsets.push(cursor);
+    cursor += getBlankSlotCharCount(slot);
+  }
+  return offsets;
+}
+
+function getBlankFlowTotal(plan) {
+  return (plan?.slots || []).reduce((sum, slot) => sum + getBlankSlotCharCount(slot), 0);
+}
+
+function wireBlankInputEvents(root) {
+  const input = root.querySelector("#blank-flow-input");
+  if (!input) return;
+
+  updateBlankFlowDisplay(root);
+
+  input.addEventListener("compositionstart", () => {
+    input.dataset.composing = "1";
+    updateBlankFlowDisplay(root);
+  });
+  input.addEventListener("compositionend", () => {
+    input.dataset.composing = "0";
+    window.setTimeout(() => {
+      normalizeBlankFlowInput(input);
+      updateBlankFlowDisplay(root);
+    }, 0);
+  });
+  input.addEventListener("input", (ev) => {
+    if (!(ev.isComposing || input.dataset.composing === "1")) {
+      normalizeBlankFlowInput(input);
+    }
+    updateBlankFlowDisplay(root);
+  });
+  input.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      submitCurrentAnswer();
+    }
+  });
+  ["focus", "blur", "keyup", "click", "select"].forEach((type) => {
+    input.addEventListener(type, () => updateBlankFlowDisplay(root));
+  });
+
+  root.querySelectorAll(".blank-slot-shell").forEach((shell) => {
+    shell.addEventListener("pointerdown", (ev) => {
+      ev.preventDefault();
+      const cell = ev.target.closest(".blank-char-cell");
+      const offset = Number(shell.dataset.offset || 0);
+      const max = Number(shell.dataset.maxChars || 1);
+      let flowIndex = offset + Math.min(max, getBlankFlowChars(input).slice(offset, offset + max).length);
+      if (cell) {
+        flowIndex = Number(cell.dataset.flowIdx || flowIndex);
+        if (cell.textContent) flowIndex += 1;
+      }
+      focusBlankFlowAt(root, flowIndex);
+    });
+  });
+}
+
+function normalizeBlankFlowInput(input) {
+  const chars = getBlankFlowChars(input).slice(0, getBlankFlowMax(input));
+  input.value = chars.join("");
+}
+
+function getBlankFlowChars(input) {
+  return Array.from(String(input?.value || "").replace(/\s+/g, ""));
+}
+
+function getBlankFlowMax(input) {
+  const max = Number(input?.getAttribute("maxlength") || 0);
+  if (Number.isFinite(max) && max > 0) return max;
+  return document.querySelectorAll(".blank-char-cell").length || 1;
+}
+
+function setBlankFlowCaret(input, index) {
+  const max = getBlankFlowMax(input);
+  const next = Math.max(0, Math.min(max, Number(index) || 0));
+  try { input.setSelectionRange(next, next); } catch (_) {}
+}
+
+function getBlankFlowCaretCharIndex(input) {
+  const raw = String(input?.value || "");
+  const end = Number.isInteger(input?.selectionStart) ? input.selectionStart : raw.length;
+  return Array.from(raw.slice(0, end).replace(/\s+/g, "")).length;
+}
+
+function updateBlankFlowDisplay(root) {
+  const input = root.querySelector("#blank-flow-input");
+  if (!input) return;
+  const chars = getBlankFlowChars(input);
+  const cells = [...root.querySelectorAll(".blank-char-cell")];
+  const hasFocus = document.activeElement === input;
+  const activeIndex = Math.min(getBlankFlowCaretCharIndex(input), Math.max(0, cells.length - 1));
+
+  cells.forEach((cell) => {
+    const idx = Number(cell.dataset.flowIdx || 0);
+    const text = chars[idx] || "";
+    cell.textContent = text;
+    cell.classList.toggle("is-filled", Boolean(text));
+    cell.classList.toggle("is-active", hasFocus && idx === activeIndex);
+  });
+}
+
+function focusBlankFlowAt(root, index) {
+  const input = root.querySelector("#blank-flow-input");
+  if (!input) return;
+  input.focus();
+  setBlankFlowCaret(input, index);
+  updateBlankFlowDisplay(root);
+}
+
+function getBlankSlotShells() {
+  return [...document.querySelectorAll(".blank-slot-shell")].sort((a, b) => Number(a.dataset.blankIdx ?? 0) - Number(b.dataset.blankIdx ?? 0));
+}
+
+function getBlankCharInputs() {
+  const input = document.getElementById("blank-flow-input");
+  return input ? [input] : [];
+}
+
+function readBlankSlotValue(slotEl) {
+  const input = document.getElementById("blank-flow-input");
+  const offset = Number(slotEl?.dataset.offset || 0);
+  const max = Number(slotEl?.dataset.maxChars || 1);
+  return getBlankFlowChars(input).slice(offset, offset + max).join("");
+}
+
+function isBlankSlotComplete(slotEl) {
+  const input = document.getElementById("blank-flow-input");
+  const offset = Number(slotEl?.dataset.offset || 0);
+  const max = Number(slotEl?.dataset.maxChars || 1);
+  return getBlankFlowChars(input).slice(offset, offset + max).length >= max;
+}
 function isBlankAnswerCorrect(values, plan) {
   if (!plan || !Array.isArray(plan.slots)) return false;
   if (values.length !== plan.slots.length) return false;
@@ -790,6 +1008,7 @@ function buildBlankPlan(answerRaw, keywordsKo) {
     parts.push({ type: "blank", slotIndex });
     slots.push({
       keyword: m.keyword,
+      displayText: m.text,
       answers: buildBlankAnswerCandidates(m.keyword, m.text),
     });
     usedKeywordsOrder.push(m.keyword);

@@ -525,8 +525,7 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;"><span class="pill">${escapeHtml(TEXT.QTYPE_TAP)}</span></div>
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${renderTextWithEmphasis(q.instruction || DEFAULT_INSTRUCTION)}</div>
+      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || DEFAULT_INSTRUCTION)}</div>
       <div class="sentence" id="tap-sentence">${renderSentenceTokens(q.tokens)}</div>
       <div id="feedback" class="feedback"></div>
     </div>
@@ -640,7 +639,11 @@ function maybeEnterTypingMode() {
   if (input) {
     input.value = "";
     input.placeholder = selectedPhrase;
-    input.focus();
+    const slotInputControl = window.AisthInputSlots
+      ? window.AisthInputSlots.enhance(input, { modelText: selectedPhrase, onEnter: () => handleTypingCheck(true) })
+      : null;
+    if (slotInputControl) slotInputControl.focus();
+    else input.focus();
   }
   if (submitBtn) {
     submitBtn.classList.remove("hidden");
@@ -681,6 +684,7 @@ function handleTypingCheck(showWrongOnEnter) {
     el.style.pointerEvents = "none";
   });
   input.disabled = true;
+  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) nextBtn.disabled = false;
 

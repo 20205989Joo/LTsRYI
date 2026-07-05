@@ -277,8 +277,6 @@
           27: "aisth/aisth-l7e1.html",
           28: "aisth/aisth-l7e2.html",
           29: "aisth/aisth-l7e3.html",
-          30: "aisth/aisth-l7e4.html",
-          31: "aisth/aisth-l7e5.html",
           32: "aisth/aisth-l8e1.html",
           33: "aisth/aisth-l8e2.html",
           34: "aisth/aisth-l8e3.html",

@@ -8,94 +8,49 @@
   <link rel="stylesheet" href="styles-frame.css" />
   <link rel="stylesheet" href="styles-room.css" />
   <link rel="stylesheet" href="styles-Aisth.css" />
-
-  <style>
-    .main-page {
-      position: relative;
-      width: 375px;
-      height: 667px;
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 2px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-
-    #cafe_int {
-      position: absolute;
-      width: 340px;
-      height: 626px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 20px;
-      overflow: hidden;
-      background: #fffaf2;
-      z-index: 1;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-
-    #quiz-area {
-      width: 90%;
-      height: 470px;
-      overflow-y: auto;
-      background: #fff;
-      border: 2px dashed #ccc;
-      padding: 12px;
-      border-radius: 12px;
-    }
-
-    #back-btn {
-      margin-top: 10px;
-      width: 100%;
-      height: 40px;
-      background: #7e3106;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    .popup-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .popup-content {
-      background: #fff;
-      width: 300px;
-      max-height: 500px;
-      overflow-y: auto;
-      padding: 16px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    }
-  </style>
 </head>
 
 <body>
-  <div class="main-page">
-    <div id="cafe_int">
-      <div id="quiz-area"></div>
-    </div>
-    <button id="back-btn" type="button">&#xB3CC;&#xC544;&#xAC00;&#xAE30;</button>
+  <div class="main-page" data-aisth-page>
+    <main id="cafe_int" data-aisth-stage>
+      <section id="quiz-area" data-aisth-quiz-area aria-live="polite"></section>
+    </main>
+
+    <button id="back-btn" type="button" data-aisth-action="back">돌아가기</button>
   </div>
 
-  <div class="popup-overlay" id="result-popup" aria-hidden="true">
-    <div class="popup-content" id="result-content"></div>
+  <div class="popup-overlay" id="result-popup" aria-hidden="true" data-aisth-result-popup>
+    <div class="popup-content" id="result-content" data-aisth-result-content></div>
   </div>
+
+  <template id="aisth-question-shell-template">
+    <section class="aisth-question-shell" data-aisth-question-shell>
+      <div class="q-label" data-aisth-q-label></div>
+
+      <div class="box aisth-question-box" data-aisth-question-box>
+        <div class="aisth-question-meta" data-aisth-question-meta></div>
+        <div class="aisth-question-instruction" data-aisth-question-instruction></div>
+        <div class="aisth-question-body" data-aisth-question-body></div>
+      </div>
+
+      <div class="box aisth-answer-box" data-aisth-answer-box>
+        <div class="aisth-answer-body" data-aisth-answer-body></div>
+        <div class="feedback" data-aisth-feedback></div>
+      </div>
+
+      <div class="btn-row" data-aisth-actions>
+        <button class="quiz-btn" type="button" data-aisth-action="submit">제출</button>
+        <button class="quiz-btn" type="button" data-aisth-action="next" disabled>다음</button>
+      </div>
+    </section>
+  </template>
 
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <script src="herma-toastfx.js"></script>
   <script src="dishquiz_resultstable.js"></script>
   <script src="../lesson-intro-player.js"></script>
+  <script src="aisth-intro-fronts.js"></script>
+  <script src="aisth-input-slots.js"></script>
   <script src="aisth-l0e1.js"></script>
   <script src="imsi_questions_compressor.js"></script>
   <script src="Imsi_resultstable_bridge.js"></script>

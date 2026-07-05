@@ -139,75 +139,6 @@ function injectRuntimeStyles() {
       font-weight: 900;
       color: #7e3106;
     }
-
-    .choice-list {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .choice-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 10px 12px;
-      cursor: pointer;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-
-    .choice-item:hover {
-      border-color: #f1b884;
-    }
-
-    .choice-item.selected {
-      border-color: #f17b2a;
-      background: #fff7ee;
-      box-shadow: 0 0 0 1px rgba(241, 123, 42, 0.28), 0 0 12px rgba(241, 123, 42, 0.35);
-    }
-
-    .choice-label {
-      position: relative;
-      width: 24px;
-      height: 24px;
-      border: 1px solid #d9c0a7;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 900;
-      color: #7e3106;
-      line-height: 1;
-      flex-shrink: 0;
-      z-index: 0;
-    }
-
-    .choice-item.selected .choice-label::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 34px;
-      height: 34px;
-      transform: translate(-50%, -50%);
-      border: 2px solid #7e3106;
-      border-radius: 50%;
-      pointer-events: none;
-      box-sizing: border-box;
-    }
-
-    .choice-text {
-      font-size: 15px;
-      font-weight: 900;
-      color: #3c2d22;
-      line-height: 1.4;
-      word-break: keep-all;
-    }
-
     .focus-token {
       background: rgba(255, 208, 90, 0.45);
       border-radius: 6px;
@@ -463,9 +394,9 @@ function renderQuestion() {
 
   const optionsHtml = q.options
     .map((opt, idx) => `
-      <div class="choice-item" data-opt-index="${idx}" role="button" tabindex="0">
-        <span class="choice-label">${escapeHtml(opt.label)}</span>
-        <span class="choice-text">${renderSentenceOption(opt.text)}</span>
+      <div class="aisth-choice-item" data-opt-index="${idx}" role="button" tabindex="0">
+        <span class="aisth-choice-label">${escapeHtml(opt.label)}</span>
+        <span class="aisth-choice-text">${renderSentenceOption(opt.text)}</span>
       </div>
     `)
     .join("");
@@ -474,11 +405,10 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div style="margin-bottom:8px;"><span class="pill">${escapeHtml(TEXT.QTYPE)}</span></div>
       <div class="arrow-q">${escapeHtml(q.arrowQuestion || "...")}</div>
       <div class="ask-line">${escapeHtml(TEXT.ASK_LINE)}</div>
 
-      <div class="choice-list">${optionsHtml}</div>
+      <div class="aisth-choice-list">${optionsHtml}</div>
       <div id="feedback" class="feedback"></div>
     </div>
 
@@ -497,7 +427,7 @@ function renderQuestion() {
 }
 
 function wireChoiceEvents() {
-  document.querySelectorAll(".choice-item").forEach((el) => {
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     const activate = () => {
       if (isCurrentLocked) return;
       const idx = Number(el.dataset.optIndex ?? -1);
@@ -517,7 +447,7 @@ function wireChoiceEvents() {
 }
 
 function refreshChoiceSelection() {
-  document.querySelectorAll(".choice-item").forEach((el) => {
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     const idx = Number(el.dataset.optIndex ?? -1);
     el.classList.toggle("selected", idx === selectedOptionIndex);
   });
@@ -552,7 +482,7 @@ function submitCurrentAnswer() {
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) nextBtn.disabled = false;
 
-  document.querySelectorAll(".choice-item").forEach((el) => {
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     el.style.pointerEvents = "none";
   });
 

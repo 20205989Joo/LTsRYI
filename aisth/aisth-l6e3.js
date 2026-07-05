@@ -514,7 +514,6 @@ function renderQuestion() {
   const instruction = stripEmphasisMarkers(group[0].instruction || TEXT.INPUT_HINT_FALLBACK);
 
   const itemsHtml = group.map((q, idx) => {
-    const qTypeLabel = q.type === "blank" ? TEXT.QTYPE_BLANK : TEXT.QTYPE_REWRITE;
     const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
     const placeholder = q.type === "blank"
       ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
@@ -526,8 +525,8 @@ function renderQuestion() {
 
     return `
       <div class="set-item">
-        <div class="set-item-head">Q${q.qNumber} <span class="pill">${escapeHtml(qTypeLabel)}</span></div>
-        <div class="sentence">${qBody}</div>
+        <div class="set-item-head">Q${q.qNumber}</div>
+        <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
         ${hintHtml}
         <div style="margin-top:8px;">${inputHtml}</div>
       </div>
@@ -538,7 +537,7 @@ function renderQuestion() {
     <div class="q-label">SET ${currentIndex + 1} / ${questionGroups.length} (Q${firstNo}-${lastNo})</div>
 
     <div class="box">
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(instruction)}</div>
+      <div class="question-instruction">${escapeHtml(instruction)}</div>
     </div>
 
     <div class="box" style="background:#fff;">
@@ -557,12 +556,19 @@ function renderQuestion() {
   const inputs = group
     .map((_, idx) => document.getElementById(`user-answer-${idx}`))
     .filter(Boolean);
+  const slotInputControls = inputs.map((input, idx) => {
+    const q = group[idx];
+    return input && q && window.AisthInputSlots
+      ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
+      : null;
+  });
 
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
   if (nextBtn) nextBtn.addEventListener("click", goNext);
 
   if (inputs.length) {
-    inputs[0].focus();
+    if (slotInputControls[0]) slotInputControls[0].focus();
+    else inputs[0].focus();
     inputs.forEach((input, idx) => {
       const q = group[idx];
       input.addEventListener("keydown", (ev) => {
@@ -615,7 +621,10 @@ function submitCurrentAnswer() {
   }
 
   isCurrentLocked = true;
-  attempts.forEach((a) => { if (a.input) a.input.disabled = true; });
+  attempts.forEach((a) => {
+    if (a.input) a.input.disabled = true;
+    if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(a.input, true);
+  });
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) nextBtn.disabled = false;
 

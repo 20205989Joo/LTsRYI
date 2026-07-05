@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="file:///C:/Users/82109/Documents/My%20Lab/4_My%20Factory/CodingNDeveloping/%EC%9B%B9%EC%BD%94%EB%94%A9/Ltryi_Frontend_moved/LTsRYI/aisth/styles-Aisth.css">
+<style>
+  html,body{margin:0;width:375px;height:667px;background:#fff;}
+  #quiz-area{width:306px;height:470px;overflow-y:auto;background:#fff;border:2px dashed #ccc;padding:12px;border-radius:12px;box-sizing:border-box;}
+</style>
+</head>
+<body>
+<div id="quiz-area"></div>
+<pre id="result"></pre>
+<script src="file:///C:/Users/82109/Documents/My%20Lab/4_My%20Factory/CodingNDeveloping/%EC%9B%B9%EC%BD%94%EB%94%A9/Ltryi_Frontend_moved/LTsRYI/lesson-intro-player.js"></script>
+<script src="file:///C:/Users/82109/Documents/My%20Lab/4_My%20Factory/CodingNDeveloping/%EC%9B%B9%EC%BD%94%EB%94%A9/Ltryi_Frontend_moved/LTsRYI/aisth/aisth-intro-fronts.js"></script>
+<script>
+(function(){
+  var area = document.getElementById('quiz-area');
+  window.AisthIntroFronts.render(area, { pageLabel:'Aisth L4-E1', lesson:4, exercise:1, startLabel:'Start', onStart:function(){} });
+  var next = area.querySelector('[data-lip-action="next"]');
+  next.click();
+  setTimeout(function(){ next.click(); }, 220);
+  setTimeout(function(){
+    var win = area.querySelector('.aisth-pronoun-meaning-window');
+    var result = { found: !!win };
+    if (win) {
+      var rect = win.getBoundingClientRect();
+      var css = getComputedStyle(win);
+      result.height = css.height;
+      result.rectHeight = Math.round(rect.height);
+      result.width = css.width;
+      result.display = css.display;
+      result.overflow = css.overflow;
+    }
+    document.body.setAttribute('data-check', JSON.stringify(result));
+    document.getElementById('result').textContent = JSON.stringify(result);
+  }, 560);
+})();
+</script>
+</body>
+</html>

@@ -488,7 +488,7 @@ function renderQuestion() {
     <div class="q-label">SET ${currentIndex + 1} / ${questionGroups.length} (Q${firstNo}-${lastNo})</div>
 
     <div class="box">
-      <div style="font-size:13px; color:#7e3106; font-weight:900;">${escapeHtml(instruction)}</div>
+      <div class="question-instruction">${escapeHtml(instruction)}</div>
     </div>
 
     <div class="box" style="background:#fff;">
