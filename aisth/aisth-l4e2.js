@@ -2,13 +2,12 @@
 // Independent runtime for Aisth Lesson 4 Exercise 2
 // Circle-select preposition quiz
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 4;
 const TARGET_EXERCISE = 2;
 const PAGE_LABEL = "Aisth L4-E2";
 const MAX_QUESTIONS = 0; // 0 = unlimited
 
-const FIXED_INSTRUCTION = "올바른 전치사를 동그라미 쳐보세요.";
+const FIXED_INSTRUCTION = "맞는 단어를 골라보세요!";
 
 const TEXT = {
   START: "🚀 시작",
@@ -20,7 +19,6 @@ const TEXT = {
   CORRECT: "정답!",
   WRONG: "오답",
   QTYPE: "전치사 선택",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -55,7 +53,7 @@ const PREPOSITION_FALLBACK = [
 
 let subcategory = "Grammar";
 let level = "aisth";
-let day = "014";
+let day = "013";
 let quizTitle = "quiz_Grammar_aisth_l4e2";
 let userId = "";
 
@@ -76,16 +74,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -158,7 +158,37 @@ function injectRuntimeStyles() {
     .ko-line {
       margin-top: 8px;
       color: #5a4637;
-      font-size: 13px;
+      font-size: 12.5px;
+      font-weight: 750;
+    }
+
+    .l42-question-box .question-instruction {
+      color: #111;
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 950;
+      word-break: keep-all;
+      margin: 16px 0 12px;
+    }
+
+    .l42-question-box .sentence {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 96px;
+      padding: 18px 14px;
+      margin-top: 12px;
+      font-size: 17px;
+      font-weight: 850;
+      line-height: 1.75;
+      color: #203736;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .l42-choice-item {
+      text-align: left;
     }
 
     .blank-slot {
@@ -295,25 +325,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -343,7 +388,7 @@ function buildQuestionsFromRows() {
       no: idx + 1,
       qNumber: Number(row["QNumber"]) || idx + 1,
       title,
-      instruction: instructionRaw || FIXED_INSTRUCTION,
+      instruction: FIXED_INSTRUCTION,
       answerRaw,
       pre: parsed.pre,
       post: parsed.post,
@@ -490,53 +535,53 @@ function renderQuestion() {
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
-    <div class="box">
-      <div class="question-instruction">${escapeHtml(q.instruction || FIXED_INSTRUCTION)}</div>
+    <div class="box l42-question-box">
+      <div class="question-instruction">${escapeHtml(FIXED_INSTRUCTION)}</div>
       <div class="sentence aisth-question-surface">
         <div class="en-line">${renderTextWithEmphasis(stemText).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`)}</div>
         ${q.koreanHint ? `<div class="ko-line">(${renderTextWithEmphasis(q.koreanHint)})</div>` : ""}
       </div>
-    </div>
-
-    <div class="box" style="background:#fff;">
-      <div class="choice-line">(${renderOptionTokens(q.options)})</div>
+      <div class="aisth-choice-list">${renderOptionTokens(q.options)}</div>
       <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>${escapeHtml(TEXT.NEXT)}</button>
     </div>
   `;
 
   wireOptionClicks();
-
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
 }
 
 function renderOptionTokens(options) {
   return (options || [])
-    .map((opt, idx) => `<span class="opt-token" data-opt-index="${idx}">${escapeHtml(opt)}</span>`)
-    .join(`<span class="slash"> / </span>`);
+    .map((opt, idx) => `
+      <div class="aisth-choice-item l42-choice-item" data-opt-index="${idx}" role="button" tabindex="0">
+        <span class="aisth-choice-label">${String.fromCharCode(65 + idx)}</span>
+        <span class="aisth-choice-text">${escapeHtml(opt)}</span>
+      </div>
+    `)
+    .join("");
 }
 
 function wireOptionClicks() {
-  document.querySelectorAll(".opt-token").forEach((el) => {
-    el.addEventListener("click", () => {
+  document.querySelectorAll(".l42-choice-item").forEach((el) => {
+    const activate = () => {
       if (isCurrentLocked) return;
       const idx = Number(el.dataset.optIndex ?? -1);
       if (!Number.isInteger(idx) || idx < 0) return;
       selectedOptionIndex = idx;
       refreshOptionSelection();
+      submitCurrentAnswer();
+    };
+    el.addEventListener("click", activate);
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
     });
   });
 }
 
 function refreshOptionSelection() {
-  document.querySelectorAll(".opt-token").forEach((el) => {
+  document.querySelectorAll(".l42-choice-item").forEach((el) => {
     const idx = Number(el.dataset.optIndex ?? -1);
     el.classList.toggle("selected", idx === selectedOptionIndex);
   });
@@ -546,8 +591,6 @@ function submitCurrentAnswer() {
   if (isCurrentLocked) return;
 
   const q = questions[currentIndex];
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
 
   if (!q) return;
@@ -571,10 +614,8 @@ function submitCurrentAnswer() {
   }
 
   isCurrentLocked = true;
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
-  document.querySelectorAll(".opt-token").forEach((el) => {
+  scheduleAutoNext();
+  document.querySelectorAll(".l42-choice-item").forEach((el) => {
     el.style.pointerEvents = "none";
   });
 
@@ -595,6 +636,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -723,6 +771,7 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
@@ -734,6 +783,10 @@ function normalizeEnglish(value) {
     .toLowerCase();
 }
 
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
+}
+
 function renderTextWithEmphasis(value) {
   const text = normalizeEscapedBreaks(String(value ?? ""));
   const re = /\*\*(.*?)\*\*/gs;
@@ -742,12 +795,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

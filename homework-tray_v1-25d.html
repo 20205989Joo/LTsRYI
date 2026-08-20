@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>오늘의 숙제 트레이 — 2.5D</title>
+  <link rel="stylesheet" href="styles-room.css" />
+  <link rel="stylesheet" href="nav-buttons.css" />
+  <link rel="stylesheet" href="cafe-25d-pages.css?v=20260731e" />
+</head>
+<body class="page-tray">
+  <div class="main-page">
+    <header class="cafe25-topbar">
+      <button
+        id="back-to-room-btn"
+        class="cafe25-back"
+        type="button"
+        data-nav-mainhall="student-room-25d.html"
+        data-nav-replace="true"
+        aria-label="학생 카페로 돌아가기"
+      >‹</button>
+      <div class="cafe25-heading">
+        <strong>학습 테이블</strong>
+        <span>today's study table</span>
+      </div>
+      <div class="cafe25-mark" aria-hidden="true">LT</div>
+    </header>
+
+    <main id="cafe_int">
+      <div class="cafe25-chip" style="left:14px; top:15px;">주문한 접시</div>
+
+      <div class="table-pedestal" aria-hidden="true"></div>
+      <div class="round_table">
+        <div class="tray_surface" id="tray-area">
+          <!-- JS가 .dish 요소 삽입 -->
+        </div>
+      </div>
+
+      <button
+        onclick="clearDownloadHistory()"
+        class="utility-bell-btn"
+        type="button"
+        title="기록 초기화"
+        aria-label="기록 초기화"
+      >🔔</button>
+
+      <button
+        id="tablet-launch-btn"
+        class="tablet-launch-btn"
+        type="button"
+        title="Tablet"
+        aria-label="태블릿 화면 열기"
+      >
+        <img src="tablet_image.png" alt="" />
+      </button>
+
+      <img
+        id="receipt_icon"
+        src="receipt_icon.png"
+        alt="영수증 보기"
+        role="button"
+        tabindex="0"
+      />
+    </main>
+  </div>
+
+  <script src="nav-buttons.js"></script>
+  <script>
+    (() => {
+      const tabletButton = document.getElementById("tablet-launch-btn");
+      tabletButton?.addEventListener("click", () => {
+        const userId = new URLSearchParams(location.search).get("id");
+        const path = "tablet_screen.html";
+        location.href = userId
+          ? `${path}?id=${encodeURIComponent(userId)}`
+          : path;
+      });
+
+      document.getElementById("receipt_icon")?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.currentTarget.click();
+        }
+      });
+    })();
+  </script>
+  <script src="adjustFontSize.js"></script>
+  <script src="day_manager.js?v=salmon2-route-20260520"></script>
+  <script src="dish_tray-loader.js?v=wordflow-submit-20260731"></script>
+  <script src="dish-retake-lock.js"></script>
+  <script src="dish_popup-handler.js?v=wordflow-25d-20260731b"></script>
+  <script src="dish-receipt.js"></script>
+</body>
+</html>

@@ -56,7 +56,8 @@
 
 .tab {
   flex: 1;
-  padding: 6px 0;
+  min-height: 58px;
+  padding: 8px 0;
   border: none;
   border-radius: 12px 12px 0 0;
   background: #f3f3f3;
@@ -66,6 +67,11 @@
   top: 2px;
   z-index: 1;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .tab.active {
@@ -79,7 +85,7 @@
   font-size: 18px;
   font-weight: bold;
   display: block;
-  line-height: 1;
+  line-height: 1.15;
 }
 
 .tab .tab-small {
@@ -87,7 +93,7 @@
   color: #666;
   display: block;
   margin-top: 0;
-  line-height: 0.1;
+  line-height: 1.2;
 }
 
 /* ░░ 탭별 콘텐츠 영역 ░░ */
@@ -128,11 +134,209 @@
   width: 75px;
   height: 75px;
   border-radius: 16px;
-  font-size: 12px;
+  border-color: #ddd3c8;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 246, 240, 0.96) 100%);
+  color: #3e3731;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 3px 8px rgba(72, 54, 38, 0.1);
+  font-family:
+    "Pretendard",
+    "SUIT",
+    "Noto Sans KR",
+    "Apple SD Gothic Neo",
+    "Malgun Gothic",
+    sans-serif;
+  font-size: 15px;
+  font-weight: 800;
   text-align: center;
   white-space: normal;
-  line-height: 1.2;
-  padding: 8px;
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+  padding: 10px 8px 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(0);
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    color 0.16s ease;
+}
+
+.menu-btn.square::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 11px;
+  width: 17px;
+  height: 3px;
+  border-radius: 999px;
+  background: #e5a46e;
+  opacity: 0.72;
+}
+
+.menu-btn.square:hover {
+  border-color: #d3a37d;
+  background:
+    linear-gradient(145deg, #ffffff 0%, #fff4e9 100%);
+  color: #2f2924;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 6px 13px rgba(104, 70, 42, 0.15);
+  transform: translateY(-2px);
+}
+
+.menu-btn.square:focus-visible {
+  outline: 2px solid rgba(241, 123, 42, 0.55);
+  outline-offset: 2px;
+}
+
+.kiosk-menu-tile {
+  position: relative;
+  width: 75px;
+  height: 75px;
+  flex: 0 0 75px;
+  isolation: isolate;
+}
+
+.kiosk-menu-tile .menu-btn.square {
+  display: flex;
+}
+
+.kiosk-menu-tile.help-open {
+  z-index: 40;
+}
+
+.kiosk-menu-help {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 5;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid rgba(50, 50, 50, 0.32);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #3d4248;
+  font: 800 12px/16px sans-serif;
+  text-align: center;
+  cursor: help;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+}
+
+.kiosk-menu-help:hover,
+.kiosk-menu-help:focus-visible,
+.kiosk-menu-tile.help-open .kiosk-menu-help {
+  border-color: #454b52;
+  background: #ffffff;
+  color: #111820;
+  outline: none;
+}
+
+.kiosk-menu-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: 154px;
+  box-sizing: border-box;
+  padding: 9px 10px;
+  border: 1px solid #c9cdd2;
+  border-radius: 8px;
+  background: #20252b;
+  color: #f7f8f9;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+}
+
+.kiosk-menu-tile:nth-child(3n) .kiosk-menu-tooltip {
+  right: 0;
+  left: auto;
+}
+
+.kiosk-menu-tile.is-coming-soon .menu-btn.square,
+.kiosk-menu-tile.is-coming-soon .menu-btn.square:hover {
+  border-color: #c9cdd1;
+  background:
+    linear-gradient(145deg, #f0f1f2 0%, #e3e5e7 100%);
+  color: #666d74;
+  cursor: not-allowed;
+  filter: saturate(0.4);
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px 8px;
+  transform: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 2px 6px rgba(50, 55, 60, 0.08);
+}
+
+.kiosk-menu-tile.is-coming-soon .menu-btn.square::before {
+  background: #aeb3b8;
+  opacity: 0.62;
+}
+
+.kiosk-menu-tile.is-coming-soon.is-updating .menu-btn.square,
+.kiosk-menu-tile.is-coming-soon.is-updating .menu-btn.square:hover {
+  border-color: #ddd3c8;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 246, 240, 0.96) 100%);
+  color: #3e3731;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 3px 8px rgba(72, 54, 38, 0.1);
+}
+
+.kiosk-menu-tile.is-coming-soon.is-updating .menu-btn.square::before {
+  background: #e5a46e;
+  opacity: 0.72;
+}
+
+.kiosk-coming-soon {
+  position: absolute;
+  right: auto;
+  bottom: 8px;
+  left: -3px;
+  z-index: 4;
+  width: 81px;
+  padding: 3px 0;
+  transform: rotate(-8deg);
+  border-top: 1px solid rgba(255, 255, 255, 0.72);
+  border-bottom: 1px solid rgba(137, 104, 13, 0.18);
+  background: #f6df83;
+  color: #6f590f;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(121, 96, 24, 0.16);
+}
+
+.kiosk-menu-tile.is-updating .kiosk-coming-soon {
+  border-top-color: rgba(255, 255, 255, 0.8);
+  border-bottom-color: rgba(170, 64, 108, 0.26);
+  background: linear-gradient(90deg, #f7b5cd 0%, #ee94b7 100%);
+  color: #71354f;
+  box-shadow: 0 2px 5px rgba(151, 64, 101, 0.22);
+}
+
+.kiosk-menu-tile.is-tester-preview .kiosk-coming-soon {
+  opacity: 0.46;
 }
 
 #levelSection {
@@ -247,6 +451,14 @@
 #levelSection .menu-btn.level-btn:hover {
   transform: translateY(-1px);
   filter: brightness(1.02);
+}
+
+#levelSection .menu-btn.level-btn.is-preview-locked,
+#levelSection .menu-btn.level-btn.is-preview-locked:hover {
+  opacity: 0.38;
+  filter: grayscale(0.8) saturate(0.25);
+  cursor: not-allowed;
+  transform: none;
 }
 
 #levelSection .menu-btn.level-btn .level-name {
@@ -857,15 +1069,26 @@
 
 /* ✅ 영수증 박스 */
 .receipt-box {
-  background: white;
-  border: 2px dashed #444;
-  border-radius: 8px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(111, 92, 71, 0.035) 0,
+      rgba(111, 92, 71, 0.035) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    #fffdf7;
+  border: 0;
+  border-radius: 2px;
   width: 240px;
-  padding: 16px;
+  padding: 20px 17px 18px;
   font-family: monospace;
   font-size: 13px;
   color: #222;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.8) inset,
+    0 15px 28px rgba(48, 34, 24, 0.25);
+  filter: drop-shadow(0 2px 1px rgba(74, 52, 36, 0.12));
   position: absolute;
   top: 120px;
   left: 50%;
@@ -873,19 +1096,113 @@
   z-index: 20;
   opacity: 1;
   transition: opacity 1s ease;
+  isolation: isolate;
+  animation: receiptPaperIn 220ms ease-out both;
+}
+
+.receipt-box::before,
+.receipt-box::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  height: 9px;
+  background: linear-gradient(135deg, transparent 5px, #fffdf7 5.5px) 0 0 / 10px 10px repeat-x;
+  pointer-events: none;
+}
+
+.receipt-box::before {
+  top: -8px;
+}
+
+.receipt-box::after {
+  bottom: -8px;
+  transform: rotate(180deg);
+}
+
+@keyframes receiptPaperIn {
+  from {
+    margin-top: -9px;
+    opacity: 0;
+  }
+  to {
+    margin-top: 0;
+    opacity: 1;
+  }
 }
 
 /* ✅ 영수증 제목 */
 .receipt-title {
   text-align: center;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin: 0 0 10px;
+  padding-bottom: 9px;
+  border-bottom: 1px dashed #9d8d7e;
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.04em;
 }
 
 /* ✅ 영수증 내용 */
 .receipt-content {
   white-space: pre-line;
-  line-height: 1.4;
+  line-height: 1.55;
+}
+
+.receipt-content::after {
+  content: "";
+  display: block;
+  width: 96px;
+  height: 17px;
+  margin: 15px auto 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    #3c352f 0 2px,
+    transparent 2px 4px,
+    #3c352f 4px 5px,
+    transparent 5px 8px
+  );
+  opacity: 0.42;
+}
+
+.receipt-box #cancelOrderBtn {
+  margin-top: 8px;
+  border: 1px solid #a6423c !important;
+  border-radius: 7px !important;
+  color: #fffaf7 !important;
+  background: linear-gradient(180deg, #ef8279 0%, #d6574f 62%, #c64a43 100%) !important;
+  box-shadow:
+    0 3px 0 #913833,
+    0 6px 10px rgba(104, 46, 40, 0.24),
+    inset 0 1px 0 rgba(255,255,255,0.42) !important;
+  transform: translateY(0);
+  transition: transform 100ms ease, box-shadow 100ms ease, filter 120ms ease;
+  cursor: pointer;
+}
+
+.receipt-box #cancelOrderBtn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 0 #913833,
+    0 8px 12px rgba(104, 46, 40, 0.27),
+    inset 0 1px 0 rgba(255,255,255,0.48) !important;
+}
+
+.receipt-box #cancelOrderBtn:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 #913833,
+    0 3px 5px rgba(104, 46, 40, 0.22),
+    inset 0 1px 3px rgba(86, 28, 25, 0.22) !important;
+}
+
+#redirect-toast {
+  transition-duration: 180ms !important;
+}
+
+#redirect-progress-bar {
+  transition: width 1.4s linear !important;
 }
 
 /* ✅ receipt 아이콘 */

@@ -1,11 +1,46 @@
 ﻿// aisth-l5e4.js
 // Independent runtime for Aisth Lesson 5 Exercise 4
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 5;
 const TARGET_EXERCISE = 4;
 const PAGE_LABEL = "Aisth L5-E4";
 const MAX_QUESTIONS = 0; // 0 = unlimited
+
+// Reserved for a future advanced-reading lesson. Intentionally excluded here.
+// These keep the original reading-comprehension prompts visible without loading them into this quiz.
+const L54_RESERVED_ADVANCED_PROMPTS = Object.freeze([
+  "I'm going to visit my grandmother this weekend. → When is the visit planned for?",
+  "He has to finish his homework before dinner. → When is the homework due?",
+  "He used to live in New York, but now he lives in Seoul. → Where does he live now?",
+  "We might be able to meet tomorrow. → Is this a confirmed plan?",
+  "He was supposed to be here by 10, but he's still not here. → Did he arrive on time?",
+  "He would like to ask you something. → What does he want to do?",
+  "I may have to cancel the meeting. → Is the cancellation definite?",
+]);
+
+const L54_DIRECT_CHOICE_ROWS = [
+  ["She (is going to / has to) move to another city next month.", "is going to"],
+  ["I (would like to / used to) order the steak, please.", "would like to"],
+  ["A: I can't do this alone. B: Don't worry. I (will / used to) help you.", "will"],
+  ["You (may have to / used to) wait a little longer.", "may have to"],
+  ["A: I have to leave early today. B: Why? Do you (have to do / used to do) something important?", "have to do"],
+  ["This book is hard, but I (am able to / used to) understand it.", "am able to"],
+  ["We (are going to / would like to) stay at a hotel near the beach.", "are going to"],
+  ["She (has to / used to) wake up early when she was in high school.", "used to"],
+  ["I am not sure if I (will / might be able to) finish this today.", "might be able to"],
+  ["You (have to / are going to) wear a uniform at this school.", "have to"],
+  ["They (are supposed to / used to) submit the report by Friday.", "are supposed to"],
+  ["A: She's very good at math. B: Yeah, she (is able to / used to) solve any problem.", "is able to"],
+  ["I (would like to / have to) speak with the manager, please.", "would like to"],
+].map(([Question, Answer], index) => ({
+  Lesson: TARGET_LESSON,
+  Exercise: TARGET_EXERCISE,
+  Title: "조동사2 선택",
+  Question,
+  QNumber: index + 1,
+  Answer,
+  Instruction: "두 표현 중 문맥에 맞는 것을 고르세요.",
+}));
 
 const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
 const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요.";
@@ -25,7 +60,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -47,6 +81,9 @@ let questions = [];
 let currentIndex = 0;
 let results = [];
 let isCurrentLocked = false;
+let selectedOptionIndex = -1;
+let autoNextTimer = 0;
+let wrongReleaseTimer = 0;
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
 
@@ -60,16 +97,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -129,6 +168,7 @@ function injectRuntimeStyles() {
       margin-top: 8px;
       line-height: 1.65;
       font-size: 14px;
+      font-weight: 900;
       word-break: keep-all;
       white-space: pre-wrap;
     }
@@ -248,25 +288,37 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  return L54_DIRECT_CHOICE_ROWS.map((row) => ({ ...row }));
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "direct-js",
+    title: "aisth-l5e4.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -276,41 +328,41 @@ function buildQuestionsFromRows() {
 
   if (MAX_QUESTIONS > 0) filtered = filtered.slice(0, MAX_QUESTIONS);
 
-  const modeByType = deriveInstructionModeByType(filtered);
-
-  const firstRowAnswer = normalizeEscapedBreaks(String(filtered[0]?.["Answer"] ?? "").trim());
-  const firstRewriteAnswer = normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "rewrite")?.["Answer"] ?? "").trim());
-  const firstBlankAnswer = normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "blank")?.["Answer"] ?? "").trim());
-
-  rewritePlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstRewriteAnswer || "example"));
-  blankPlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstBlankAnswer || "answer"));
-
   questions = filtered.map((row, idx) => {
     const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
     const answer = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
     const title = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Title"] ?? "").trim()));
-    const type = detectType(question);
-
-    const fallbackInst = type === "blank" ? DEFAULT_BLANK_INSTRUCTION : DEFAULT_REWRITE_INSTRUCTION;
-    const modeInst = modeByType[type] || fallbackInst;
-
+    const parsed = parseTwoChoiceQuestion(question);
     const qNumber = Number(row["QNumber"]) || idx + 1;
-    const rawInstruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
-
-    let instruction = rawInstruction || modeInst;
-    if (qNumber === 1 && modeInst) instruction = modeInst;
-    if (isInstructionLeakingAnswer(instruction, answer, type)) instruction = modeInst;
+    const options = parsed.options.map((text, optionIndex) => ({
+      label: String.fromCharCode(65 + optionIndex),
+      text,
+    }));
 
     return {
       no: idx + 1,
       qNumber,
       question,
       answer,
-      instruction,
+      answerRaw: answer,
+      instruction: normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim()) || "두 표현 중 알맞은 것을 고르세요.",
       title,
-      type,
+      promptBefore: parsed.before,
+      promptAfter: parsed.after,
+      options,
+      correctOptionIndex: options.findIndex((option) => normalizeLoose(option.text) === normalizeLoose(answer)),
     };
   });
+}
+
+function parseTwoChoiceQuestion(question) {
+  const match = String(question || "").match(/^(.*?)\(([^/()]+)\/([^()]+)\)(.*)$/s);
+  if (!match) return { before: question, after: "", options: [] };
+  return {
+    before: match[1].trim(),
+    after: match[4].trim(),
+    options: [match[2].trim(), match[3].trim()],
+  };
 }
 
 function deriveInstructionModeByType(rows) {
@@ -425,79 +477,65 @@ function renderQuestion() {
   }
 
   isCurrentLocked = false;
-
-  const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
-
-  const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
-    : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
-
-  const inputHtml = q.type === "blank"
-    ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
-    : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
+  selectedOptionIndex = -1;
+  if (autoNextTimer) window.clearTimeout(autoNextTimer);
+  if (wrongReleaseTimer) window.clearTimeout(wrongReleaseTimer);
+  const promptHtml = `${renderTextWithEmphasis(q.promptBefore)} <span class="blank-slot">___</span> ${renderTextWithEmphasis(q.promptAfter)}`.trim();
+  const optionsHtml = q.options.map((option, idx) => `
+    <div class="aisth-choice-item" data-opt-index="${idx}" role="button" tabindex="0">
+      <span class="aisth-choice-label">${escapeHtml(option.label)}</span>
+      <span class="aisth-choice-text">${renderTextWithEmphasis(option.text)}</span>
+    </div>
+  `).join("");
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
       <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
-    </div>
-
-    <div class="box" style="background:#fff;">
-      ${inputHtml}
+      <div class="sentence aisth-question-surface aisth-question-center"><div class="aisth-sentence-flow">${promptHtml}</div></div>
+      <div class="aisth-choice-list">${optionsHtml}</div>
       <div id="feedback" class="feedback"></div>
     </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
-    </div>
   `;
+  wireChoiceEvents();
+}
 
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const input = document.getElementById("user-answer");
-  const slotInputControl = input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
-    : null;
-
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
-
-  if (input) {
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" && q.type === "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-      if (ev.key === "Enter" && ev.ctrlKey && q.type !== "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
+function wireChoiceEvents() {
+  document.querySelectorAll(".aisth-choice-item").forEach((element) => {
+    const activate = () => {
+      if (isCurrentLocked) return;
+      selectedOptionIndex = Number(element.dataset.optIndex ?? -1);
+      refreshChoiceSelection();
+      submitCurrentAnswer();
+    };
+    element.addEventListener("click", activate);
+    element.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
       }
     });
-  }
+  });
+}
+
+function refreshChoiceSelection() {
+  document.querySelectorAll(".aisth-choice-item").forEach((element) => {
+    element.classList.toggle("selected", Number(element.dataset.optIndex ?? -1) === selectedOptionIndex);
+  });
 }
 
 function submitCurrentAnswer() {
   if (isCurrentLocked) return;
 
   const q = questions[currentIndex];
-  const input = document.getElementById("user-answer");
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
 
-  if (!q || !input) return;
-
-  const userRaw = String(input.value || "").trim();
-  if (!userRaw) {
-    showToast("no", TEXT.INPUT_REQUIRED);
-    return;
-  }
-  const ok = isAnswerCorrect(q.type, userRaw, q.answer);
+  if (!q || selectedOptionIndex < 0 || selectedOptionIndex >= q.options.length) return;
+  const selectedOption = q.options[selectedOptionIndex];
+  const ok = q.correctOptionIndex >= 0
+    ? selectedOptionIndex === q.correctOptionIndex
+    : normalizeLoose(selectedOption.text) === normalizeLoose(q.answerRaw);
 
   if (!ok) {
     if (feedback) {
@@ -505,22 +543,29 @@ function submitCurrentAnswer() {
       feedback.innerHTML = "";
     }
     showToast("no", TEXT.WRONG);
+    const wrongIndex = selectedOptionIndex;
+    wrongReleaseTimer = window.setTimeout(() => {
+      wrongReleaseTimer = 0;
+      if (!isCurrentLocked && selectedOptionIndex === wrongIndex) {
+        selectedOptionIndex = -1;
+        refreshChoiceSelection();
+      }
+    }, 420);
     return;
   }
 
   isCurrentLocked = true;
-  input.disabled = true;
-  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  document.querySelectorAll(".aisth-choice-item").forEach((element) => {
+    element.style.pointerEvents = "none";
+  });
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
-    type: q.type,
     question: q.question,
-    selected: userRaw,
-    answer: q.answer,
+    selected: `${selectedOption.label}. ${selectedOption.text}`,
+    answer: q.correctOptionIndex >= 0
+      ? `${q.options[q.correctOptionIndex].label}. ${q.options[q.correctOptionIndex].text}`
+      : q.answerRaw,
     instruction: q.instruction,
     correct: true,
   });
@@ -532,6 +577,17 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+  autoNextTimer = window.setTimeout(() => {
+    autoNextTimer = 0;
+    goNext();
+  }, 560);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -569,9 +625,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -640,11 +701,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -655,12 +721,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

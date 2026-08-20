@@ -1,7 +1,6 @@
 ﻿// aisth-l2e2.js
 // Independent runtime for Aisth Lesson 2 Exercise 2
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 2;
 const TARGET_EXERCISE = 2;
 const PAGE_LABEL = "Aisth L2-E2";
@@ -13,19 +12,19 @@ const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요
 const TEXT = {
   START: "🚀 시작",
   INTRO_1: "Herma 스타일 규칙을 따르는 독립형 Aisth 퀴즈입니다.",
-  INTRO_2: "제출하면 채점되고, 다음 문제로 이동할 수 있습니다.",
+  INTRO_2: "정답을 완성하면 바로 채점되고 다음 문제로 이동합니다.",
   PIN: "📌",
   NO_QUESTIONS: "해당 Lesson/Exercise의 문제가 없습니다.",
-  INPUT_REQUIRED: "입력 후 제출하세요.",
+  INPUT_REQUIRED: "정답을 입력하세요.",
   CORRECT: "정답!",
   WRONG: "오답",
   QTYPE_BLANK: "빈칸형",
   QTYPE_REWRITE: "서술형",
   INPUT_HINT_FALLBACK: "정답을 입력하세요.",
+  HINT: "힌트",
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -60,16 +59,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -151,6 +152,39 @@ function injectRuntimeStyles() {
       box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
       color: #7e3106;
       font-weight: 900;
+    }
+    #quiz-area .l22-prompt-surface {
+      display: block !important;
+      text-align: center !important;
+      white-space: normal !important;
+    }
+
+    .l22-prompt-lines {
+      display: flex;
+      width: 100%;
+      min-height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      text-align: center;
+      white-space: normal;
+    }
+
+    .l22-en-line {
+      color: #203736;
+      font-size: 18px;
+      line-height: 1.45;
+      font-weight: 950;
+      word-break: keep-all;
+    }
+
+    .l22-ko-line {
+      color: #6d5b50;
+      font-size: 12.5px;
+      line-height: 1.45;
+      font-weight: 850;
+      word-break: keep-all;
     }
     textarea,
     .short-input {
@@ -248,25 +282,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -426,14 +475,14 @@ function renderQuestion() {
 
   isCurrentLocked = false;
 
-  const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
+  const qBody = renderQuestionPrompt(q);
 
   const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
+    ? ""
     : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
 
   const inputHtml = q.type === "blank"
-    ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
+    ? `<input id="user-answer" class="short-input l22-slot-source-input" type="text" autocomplete="off" inputmode="latin" lang="en" autocapitalize="none" spellcheck="false" placeholder="${escapeHtmlAttr(placeholder)}" />`
     : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
 
   area.innerHTML = `
@@ -441,33 +490,49 @@ function renderQuestion() {
 
     <div class="box">
       <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
+      <div class="sentence aisth-question-surface aisth-question-center l22-prompt-surface">${qBody}</div>
     </div>
 
-    <div class="box" style="background:#fff;">
+    <div class="box${q.type === "blank" ? " aisth-letter-answer-box" : ""}" style="background:#fff;">
+      <div class="aisth-answer-tool-row">
+        <span aria-hidden="true"></span>
+        <span class="aisth-type-pill">type!</span>
+        <span class="aisth-answer-tool-end">${q.type === "blank" && q.no > 1 ? `<button class="aisth-hint-tool" id="hint-btn" type="button" aria-label="hint"><span class="aisth-hint-bulb" aria-hidden="true">!</span><span>hint</span></button>` : ""}</span>
+      </div>
       ${inputHtml}
       <div id="feedback" class="feedback"></div>
     </div>
 
     <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
+  const hintBtn = document.getElementById("hint-btn");
   const nextBtn = document.getElementById("next-btn");
   const input = document.getElementById("user-answer");
-  const slotInputControl = input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
+  const initialPlaceholderText = q.type === "blank" && q.no === 1 ? pickSlotModelText(q.answer) : "";
+  const slotInputControl = q.type === "blank" && input && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, placeholderText: initialPlaceholderText, onEnter: submitCurrentAnswer })
     : null;
 
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
+  if (hintBtn) {
+    hintBtn.addEventListener("click", () => {
+      revealFirstSlotPlaceholder(slotInputControl?.control, buildSlotPlaceholderText(q));
+      hintBtn.disabled = true;
+    });
+  }
   if (nextBtn) nextBtn.addEventListener("click", goNext);
 
   if (input) {
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
+    if (slotInputControl) {
+      applyPlaceholderAnimationDelays(slotInputControl.control);
+      input.addEventListener("input", () => updateSlotAnswerState(q, input, slotInputControl.control));
+      updateSlotAnswerState(q, input, slotInputControl.control);
+      slotInputControl.focus();
+    } else {
+      input.focus();
+    }
     input.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" && q.type === "blank") {
         ev.preventDefault();
@@ -486,8 +551,6 @@ function submitCurrentAnswer() {
 
   const q = questions[currentIndex];
   const input = document.getElementById("user-answer");
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
 
   if (!q || !input) return;
@@ -511,9 +574,7 @@ function submitCurrentAnswer() {
   isCurrentLocked = true;
   input.disabled = true;
   if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
@@ -532,6 +593,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -569,9 +637,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -640,11 +713,128 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
+}
+
+function renderQuestionPrompt(q) {
+  const parts = splitQuestionPrompt(q?.question || "");
+  const enHtml = parts.en
+    ? `<div class="l22-en-line"><span class="aisth-sentence-flow">${renderPromptLine(parts.en)}</span></div>`
+    : "";
+  const koHtml = parts.ko
+    ? `<div class="l22-ko-line">${renderTextWithEmphasis(parts.ko)}</div>`
+    : "";
+
+  return `
+        <div class="l22-prompt-lines">
+          ${enHtml}
+          ${koHtml}
+        </div>
+      `;
+}
+
+function splitQuestionPrompt(raw) {
+  const lines = normalizeEscapedBreaks(String(raw ?? ""))
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => stripEnglishWrapper(line));
+
+  if (lines.length >= 2) {
+    const enIndex = lines.findIndex((line) => /[A-Za-z]/.test(line) || line.includes("___"));
+    if (enIndex >= 0) {
+      return {
+        en: lines[enIndex],
+        ko: lines.filter((_, idx) => idx !== enIndex).join(" "),
+      };
+    }
+  }
+
+  const only = lines[0] || "";
+  if (/[A-Za-z]/.test(only) || only.includes("___")) return { en: only, ko: "" };
+  return { en: "", ko: only };
+}
+
+function stripEnglishWrapper(line) {
+  return String(line ?? "").replace(/^\((.*)\)$/s, "$1").trim();
+}
+
+function renderPromptLine(line) {
+  return renderTextWithEmphasis(line).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
+}
+
+function buildSlotPlaceholderText(q) {
+  const modelText = pickSlotModelText(q?.answer);
+  if (!modelText) return "";
+  return Array.from(modelText.replace(/\s+/g, ""))[0] || "";
+}
+
+function revealFirstSlotPlaceholder(control, placeholderText) {
+  if (!control || !placeholderText) return;
+  control.classList.remove("is-full-hint");
+  control.classList.add("has-revealed-hint");
+  control.dataset.placeholderChars = String(placeholderText);
+  const flowInput = control.querySelector(".aisth-slot-input");
+  if (flowInput) flowInput.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function applyPlaceholderAnimationDelays(control) {
+  if (!control) return;
+  Array.from(control.querySelectorAll(".aisth-slot-cell")).forEach((cell, idx) => {
+    cell.style.setProperty("--aisth-placeholder-delay", `${(idx * 0.16).toFixed(2)}s`);
+  });
+}
+
+function updateSlotAnswerState(q, sourceInput, control) {
+  if (!q || !sourceInput || !control || isCurrentLocked || q.type !== "blank") return;
+
+  const modelText = pickSlotModelText(q.answer);
+  const modelChars = getAnswerChars(modelText);
+  const userChars = getAnswerChars(sourceInput.value);
+  const cells = Array.from(control.querySelectorAll(".aisth-slot-cell"));
+  let allCorrect = modelChars.length > 0 && userChars.length >= modelChars.length;
+
+  cells.forEach((cell, idx) => {
+    const userChar = userChars[idx] || "";
+    const modelChar = modelChars[idx] || "";
+    const isFilled = Boolean(userChar);
+    const ok = isFilled && compareSlotChar(userChar, modelChar);
+
+    cell.classList.toggle("is-slot-correct", ok);
+    cell.classList.toggle("is-slot-wrong", isFilled && !ok);
+    if (!ok) allCorrect = false;
+  });
+
+  if (allCorrect) submitCurrentAnswer();
+}
+
+function compareSlotChar(userChar, modelChar) {
+  return String(userChar || "").toLowerCase() === String(modelChar || "").toLowerCase();
+}
+
+function getAnswerChars(value) {
+  return Array.from(String(value ?? "").replace(/\s+/g, ""));
+}
+
+function pickSlotModelText(modelRaw) {
+  const raw = stripEmphasisMarkers(normalizeEscapedBreaks(String(modelRaw ?? ""))).trim();
+  if (!raw) return "";
+
+  let line = raw.split(/\r?\n/).map((x) => x.trim()).filter(Boolean)[0] || raw;
+  line = line.split("||").map((x) => x.trim()).filter(Boolean)[0] || line;
+  if (/\bor\b/i.test(line)) line = line.split(/\bor\b/i).map((x) => x.trim()).filter(Boolean)[0] || line;
+  if (line.includes("/")) line = line.split("/").map((x) => x.trim()).filter(Boolean)[0] || line;
+  if (line.includes(",")) line = line.split(",").map((x) => x.trim()).filter(Boolean)[0] || line;
+  return line.replace(/[.?!~]+$/g, "").trim();
 }
 
 function renderTextWithEmphasis(value) {
@@ -655,12 +845,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

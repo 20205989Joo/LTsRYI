@@ -2,7 +2,6 @@
 // Independent runtime for Aisth Lesson 4 Exercise 1
 // Pronoun-case table selection (circle choice)
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 4;
 const TARGET_EXERCISE = 1;
 const PAGE_LABEL = "Aisth L4-E1";
@@ -24,7 +23,6 @@ const TEXT = {
   CASE_OBJ: "목적격",
   CASE_POS_ADJ: "소유형용사",
   CASE_POS_PRO: "소유대명사",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -57,7 +55,7 @@ const PRONOUN_GLOSS = {
 
 let subcategory = "Grammar";
 let level = "aisth";
-let day = "013";
+let day = "012";
 let quizTitle = "quiz_Grammar_aisth_l4e1";
 let userId = "";
 
@@ -78,16 +76,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -160,38 +160,55 @@ function injectRuntimeStyles() {
       font-weight: 900;
     }
 
+    .case-particle-token {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 7px;
+      border: 1.5px dashed #00B0F0;
+      border-radius: 8px;
+      background: rgba(0, 176, 240, 0.10);
+      color: #00B0F0;
+      font-weight: 950;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
     .case-table-wrap {
       margin-top: 10px;
       overflow-x: auto;
-      border-radius: 10px;
-      border: 1px solid #ebd9c4;
-      background: #fff;
+      padding: 4px;
+      border-radius: 14px;
+      border: 0;
+      background: transparent;
     }
 
     .case-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 6px;
       table-layout: fixed;
       min-width: 250px;
     }
 
     .case-table th,
     .case-table td {
-      border: 1px solid #efdfcb;
+      border: 0;
       text-align: center;
-      padding: 8px 6px;
+      padding: 0;
     }
 
     .case-table th {
-      background: #fff6eb;
-      color: #7e3106;
+      background: #edfafa;
+      color: #235f68;
       font-size: 10px;
       font-weight: 900;
       letter-spacing: 0.1px;
+      padding: 5px 3px;
+      border-radius: 7px;
     }
 
     .case-table td {
-      background: #fff;
+      background: transparent;
       color: #3c2d22;
       font-size: 14px;
       font-weight: 700;
@@ -199,38 +216,38 @@ function injectRuntimeStyles() {
 
     .table-choice {
       position: relative;
-      display: inline-flex;
+      display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 1px;
-      padding: 0 3px;
+      min-height: 54px;
+      padding: 7px 4px;
+      border: 1.5px solid rgba(87,184,191,.76);
+      border-radius: 12px;
+      background: linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(230,255,252,.84) 45%,rgba(198,238,242,.90) 100%);
+      color: #24434a;
       cursor: pointer;
       user-select: none;
-      transition: color 0.15s ease;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.92),inset 0 -2px 5px rgba(28,91,102,.14),0 4px 10px rgba(0,0,0,.09);
+      transition: transform .14s ease,box-shadow .14s ease,border-color .14s ease;
       z-index: 0;
     }
 
     .table-choice:hover {
-      color: #7e3106;
+      color: #183d49;
+      border-color:rgba(126,225,236,.98);
+      transform:translateY(-1px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.92),inset 0 -2px 5px rgba(28,91,102,.16),0 6px 14px rgba(0,0,0,.13);
     }
 
     .table-choice.selected {
-      color: #7e3106;
+      color: #183d49;
       font-weight: 900;
-    }
-
-    .table-choice.selected::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: max(calc(100% + 16px), 30px);
-      height: max(calc(100% + 16px), 30px);
-      transform: translate(-50%, -50%);
-      border: 2px solid #7e3106;
-      border-radius: 50%;
-      pointer-events: none;
-      box-sizing: border-box;
+      border-color:#7ee1ec;
+      background:linear-gradient(180deg,#d7fbff 0%,#bdeef2 58%,#8fd3df 100%);
+      transform:translateY(1px);
+      box-shadow:inset 0 3px 8px rgba(22,86,102,.26),inset 0 -1px 1px rgba(255,255,255,.56),0 1px 4px rgba(0,0,0,.10),0 0 0 1px rgba(126,225,236,.38);
     }
 
     .cell-word {
@@ -313,25 +330,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -504,18 +536,9 @@ function renderQuestion() {
       <div id="feedback" class="feedback"></div>
     </div>
 
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
-    </div>
   `;
 
   wireCaseClicks();
-
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
 }
 
 function renderCaseTable(cells) {
@@ -523,7 +546,7 @@ function renderCaseTable(cells) {
   const body = cells
     .map((c, idx) => `
       <td>
-        <span class="table-choice" data-cell-index="${idx}">
+        <span class="table-choice" data-cell-index="${idx}" role="button" tabindex="0">
           <span class="cell-word">${escapeHtml(c.value)}</span>
           <span class="cell-mean">${escapeHtml(c.gloss || "")}</span>
         </span>
@@ -543,12 +566,20 @@ function renderCaseTable(cells) {
 
 function wireCaseClicks() {
   document.querySelectorAll(".table-choice").forEach((el) => {
-    el.addEventListener("click", () => {
+    const activate = () => {
       if (isCurrentLocked) return;
       const idx = Number(el.dataset.cellIndex ?? -1);
       if (!Number.isInteger(idx) || idx < 0) return;
       selectedCellIndex = idx;
       refreshCaseSelection();
+      submitCurrentAnswer();
+    };
+    el.addEventListener("click", activate);
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
     });
   });
 }
@@ -564,8 +595,6 @@ function submitCurrentAnswer() {
   if (isCurrentLocked) return;
 
   const q = questions[currentIndex];
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
 
   if (!q) return;
@@ -588,9 +617,7 @@ function submitCurrentAnswer() {
   }
 
   isCurrentLocked = true;
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   document.querySelectorAll(".table-choice").forEach((el) => {
     el.style.pointerEvents = "none";
   });
@@ -612,6 +639,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -649,9 +683,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -691,7 +730,7 @@ function renderQuestionWithBaseHighlight(value) {
   const before = text.slice(0, idx);
   const after = text.slice(idx + full.length);
 
-  return `${escapeHtml(before)}<span class="focus-token">${escapeHtml(inner)}</span>${escapeHtml(after)}`;
+  return `${escapeHtml(before)}<span class="case-particle-token">${escapeHtml(inner)}</span>${escapeHtml(after)}`;
 }
 
 function normalizeForCompare(value) {
@@ -715,6 +754,7 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 

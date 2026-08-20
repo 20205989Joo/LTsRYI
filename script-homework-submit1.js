@@ -5,7 +5,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   const userId = urlParams.get('id');
 
   // ✅ 전송 후 항상 돌아갈 테이블(또는 메인) 페이지
-  const redirectUrl = `homework-tray_v1.html?id=${encodeURIComponent(userId || '')}`;
+  const trayPage = location.pathname.toLowerCase().includes('homework-submit-25d')
+    ? 'homework-tray_v1-25d.html'
+    : 'homework-tray_v1.html';
+  const redirectUrl = `${trayPage}?id=${encodeURIComponent(userId || '')}`;
 
   const kstOffset = 9 * 60 * 60 * 1000;
   const now = new Date(Date.now() + kstOffset);

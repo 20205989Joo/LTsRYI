@@ -2,9 +2,9 @@
 // Independent runtime for Aisth Lesson 5 Exercise 1
 // Inline circle-select inside the main question box
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 6;
 const TARGET_EXERCISE = 5;
+const SOURCE_EXERCISE = 5;
 const PAGE_LABEL = "Aisth L6-E5";
 const MAX_QUESTIONS = 0; // 0 = unlimited
 
@@ -20,7 +20,6 @@ const TEXT = {
   CORRECT: "정답!",
   WRONG: "오답",
   QTYPE: "동그라미형",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -56,16 +55,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -135,6 +136,48 @@ function injectRuntimeStyles() {
       font-weight: 900;
     }
 
+    .l64-bound-head {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 4px;
+      border-radius: 6px;
+      background: rgba(47,123,58,.07);
+      color: #2f7b3a;
+      box-shadow: 0 0 0 2px rgba(47,123,58,.07), 0 0 10px rgba(47,123,58,.13);
+      font-weight: 900;
+    }
+
+    .l64-preposition-slot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      color: #2f7b3a;
+      font-weight: 950;
+    }
+
+    .l64-preposition-choice .aisth-choice-text {
+      color: #2f7b3a;
+      text-shadow: 0 0 8px rgba(47,123,58,.14);
+    }
+
+    .l64-prompt-en {
+      color: #2d251f;
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .l64-prompt-ko {
+      margin-top: 5px;
+      color: #8a7c70;
+      font-size: 11px;
+      font-weight: 750;
+      line-height: 1.45;
+      text-align: center;
+    }
+
     .btn-row {
       display: flex;
       gap: 10px;
@@ -198,30 +241,45 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, SOURCE_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
   let filtered = rawRows
-    .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === TARGET_EXERCISE)
+    .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === SOURCE_EXERCISE)
     .sort((a, b) => Number(a["QNumber"]) - Number(b["QNumber"]));
 
   if (MAX_QUESTIONS > 0) filtered = filtered.slice(0, MAX_QUESTIONS);
@@ -285,7 +343,7 @@ function parseChoiceQuestion(raw) {
 }
 
 function resolveCorrectOptionIndex(answerRaw, options) {
-  const ans = String(answerRaw || "").trim();
+  const ans = String(answerRaw || "").trim().replace(/^\/+|\/+$/g, "").trim();
   const letter = ans.match(/^([A-Z])\.?$/i)?.[1]?.toUpperCase();
   if (letter) {
     const idx = (options || []).findIndex((o) => o.label === letter);
@@ -294,6 +352,38 @@ function resolveCorrectOptionIndex(answerRaw, options) {
 
   const normAns = normalizeLoose(ans);
   return (options || []).findIndex((o) => normalizeLoose(o.text) === normAns || normalizeLoose(`${o.label}. ${o.text}`) === normAns);
+}
+
+function renderL64Prompt(value) {
+  const lines = normalizeEscapedBreaks(String(value || "")).split(/\r?\n/);
+  return lines.map((line) => {
+    const markerIndex = line.indexOf("___");
+    if (markerIndex < 0) return renderTextWithEmphasis(line);
+
+    const before = line.slice(0, markerIndex).trimEnd();
+    const after = line.slice(markerIndex + 3);
+    const headMatch = before.match(/(looking\s+forward|[A-Za-z][A-Za-z’']*)$/i);
+    if (!headMatch) {
+      return `${escapeHtml(before)} <span class="l64-preposition-slot">___</span>${escapeHtml(after)}`;
+    }
+
+    const head = String(headMatch[1] || "");
+    const headIndex = before.length - head.length;
+    return `${escapeHtml(before.slice(0, headIndex))}<span class="l64-bound-head">${escapeHtml(head)}</span> <span class="l64-preposition-slot">___</span>${escapeHtml(after)}`;
+  }).join("<br/>");
+}
+
+function renderL64PromptBlock(value) {
+  const lines = normalizeEscapedBreaks(String(value || ""))
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const english = lines[0] || "";
+  const korean = lines.slice(1).join(" ");
+  return `
+    <div class="l64-prompt-en">${renderL64Prompt(english)}</div>
+    ${korean ? `<div class="l64-prompt-ko">${escapeHtml(korean)}</div>` : ""}
+  `;
 }
 
 function renderIntro() {
@@ -372,12 +462,12 @@ function renderQuestion() {
   selectedOptionIndex = -1;
 
   const promptHtml = q.prompt
-    ? `<div class="prompt aisth-question-surface">${renderTextWithEmphasis(q.prompt)}</div>`
+    ? `<div class="prompt aisth-question-surface">${renderL64PromptBlock(q.prompt)}</div>`
     : "";
 
   const optionsHtml = q.options
     .map((opt, idx) => `
-      <div class="aisth-choice-item" data-opt-index="${idx}" role="button" tabindex="0">
+      <div class="aisth-choice-item l64-preposition-choice" data-opt-index="${idx}" role="button" tabindex="0">
         <span class="aisth-choice-label">${escapeHtml(opt.label)}</span>
         <span class="aisth-choice-text">${renderTextWithEmphasis(opt.text)}</span>
       </div>
@@ -395,8 +485,8 @@ function renderQuestion() {
     </div>
 
     <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>${escapeHtml(TEXT.NEXT)}</button>
+      <button class="quiz-btn" id="submit-btn" type="button" style="display:none;" aria-hidden="true" tabindex="-1">${escapeHtml(TEXT.SUBMIT)}</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
@@ -416,6 +506,7 @@ function wireChoiceEvents() {
       if (!Number.isInteger(idx) || idx < 0) return;
       selectedOptionIndex = idx;
       refreshChoiceSelection();
+      submitCurrentAnswer();
     };
 
     el.addEventListener("click", activate);
@@ -467,8 +558,7 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     el.style.pointerEvents = "none";
   });
@@ -492,6 +582,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -608,6 +705,7 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
@@ -619,7 +717,11 @@ function normalizeLoose(value) {
     .trim()
     .replace(/[.?!~]+$/g, "")
     .toLowerCase()
-    .replace(/[\s'"`.,!?~:;()\/\[\]{}_-]+/g, "");
+    .replace(/[\s'"`.,!?~:;()\[\]{}_-]+/g, "");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -630,12 +732,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

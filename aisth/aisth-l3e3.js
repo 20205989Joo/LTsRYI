@@ -1,32 +1,25 @@
 ﻿// aisth-l3e3.js
 // Independent runtime for Aisth Lesson 3 Exercise 3
+// Card-select comparative / superlative quiz
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 3;
 const TARGET_EXERCISE = 3;
+const SOURCE_EXERCISE = 4;
 const PAGE_LABEL = "Aisth L3-E3";
 const MAX_QUESTIONS = 0; // 0 = unlimited
 
-const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
-const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요.";
+const DEFAULT_INSTRUCTION = "맞는 답을 골라보세요!";
 
 const TEXT = {
   START: "🚀 시작",
-  INTRO_1: "Herma 스타일 규칙을 따르는 독립형 Aisth 퀴즈입니다.",
-  INTRO_2: "제출하면 채점되고, 다음 문제로 이동할 수 있습니다.",
+  INTRO_1: "문맥에 맞는 답을 선택해 동그라미로 표시하세요.",
+  INTRO_2: "오답이면 다시 고를 수 있고, 맞으면 다음 문제로 넘어갑니다.",
   PIN: "📌",
   NO_QUESTIONS: "해당 Lesson/Exercise의 문제가 없습니다.",
-  INPUT_REQUIRED: "입력 후 제출하세요.",
-  PICK_VERB_FIRST: "먼저 강조 동사(또는 보조동사)를 옮기세요.",
+  PICK_OPTION: "선택지를 먼저 고르세요.",
   CORRECT: "정답!",
   WRONG: "오답",
-  QTYPE_BLANK: "빈칸형",
-  QTYPE_REWRITE: "서술형",
-  INPUT_HINT_FALLBACK: "정답을 입력하세요.",
-  PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
-  PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
-  PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
+  QTYPE_CIRCLE: "동그라미형",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -36,6 +29,28 @@ const TEXT = {
   CLOSE: "닫기",
   UNANSWERED: "(미응답)",
 };
+
+const NAME_STOPWORDS = new Set([
+  "A",
+  "B",
+  "Among",
+  "Who",
+  "Which",
+  "Then",
+  "So",
+  "Really",
+  "You",
+  "I",
+  "We",
+  "They",
+  "He",
+  "She",
+  "It",
+  "My",
+  "Is",
+  "This",
+  "That",
+]);
 
 let subcategory = "Grammar";
 let level = "aisth";
@@ -48,11 +63,7 @@ let questions = [];
 let currentIndex = 0;
 let results = [];
 let isCurrentLocked = false;
-let rewritePlaceholderExample = "";
-let blankPlaceholderExample = "";
-let dragPlaced = false;
-let dragLead = "";
-let notSelected = false;
+let selectedOptionIndex = -1;
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -64,16 +75,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -114,8 +127,8 @@ function injectRuntimeStyles() {
       background: #fff3e0;
       border: 1px solid #e9c7a7;
       border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
     }
 
     .q-label {
@@ -129,9 +142,9 @@ function injectRuntimeStyles() {
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 12px;
-      padding: 10px;
-      margin-top: 6px;
-      line-height: 1.55;
+      padding: 12px;
+      margin-top: 8px;
+      line-height: 1.65;
       font-size: 14px;
       word-break: keep-all;
       white-space: pre-wrap;
@@ -157,245 +170,114 @@ function injectRuntimeStyles() {
       font-weight: 900;
     }
 
-    .drag-line {
-      display: block;
-      line-height: 1.75;
-      white-space: normal;
+    .l33-than-token {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 6px;
+      border: 1px solid #111;
+      border-radius: 7px;
+      background: linear-gradient(180deg, #fff7ad 0%, #ffe36e 62%, #e8c840 100%);
+      color: #111;
+      font-weight: 950;
+      line-height: 1.45;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 2px 0 rgba(65,48,0,.18);
+    }
+
+    .choice-line {
+      font-size: 15px;
+      line-height: 1.9;
+      padding: 4px 0;
+      color: #3c2d22;
       word-break: keep-all;
     }
 
-    .line-ko {
-      margin-top: 4px;
-      color: #6d5b4d;
-      font-size: 12px;
-      line-height: 1.55;
-    }
-
-    .front-slot {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      vertical-align: baseline;
-      margin: 0 5px;
-      min-width: 30px;
-      height: 1.15em;
-      padding: 0 4px;
-      border-radius: 4px;
-      transition: background 0.12s ease, border-color 0.12s ease;
-    }
-
-    .front-slot.empty {
-      color: transparent;
-      border: 1px dashed rgba(126, 49, 6, 0.09);
-      background: transparent;
-    }
-
-    .front-slot.hover {
-      border-color: rgba(241, 123, 42, 0.35);
-      background: rgba(241, 123, 42, 0.06);
-    }
-
-    .front-slot.ready {
-      border: none;
-      background: transparent;
-    }
-
-    .drag-token {
-      display: inline-block;
-      padding: 0 3px;
-      border-radius: 4px;
-      border: none;
-      background: rgba(255, 208, 90, 0.45);
-      color: #7e3106;
-      font-weight: 900;
-      white-space: nowrap;
-      cursor: grab;
-      user-select: none;
-    }
-
-    .drag-token:active { cursor: grabbing; }
-    .drag-token.dragging {
-      animation: slime-pull 0.32s ease-out;
-      transform-origin: 50% 58%;
-      filter: saturate(1.06);
-    }
-    .drag-token.hover-not {
-      box-shadow: 0 0 0 1px rgba(196, 69, 58, 0.22) inset, 0 0 8px rgba(196, 69, 58, 0.2);
-    }
-
-    .drag-token.used-dim {
-      opacity: 0.38;
-      pointer-events: none;
-      cursor: default;
-      background: rgba(255, 208, 90, 0.2);
-    }
-
-    .drag-token.used-hide {
-      display: none;
-    }
-
-    .verb-wrap {
+    .opt-token {
       position: relative;
-      display: inline-flex;
-      align-items: baseline;
-    }
-
-    .aux-pop-token {
-      position: absolute;
-      left: -0.95em;
-      top: -1.15em;
       display: inline-block;
-      padding: 0 3px;
-      border-radius: 4px;
-      border: none;
-      background: rgba(255, 208, 90, 0.56);
-      color: #7e3106;
-      font-weight: 900;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transform: translate(0, 6px) scale(0.86);
-      transition: opacity 0.18s ease, transform 0.2s ease;
-      user-select: none;
-    }
-
-    .aux-pop-token.ready {
-      opacity: 1;
-      pointer-events: auto;
-      cursor: grab;
-      transform: translate(0, 0) scale(1);
-    }
-    .aux-pop-token.hover-not {
-      box-shadow: 0 0 0 1px rgba(196, 69, 58, 0.22) inset, 0 0 8px rgba(196, 69, 58, 0.2);
-    }
-
-    .aux-pop-token.dragging {
-      animation: slime-pull 0.3s ease-out;
-      transform-origin: 60% 62%;
-    }
-
-    .aux-pop-token.burst {
-      animation: aux-burst 0.2s ease-out;
-    }
-
-    .aux-pop-token.used {
-      display: none;
-    }
-
-    .aux-pop-token.lifted {
-      opacity: 0;
-    }
-
-    .aux-pop-token.docked {
-      position: static;
-      left: auto;
-      top: auto;
-      opacity: 1;
-      transform: none;
-      pointer-events: none;
-      margin-right: 2px;
-    }
-
-    .verb-wrap.split-open .drag-token {
-      background: rgba(255, 208, 90, 0.24);
-      color: rgba(126, 49, 6, 0.72);
-    }
-
-    .verb-wrap.split-open .aux-pop-token.ready {
-      background: rgba(255, 208, 90, 0.32);
-      color: rgba(126, 49, 6, 0.76);
-    }
-
-    .ghost-chip {
-      display: inline;
-      padding: 0 2px;
-      border-radius: 4px;
-      border: none;
-      color: #7e3106;
-      font-size: 14px;
-      font-weight: 900;
-      background: rgba(255, 208, 90, 0.55);
-    }
-
-    .ghost-chip.neg-glow,
-    .drag-token.neg-glow,
-    .aux-pop-token.neg-glow {
-      color: #7b2a23;
-      background: rgba(255, 221, 215, 0.75);
-      box-shadow: 0 0 0 1px rgba(200, 82, 70, 0.2) inset, 0 0 8px rgba(210, 84, 71, 0.25);
-      text-shadow: 0 0 6px rgba(210, 84, 71, 0.28);
-    }
-
-    .ko-neg-add {
-      color: #7b2a23;
-      background: rgba(255, 221, 215, 0.75);
-      border-radius: 4px;
+      color: #3c2d22;
+      font-weight: 700;
+      font-size: inherit;
+      line-height: inherit;
       padding: 0 1px;
-      box-shadow: 0 0 0 1px rgba(200, 82, 70, 0.2) inset, 0 0 8px rgba(210, 84, 71, 0.25);
-      text-shadow: 0 0 6px rgba(210, 84, 71, 0.28);
-    }
-
-    .not-row {
-      margin-top: 2px;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .not-token {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(126, 49, 6, 0.22);
-      background: rgba(255, 255, 255, 0.85);
-      color: #7e3106;
-      font-size: 12px;
-      font-weight: 900;
-      cursor: grab;
+      margin: 0 2px;
+      cursor: pointer;
       user-select: none;
+      transition: color 0.15s ease;
+      z-index: 0;
     }
 
-    .not-token:active {
-      cursor: grabbing;
+    .opt-token:hover {
+      color: #7e3106;
     }
 
-    .not-token.active {
-      border-color: rgba(196, 69, 58, 0.45);
-      background: rgba(255, 221, 215, 0.85);
-      color: #7b2a23;
-      box-shadow: 0 0 7px rgba(196, 69, 58, 0.22);
-    }
-
-    textarea,
-    .short-input {
-      width: 100%;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      font-size: 13px;
-      box-sizing: border-box;
-      outline: none;
-      background: #fff;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 58px;
-    }
-
-    .short-input {
-      font-size: 18px;
+    .opt-token.selected {
+      color: #7e3106;
       font-weight: 900;
-      text-align: center;
-      letter-spacing: 0.3px;
-    }
-    input::placeholder,
-    textarea::placeholder {
-      color: #b9b2aa;
-      opacity: 1;
     }
 
+    .opt-token.selected::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: max(calc(100% + 14px), 28px);
+      height: max(calc(100% + 14px), 28px);
+      transform: translate(-50%, -50%);
+      border: 2px solid #7e3106;
+      border-radius: 50%;
+      pointer-events: none;
+      box-sizing: border-box;
+    }
+
+    .slash {
+      color: #6f5847;
+      font-weight: 700;
+    }
+
+    .l33-question-box .question-instruction {
+      color: #111;
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 950;
+      margin: 4px 0 12px;
+    }
+
+    .l33-question-box .sentence {
+      min-height: 88px;
+      box-sizing: border-box;
+      padding: 18px 14px;
+      border: 1.5px solid rgba(126,49,6,.34);
+      color: #203736;
+      font-size: 17px;
+      font-weight: 850;
+      line-height: 1.7;
+    }
+
+    #quiz-area .l33-choice-item.l33-choice-er {
+      border-color: #111;
+      background: linear-gradient(180deg,#fff7ad 0%,#ffe36e 62%,#e8c840 100%);
+    }
+
+    #quiz-area .l33-choice-item.l33-choice-est {
+      border-color: #111;
+      background: linear-gradient(180deg,#e2b47d 0%,#c98642 62%,#a7662e 100%);
+    }
+
+    #quiz-area .l33-choice-item.l33-choice-er.selected,
+    #quiz-area .l33-choice-item.l33-choice-est.selected {
+      border-color: #111;
+      filter: saturate(1.08);
+      box-shadow: inset 0 3px 8px rgba(80,45,8,.24), 0 1px 4px rgba(0,0,0,.12), 0 0 0 2px rgba(17,17,17,.28);
+    }
+
+    #quiz-area .l33-choice-item .aisth-choice-label {
+      background: #111;
+      color: #fff;
+    }
+
+    #quiz-area .l33-choice-item .aisth-choice-text {
+      color: #111;
+    }
 
     .btn-row {
       display: flex;
@@ -415,9 +297,6 @@ function injectRuntimeStyles() {
       line-height: 1.6;
     }
 
-    .ok { color: #2e7d32; }
-    .bad { color: #c62828; }
-
     .result-item {
       background: #fffaf4;
       border: 1px solid #f0d9bf;
@@ -430,20 +309,6 @@ function injectRuntimeStyles() {
 
     .result-ok { color: #2e7d32; font-weight: 900; }
     .result-bad { color: #c62828; font-weight: 900; }
-
-    @keyframes slime-pull {
-      0% { transform: scale(1, 1); }
-      38% { transform: scale(1.22, 0.8) skewX(-6deg); }
-      72% { transform: scale(0.94, 1.1) skewX(3deg); }
-      100% { transform: scale(1.04, 0.94); }
-    }
-
-    @keyframes aux-burst {
-      0% { transform: translate(0.78em, 0.54em) scale(0.22, 0.88); opacity: 0.02; filter: blur(0.6px); }
-      36% { transform: translate(0.2em, 0.16em) scale(1.22, 0.72); opacity: 1; filter: blur(0.2px); }
-      68% { transform: translate(-0.03em, -0.04em) scale(0.93, 1.08); opacity: 1; filter: blur(0); }
-      100% { transform: translate(0, 0) scale(1); opacity: 1; filter: blur(0); }
-    }
   `;
   document.head.appendChild(style);
 }
@@ -480,96 +345,102 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, SOURCE_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
   let filtered = rawRows
-    .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === TARGET_EXERCISE)
+    .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === SOURCE_EXERCISE)
     .sort((a, b) => Number(a["QNumber"]) - Number(b["QNumber"]));
 
   if (MAX_QUESTIONS > 0) filtered = filtered.slice(0, MAX_QUESTIONS);
 
-  const modeByType = deriveInstructionModeByType(filtered);
-
-  const firstRowAnswer = cleanAnswerForScoring(normalizeEscapedBreaks(String(filtered[0]?.["Answer"] ?? "").trim()));
-  const firstRewriteAnswer = cleanAnswerForScoring(normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "rewrite")?.["Answer"] ?? "").trim()));
-  const firstBlankAnswer = cleanAnswerForScoring(normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "blank")?.["Answer"] ?? "").trim()));
-
-  rewritePlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstRewriteAnswer || "example"));
-  blankPlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstBlankAnswer || "answer"));
+  const fixedInstruction = deriveInstructionMode(filtered) || DEFAULT_INSTRUCTION;
+  const answerPool = filtered
+    .map((r) => stripEmphasisMarkers(normalizeEscapedBreaks(String(r["Answer"] ?? "").trim())))
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   questions = filtered.map((row, idx) => {
-    const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
-    const answerRaw = normalizeEscapedBreaks(String(row["Answer"] ?? "").trim());
-    const answer = cleanAnswerForScoring(answerRaw);
+    const questionRaw = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
+    const answerRaw = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim())).trim();
     const title = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Title"] ?? "").trim()));
-    const type = detectType(question);
-    const parts = splitQuestionForDisplay(question);
-
-    const fallbackInst = type === "blank" ? DEFAULT_BLANK_INSTRUCTION : DEFAULT_REWRITE_INSTRUCTION;
-    const modeInst = modeByType[type] || fallbackInst;
-
     const qNumber = Number(row["QNumber"]) || idx + 1;
-    const rawInstruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
+    const instructionRaw = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
+    const explicit = parseExplicitChoiceGroup(questionRaw);
 
-    let instruction = rawInstruction || modeInst;
-    if (qNumber === 1 && modeInst) instruction = modeInst;
-    if (isInstructionLeakingAnswer(instruction, answer, type)) instruction = modeInst;
+    const instruction = instructionRaw && !isInstructionLeakingAnswer(instructionRaw, answerRaw)
+      ? instructionRaw
+      : fixedInstruction;
+
+    const options = buildChoiceOptions({
+      question: questionRaw,
+      answer: answerRaw,
+      explicitChoices: explicit?.options || [],
+      answerPool,
+      qNumber,
+    });
+
+    const questionDisplay = explicit?.fullMatch
+      ? questionRaw.replace(explicit.fullMatch, "( ___ )")
+      : questionRaw;
 
     return {
       no: idx + 1,
       qNumber,
-      question,
-      answer,
-      instruction,
       title,
-      type,
-      questionEnglish: parts.english,
-      questionKorean: parts.korean,
-      dragMeta: buildDragMetaForNegative(parts.english, answer),
+      questionRaw,
+      questionDisplay,
+      answerRaw,
+      instruction,
+      options,
     };
   });
 }
 
-function deriveInstructionModeByType(rows) {
-  const bucket = { rewrite: new Map(), blank: new Map() };
-
+function deriveInstructionMode(rows) {
+  const bucket = new Map();
   rows.forEach((row) => {
-    const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
-    const answer = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
     const instruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
-    const type = detectType(question);
-
+    const answer = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
     if (!instruction) return;
-    if (isInstructionLeakingAnswer(instruction, answer, type)) return;
-
-    const m = bucket[type];
-    m.set(instruction, (m.get(instruction) || 0) + 1);
+    if (isInstructionLeakingAnswer(instruction, answer)) return;
+    bucket.set(instruction, (bucket.get(instruction) || 0) + 1);
   });
-
-  return {
-    rewrite: pickTopKey(bucket.rewrite),
-    blank: pickTopKey(bucket.blank),
-  };
+  return pickTopKey(bucket);
 }
 
 function pickTopKey(mapObj) {
@@ -582,224 +453,6 @@ function pickTopKey(mapObj) {
     }
   }
   return topKey;
-}
-
-function detectType(question) {
-  return String(question || "").includes("___") ? "blank" : "rewrite";
-}
-
-const BE_VERBS = new Set(["am", "is", "are", "was", "were"]);
-const KEEP_AUX = new Set(["can", "will", "should", "must", "may", "might", "could", "would", "shall"]);
-const DO_AUX = new Set(["do", "does", "did"]);
-
-function splitQuestionForDisplay(question) {
-  const text = normalizeEscapedBreaks(String(question || "")).trim();
-  const m = text.match(/^(.*?)(\(([^()]*)\))\s*$/s);
-  if (m && /[가-힣]/.test(String(m[3] || ""))) {
-    return {
-      english: String(m[1] || "").trim(),
-      korean: String(m[2] || "").trim(),
-    };
-  }
-  return { english: text, korean: "" };
-}
-
-function cleanAnswerForScoring(raw) {
-  let s = stripEmphasisMarkers(normalizeEscapedBreaks(String(raw ?? ""))).trim();
-  if (!s) return "";
-
-  const arrowParts = s.split(/(?:->|→)/);
-  if (arrowParts.length > 1) s = String(arrowParts[arrowParts.length - 1] || "").trim();
-
-  const outer = s.match(/^\((.*)\)$/);
-  if (outer) s = String(outer[1] || "").trim();
-
-  const tailNote = s.match(/^(.+?)\s*\([^)]*\)\s*$/);
-  if (tailNote && tailNote[1].trim()) s = tailNote[1].trim();
-
-  return s;
-}
-
-function buildDragMetaForNegative(questionEnglish, answer) {
-  const raw = normalizeEscapedBreaks(String(questionEnglish || "")).trim();
-  if (!raw || !/[A-Za-z]/.test(raw)) {
-    return {
-      canDrag: false,
-      tokens: [],
-      verbIndex: -1,
-      ghostLead: "",
-      keepSourceToken: false,
-      baseVerb: "",
-      insertIndex: 1,
-    };
-  }
-
-  const plain = stripEmphasisMarkers(raw);
-  const tokens = plain.split(/\s+/).filter(Boolean);
-  if (!tokens.length) {
-    return {
-      canDrag: false,
-      tokens: [],
-      verbIndex: -1,
-      ghostLead: "",
-      keepSourceToken: false,
-      baseVerb: "",
-      insertIndex: 1,
-    };
-  }
-
-  const answerWords = parseAnswerWords(answer);
-  const neg = detectNegativeLeadFromAnswer(answerWords);
-  if (!neg.supported) {
-    return {
-      canDrag: false,
-      tokens,
-      verbIndex: -1,
-      ghostLead: "",
-      keepSourceToken: false,
-      baseVerb: "",
-      insertIndex: 1,
-    };
-  }
-
-  const qSubject = normalizeWordToken(tokens[0]);
-  const aSubject = normalizeWordToken(answerWords[0] || "");
-  if (!qSubject || !aSubject || qSubject !== aSubject) {
-    return {
-      canDrag: false,
-      tokens,
-      verbIndex: -1,
-      ghostLead: "",
-      keepSourceToken: false,
-      baseVerb: "",
-      insertIndex: 1,
-    };
-  }
-
-  const verbIndex = detectVerbIndexForNegative(tokens, raw, neg);
-  if (verbIndex < 0) {
-    return {
-      canDrag: false,
-      tokens,
-      verbIndex: -1,
-      ghostLead: "",
-      keepSourceToken: false,
-      baseVerb: "",
-      insertIndex: 1,
-    };
-  }
-
-  return {
-    canDrag: true,
-    tokens,
-    verbIndex,
-    ghostLead: neg.aux,
-    keepSourceToken: DO_AUX.has(neg.aux),
-    baseVerb: DO_AUX.has(neg.aux) ? (neg.baseVerb || inferBaseVerbFromToken(tokens[verbIndex])) : "",
-    insertIndex: 1,
-  };
-}
-
-function detectNegativeLeadFromAnswer(answerWords) {
-  const words = [...answerWords];
-  for (let i = 0; i < words.length - 1; i++) {
-    const w = normalizeWordToken(words[i]);
-    const n = normalizeWordToken(words[i + 1]);
-    if ((BE_VERBS.has(w) || KEEP_AUX.has(w) || DO_AUX.has(w)) && n === "not") {
-      return {
-        supported: true,
-        aux: w,
-        baseVerb: DO_AUX.has(w) ? normalizeWordToken(words[i + 2] || "") : "",
-      };
-    }
-  }
-  return { supported: false, aux: "", baseVerb: "" };
-}
-
-function detectVerbIndexForNegative(tokens, questionWithMarks, neg) {
-  const norms = tokens.map((t) => normalizeWordToken(t));
-  if (BE_VERBS.has(neg.aux) || KEEP_AUX.has(neg.aux)) {
-    return norms.indexOf(neg.aux);
-  }
-
-  const emphasized = extractFirstEmphasisWord(questionWithMarks);
-  if (emphasized) {
-    const idx = norms.indexOf(emphasized);
-    if (idx >= 0) return idx;
-  }
-
-  if (neg.baseVerb) {
-    const forms = buildVerbForms(neg.baseVerb);
-    for (let i = 0; i < norms.length; i++) {
-      if (forms.has(norms[i])) return i;
-    }
-  }
-
-  for (let i = 1; i < norms.length; i++) {
-    if (/^[a-z]+$/.test(norms[i])) return i;
-  }
-  return -1;
-}
-
-function extractFirstEmphasisWord(questionWithMarks) {
-  const m = String(questionWithMarks || "").match(/\*\*(.*?)\*\*/s);
-  if (!m) return "";
-  const first = String(m[1] || "").trim().split(/\s+/)[0] || "";
-  return normalizeWordToken(first);
-}
-
-function inferBaseVerbFromToken(token) {
-  const t = normalizeWordToken(token);
-  if (!t) return "";
-  if (t === "has") return "have";
-  if (t === "does") return "do";
-  if (t === "goes") return "go";
-  if (t === "tries") return "try";
-  if (t.endsWith("ies") && t.length > 3) return t.slice(0, -3) + "y";
-  if (t.endsWith("es") && t.length > 2) return t.slice(0, -2);
-  if (t.endsWith("s") && t.length > 1) return t.slice(0, -1);
-  if (t.endsWith("ed") && t.length > 2) return t.slice(0, -2);
-  return t;
-}
-
-function buildVerbForms(baseVerb) {
-  const b = String(baseVerb || "").toLowerCase().trim();
-  const out = new Set([b]);
-  if (!b) return out;
-
-  if (b === "have") out.add("has");
-  if (b === "go") out.add("goes");
-  if (b === "do") out.add("does");
-
-  out.add(b + "s");
-  out.add(b + "es");
-  if (b.endsWith("y") && b.length > 1) out.add(b.slice(0, -1) + "ies");
-  return out;
-}
-
-function parseAnswerWords(answer) {
-  return canonicalizeNegationText(cleanAnswerForScoring(answer))
-    .toLowerCase()
-    .match(/[a-z']+/g) || [];
-}
-
-function canonicalizeNegationText(value) {
-  return String(value ?? "")
-    .replace(/[’‘`]/g, "'")
-    .replace(/\bcannot\b/gi, "can not")
-    .replace(/\bwon't\b/gi, "will not")
-    .replace(/\bshan't\b/gi, "shall not")
-    .replace(/\bcan't\b/gi, "can not")
-    .replace(/\bain't\b/gi, "is not")
-    .replace(/\b([a-z]+)n't\b/gi, "$1 not")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function normalizeWordToken(token) {
-  return String(token || "")
-    .toLowerCase()
-    .replace(/^[^a-z]+|[^a-z]+$/g, "");
 }
 
 function renderIntro() {
@@ -825,7 +478,7 @@ function renderIntro() {
 
   const total = questions.length;
   const title = questions[0]?.title || PAGE_LABEL;
-  const firstInst = stripEmphasisMarkers(questions[0]?.instruction || TEXT.INPUT_HINT_FALLBACK);
+  const firstInst = stripEmphasisMarkers(questions[0]?.instruction || DEFAULT_INSTRUCTION);
 
   area.innerHTML = `
     <div class="box">
@@ -875,409 +528,85 @@ function renderQuestion() {
   }
 
   isCurrentLocked = false;
-  dragPlaced = false;
-  dragLead = q.dragMeta?.ghostLead || "";
-  notSelected = false;
+  selectedOptionIndex = -1;
 
-  const dragEnabled = q.type !== "blank" && !!q.dragMeta?.canDrag;
-
-  const bodySource = q.questionEnglish || q.question;
-  const qBody = dragEnabled
-    ? renderDragSentenceHtml(q)
-    : renderTextWithEmphasis(bodySource).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
-
-  const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
-    : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
-
-  const inputHtml = (q.type === "blank" || dragEnabled)
-    ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
-    : `<textarea id="user-answer" rows="2" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
+  const qBody = renderL33QuestionText(q.questionDisplay).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
+  const optionLine = renderChoiceOptionsLine(q);
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
-    <div class="box">
-      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface">${qBody}${q.questionKorean ? `<div class="line-ko" id="line-ko-text">${renderKoreanLine(q)}</div>` : ""}</div>
-      ${dragEnabled ? `<div class="not-row"><span class="not-token" id="not-token-btn" draggable="true">not</span></div>` : ""}
-    </div>
-
-    <div class="box" style="background:#fff;">
-      ${inputHtml}
+    <div class="box l33-question-box">
+      <div class="question-instruction">${escapeHtml(DEFAULT_INSTRUCTION)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
+      <div class="aisth-choice-list">${optionLine}</div>
       <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
     </div>
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const input = document.getElementById("user-answer");
-  const slotInputControl = !dragEnabled && input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
-    : null;
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
-  if (dragEnabled) {
-    wireDragUI(q);
-    wireNotToken(q);
-  }
+  wireOptionClicks();
+}
 
-  if (input) {
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" && q.type === "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-      if (ev.key === "Enter" && ev.ctrlKey && q.type !== "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
+function renderChoiceOptionsLine(q) {
+  const opts = Array.isArray(q?.options) ? q.options.filter(Boolean) : [];
+  if (opts.length < 2) return "";
+  return opts.map((opt, idx) => `
+    <div class="aisth-choice-item l33-choice-item ${getComparisonChoiceTone(q, opt)}" data-opt-index="${idx}" role="button" tabindex="0">
+      <span class="aisth-choice-label">${String.fromCharCode(65 + idx)}</span>
+      <span class="aisth-choice-text">${escapeHtml(opt)}</span>
+    </div>
+  `).join("");
+}
+
+function getComparisonChoiceTone(q, option) {
+  const value = String(option || "").toLowerCase();
+  if (/\bmost\b|[a-z]+est\b/.test(value)) return "l33-choice-est";
+  if (/\b(?:more|less)\b|[a-z]+er\b/.test(value)) return "l33-choice-er";
+  const context = `${q?.answerRaw || ""} ${q?.questionDisplay || ""}`.toLowerCase();
+  return /\bmost\b|[a-z]+est\b|\bthe\s+_{2,}/.test(context) ? "l33-choice-est" : "l33-choice-er";
+}
+
+function wireOptionClicks() {
+  document.querySelectorAll(".l33-choice-item").forEach((el) => {
+    const activate = () => {
+      if (isCurrentLocked) return;
+      const idx = Number(el.dataset.optIndex ?? -1);
+      if (!Number.isInteger(idx) || idx < 0) return;
+      selectedOptionIndex = idx;
+      refreshOptionSelection();
+      submitCurrentAnswer();
+    };
+    el.addEventListener("click", activate);
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
       }
     });
-  }
-}
-
-function renderDragSentenceHtml(q) {
-  const meta = q.dragMeta;
-  if (!meta?.canDrag) {
-    return renderTextWithEmphasis(q.questionEnglish || q.question);
-  }
-  return renderDraggableLine(meta);
-}
-
-function renderDraggableLine(meta) {
-  const parts = [];
-  meta.tokens.forEach((token, idx) => {
-    if (idx === meta.verbIndex) {
-      if (meta.keepSourceToken) {
-        parts.push(
-          `<span class="verb-wrap"><span class="aux-pop-token" id="spawn-aux-token" draggable="false">${escapeHtml(meta.ghostLead)}</span><span class="drag-token" id="drag-verb-token" draggable="false">${escapeHtml(token)}</span></span>`
-        );
-        return;
-      }
-      parts.push(`<span class="drag-token" id="aux-direct-token" draggable="false">${escapeHtml(token)}</span>`);
-      return;
-    }
-
-    parts.push(`<span>${escapeHtml(token)}</span>`);
-  });
-
-  return `<div class="drag-line">${parts.join(" ")}</div>`;
-}
-
-function renderKoreanLine(q) {
-  if (!q?.questionKorean) return "";
-  if (!notSelected || !q.dragMeta?.canDrag) return renderTextWithEmphasis(q.questionKorean);
-  return renderNegativeKoreanWithEmphasis(q.questionKorean);
-}
-
-function refreshKoreanLine(q) {
-  const el = document.getElementById("line-ko-text");
-  if (!el) return;
-  el.innerHTML = renderKoreanLine(q);
-}
-
-function renderNegativeKoreanWithEmphasis(value) {
-  const text = normalizeEscapedBreaks(String(value ?? ""));
-  const re = /\*\*(.*?)\*\*/s;
-  const m = re.exec(text);
-  if (!m) return renderTextWithEmphasis(value);
-
-  const before = text.slice(0, m.index);
-  const target = String(m[1] ?? "").trim();
-  const afterStart = m.index + String(m[0] ?? "").length;
-  const after = text.slice(afterStart);
-  const negInfo = negateKoreanPhraseInfo(target);
-  const negHtml = renderNegativeKoreanCoreHtml(negInfo);
-
-  return `${escapeHtml(before)}<span class="focus-token">${negHtml}</span>${escapeHtml(after)}`;
-}
-
-function renderNegativeKoreanCoreHtml(info) {
-  if (!info) return "";
-  if (info.kind === "prefix") {
-    const prefixRaw = String(info.prefix || "").trimEnd();
-    const hasSpace = /\s$/.test(String(info.prefix || ""));
-    return `<span class="ko-neg-add">${escapeHtml(prefixRaw)}</span>${hasSpace ? " " : ""}${escapeHtml(info.base || "")}`;
-  }
-  if (info.kind === "suffix") {
-    return `${escapeHtml(info.base || "")}<span class="ko-neg-add">${escapeHtml(info.suffix || "")}</span>`;
-  }
-  return escapeHtml(info.text || "");
-}
-
-function negateKoreanPhraseInfo(phrase) {
-  const src = String(phrase ?? "").trim();
-  if (!src) return { kind: "plain", text: src };
-  if (/^(안|못)\s/.test(src)) return { kind: "plain", text: src };
-
-  const direct = new Map([
-    ["좋아해", { kind: "prefix", prefix: "안 ", base: "좋아해", text: "안 좋아해" }],
-    ["행복해", { kind: "suffix", base: "행복하", suffix: "지 않아", text: "행복하지 않아" }],
-    ["있어", { kind: "plain", text: "없어" }],
-    ["해", { kind: "prefix", prefix: "안 ", base: "해", text: "안 해" }],
-    ["했어", { kind: "prefix", prefix: "안 ", base: "했어", text: "안 했어" }],
-    ["배고파", { kind: "suffix", base: "배고프", suffix: "지 않아", text: "배고프지 않아" }],
-    ["들어", { kind: "prefix", prefix: "안 ", base: "들어", text: "안 들어" }],
-    ["됐어", { kind: "prefix", prefix: "안 ", base: "됐어", text: "안 됐어" }],
-    ["웃어", { kind: "prefix", prefix: "안 ", base: "웃어", text: "안 웃어" }],
-    ["외출해", { kind: "prefix", prefix: "안 ", base: "외출해", text: "안 외출해" }],
-    ["봤어", { kind: "prefix", prefix: "안 ", base: "봤어", text: "안 봤어" }],
-    ["말했어", { kind: "prefix", prefix: "안 ", base: "말했어", text: "안 말했어" }],
-    ["열었어", { kind: "prefix", prefix: "안 ", base: "열었어", text: "안 열었어" }],
-    ["먹어", { kind: "prefix", prefix: "안 ", base: "먹어", text: "안 먹어" }],
-    ["한다", { kind: "prefix", prefix: "안 ", base: "한다", text: "안 한다" }],
-    ["말한다", { kind: "prefix", prefix: "안 ", base: "말한다", text: "안 말한다" }],
-    ["했다", { kind: "prefix", prefix: "안 ", base: "했다", text: "안 했다" }],
-  ]);
-  if (direct.has(src)) return direct.get(src);
-
-  if (src.endsWith("있어")) return { kind: "plain", text: `${src.slice(0, -2)}없어` };
-  if (src.endsWith("있다")) return { kind: "plain", text: `${src.slice(0, -2)}없다` };
-  if (src.endsWith("해")) return { kind: "prefix", prefix: "안 ", base: src, text: `안 ${src}` };
-  if (src.endsWith("한다")) return { kind: "prefix", prefix: "안 ", base: src, text: `안 ${src}` };
-
-  return { kind: "prefix", prefix: "안 ", base: src, text: `안 ${src}` };
-}
-
-function wireNotToken(q) {
-  const btn = document.getElementById("not-token-btn");
-  if (!btn) return;
-
-  btn.addEventListener("click", () => {
-    if (isCurrentLocked) return;
-    const ok = tryAttachNotToTarget(q);
-    if (!ok && q.dragMeta?.keepSourceToken) {
-      showToast("no", TEXT.PICK_VERB_FIRST);
-    }
   });
 }
 
-function wireDragUI(q) {
-  const meta = q.dragMeta;
-  if (!meta?.canDrag) return;
-
-  const token = document.getElementById("drag-verb-token");
-  const auxToken = document.getElementById("spawn-aux-token");
-  const directAux = document.getElementById("aux-direct-token");
-  const notToken = document.getElementById("not-token-btn");
-  if (!notToken) return;
-
-  let dragGhostNode = null;
-  let draggingNot = false;
-
-  if (meta.keepSourceToken && token && auxToken) {
-    token.addEventListener("click", () => revealAuxToken(auxToken, q));
-    token.addEventListener("dragstart", (ev) => ev.preventDefault());
-  } else if (directAux) {
-    dragLead = q.dragMeta?.ghostLead || normalizeWordToken(directAux.textContent || "");
-  }
-
-  notToken.addEventListener("dragstart", (ev) => {
-    if (isCurrentLocked) {
-      ev.preventDefault();
-      return;
-    }
-    if (meta.keepSourceToken && (!auxToken || !auxToken.classList.contains("ready"))) {
-      showToast("no", TEXT.PICK_VERB_FIRST);
-      ev.preventDefault();
-      return;
-    }
-
-    draggingNot = true;
-    dragGhostNode = createDragGhostNode("not");
-
-    if (ev.dataTransfer) {
-      ev.dataTransfer.setData("text/plain", "not");
-      ev.dataTransfer.effectAllowed = "move";
-      ev.dataTransfer.setDragImage(dragGhostNode, 14, 8);
-    }
+function refreshOptionSelection() {
+  document.querySelectorAll(".l33-choice-item").forEach((el) => {
+    const idx = Number(el.dataset.optIndex ?? -1);
+    el.classList.toggle("selected", idx === selectedOptionIndex);
   });
-
-  notToken.addEventListener("dragend", () => {
-    draggingNot = false;
-    clearNotHover(auxToken, directAux);
-    if (dragGhostNode) {
-      dragGhostNode.remove();
-      dragGhostNode = null;
-    }
-  });
-
-  bindNotDropTarget(auxToken, () => meta.keepSourceToken && !!auxToken?.classList.contains("ready"), () => {
-    if (isCurrentLocked || !draggingNot) return;
-    if (dragGhostNode) {
-      dragGhostNode.remove();
-      dragGhostNode = null;
-    }
-    draggingNot = false;
-    applyNotToTarget(q, auxToken);
-  });
-
-  bindNotDropTarget(directAux, () => !meta.keepSourceToken, () => {
-    if (isCurrentLocked || !draggingNot) return;
-    if (dragGhostNode) {
-      dragGhostNode.remove();
-      dragGhostNode = null;
-    }
-    draggingNot = false;
-    applyNotToTarget(q, directAux);
-  });
-}
-
-function bindNotDropTarget(targetEl, canDropFn, onDropped) {
-  if (!targetEl) return;
-
-  targetEl.addEventListener("dragover", (ev) => {
-    if (!canDropFn()) return;
-    ev.preventDefault();
-    targetEl.classList.add("hover-not");
-  });
-  targetEl.addEventListener("dragleave", () => targetEl.classList.remove("hover-not"));
-  targetEl.addEventListener("drop", (ev) => {
-    if (!canDropFn()) return;
-    ev.preventDefault();
-    targetEl.classList.remove("hover-not");
-    onDropped();
-  });
-}
-
-function clearNotHover(auxToken, directAux) {
-  if (auxToken) auxToken.classList.remove("hover-not");
-  if (directAux) directAux.classList.remove("hover-not");
-}
-
-function tryAttachNotToTarget(q) {
-  const target = resolveNotTarget(q);
-  if (!target) return false;
-  applyNotToTarget(q, target);
-  return true;
-}
-
-function resolveNotTarget(q) {
-  if (q.dragMeta?.keepSourceToken) {
-    const auxToken = document.getElementById("spawn-aux-token");
-    if (!auxToken || !auxToken.classList.contains("ready")) return null;
-    return auxToken;
-  }
-  return document.getElementById("aux-direct-token");
-}
-
-function applyNotToTarget(q, targetEl) {
-  if (!q.dragMeta?.canDrag || !targetEl) return;
-
-  dragLead = q.dragMeta?.ghostLead || dragLead || "";
-  if (!dragLead) return;
-
-  notSelected = true;
-  dragPlaced = true;
-
-  const notBtn = document.getElementById("not-token-btn");
-  if (notBtn) notBtn.classList.add("active");
-
-  targetEl.classList.remove("hover-not");
-  updateLeadVisual(q);
-
-  const input = document.getElementById("user-answer");
-  if (input) input.focus();
-}
-
-function revealAuxToken(auxToken, q) {
-  if (!auxToken) return;
-  const wrap = auxToken.closest(".verb-wrap");
-
-  dragLead = q.dragMeta?.ghostLead || dragLead || "";
-
-  auxToken.classList.remove("used");
-  auxToken.classList.add("ready");
-  auxToken.classList.remove("docked");
-  auxToken.setAttribute("draggable", "false");
-  auxToken.textContent = getComposedLead(q);
-  if (wrap) wrap.classList.add("split-open");
-
-  auxToken.classList.remove("burst");
-  void auxToken.offsetWidth;
-  auxToken.classList.add("burst");
-}
-
-function createDragGhostNode(text) {
-  const node = document.createElement("span");
-  node.textContent = text;
-  node.style.position = "fixed";
-  node.style.left = "-9999px";
-  node.style.top = "-9999px";
-  node.style.pointerEvents = "none";
-  node.style.display = "inline-block";
-  node.style.padding = "0 4px";
-  node.style.borderRadius = "4px";
-  node.style.fontWeight = "900";
-  node.style.fontSize = "14px";
-  node.style.color = "#7e3106";
-  node.style.background = "rgba(255, 208, 90, 0.55)";
-  node.style.boxShadow = "inset 0 0 0 1px rgba(160, 110, 0, 0.15)";
-  document.body.appendChild(node);
-  return node;
-}
-
-function getComposedLead(q) {
-  const base = dragLead || q.dragMeta?.ghostLead || "";
-  if (!base) return "";
-  return notSelected ? `${base} not` : base;
-}
-
-function isDoNotLead(lead) {
-  return /\b(do|does|did)\s+not\b/i.test(String(lead || ""));
-}
-
-function updateLeadVisual(q) {
-  const lead = getComposedLead(q);
-  if (!lead) return;
-  const doNotGlow = isDoNotLead(lead);
-  const hasNot = /\bnot\b/i.test(lead);
-  const auxToken = document.getElementById("spawn-aux-token");
-  const directAux = document.getElementById("aux-direct-token");
-  const verbToken = document.getElementById("drag-verb-token");
-
-  if (q.dragMeta?.keepSourceToken) {
-    if (auxToken && auxToken.classList.contains("ready")) {
-      auxToken.textContent = lead;
-      auxToken.classList.toggle("neg-glow", doNotGlow);
-      auxToken.classList.toggle("docked", hasNot);
-    }
-    if (verbToken) {
-      verbToken.classList.add("used-dim");
-      verbToken.classList.toggle("neg-glow", doNotGlow);
-    }
-  } else if (directAux) {
-    directAux.textContent = lead;
-    directAux.classList.add("neg-glow");
-  }
-
-  refreshKoreanLine(q);
 }
 
 function submitCurrentAnswer() {
   if (isCurrentLocked) return;
 
   const q = questions[currentIndex];
-  const input = document.getElementById("user-answer");
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
 
-  if (!q || !input) return;
-
-  const userRaw = String(input.value || "").trim();
-  if (!userRaw) {
-    showToast("no", TEXT.INPUT_REQUIRED);
+  if (!q) return;
+  if (selectedOptionIndex < 0) {
+    showToast("no", TEXT.PICK_OPTION);
     return;
   }
-  const ok = isAnswerCorrect(q.type, userRaw, q.answer);
+
+  const selected = String(q.options[selectedOptionIndex] ?? "").trim();
+  const ok = isAnswerCorrect(selected, q.answerRaw);
 
   if (!ok) {
     if (feedback) {
@@ -1289,18 +618,17 @@ function submitCurrentAnswer() {
   }
 
   isCurrentLocked = true;
-  input.disabled = true;
-  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
+  scheduleAutoNext();
+  document.querySelectorAll(".l33-choice-item").forEach((el) => {
+    el.style.pointerEvents = "none";
+  });
 
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
-    type: q.type,
-    question: q.question,
-    selected: userRaw,
-    answer: q.answer,
+    question: stripEmphasisMarkers(q.questionDisplay),
+    selected,
+    answer: q.answerRaw,
     instruction: q.instruction,
     correct: true,
   });
@@ -1314,6 +642,13 @@ function submitCurrentAnswer() {
   showToast("ok", TEXT.CORRECT);
 }
 
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
+}
+
 function goNext() {
   currentIndex += 1;
   if (currentIndex >= questions.length) {
@@ -1323,15 +658,15 @@ function goNext() {
   renderQuestion();
 }
 
-function isAnswerCorrect(type, userRaw, modelRaw) {
-  const userStrict = normalizeForCompare(userRaw, type);
-  const userLoose = normalizeLoose(userRaw, type);
+function isAnswerCorrect(userRaw, modelRaw) {
+  const userStrict = normalizeForCompare(userRaw);
+  const userLoose = normalizeLoose(userRaw);
   if (!userStrict && !userLoose) return false;
 
   const candidates = buildModelCandidates(modelRaw);
   for (const cand of candidates) {
-    const candStrict = normalizeForCompare(cand, type);
-    const candLoose = normalizeLoose(cand, type);
+    const candStrict = normalizeForCompare(cand);
+    const candLoose = normalizeLoose(cand);
     if (userStrict && candStrict && userStrict === candStrict) return true;
     if (userLoose && candLoose && userLoose === candLoose) return true;
   }
@@ -1349,9 +684,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -1371,7 +711,7 @@ function buildModelCandidates(modelRaw) {
     if (t.includes(",")) {
       const parts = t.split(",").map((x) => x.trim()).filter(Boolean);
       if (parts.length >= 2 && parts.length <= 4) {
-        parts.forEach((p) => { if (p.length <= 40) set.add(p); });
+        parts.forEach((p) => { if (p.length <= 80) set.add(p); });
       }
     }
   }
@@ -1379,41 +719,290 @@ function buildModelCandidates(modelRaw) {
   return [...set];
 }
 
-function isInstructionLeakingAnswer(instruction, answer, type) {
-  const i1 = normalizeForCompare(instruction, type);
-  const a1 = normalizeForCompare(answer, type);
-  if (i1 && a1 && i1 === a1) return true;
+function buildChoiceOptions({ question, answer, explicitChoices, answerPool, qNumber }) {
+  const answerNorm = normalizeLoose(answer);
+  const options = [];
+  const seen = new Set();
 
-  const i2 = normalizeLoose(instruction, type);
-  const a2 = normalizeLoose(answer, type);
+  const add = (value) => {
+    const clean = cleanChoiceText(value);
+    if (!clean) return;
+    const key = normalizeLoose(clean);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    options.push(clean);
+  };
+
+  if (Array.isArray(explicitChoices) && explicitChoices.length >= 2) {
+    explicitChoices.forEach(add);
+    add(answer);
+    return dedupeByNormalize(options);
+  }
+
+  add(answer);
+  extractNameCandidates(question).forEach(add);
+  extractOnePhrases(question).forEach(add);
+  buildVariantCandidates(answer).forEach(add);
+
+  const relatedPool = (answerPool || [])
+    .map(cleanChoiceText)
+    .filter(Boolean)
+    .filter((x) => isSameShape(answer, x))
+    .filter((x) => normalizeLoose(x) !== answerNorm);
+
+  relatedPool.forEach((x) => {
+    if (options.length < 4) add(x);
+  });
+
+  (answerPool || []).forEach((x) => {
+    if (options.length < 4) add(x);
+  });
+
+  buildGenericFallback(answer).forEach((x) => {
+    if (options.length < 4) add(x);
+  });
+
+  const normalized = dedupeByNormalize(options).filter((x) => x);
+  if (!normalized.some((x) => normalizeLoose(x) === answerNorm)) normalized.unshift(cleanChoiceText(answer));
+
+  const picked = [normalized[0], ...normalized.slice(1, 4)].filter(Boolean);
+  if (picked.length < 2) return [cleanChoiceText(answer), cleanChoiceText(answer)];
+  return rotateChoices(picked, qNumber);
+}
+
+function rotateChoices(options, qNumber) {
+  const list = dedupeByNormalize(options).filter(Boolean);
+  if (list.length < 2) return list;
+  const shift = Math.abs(Number(qNumber) || 0) % list.length;
+  return list.slice(shift).concat(list.slice(0, shift));
+}
+
+function dedupeByNormalize(items) {
+  const out = [];
+  const seen = new Set();
+  (items || []).forEach((item) => {
+    const s = cleanChoiceText(item);
+    const key = normalizeLoose(s);
+    if (!s || !key || seen.has(key)) return;
+    seen.add(key);
+    out.push(s);
+  });
+  return out;
+}
+
+function parseExplicitChoiceGroup(questionText) {
+  const s = normalizeEscapedBreaks(String(questionText ?? ""));
+  const re = /\(([^()]*\/[^()]*)\)/g;
+  let m;
+  while ((m = re.exec(s)) !== null) {
+    const inside = String(m[1] ?? "").trim();
+    const options = inside.split("/")
+      .map((x) => cleanChoiceText(x))
+      .filter(Boolean);
+    if (options.length >= 2) {
+      return {
+        fullMatch: m[0],
+        options: dedupeByNormalize(options),
+      };
+    }
+  }
+  return null;
+}
+
+function extractNameCandidates(questionText) {
+  const names = [];
+  const re = /\b[A-Z][a-z]+\b/g;
+  let m;
+  const s = normalizeEscapedBreaks(String(questionText ?? ""));
+  while ((m = re.exec(s)) !== null) {
+    const name = String(m[0] || "").trim();
+    if (!name || NAME_STOPWORDS.has(name)) continue;
+    names.push(name);
+  }
+  return dedupeByNormalize(names);
+}
+
+function extractOnePhrases(questionText) {
+  const out = [];
+  const s = normalizeEscapedBreaks(String(questionText ?? ""));
+
+  const phraseRe = /\b(the\s+(?:first|second|third|fourth|fifth|last)\s+one|this one|that one)\b/gi;
+  let m;
+  while ((m = phraseRe.exec(s)) !== null) {
+    out.push(String(m[1] ?? "").trim());
+  }
+
+  return dedupeByNormalize(out);
+}
+
+function buildVariantCandidates(answerText) {
+  const out = [];
+  const answer = cleanChoiceText(answerText);
+  const isProperName = /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*$/.test(answer);
+  if (isProperName) return out;
+  const lower = answer.toLowerCase();
+
+  const pref = lower.match(/^(more|most|less|least)\s+(.+)$/);
+  if (pref) {
+    const stem = pref[2].trim();
+    out.push(`more ${stem}`);
+    out.push(`most ${stem}`);
+    out.push(`less ${stem}`);
+    out.push(`least ${stem}`);
+  }
+
+  const onePhrase = lower.match(/^the\s+(first|second|third|fourth|fifth|last)\s+one$/);
+  if (onePhrase) {
+    out.push("the first one");
+    out.push("the second one");
+    out.push("the third one");
+    out.push("the last one");
+  }
+
+  if (/^[a-z]+$/.test(lower)) {
+    if (lower.endsWith("er")) {
+      const base = deriveBaseFromEr(lower);
+      out.push(base);
+      out.push(toComparative(base));
+      out.push(toSuperlative(base));
+    } else if (lower.endsWith("est")) {
+      const base = deriveBaseFromEst(lower);
+      out.push(base);
+      out.push(toComparative(base));
+      out.push(toSuperlative(base));
+    } else {
+      out.push(toComparative(lower));
+      out.push(toSuperlative(lower));
+    }
+  }
+
+  return dedupeByNormalize(out);
+}
+
+function buildGenericFallback(answerText) {
+  const answer = cleanChoiceText(answerText).toLowerCase();
+  if (/^[A-Z][a-z]+$/.test(cleanChoiceText(answerText))) {
+    return ["Alice", "Mike", "Tom"];
+  }
+  if (answer.includes("one")) {
+    return ["the first one", "the second one", "the third one"];
+  }
+  if (/^(more|most|less|least)\s+/.test(answer)) {
+    const stem = answer.replace(/^(more|most|less|least)\s+/, "").trim();
+    return [`more ${stem}`, `most ${stem}`, `less ${stem}`, `least ${stem}`];
+  }
+  if (/^[a-z]+$/.test(answer)) {
+    const base = answer.endsWith("er")
+      ? deriveBaseFromEr(answer)
+      : answer.endsWith("est")
+        ? deriveBaseFromEst(answer)
+        : answer;
+    return [base, toComparative(base), toSuperlative(base)];
+  }
+  return [];
+}
+
+function isSameShape(answer, candidate) {
+  const a = cleanChoiceText(answer);
+  const b = cleanChoiceText(candidate);
+  if (!a || !b) return false;
+  if (normalizeLoose(a) === normalizeLoose(b)) return false;
+
+  if (/^[A-Z][a-z]+$/.test(a)) return /^[A-Z][a-z]+$/.test(b);
+  if (/\bone\b/i.test(a)) return /\bone\b/i.test(b);
+  if (/^(more|most|less|least)\s+/i.test(a)) return /^(more|most|less|least)\s+/i.test(b);
+  if (/^[a-z]+$/.test(a) && a.endsWith("er")) return /^[a-z]+$/.test(b) && b.endsWith("er");
+  if (/^[a-z]+$/.test(a) && a.endsWith("est")) return /^[a-z]+$/.test(b) && b.endsWith("est");
+  if (a.includes(" ")) return b.includes(" ");
+  return /^[a-z]+$/.test(b);
+}
+
+function deriveBaseFromEr(word) {
+  if (!word.endsWith("er")) return word;
+  if (word.endsWith("ier")) return word.slice(0, -3) + "y";
+  let stem = word.slice(0, -2);
+  if (stem.length >= 2) {
+    const last = stem[stem.length - 1];
+    const prev = stem[stem.length - 2];
+    if (last === prev && /[bcdfghjklmnpqrstvwxyz]/.test(last)) {
+      stem = stem.slice(0, -1);
+    }
+  }
+  return stem;
+}
+
+function deriveBaseFromEst(word) {
+  if (!word.endsWith("est")) return word;
+  if (word.endsWith("iest")) return word.slice(0, -4) + "y";
+  let stem = word.slice(0, -3);
+  if (stem.length >= 2) {
+    const last = stem[stem.length - 1];
+    const prev = stem[stem.length - 2];
+    if (last === prev && /[bcdfghjklmnpqrstvwxyz]/.test(last)) {
+      stem = stem.slice(0, -1);
+    }
+  }
+  return stem;
+}
+
+function toComparative(baseWord) {
+  const base = String(baseWord || "").toLowerCase().trim();
+  if (!base) return "";
+  if (base.endsWith("y") && base.length > 1) return base.slice(0, -1) + "ier";
+  if (base.endsWith("e")) return base + "r";
+  if (isCvc(base)) return base + base.at(-1) + "er";
+  return base + "er";
+}
+
+function toSuperlative(baseWord) {
+  const base = String(baseWord || "").toLowerCase().trim();
+  if (!base) return "";
+  if (base.endsWith("y") && base.length > 1) return base.slice(0, -1) + "iest";
+  if (base.endsWith("e")) return base + "st";
+  if (isCvc(base)) return base + base.at(-1) + "est";
+  return base + "est";
+}
+
+function isCvc(word) {
+  if (!/^[a-z]{3,}$/.test(word)) return false;
+  const vowels = "aeiou";
+  const a = word[word.length - 3];
+  const b = word[word.length - 2];
+  const c = word[word.length - 1];
+  return !vowels.includes(a) && vowels.includes(b) && !vowels.includes(c) && c !== "w" && c !== "x" && c !== "y";
+}
+
+function cleanChoiceText(value) {
+  return stripEmphasisMarkers(normalizeEscapedBreaks(String(value ?? "")))
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[()]/g, "")
+    .trim();
+}
+
+function isInstructionLeakingAnswer(instruction, answer) {
+  const i1 = normalizeForCompare(instruction);
+  const a1 = normalizeForCompare(answer);
+  if (i1 && a1 && i1 === a1) return true;
+  const i2 = normalizeLoose(instruction);
+  const a2 = normalizeLoose(answer);
   return !!i2 && !!a2 && i2 === a2;
 }
 
-function normalizeForCompare(value, type) {
-  let s = canonicalizeNegationText(
-    stripEmphasisMarkers(normalizeEscapedBreaks(String(value ?? "")))
-      .replace(/[“”]/g, '"')
-  )
+function normalizeForCompare(value) {
+  return stripEmphasisMarkers(normalizeEscapedBreaks(String(value ?? "")))
+    .replace(/[’‘`]/g, "'")
+    .replace(/[“”]/g, '"')
     .replace(/\s+/g, " ")
     .trim()
     .replace(/[.?!~]+$/g, "")
     .trim();
-
-  if (type === "blank") s = s.toLowerCase();
-
-  return s;
 }
 
-function normalizeLoose(value, type) {
-  return normalizeForCompare(value, type)
+function normalizeLoose(value) {
+  return normalizeForCompare(value)
     .toLowerCase()
     .replace(/[\s'"`.,!?~:;()\[\]{}_-]+/g, "");
-}
-
-function clipExample(s) {
-  const oneLine = stripEmphasisMarkers(normalizeEscapedBreaks(String(s ?? ""))).replace(/\s+/g, " ").trim();
-  if (!oneLine) return "";
-  return oneLine.length > 36 ? oneLine.slice(0, 36) + "..." : oneLine;
 }
 
 function normalizeEscapedBreaks(value) {
@@ -1421,11 +1010,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -1436,13 +1030,17 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
+}
+
+function renderL33QuestionText(value) {
+  return renderTextWithEmphasis(value).replace(/\bthan\b/gi, (match) => `<span class="l33-than-token">${match}</span>`);
 }
 
 function formatMultilineText(value) {
@@ -1466,10 +1064,10 @@ function showResultPopup() {
 
     return `
       <div class="result-item">
-        <div><b>Q${idx + 1}</b> ${renderTextWithEmphasis(q.question)}</div>
+        <div><b>Q${idx + 1}</b> ${renderTextWithEmphasis(q.questionDisplay)}</div>
         <div style="margin-top:4px;"><span class="${stateClass}">${state}</span></div>
         <div>${TEXT.MY_ANSWER}: ${escapeHtml(user)}</div>
-        <div>${TEXT.ANSWER}: ${formatMultilineText(q.answer)}</div>
+        <div>${TEXT.ANSWER}: ${formatMultilineText(q.answerRaw)}</div>
       </div>
     `;
   }).join("");
@@ -1546,14 +1144,3 @@ function escapeHtml(str) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
-function escapeHtmlAttr(str) {
-  return escapeHtml(stripEmphasisMarkers(normalizeEscapedBreaks(str))).replaceAll("\n", " ");
-}
-
-
-
-
-
-
-

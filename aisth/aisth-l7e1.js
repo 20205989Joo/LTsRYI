@@ -1,7 +1,6 @@
 ﻿// aisth-l7e1.js
 // Independent runtime for Aisth Lesson 7 Exercise 1
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 7;
 const TARGET_EXERCISE = 1;
 const PAGE_LABEL = "Aisth L7-E1";
@@ -25,7 +24,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -38,7 +36,7 @@ const TEXT = {
 
 let subcategory = "Grammar";
 let level = "aisth";
-let day = "025";
+let day = "026";
 let quizTitle = "quiz_Grammar_aisth_l7e1";
 let userId = "";
 
@@ -49,6 +47,8 @@ let results = [];
 let isCurrentLocked = false;
 let hintTimerId = 0;
 let activeHintRole = "S";
+let interrogationTimerId = 0;
+let interrogationResolvedRoles = new Set();
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
 
@@ -62,16 +62,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -145,19 +147,19 @@ function injectRuntimeStyles() {
       display: inline-block;
       padding: 1px 6px;
       border-radius: 7px;
-      border: 1px dashed #d5a22a;
-      background: #fff8e4;
-      color: #7e3106;
+      border: 1px dashed var(--aisth-role-v-border, #c88a12);
+      background: var(--aisth-role-v-bg, #fff4cc);
+      color: var(--aisth-role-v-text, #7a4a00);
       font-weight: 900;
       margin: 0 2px;
     }
 
     .focus-token {
-      background: rgba(255, 208, 90, 0.45);
+      background: var(--aisth-role-v-bg, #fff4cc);
       border-radius: 6px;
       padding: 0 3px;
-      box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
-      color: #7e3106;
+      box-shadow: inset 0 0 0 1px rgba(200, 138, 18, 0.24), 0 0 10px var(--aisth-role-v-glow, rgba(216,162,27,.30));
+      color: var(--aisth-role-v-text, #7a4a00);
       font-weight: 900;
     }
 
@@ -181,9 +183,9 @@ function injectRuntimeStyles() {
     }
 
     .svtd-inline-tag.is-verb {
-      border-color: #d5aa00;
-      background: #fff1a6;
-      color: #5d4a00;
+      border-color: var(--aisth-role-v-border, #c88a12);
+      background: var(--aisth-role-v-bg, #fff4cc);
+      color: var(--aisth-role-v-text, #7a4a00);
     }
 
     .svtd-inline-tag.is-target {
@@ -435,6 +437,953 @@ function injectRuntimeStyles() {
 
     .result-ok { color: #2e7d32; font-weight: 900; }
     .result-bad { color: #c62828; font-weight: 900; }
+
+    .l71-briefing {
+      border: 1px solid rgba(126, 49, 6, 0.16);
+      border-radius: 13px;
+      background: rgba(255, 251, 244, 0.94);
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    .l71-briefing .question-instruction {
+      margin-bottom: 6px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .l71-briefing .svtd-table th,
+    .l71-briefing .svtd-table td {
+      padding: 3px 3px;
+      font-size: 10px;
+      line-height: 1.25;
+    }
+
+    .l71-scene {
+      --scene-night: #151844;
+      position: relative;
+      height: 156px;
+      margin: 0 0 8px;
+      overflow: hidden;
+      border: 2px solid #0e1237;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 76% 18%, rgba(255, 212, 104, 0.2) 0 1px, transparent 2px),
+        radial-gradient(circle at 18% 28%, rgba(120, 221, 255, 0.28) 0 1px, transparent 2px),
+        linear-gradient(180deg, #252a68 0%, var(--scene-night) 76%, #0d1236 100%);
+      box-shadow: inset 0 -18px 34px rgba(0, 0, 0, 0.22), 0 7px 18px rgba(22, 24, 68, 0.18);
+    }
+
+    .l71-scene::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -18px;
+      width: 78px;
+      height: 116px;
+      transform: translateX(-50%);
+      clip-path: polygon(36% 0, 64% 0, 100% 100%, 0 100%);
+      background: linear-gradient(180deg, rgba(255, 224, 135, 0.58), rgba(255, 224, 135, 0.02));
+      opacity: 0.68;
+    }
+
+    .l71-scene::after {
+      content: "";
+      position: absolute;
+      left: 26px;
+      right: 26px;
+      bottom: 24px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(7, 9, 32, 0.74);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .l71-lamp {
+      position: absolute;
+      z-index: 4;
+      left: 50%;
+      top: -3px;
+      width: 34px;
+      height: 20px;
+      transform: translateX(-50%);
+      border-radius: 5px 5px 18px 18px;
+      background: #ffcf58;
+      box-shadow: 0 0 18px rgba(255, 210, 95, 0.65);
+    }
+
+    .l71-person {
+      position: absolute;
+      z-index: 3;
+      bottom: 24px;
+      width: 76px;
+      height: 91px;
+      transform-origin: 50% 82%;
+    }
+
+    .l71-detective { left: 22px; animation: l71-detective-idle 2.4s ease-in-out infinite; }
+    .l71-suspect { right: 21px; animation: l71-suspect-nervous 0.72s ease-in-out infinite; }
+
+    .l71-head {
+      position: absolute;
+      left: 18px;
+      top: 4px;
+      width: 42px;
+      height: 42px;
+      border: 3px solid #0b1239;
+      border-radius: 48% 52% 45% 55%;
+      background: #f3a96e;
+      box-shadow: inset -6px -6px 0 rgba(158, 65, 73, 0.18);
+    }
+
+    .l71-detective .l71-head { background: #71d3df; }
+
+    .l71-eye {
+      position: absolute;
+      top: 17px;
+      width: 5px;
+      height: 6px;
+      border-radius: 50%;
+      background: #111638;
+    }
+
+    .l71-eye.is-left { left: 10px; }
+    .l71-eye.is-right { right: 10px; }
+
+    .l71-mouth {
+      position: absolute;
+      left: 15px;
+      top: 29px;
+      width: 11px;
+      height: 5px;
+      border-bottom: 2px solid #5d2b3f;
+      border-radius: 50%;
+    }
+
+    .l71-detective .l71-mouth { border-bottom-color: #123b54; }
+
+    .l71-hat {
+      position: absolute;
+      z-index: 2;
+      left: 10px;
+      top: -2px;
+      width: 57px;
+      height: 17px;
+      border-radius: 50% 50% 8px 8px;
+      background: #ffcf58;
+      border-bottom: 3px solid #0b1239;
+      transform: rotate(-4deg);
+    }
+
+    .l71-body {
+      position: absolute;
+      left: 12px;
+      bottom: 0;
+      width: 54px;
+      height: 48px;
+      border: 3px solid #0b1239;
+      border-radius: 28px 28px 10px 10px;
+      background: #ef6a70;
+      box-sizing: border-box;
+    }
+
+    .l71-detective .l71-body { background: #6357c7; }
+
+    .l71-arm {
+      position: absolute;
+      z-index: -1;
+      top: 54px;
+      width: 32px;
+      height: 10px;
+      border: 3px solid #0b1239;
+      border-radius: 999px;
+      background: #ef6a70;
+      transform-origin: 8px 50%;
+    }
+
+    .l71-detective .l71-arm { right: -5px; background: #6357c7; transform: rotate(-19deg); }
+    .l71-suspect .l71-arm { left: -4px; transform: rotate(18deg); }
+
+    .l71-bubble {
+      position: absolute;
+      z-index: 7;
+      top: 12px;
+      max-width: 108px;
+      min-height: 29px;
+      padding: 7px 9px;
+      border: 2px solid #0d1237;
+      border-radius: 13px;
+      background: #fff8dc;
+      color: #191b3f;
+      font-size: 10px;
+      font-weight: 950;
+      line-height: 1.25;
+      text-align: center;
+      box-sizing: border-box;
+      filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.17));
+    }
+
+    .l71-detective-bubble { left: 83px; }
+    .l71-suspect-bubble { right: 82px; top: 65px; background: #fff; opacity: 0; transform: translateY(4px); }
+    .l71-suspect-bubble.has-answer { opacity: 1; transform: translateY(0); transition: 0.22s ease; }
+
+    .l71-suspect.is-shaking .l71-head { animation: l71-head-no 0.5s ease 2; }
+    .l71-scene.is-celebrating .l71-person { animation: l71-cheer 0.68s ease 2 both; }
+    .l71-scene.is-celebrating .l71-arm { top: 42px; transform: rotate(-68deg); }
+    .l71-scene.is-celebrating .l71-person .l71-arm:last-child { transform: rotate(68deg); }
+    .l71-scene.is-celebrating { background: radial-gradient(circle at 50% 42%, #ffda69 0 12%, #4f54b5 45%, #181a4a 100%); }
+
+    @keyframes l71-detective-idle { 50% { transform: translateY(-2px) rotate(-1deg); } }
+    @keyframes l71-suspect-nervous { 25% { transform: translateX(-1px) rotate(-1deg); } 75% { transform: translateX(1px) rotate(1deg); } }
+    @keyframes l71-head-no { 25% { transform: translateX(-6px) rotate(-8deg); } 75% { transform: translateX(6px) rotate(8deg); } }
+    @keyframes l71-cheer { 45% { transform: translateY(-15px) rotate(-2deg); } 75% { transform: translateY(0) rotate(2deg); } }
+
+    .l71-file {
+      position: relative;
+      padding: 13px 9px 9px;
+      border: 1px solid #b99c74;
+      border-radius: 4px 11px 11px 11px;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 23px, rgba(74, 105, 127, 0.09) 24px),
+        #f6edcf;
+      box-shadow: 0 6px 14px rgba(80, 57, 28, 0.14), inset 0 0 26px rgba(133, 92, 38, 0.06);
+    }
+
+    .l71-file::before {
+      content: "취조 파일";
+      position: absolute;
+      left: 12px;
+      top: -10px;
+      padding: 3px 10px;
+      border: 1px solid #b99c74;
+      border-bottom: 0;
+      border-radius: 6px 6px 0 0;
+      background: #dfc99f;
+      color: #4d3829;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+    }
+
+    .l71-file-row {
+      display: grid;
+      grid-template-columns: 70px minmax(0, 1fr);
+      align-items: center;
+      gap: 6px;
+      min-height: 39px;
+      padding: 3px 4px;
+      border-bottom: 1px dashed rgba(91, 70, 45, 0.2);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .l71-file-row:last-child { border-bottom: 0; }
+    .l71-file-row.is-active { background: rgba(255, 255, 255, 0.54); transform: translateX(2px); }
+    .l71-file-row.is-solved { opacity: 0.78; }
+
+    .l71-file-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #3d332b;
+      font-size: 10px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .l71-file-label .svtd-inline-tag { min-width: 20px; padding: 1px 5px; font-size: 10px; }
+    .l71-file-answer { min-width: 0; display: flex; align-items: center; gap: 5px; }
+    .l71-file-answer .aisth-slot-control { width: auto; max-width: 100%; padding: 0; gap: 3px; }
+    .l71-file-answer .aisth-slot-cell { width: 20px; min-width: 20px; height: 29px; font-size: 13px; }
+    .l71-file-answer .aisth-slot-word { gap: 2px; }
+
+    .l71-none-stamp {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 25px;
+      padding: 0 10px;
+      border: 2px solid rgba(171, 50, 55, 0.48);
+      border-radius: 4px;
+      color: #a32d35;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      transform: rotate(-3deg);
+      opacity: 0.68;
+    }
+
+    .l71-affix { color: #6d4b2f; font-size: 11px; font-weight: 950; white-space: nowrap; }
+    .l71-source-input { position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; }
+
+    .l71-scene {
+      height: 158px;
+      border-color: #292725;
+      border-radius: 12px;
+      background:
+        linear-gradient(90deg, transparent 49.4%, rgba(255,255,255,0.035) 50%, transparent 50.6%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 19px),
+        linear-gradient(180deg, #4b4a48 0%, #353534 67%, #252525 100%);
+      box-shadow: inset 0 -24px 34px rgba(0,0,0,0.34), inset 0 0 0 1px rgba(255,255,255,0.04), 0 6px 15px rgba(30,25,20,0.18);
+    }
+
+    .l71-scene::before {
+      top: 13px;
+      width: 124px;
+      height: 108px;
+      clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%);
+      background: linear-gradient(180deg, rgba(255, 231, 169, 0.34), rgba(255, 231, 169, 0.025));
+      opacity: 0.62;
+    }
+
+    .l71-scene::after {
+      left: 56px;
+      right: 56px;
+      bottom: 23px;
+      height: 12px;
+      border: 2px solid #171717;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #706453, #3e3932);
+      box-shadow: 0 9px 0 -5px #171717, 0 15px 20px rgba(0,0,0,0.38);
+    }
+
+    .l71-lamp {
+      top: -5px;
+      width: 39px;
+      height: 24px;
+      border: 2px solid #171717;
+      border-radius: 3px 3px 18px 18px;
+      background: linear-gradient(180deg, #7c7b76, #343432);
+      box-shadow: 0 8px 15px rgba(255, 224, 150, 0.27);
+    }
+
+    .l71-person {
+      bottom: 28px;
+      width: 72px;
+      height: 84px;
+      animation: none;
+    }
+
+    .l71-detective { left: 22px; transform: rotate(1deg); }
+    .l71-suspect { right: 20px; animation: l71-suspect-side-nervous 1.15s ease-in-out infinite; }
+
+    .l71-head {
+      top: 5px;
+      width: 39px;
+      height: 43px;
+      border: 2.5px solid #171717;
+      background: #d5a078;
+      box-shadow: inset 0 -5px 0 rgba(103, 55, 42, 0.14);
+    }
+
+    .l71-detective .l71-head {
+      left: 20px;
+      border-radius: 52% 44% 48% 46%;
+      background: #c9956f;
+      transform: rotate(2deg);
+    }
+
+    .l71-suspect .l71-head {
+      left: 12px;
+      border-radius: 44% 52% 46% 48%;
+      background: #d9a27b;
+      transform: rotate(-2deg);
+    }
+
+    .l71-hair {
+      position: absolute;
+      z-index: 2;
+      top: -2px;
+      width: 31px;
+      height: 16px;
+      border: 2px solid #171717;
+      border-bottom: 0;
+      background: #292724;
+    }
+
+    .l71-detective .l71-hair { left: 7px; border-radius: 17px 13px 2px 5px; }
+    .l71-suspect .l71-hair { right: 7px; border-radius: 13px 17px 5px 2px; }
+
+    .l71-eye { top: 17px; width: 4px; height: 5px; background: #171717; }
+    .l71-detective .l71-eye.is-left,
+    .l71-suspect .l71-eye.is-right { display: none; }
+    .l71-detective .l71-eye.is-right { right: 7px; }
+    .l71-suspect .l71-eye.is-left { left: 7px; }
+
+    .l71-nose {
+      position: absolute;
+      top: 20px;
+      width: 8px;
+      height: 7px;
+      border-top: 2px solid #171717;
+      background: #d5a078;
+      transform: rotate(18deg);
+    }
+
+    .l71-detective .l71-nose { right: -6px; border-right: 2px solid #171717; }
+    .l71-suspect .l71-nose { left: -6px; border-left: 2px solid #171717; transform: rotate(-18deg); }
+
+    .l71-mouth { top: 31px; width: 9px; height: 3px; border-bottom-color: #5c302d; }
+    .l71-detective .l71-mouth { left: 25px; border-bottom-color: #5c302d; }
+    .l71-suspect .l71-mouth { left: 5px; border-bottom-color: #5c302d; }
+
+    .l71-hat {
+      left: 9px;
+      top: -4px;
+      width: 56px;
+      height: 14px;
+      border: 2px solid #171717;
+      border-radius: 9px 9px 3px 3px;
+      background: #262524;
+      transform: rotate(2deg);
+    }
+
+    .l71-body {
+      left: 10px;
+      height: 43px;
+      border-color: #171717;
+      border-radius: 18px 18px 5px 5px;
+      background: #353a3e;
+    }
+
+    .l71-detective .l71-body { background: #252b30; }
+    .l71-suspect .l71-body { background: #6d6258; }
+
+    .l71-arm,
+    .l71-detective .l71-arm,
+    .l71-suspect .l71-arm {
+      z-index: 5;
+      top: 61px;
+      width: 39px;
+      height: 9px;
+      border-color: #171717;
+      background: #353a3e;
+    }
+
+    .l71-detective .l71-arm { left: 39px; transform: rotate(8deg); }
+    .l71-suspect .l71-arm { left: -7px; background: #6d6258; transform: rotate(-8deg); }
+
+    .l71-chair {
+      position: absolute;
+      z-index: -2;
+      left: 7px;
+      bottom: -8px;
+      width: 58px;
+      height: 43px;
+      border: 3px solid #181818;
+      border-radius: 7px 7px 0 0;
+      opacity: 0.72;
+    }
+
+    .l71-dialogue-step {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      opacity: 0;
+      pointer-events: none;
+      animation: l71-dialogue-cycle 12s linear infinite;
+      animation-delay: var(--l71-dialogue-delay, 0s);
+    }
+
+    .l71-dialogue-step .l71-bubble {
+      display: block;
+      min-height: 26px;
+      max-width: 113px;
+      padding: 6px 8px;
+      border-color: #252321;
+      border-radius: 8px;
+      background: #eee6d4;
+      color: #272421;
+      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.2));
+    }
+
+    .l71-dialogue-step .l71-detective-bubble { left: 72px; top: 10px; }
+    .l71-dialogue-step .l71-suspect-bubble { right: 69px; top: 69px; opacity: 1; transform: none; background: #f7f4ec; }
+    .l71-dialogue-step.is-empty .l71-suspect-bubble { color: #8e3434; }
+
+    @keyframes l71-dialogue-cycle {
+      0%, 20% { opacity: 1; }
+      24%, 100% { opacity: 0; }
+    }
+
+    @keyframes l71-suspect-side-nervous {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50% { transform: translateY(1px) rotate(1deg); }
+    }
+
+    .l71-scene.has-empty-t:not(.has-empty-d) .l71-suspect .l71-head { animation: l71-head-no-t 12s linear infinite; }
+    .l71-scene.has-empty-d:not(.has-empty-t) .l71-suspect .l71-head { animation: l71-head-no-d 12s linear infinite; }
+    .l71-scene.has-empty-t.has-empty-d .l71-suspect .l71-head { animation: l71-head-no-td 12s linear infinite; }
+
+    @keyframes l71-head-no-t {
+      0%, 49%, 75%, 100% { transform: translateX(0) rotate(-2deg); }
+      55%, 65% { transform: translateX(-5px) rotate(-9deg); }
+      60%, 70% { transform: translateX(5px) rotate(7deg); }
+    }
+
+    @keyframes l71-head-no-d {
+      0%, 74%, 100% { transform: translateX(0) rotate(-2deg); }
+      80%, 90% { transform: translateX(-5px) rotate(-9deg); }
+      85%, 95% { transform: translateX(5px) rotate(7deg); }
+    }
+
+    @keyframes l71-head-no-td {
+      0%, 49%, 75%, 100% { transform: translateX(0) rotate(-2deg); }
+      55%, 65%, 80%, 90% { transform: translateX(-5px) rotate(-9deg); }
+      60%, 70%, 85%, 95% { transform: translateX(5px) rotate(7deg); }
+    }
+
+    .l71-file {
+      padding: 13px 5px 1px;
+      overflow: visible;
+    }
+
+    .l71-file-row {
+      grid-template-columns: 80px minmax(0, 1fr);
+      gap: 4px;
+      min-height: 32px;
+      padding: 2px;
+      overflow: visible;
+    }
+
+    .l71-file-label {
+      min-width: 0;
+      gap: 4px;
+      padding-top: 0;
+      white-space: nowrap;
+      line-height: 1;
+      font-size: 10px;
+    }
+
+    .l71-file-label .svtd-inline-tag {
+      width: 22px;
+      min-width: 22px;
+      height: 22px;
+      min-height: 22px;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 10px;
+      line-height: 1;
+      box-sizing: border-box;
+    }
+
+    .l71-file-label > span:last-child {
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .l71-file-answer {
+      min-width: 0;
+      max-width: 100%;
+      overflow: visible;
+      align-items: center;
+      gap: 0;
+    }
+
+    .l71-file-answer .aisth-slot-control,
+    .l71-file-answer .aisth-slot-control.aisth-slot-control--latin {
+      width: auto;
+      max-width: 100%;
+      min-width: 0;
+      flex: 0 1 auto;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 6px;
+      overflow: visible;
+    }
+
+    .l71-answer-cluster {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      white-space: normal;
+    }
+
+    #quiz-area .l71-file-answer .aisth-slot-control.aisth-slot-control--latin .aisth-slot-shell {
+      min-height: 22px;
+      gap: 0;
+    }
+    .l71-file-answer .aisth-slot-word-gap { display: none; }
+    #quiz-area .l71-file-answer .aisth-slot-control.aisth-slot-control--latin .aisth-slot-cell {
+      width: 22px;
+      min-width: 22px;
+      height: 30px;
+      padding-inline: 0;
+      font-size: 15px;
+    }
+
+    #quiz-area .l71-file-answer .aisth-slot-control.aisth-slot-control--latin .aisth-slot-cell.is-placeholder {
+      border-color: rgba(102,126,214,.62);
+      border-bottom-color: rgba(77,87,170,.78);
+      background: linear-gradient(180deg,#fbfcff 0%,#edf1ff 56%,#dfe7ff 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 3px 8px rgba(58,70,152,.10);
+    }
+
+    .l71-affix {
+      color: #2f7b3a;
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 950;
+      white-space: nowrap;
+      text-shadow: 0 0 5px rgba(47,123,58,.16);
+    }
+
+    .l71-file-answer .aisth-slot-cell.is-l71-suffix:not(.is-slot-wrong) {
+      border-color: rgba(136, 84, 208, 0.76);
+      border-bottom-color: #6c3ac7;
+      background: rgba(136, 84, 208, 0.16);
+      color: #6c3ac7;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78), inset 0 0 0 1px rgba(136,84,208,.24), 0 0 10px rgba(136,84,208,.24);
+    }
+
+    .l71-briefing {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .l71-briefing .svtd-table {
+      margin: 0 auto;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .l71-briefing .svtd-table th {
+      padding: 6px 4px;
+      font-size: 13px;
+      line-height: 1.15;
+    }
+    .l71-briefing .svtd-table td {
+      padding: 7px 4px;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+    .l71-briefing .svtd-table th:nth-child(1) { border-color: #2f8f55; background: #e2f7e8; color: #17643c; }
+    .l71-briefing .svtd-table th:nth-child(2) { border-color: #c88a12; background: #fff4cc; color: #7a4a00; }
+    .l71-briefing .svtd-table th:nth-child(3) { border-color: #dc3f3f; background: #ffe1e1; color: #a91f1f; }
+    .l71-briefing .svtd-table th:nth-child(4) { border-color: #111; background: #1f1f1f; color: #fff; }
+
+    .l71-title-caption {
+      width: 100%;
+      margin: 0 0 2px;
+      color: #3c2d22;
+      font-size: 15px;
+      line-height: 1.15;
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .l71-question-layout {
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 40px);
+      min-height: 438px;
+      box-sizing: border-box;
+    }
+
+    .l71-question-layout .l71-scene {
+      flex: 0 0 240px;
+      height: 240px;
+      margin-bottom: 8px;
+    }
+
+    .l71-question-layout.has-wrapped-slot .l71-scene {
+      flex-basis: 204px;
+      height: 204px;
+    }
+
+    .l71-question-layout.has-wrapped-slot .l71-scene::before { height: 150px; }
+    .l71-question-layout.has-wrapped-slot .l71-dialogue-step .l71-detective-bubble { top: 40px; }
+    .l71-question-layout.has-wrapped-slot .l71-dialogue-step .l71-suspect-bubble { top: 99px; }
+
+    .l71-question-layout .l71-scene::before { height: 180px; }
+    .l71-question-layout .l71-dialogue-step .l71-detective-bubble { top: 72px; }
+    .l71-question-layout .l71-dialogue-step .l71-suspect-bubble { top: 131px; }
+
+    .l71-question-layout .l71-file {
+      flex: 0 0 auto;
+      margin-top: auto;
+    }
+
+    .l71-person {
+      bottom: 28px;
+      width: 82px;
+      height: 94px;
+      transform-origin: 50% 86%;
+    }
+
+    .l71-detective { left: 14px; }
+    .l71-suspect { right: 14px; }
+
+    .l71-head,
+    .l71-detective .l71-head,
+    .l71-suspect .l71-head {
+      z-index: 4;
+      top: 11px;
+      width: 41px;
+      height: 47px;
+      overflow: visible;
+      border: 2.5px solid #171717;
+      box-shadow: inset 0 -5px 0 rgba(103,55,42,.12);
+    }
+
+    .l71-detective .l71-head {
+      left: 25px;
+      border-radius: 52% 46% 48% 46%;
+      background: #c9956f;
+      transform: rotate(1deg);
+    }
+
+    .l71-suspect .l71-head {
+      left: 14px;
+      border-radius: 46% 52% 46% 49%;
+      background: #d9a27b;
+      transform: rotate(-1deg);
+    }
+
+    .l71-hair,
+    .l71-detective .l71-hair,
+    .l71-suspect .l71-hair {
+      z-index: 5;
+      top: -4px;
+      width: 39px;
+      height: 21px;
+      border: 2px solid #171717;
+      border-bottom: 0;
+      background: #292724;
+    }
+
+    .l71-detective .l71-hair {
+      left: -1px;
+      border-radius: 23px 15px 7px 4px;
+    }
+
+    .l71-suspect .l71-hair {
+      right: -1px;
+      border-radius: 15px 23px 4px 7px;
+      background: #332b28;
+    }
+
+    .l71-hair::before {
+      content: "";
+      position: absolute;
+      top: 11px;
+      width: 6px;
+      height: 12px;
+      border-radius: 2px 2px 6px 6px;
+      background: inherit;
+    }
+
+    .l71-detective .l71-hair::before { left: 1px; }
+    .l71-suspect .l71-hair::before { right: 1px; }
+
+    .l71-hair-lock {
+      position: absolute;
+      z-index: 6;
+      top: 7px;
+      width: 12px;
+      height: 9px;
+      border-radius: 0 0 10px 2px;
+      background: #292724;
+      transform: rotate(16deg);
+    }
+
+    .l71-detective .l71-hair-lock { left: 23px; }
+    .l71-suspect .l71-hair-lock { right: 23px; background: #332b28; transform: scaleX(-1) rotate(16deg); }
+
+    .l71-ear {
+      position: absolute;
+      z-index: 3;
+      top: 22px;
+      width: 8px;
+      height: 11px;
+      border: 2px solid #171717;
+      border-radius: 50%;
+      background: inherit;
+    }
+
+    .l71-detective .l71-ear { left: -6px; }
+    .l71-suspect .l71-ear { right: -6px; }
+
+    .l71-eye { top: 20px; width: 4px; height: 5px; background: #171717; }
+    .l71-detective .l71-eye.is-right { right: 7px; }
+    .l71-suspect .l71-eye.is-left { left: 7px; }
+
+    .l71-brow {
+      position: absolute;
+      z-index: 7;
+      top: 15px;
+      width: 9px;
+      height: 3px;
+      border-top: 2px solid #171717;
+      border-radius: 50%;
+    }
+
+    .l71-detective .l71-brow { right: 5px; transform: rotate(-8deg); }
+    .l71-suspect .l71-brow { left: 5px; transform: rotate(11deg); }
+
+    .l71-nose,
+    .l71-detective .l71-nose,
+    .l71-suspect .l71-nose {
+      z-index: 7;
+      top: 23px;
+      width: 0;
+      height: 0;
+      border: 0;
+      background: transparent;
+      transform: none;
+    }
+
+    .l71-detective .l71-nose {
+      right: -7px;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 8px solid #171717;
+    }
+
+    .l71-detective .l71-nose::after {
+      content: "";
+      position: absolute;
+      right: 2px;
+      top: -2px;
+      border-top: 2px solid transparent;
+      border-bottom: 2px solid transparent;
+      border-left: 5px solid #c9956f;
+    }
+
+    .l71-suspect .l71-nose {
+      left: -7px;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-right: 8px solid #171717;
+    }
+
+    .l71-suspect .l71-nose::after {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: -2px;
+      border-top: 2px solid transparent;
+      border-bottom: 2px solid transparent;
+      border-right: 5px solid #d9a27b;
+    }
+
+    .l71-mouth {
+      top: 36px;
+      width: 9px;
+      height: 3px;
+      border: 0;
+      border-top: 2px solid #5c302d;
+      border-radius: 50%;
+    }
+    .l71-detective .l71-mouth { left: 26px; transform: rotate(3deg); }
+    .l71-suspect .l71-mouth { left: 5px; transform: rotate(-4deg); }
+
+    .l71-hat {
+      z-index: 9;
+      left: 18px;
+      top: 7px;
+      width: 52px;
+      height: 4px;
+      border: 2px solid #171717;
+      border-radius: 50% 50% 3px 3px;
+      background: #282826;
+      transform: rotate(1deg);
+    }
+
+    .l71-hat::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      bottom: 1px;
+      width: 31px;
+      height: 14px;
+      border: 2px solid #171717;
+      border-radius: 14px 14px 3px 3px;
+      background: #343331;
+    }
+
+    .l71-hat::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      bottom: 3px;
+      width: 29px;
+      height: 4px;
+      border-radius: 2px;
+      background: #8d6d45;
+    }
+
+    .l71-neck {
+      position: absolute;
+      z-index: 2;
+      top: 50px;
+      width: 13px;
+      height: 14px;
+      border: 2px solid #171717;
+      background: #c9956f;
+    }
+
+    .l71-detective .l71-neck { left: 38px; }
+    .l71-suspect .l71-neck { left: 30px; background: #d9a27b; }
+
+    .l71-body,
+    .l71-detective .l71-body,
+    .l71-suspect .l71-body {
+      z-index: 1;
+      top: 57px;
+      width: 58px;
+      height: 39px;
+      border: 2.5px solid #171717;
+      border-radius: 20px 20px 5px 5px;
+    }
+
+    .l71-detective .l71-body { left: 12px; background: #252b30; }
+    .l71-suspect .l71-body { left: 12px; background: #6d6258; }
+
+    .l71-body::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 1px;
+      width: 15px;
+      height: 19px;
+      transform: translateX(-50%);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      background: rgba(255,255,255,.12);
+    }
+
+    .l71-arm,
+    .l71-detective .l71-arm,
+    .l71-suspect .l71-arm {
+      z-index: 6;
+      top: 69px;
+      width: 42px;
+      height: 9px;
+      border: 2px solid #171717;
+      border-radius: 7px;
+    }
+
+    .l71-detective .l71-arm { left: 43px; background: #252b30; transform: rotate(8deg); }
+    .l71-suspect .l71-arm { left: -3px; background: #6d6258; transform: rotate(-8deg); }
+
+    .l71-hand {
+      position: absolute;
+      z-index: 7;
+      top: 73px;
+      width: 10px;
+      height: 9px;
+      border: 2px solid #171717;
+      border-radius: 50%;
+    }
+
+    .l71-detective .l71-hand { right: -6px; background: #c9956f; }
+    .l71-suspect .l71-hand { left: -6px; background: #d9a27b; }
   `;
   document.head.appendChild(style);
 }
@@ -471,30 +1420,50 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
   let filtered = rawRows
     .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === TARGET_EXERCISE)
+    .filter((r) => {
+      const question = String(r["Question"] ?? "").trim();
+      const answer = String(r["Answer"] ?? "").trim();
+      return question && answer && answer !== "System.Xml.XmlElement";
+    })
     .sort((a, b) => Number(a["QNumber"]) - Number(b["QNumber"]));
 
   if (MAX_QUESTIONS > 0) filtered = filtered.slice(0, MAX_QUESTIONS);
@@ -640,7 +1609,6 @@ function renderQuestion() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
 
-
   const q = questions[currentIndex];
   if (!q) {
     showResultPopup();
@@ -648,8 +1616,17 @@ function renderQuestion() {
   }
 
   isCurrentLocked = false;
+  interrogationResolvedRoles = new Set();
+  if (interrogationTimerId) {
+    window.clearTimeout(interrogationTimerId);
+    interrogationTimerId = 0;
+  }
 
   const isSVTD = /\([SVTD]\)/i.test(String(q.question || ""));
+  if (isSVTD) {
+    renderInterrogationQuestion(area, q);
+    return;
+  }
   const qBody = renderSVTDTable(q.question);
   const svtdVisibleRoles = isSVTD ? getSVTDVisibleRoles(q.question) : null;
   const displayInstruction = isSVTD
@@ -793,9 +1770,9 @@ function submitCurrentAnswer() {
     if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   }
   if (submitBtn) submitBtn.disabled = true;
+  scheduleAutoNext();
   if (nextBtn) {
-    nextBtn.disabled = false;
-    nextBtn.textContent = "\uB2E4\uC74C";
+    nextBtn.textContent = "Skip";
     nextBtn.classList.remove("hint-mode");
   }
   hideHintTooltip();
@@ -830,6 +1807,272 @@ function hideHintTooltip() {
     tooltip.classList.remove("is-visible");
     tooltip.innerHTML = "";
   }
+}
+
+function renderInterrogationQuestion(area, q) {
+  const expectedSlots = parseSVTDAnswerSlots(q.answer);
+  const modelSlots = extractSVTDAnswerEnglishSlots(q.answer);
+  const affixes = extractSVTDAffixes(q.answer);
+  const needsWrappedSlot = Object.values(modelSlots).some((value) => {
+    const words = String(value || "").trim().split(/\s+/).filter(Boolean);
+    const characterWidth = words.join("").length * 22;
+    return words.length > 1 && characterWidth + ((words.length - 1) * 6) > 205;
+  });
+
+  area.innerHTML = `
+    <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
+    <section class="l71-question-layout${needsWrappedSlot ? " has-wrapped-slot" : ""}">
+      ${renderInterrogationScene(q, expectedSlots)}
+      <section class="l71-briefing">
+        ${renderSVTDTable(q.question)}
+        <div class="l71-title-caption">를 맞춰보세요</div>
+      </section>
+      ${renderInterrogationFile(q, expectedSlots, modelSlots, affixes)}
+    </section>
+  `;
+
+  const slotApis = {};
+  ["S", "V", "T", "D"].forEach((role) => {
+    const input = document.getElementById(`svtd-input-${role.toLowerCase()}`);
+    if (!input || !window.AisthInputSlots) return;
+    const api = window.AisthInputSlots.enhance(input, {
+      modelText: modelSlots[role],
+      placeholderText: currentIndex === 0 ? modelSlots[role] : "",
+    });
+    slotApis[role] = api;
+    if (role === "V") applyL71SuffixPalette(api?.control, modelSlots[role]);
+    input.addEventListener("input", () => handleIndependentSVTDTyping(q, role, input, api?.control, expectedSlots));
+  });
+
+  q.interrogationExpected = expectedSlots;
+  q.interrogationModels = modelSlots;
+  q.interrogationSlotApis = slotApis;
+  interrogationResolvedRoles = new Set(["S", "V", "T", "D"].filter((role) => expectedSlots[role]?.empty));
+  const firstRole = ["S", "V", "T", "D"].find((role) => !expectedSlots[role]?.empty && slotApis[role]);
+  if (firstRole) slotApis[firstRole].focus();
+}
+
+function renderInterrogationScene(q, expectedSlots) {
+  const sourceSlots = parseSVTDSlots(q?.question || "");
+  const prompts = {
+    S: "그래서, 누가 했지?",
+    V: "뭘 했는데?",
+    T: "어디다가?",
+    D: "좀 더 자세히 말해봐.",
+  };
+  const sceneClasses = [
+    "l71-scene",
+    expectedSlots?.T?.empty ? "has-empty-t" : "",
+    expectedSlots?.D?.empty ? "has-empty-d" : "",
+  ].filter(Boolean).join(" ");
+  const dialogue = ["S", "V", "T", "D"].map((role, index) => {
+    const isEmpty = Boolean(expectedSlots?.[role]?.empty);
+    const response = isEmpty ? "..." : conversationalizeInterrogationLine(role, sourceSlots[role]);
+    return `
+      <div class="l71-dialogue-step${isEmpty ? " is-empty" : ""}" style="--l71-dialogue-delay:${index * 3}s;">
+        <div class="l71-bubble l71-detective-bubble">${escapeHtml(prompts[role])}</div>
+        <div class="l71-bubble l71-suspect-bubble">${escapeHtml(response)}</div>
+      </div>
+    `;
+  }).join("");
+  return `
+    <section class="${sceneClasses}" id="l71-scene" aria-label="SVTD 취조실 예시 애니메이션">
+      <span class="l71-lamp" aria-hidden="true"></span>
+      ${dialogue}
+      ${renderInterrogationPerson("detective")}
+      ${renderInterrogationPerson("suspect")}
+    </section>
+  `;
+}
+
+function renderInterrogationPerson(kind) {
+  return `
+    <div class="l71-person l71-${kind}" id="l71-${kind}" aria-hidden="true">
+      ${kind === "detective" ? '<span class="l71-hat"></span>' : ""}
+      <span class="l71-head">
+        <span class="l71-hair"></span>
+        <span class="l71-hair-lock"></span>
+        <span class="l71-ear"></span>
+        <span class="l71-brow"></span>
+        <span class="l71-eye is-left"></span><span class="l71-eye is-right"></span><span class="l71-mouth"></span>
+        <span class="l71-nose"></span>
+      </span>
+      <span class="l71-neck"></span>
+      <span class="l71-body"></span>
+      <span class="l71-arm"></span>
+      <span class="l71-hand"></span>
+      <span class="l71-chair"></span>
+    </div>
+  `;
+}
+
+function conversationalizeInterrogationLine(role, rawValue) {
+  const value = String(rawValue || "").trim();
+  const lines = {
+    S: {
+      "나는": "저요.",
+      "그들은": "그 사람들이요.",
+      "그녀는": "그녀요.",
+      "우리는": "저희요.",
+      "그는": "그 사람이요.",
+    },
+    V: {
+      "일어난다": "일어나요.",
+      "웃었다": "웃었어요.",
+      "간다": "가요.",
+      "기다렸다": "기다렸어요.",
+      "여행한다": "여행해요.",
+      "논다": "놀아요.",
+      "요리해줬다": "요리해줬어요.",
+      "제공했다": "건네줬어요.",
+      "만들었다": "만들었어요.",
+      "선출했다": "뽑았어요.",
+      "보았다": "봤어요.",
+      "자고 있다": "자고 있어요.",
+      "달린다": "달려요.",
+      "만났다": "만났어요.",
+      "도착했다": "도착했어요.",
+      "외쳤다": "외쳤어요.",
+    },
+    T: {
+      "학교에": "학교에요.",
+      "축구를": "축구요.",
+      "그에게": "그 사람한테요.",
+      "우리에게": "저희한테요.",
+      "그녀를": "그녀를요.",
+      "그를": "그 사람을요.",
+      "나를": "저를요.",
+    },
+    D: {
+      "7시에": "오전 7시에요.",
+      "시끄럽게": "시끄럽게요.",
+      "매일": "매일요.",
+      "방 안에서": "방 안에서요.",
+      "자주": "자주요.",
+      "주말에": "주말에요.",
+      "저녁을": "저녁을요.",
+      "도움을": "도움을요.",
+      "행복하게": "행복하게요.",
+      "대통령으로": "대통령으로요.",
+      "우는 것을": "우는 걸요.",
+      "웃게": "웃게요.",
+      "지금": "지금요.",
+      "매일 아침": "매일 아침이요.",
+      "역에서": "역에서요.",
+      "늦게": "늦게요.",
+    },
+  };
+  if (lines[role]?.[value]) return lines[role][value];
+  return value ? `${value}요.` : "말해볼게요.";
+}
+
+function renderInterrogationFile(q, expectedSlots, modelSlots, affixes) {
+  const labels = {
+    S: "누가",
+    V: "어떤 행동",
+    T: "어디다가",
+    D: "자세히 설명",
+  };
+  const rows = ["S", "V", "T", "D"].map((role) => {
+    const expected = expectedSlots[role];
+    const roleClass = svtdRoleClass(role);
+    const inputId = `svtd-input-${role.toLowerCase()}`;
+    const prefix = affixes[role]?.prefix || "";
+    const suffix = affixes[role]?.suffix || "";
+    const answerHtml = expected.empty
+      ? '<span class="l71-none-stamp">해당 없음</span>'
+      : `
+          <span class="l71-answer-cluster">
+            ${prefix ? `<span class="l71-affix">${escapeHtml(prefix)}</span>` : ""}
+            <input id="${inputId}" class="l71-source-input" type="text" autocomplete="off" inputmode="text" lang="en" autocapitalize="none" spellcheck="false" />
+            ${suffix ? `<span class="l71-affix">${escapeHtml(suffix)}</span>` : ""}
+          </span>
+        `;
+    return `
+      <div class="l71-file-row" id="l71-row-${role.toLowerCase()}" data-role="${role}">
+        <label class="l71-file-label" for="${inputId}">
+          ${role === "T" ? '<span class="scope-deco" aria-hidden="true"></span>' : `<span class="svtd-inline-tag is-${roleClass}">${role}</span>`}<span>${labels[role]}</span>
+        </label>
+        <div class="l71-file-answer">${answerHtml}</div>
+      </div>
+    `;
+  }).join("");
+
+  return `<section class="l71-file">${rows}</section>`;
+}
+
+function handleIndependentSVTDTyping(q, role, input, control, expectedSlots) {
+  if (isCurrentLocked || interrogationResolvedRoles.has(role)) return;
+  const value = String(input.value || "").trim();
+  paintInterrogationSlots(input, control, q.interrogationModels?.[role] || "");
+  if (!isSingleSVTDRoleCorrect(value, expectedSlots[role])) return;
+
+  interrogationResolvedRoles.add(role);
+  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
+  else input.disabled = true;
+  document.getElementById(`l71-row-${role.toLowerCase()}`)?.classList.add("is-solved");
+  const allSolved = ["S", "V", "T", "D"].every((item) => expectedSlots[item]?.empty || interrogationResolvedRoles.has(item));
+  if (allSolved) {
+    finishInterrogationQuestion(q);
+    return;
+  }
+
+  const roleOrder = ["S", "V", "T", "D"];
+  const currentRoleIndex = roleOrder.indexOf(role);
+  const nextRole = roleOrder
+    .slice(currentRoleIndex + 1)
+    .concat(roleOrder.slice(0, currentRoleIndex))
+    .find((item) => !expectedSlots[item]?.empty && !interrogationResolvedRoles.has(item));
+  if (nextRole) q.interrogationSlotApis?.[nextRole]?.focus();
+}
+
+function paintInterrogationSlots(input, control, modelText) {
+  if (!input || !control) return;
+  const expected = Array.from(String(modelText || "").replace(/\s+/g, "").toLowerCase());
+  const actual = Array.from(String(input.value || "").replace(/\s+/g, "").toLowerCase());
+  control.querySelectorAll(".aisth-slot-cell").forEach((cell, index) => {
+    cell.classList.toggle("is-slot-correct", Boolean(actual[index]) && actual[index] === expected[index]);
+    cell.classList.toggle("is-slot-wrong", Boolean(actual[index]) && actual[index] !== expected[index]);
+  });
+}
+
+function applyL71SuffixPalette(control, modelText) {
+  if (!control) return;
+  const word = String(modelText || "").trim().toLowerCase();
+  const suffixLength = /^(goes)$/.test(word) ? 2 : /^(travels|runs)$/.test(word) ? 1 : 0;
+  if (!suffixLength) return;
+  const cells = Array.from(control.querySelectorAll(".aisth-slot-cell"));
+  cells.slice(-suffixLength).forEach((cell) => cell.classList.add("is-l71-suffix"));
+}
+
+function isSingleSVTDRoleCorrect(userRaw, expected) {
+  const user = normalizeLoose(String(userRaw || ""), "rewrite");
+  if (!user || !expected || expected.empty) return false;
+  return (expected.candidates || [])
+    .map((candidate) => normalizeLoose(String(candidate || ""), "rewrite"))
+    .filter(Boolean)
+    .some((candidate) => candidate === user);
+}
+
+function finishInterrogationQuestion(q) {
+  if (isCurrentLocked) return;
+  isCurrentLocked = true;
+
+  const userSlots = collectSVTDUserSlots();
+  const userRaw = `S:${userSlots.S} | V:${userSlots.V} | T:${userSlots.T} | D:${userSlots.D}`;
+  results.push({
+    no: currentIndex + 1,
+    qNumber: q.qNumber,
+    type: q.type,
+    question: q.question,
+    selected: userRaw,
+    answer: q.answer,
+    instruction: q.instruction,
+    correct: true,
+  });
+  storeLatestResultSnapshot();
+  showToast("ok", TEXT.CORRECT);
+  interrogationTimerId = window.setTimeout(goNext, 700);
 }
 
 function showHintTooltip(role = activeHintRole) {
@@ -1016,6 +2259,13 @@ function handleNextOrHint() {
   showHintTooltip(activeHintRole);
 }
 
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
+}
+
 function goNext() {
   currentIndex += 1;
   if (currentIndex >= questions.length) {
@@ -1051,9 +2301,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -1122,11 +2377,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -1137,12 +2397,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 
@@ -1170,7 +2430,7 @@ function renderSVTDColoredSegment(value) {
   while ((m = re.exec(text)) !== null) {
     const token = String(m[0] || "");
     const role = svtdRoleFromText(token);
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     if (token === "SVTD") {
       out += ["S", "V", "T", "D"].map((x) => renderSVTDInlineTag(x, svtdRoleClass(x))).join("");
     } else {
@@ -1179,7 +2439,7 @@ function renderSVTDColoredSegment(value) {
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

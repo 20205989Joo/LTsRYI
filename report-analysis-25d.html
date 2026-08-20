@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>카페지기 리포트 — 2.5D</title>
+  <link rel="stylesheet" href="cafe-25d-pages.css" />
+</head>
+<body class="page-report">
+  <div class="main-page">
+    <header class="cafe25-topbar">
+      <button
+        id="back-to-room-btn"
+        class="cafe25-back"
+        type="button"
+        data-nav-mainhall="student-room-25d.html"
+        data-nav-replace="true"
+        aria-label="학생 카페로 돌아가기"
+      >‹</button>
+      <div class="cafe25-heading">
+        <strong>카페지기</strong>
+        <span>study guide & report</span>
+      </div>
+      <div class="cafe25-mark" aria-hidden="true">LT</div>
+    </header>
+
+    <main id="cafe_int">
+      <div class="report-window" aria-hidden="true"></div>
+      <div id="cafe_jigi" aria-hidden="true"></div>
+      <div id="bar_top" aria-hidden="true"></div>
+      <div id="bar_bottom" aria-hidden="true"></div>
+
+      <section class="display-window" id="displayArea">
+        아래에서 메뉴를 골라보세요.
+      </section>
+
+      <section class="npc-dialogue-box" id="dialogueBox">
+        안녕하세요, 어떻게 찾아오셨나요!
+        <div class="main-choices">
+          <button class="main-choice" type="button" data-cat="analysis">진행상황 체크하러 왔어요</button>
+          <button class="main-choice" type="button" data-cat="custom">저 주실 거 있어요</button>
+          <button class="main-choice" type="button" data-cat="chat">대화</button>
+        </div>
+      </section>
+
+      <div class="sub-popup" id="subChoiceBox" style="display:none;"></div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="day_manager.js"></script>
+  <script src="nav-buttons.js"></script>
+  <script src="cafejigi_menuguide.js"></script>
+</body>
+</html>

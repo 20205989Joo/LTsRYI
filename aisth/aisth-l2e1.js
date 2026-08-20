@@ -2,7 +2,6 @@
 // Independent runtime for Aisth Lesson 2 Exercise 1
 // Pattern: choose one option in parentheses + Korean hint emphasis (**...**)
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 2;
 const TARGET_EXERCISE = 1;
 const PAGE_LABEL = "Aisth L2-E1";
@@ -20,7 +19,6 @@ const TEXT = {
   CORRECT: "정답!",
   WRONG: "오답",
   QTYPE: "시제 변형 고르기",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -45,6 +43,8 @@ let currentIndex = 0;
 let results = [];
 let isCurrentLocked = false;
 let selectedOptionIndex = -1;
+let autoNextTimer = 0;
+let wrongReleaseTimer = 0;
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -56,16 +56,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -185,12 +187,12 @@ function injectRuntimeStyles() {
     }
 
     .ko-focus {
-      background: rgba(255, 208, 90, 0.45);
+      background: var(--aisth-role-v-bg, #fff4cc);
       border-radius: 6px;
       padding: 0 3px;
-      box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(200, 138, 18, 0.24), 0 0 10px var(--aisth-role-v-glow, rgba(216,162,27,.30));
       font-weight: 900;
-      color: #7e3106;
+      color: var(--aisth-role-v-text, #7a4a00);
     }
 
     .choice-line {
@@ -272,25 +274,44 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof wrongReleaseTimer !== "undefined" && wrongReleaseTimer) {
+        window.clearTimeout(wrongReleaseTimer);
+        wrongReleaseTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -477,35 +498,33 @@ function renderQuestion() {
 
   isCurrentLocked = false;
   selectedOptionIndex = -1;
+  if (autoNextTimer) {
+    clearTimeout(autoNextTimer);
+    autoNextTimer = 0;
+  }
+  if (wrongReleaseTimer) {
+    clearTimeout(wrongReleaseTimer);
+    wrongReleaseTimer = 0;
+  }
+
+  const optionsHtml = renderChoiceOptionsList(q);
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
-    <div class="box">
+    <div class="box aisth-l2e1-question-box">
       <div class="question-instruction">${escapeHtml(q.instruction || DEFAULT_INSTRUCTION)}</div>
       <div class="sentence aisth-question-surface">
         <div class="en-line">${renderEnglishStemLine(q)}</div>
         ${q.koreanHint ? `<div class="ko-line">(${renderKoreanHint(q.koreanHint)})</div>` : ""}
       </div>
-    </div>
-
-    <div class="box" style="background:#fff;">
-      <div class="choice-line">${renderChoiceOptionsLine(q)}</div>
+      <div class="aisth-choice-list">${optionsHtml}</div>
       <div id="feedback" class="feedback"></div>
     </div>
 
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>${escapeHtml(TEXT.NEXT)}</button>
-    </div>
   `;
 
   wireOptionClicks();
-
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
 }
 
 function renderEnglishStemLine(q) {
@@ -532,20 +551,48 @@ function renderChoiceOptionsLine(q) {
   return `(${opts})`;
 }
 
+function renderChoiceOptionsList(q) {
+  if (!Array.isArray(q.options) || !q.options.length) return "";
+
+  return q.options.map((opt, idx) => `
+    <div class="aisth-choice-item" data-opt-index="${idx}" role="button" tabindex="0">
+      <span class="aisth-choice-label">${escapeHtml(getChoiceLabel(idx))}</span>
+      <span class="aisth-choice-text">${escapeHtml(opt)}</span>
+    </div>
+  `).join("");
+}
+
+function getChoiceLabel(idx) {
+  return String.fromCharCode(65 + Math.max(0, Number(idx) || 0));
+}
+
 function wireOptionClicks() {
-  document.querySelectorAll(".opt-token").forEach((el) => {
-    el.addEventListener("click", () => {
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
+    const activate = () => {
       if (isCurrentLocked) return;
       const idx = Number(el.dataset.optIndex ?? -1);
       if (!Number.isInteger(idx) || idx < 0) return;
+      if (wrongReleaseTimer) {
+        clearTimeout(wrongReleaseTimer);
+        wrongReleaseTimer = 0;
+      }
       selectedOptionIndex = idx;
       refreshOptionSelection();
+      submitCurrentAnswer();
+    };
+
+    el.addEventListener("click", activate);
+    el.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        activate();
+      }
     });
   });
 }
 
 function refreshOptionSelection() {
-  document.querySelectorAll(".opt-token").forEach((el) => {
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     const idx = Number(el.dataset.optIndex ?? -1);
     el.classList.toggle("selected", idx === selectedOptionIndex);
   });
@@ -556,8 +603,6 @@ function submitCurrentAnswer() {
 
   const q = questions[currentIndex];
   const feedback = document.getElementById("feedback");
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
 
   if (!q) return;
   if (selectedOptionIndex < 0) {
@@ -574,19 +619,25 @@ function submitCurrentAnswer() {
     : q.answerRaw;
 
   if (!ok) {
+    const wrongIndex = selectedOptionIndex;
     if (feedback) {
       feedback.className = "feedback";
       feedback.innerHTML = "";
     }
     showToast("no", TEXT.WRONG);
+    wrongReleaseTimer = window.setTimeout(() => {
+      wrongReleaseTimer = 0;
+      if (!isCurrentLocked && selectedOptionIndex === wrongIndex) {
+        selectedOptionIndex = -1;
+        refreshOptionSelection();
+      }
+    }, 420);
     return;
   }
 
   isCurrentLocked = true;
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
-  document.querySelectorAll(".opt-token").forEach((el) => {
+  scheduleAutoNext();
+  document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     el.style.pointerEvents = "none";
   });
 
@@ -594,8 +645,8 @@ function submitCurrentAnswer() {
     no: currentIndex + 1,
     qNumber: q.qNumber,
     question: buildQuestionPlainText(q),
-    selected: selectedText,
-    answer: answerShown,
+    selected: `${getChoiceLabel(selectedOptionIndex)}. ${selectedText}`,
+    answer: q.correctOptionIndex >= 0 ? `${getChoiceLabel(q.correctOptionIndex)}. ${answerShown}` : answerShown,
     instruction: q.instruction,
     correct: true,
   });
@@ -607,6 +658,15 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  if (autoNextTimer) window.clearTimeout(autoNextTimer);
+  autoNextTimer = window.setTimeout(() => {
+    autoNextTimer = 0;
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -638,6 +698,7 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n+/g, "\n")
     .trim();
 }

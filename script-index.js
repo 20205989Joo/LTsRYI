@@ -84,7 +84,7 @@ document.getElementById('loginButton')?.addEventListener('click', async function
 
       // ✅ 사용자 유형에 따라 리다이렉트
       if (userType === 'student') {
-        window.location.href = `student-room.html?id=${userId}`;
+        window.location.href = `student-room-25d.html?id=${userId}`;
       } else if (userType === 'parent') {
         window.location.href = `parents-room.html?id=${userId}`;
       } else if (userType === 'teacher') {

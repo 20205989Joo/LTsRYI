@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>학습 기록 칠판 — 2.5D</title>
+  <link rel="stylesheet" href="cafe-25d-pages.css?v=grades-run-20260731c" />
+  <link rel="stylesheet" href="grades-calendar-25d-ui.css?v=20260731e" />
+</head>
+<body class="page-grades">
+  <div class="main-page">
+    <header class="cafe25-topbar">
+      <button
+        id="back-to-room-btn"
+        class="cafe25-back"
+        type="button"
+        data-nav-mainhall="student-room-25d.html"
+        data-nav-replace="true"
+        aria-label="학생 카페로 돌아가기"
+      >‹</button>
+      <div class="cafe25-heading">
+        <strong>학습 기록</strong>
+        <span>study log board</span>
+      </div>
+      <div class="cafe25-mark" aria-hidden="true">LT</div>
+    </header>
+
+    <main id="cafe_int">
+      <section id="chalkboard" aria-label="학습 기록 칠판">
+        <div class="grades-record-shell" id="gradesRecordShell">
+          <div class="grades-board-toolbar">
+            <div class="grades-period-copy">
+              <span id="gradesPeriodLabel">THIS WEEK</span>
+              <div>
+                <strong id="gradesPeriodCount">0 SUBMITTED</strong>
+                <em id="gradesPeriodScore" hidden></em>
+              </div>
+            </div>
+            <div class="grades-period-switch" role="tablist" aria-label="Record range">
+              <button class="is-active" type="button" data-record-range="day" role="tab" aria-selected="true">D</button>
+              <button type="button" data-record-range="week" role="tab" aria-selected="false">W</button>
+              <button type="button" data-record-range="month" role="tab" aria-selected="false">M</button>
+              <button type="button" data-record-range="year" role="tab" aria-selected="false">Y</button>
+            </div>
+          </div>
+
+          <div class="grades-period-view" id="gradesPeriodView" aria-live="polite"></div>
+
+          <div class="grades-record-legend" id="gradesRecordLegend"></div>
+          <div class="grades-record-cycle" aria-hidden="true"><span></span></div>
+        </div>
+
+        <div id="calendar_backside"></div>
+        <div class="calendar-section" hidden aria-hidden="true">
+          <div id="calendarMonth"></div>
+          <table id="calendarTable"></table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="nav-buttons.js"></script>
+  <script>
+    (() => {
+      const table = document.getElementById("calendarTable");
+      const monthLabel = document.getElementById("calendarMonth");
+      const now = new Date();
+      const monthNames = [
+        "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+        "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+      ];
+      monthLabel.textContent = monthNames[now.getMonth()];
+
+      const labels = ["일", "월", "화", "수", "목", "금", "토"];
+      const header = document.createElement("tr");
+      labels.forEach((label) => {
+        const cell = document.createElement("td");
+        cell.textContent = label;
+        header.appendChild(cell);
+      });
+      table.appendChild(header);
+
+      const first = new Date(now.getFullYear(), now.getMonth(), 1);
+      const start = new Date(first);
+      start.setDate(first.getDate() - first.getDay());
+      for (let week = 0; week < 5; week += 1) {
+        const row = document.createElement("tr");
+        for (let day = 0; day < 7; day += 1) {
+          const date = new Date(start);
+          date.setDate(start.getDate() + week * 7 + day);
+          const cell = document.createElement("td");
+          cell.textContent = String(date.getDate());
+          cell.className = date.getMonth() === now.getMonth()
+            ? "not-submitted"
+            : "not-submitted dimmed";
+          row.appendChild(cell);
+        }
+        table.appendChild(row);
+      }
+    })();
+  </script>
+  <script src="day_manager.js?v=20260731a" defer></script>
+  <script src="grades-calendar-25d.js?v=20260731h" defer></script>
+</body>
+</html>

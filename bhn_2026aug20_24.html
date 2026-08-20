@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>고3 모의고사 이해 → 검증 훈련</title>
+<style>
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  background:#eef1f4;
+  color:#17191d;
+  font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+body{
+  padding:8px;
+  overflow-x:auto;
+  overflow-y:auto;
+}
+
+.app{
+  width:min(1240px,calc(100vw - 16px));
+  min-height:0;
+  height:auto;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:1.12fr .88fr;
+  background:#fff;
+  border:1px solid #d8dde3;
+  border-radius:15px;
+  overflow:visible;
+  box-shadow:0 8px 26px rgba(0,0,0,.05);
+}
+
+.left,.right{
+  min-width:0;
+  min-height:0;
+  align-self:stretch;
+}
+.left{
+  padding:16px 20px 14px;
+  border-right:1px solid #e1e4e8;
+  display:flex;
+  flex-direction:column;
+}
+.right{
+  padding:16px 18px 14px;
+  background:#fafbfc;
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:8px;
+  height:calc(100vh - 16px);
+  align-self:start;
+}
+
+.eyebrow{
+  margin-bottom:3px;
+  color:#6a737d;
+  font-size:10.5px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+h1{
+  margin:0;
+  font-size:20px;
+  letter-spacing:-.03em;
+}
+.left-desc{
+  margin:3px 0 8px;
+  color:#6d7680;
+  font-size:11.5px;
+}
+
+.passage-box{
+  flex:none;
+  min-height:auto;
+  padding:16px 18px 14px;
+  border:1px solid #d7dce2;
+  border-radius:11px;
+  background:#fff;
+  overflow:visible;
+}
+.passage{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:16.1px;line-height:1.62;
+  letter-spacing:0;
+}
+.blank{
+  display:inline-block;
+  min-width:120px;
+  border-bottom:2px solid #222;
+  transform:translateY(-1px)
+}
+.footnotes{
+  margin-top:7px;
+  padding-top:6px;
+  border-top:1px solid #eceff2;
+  color:#636c75;
+  font-size:10.5px;
+}
+
+.chunk{
+  border-radius:3px;
+  transition:.12s ease;
+}
+.selectable .chunk{cursor:pointer}
+.selectable .chunk:hover{
+  background:#eef2f5;
+  box-shadow:0 0 0 2px #eef2f5;
+}
+.chunk.hint{
+  background:#fff0a8;
+  box-shadow:0 0 0 1px rgba(190,150,0,.18);
+}
+.chunk.found{
+  background:#dcebdc;
+  box-shadow:0 0 0 1px rgba(71,123,82,.18);
+}
+.chunk.wrong{
+  background:#ffdada;
+  box-shadow:0 0 0 1px rgba(180,72,72,.15);
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:9px;
+}
+.badge{
+  padding:5px 9px;
+  border:1px solid #c9d0d7;
+  border-radius:7px;
+  background:#eef1f4;
+  font-size:11.5px;
+  font-weight:800;
+}
+.progress{
+  color:#69737e;
+  font-size:11.5px;
+  font-weight:800;
+}
+
+.card{
+  flex:1 1 auto;
+  min-height:0;
+  align-self:stretch;
+  padding:20px 21px;
+  border:1px solid #d8dde3;
+  border-radius:12px;
+  background:#fff;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+}
+.step{
+  margin-bottom:5px;
+  color:#707985;
+  font-size:10.5px;
+  font-weight:800;
+}
+.question{
+  margin:0 0 10px;
+  font-size:17.5px;
+  line-height:1.36;
+  letter-spacing:-.02em;
+}
+.help{
+  margin:-3px 0 9px;
+  color:#747d87;
+  font-size:11.5px;
+  line-height:1.42;
+}
+.status{
+  margin:0 0 9px;
+  padding:7px 9px;
+  border-radius:8px;
+  background:#f2f4f6;
+  color:#56616c;
+  font-size:11.8px;
+  font-weight:700;
+}
+
+.choices{
+  display:grid;
+  gap:10px;
+}
+.choice{
+  width:100%;
+  padding:12px 13px;
+  border:1px solid #d5dbe1;
+  border-radius:9px;
+  background:#fff;
+  color:#22262b;
+  font:inherit;
+  font-size:13.6px;
+  line-height:1.38;
+  text-align:left;
+  cursor:pointer;
+}
+.choice:hover{background:#f7f9fb;border-color:#a8b2bc}
+.choice.correct{background:#edf7f0;border-color:#5d956f}
+.choice.wrong{background:#fbefef;border-color:#bd7272}
+.num{
+  display:inline-block;
+  width:24px;
+  color:#5e6872;
+  font-weight:800;
+}
+.feedback{
+  margin-top:7px;
+  padding:7px 9px;
+  border-radius:8px;
+  font-size:11.8px;
+  font-weight:800;
+}
+.feedback.ok{background:#edf7f0;color:#356745}
+.feedback.no{background:#fbefef;color:#8a4242}
+
+.quote-box{
+  margin:0 0 9px;
+  padding:8px 9px;
+  border:1px solid #d7dde3;
+  border-radius:8px;
+  background:#f7f8fa;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:12.8px;
+  line-height:1.38;
+}
+
+.nav{
+  flex:0 0 auto;
+  margin-top:0;
+  padding-top:10px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.nav button{
+  padding:8px 13px;
+  border:1px solid #cbd1d8;
+  border-radius:8px;
+  background:#fff;
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+}
+.nav .next{
+  background:#20252b;
+  color:#fff;
+  border-color:#20252b;
+}
+.nav button:disabled{opacity:.3;cursor:default}
+
+.dots{
+  flex:0 0 auto;
+  margin-top:7px;
+  display:flex;
+  justify-content:center;
+  gap:4px;
+}
+.dot{
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  background:#d7dce2;
+}
+.dot.active{width:18px;background:#586878}
+
+@media (max-height:780px){
+  .left,.right{padding-top:11px;padding-bottom:10px}
+  .left-desc{display:none}
+  .footnotes{font-size:10px;margin-top:5px;padding-top:5px}
+  .question{font-size:16px;margin-bottom:8px}
+  .help{font-size:11px;margin-bottom:7px}
+  .quote-box{font-size:12px;margin-bottom:7px}
+}
+
+@media (max-width: 1050px){
+  body{padding:6px}
+  .app{
+    width:calc(100vw - 12px);
+    min-height:0;
+    grid-template-columns:1.05fr .95fr;
+  }
+  .left{padding:14px 16px 13px}
+  .right{padding:14px 15px 12px}
+  h1{font-size:18px}
+  .question{font-size:15.5px}
+  .help{font-size:10.8px}
+  .nav button{padding:7px 11px}
+}
+
+/* If the screen is genuinely narrow, stack rather than hide or crop anything. */
+@media (max-width: 780px){
+  .app{
+    display:block;
+    min-height:0;
+  }
+  .left{
+    border-right:0;
+    border-bottom:1px solid #e1e4e8;
+  }
+  .right{
+    display:block;
+  }
+  .card{margin-bottom:8px}
+}
+
+
+/* Step 2 clue emphasis */
+.chunk.hint-old{
+  background:#f3eed6;
+  color:#8a846f;
+  box-shadow:0 0 0 1px rgba(160,145,80,.08);
+}
+.chunk.hint-current{
+  background:#ffd95f;
+  color:#17191d;
+  box-shadow:0 0 0 2px rgba(188,143,0,.20);
+  font-weight:700;
+}
+
+/* Step 2 final: left-side clue summary */
+.clue-summary{
+  display:grid;
+  gap:8px;
+  font-family:inherit;
+}
+.clue-summary-item{
+  padding:10px 11px;
+  border:1px solid #d7dde3;
+  border-radius:9px;
+  background:#fafbfc;
+}
+.clue-summary-en{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:14px;
+  line-height:1.35;
+  font-weight:700;
+}
+.clue-summary-ko{
+  margin-top:4px;
+  color:#59636e;
+  font-size:12.5px;
+  line-height:1.35;
+}
+
+/* Step 4 chunk/collocation translation scramble */
+.chunk.collocation{
+  background:#ffe58a;
+  box-shadow:0 0 0 1px rgba(188,143,0,.14);
+  font-weight:700;
+}
+.scramble-wrap{
+  display:grid;
+  gap:10px;
+}
+.token-bank,
+.answer-bank{
+  min-height:52px;
+  padding:10px;
+  border:1px solid #d5dbe1;
+  border-radius:9px;
+  background:#f8f9fb;
+  display:flex;
+  flex-wrap:wrap;
+  align-content:flex-start;
+  gap:7px;
+}
+.answer-bank{
+  background:#fff;
+  border-style:dashed;
+}
+.token{
+  padding:7px 10px;
+  border:1px solid #cbd2d9;
+  border-radius:8px;
+  background:#fff;
+  font-size:13px;
+  line-height:1;
+  cursor:pointer;
+  user-select:none;
+}
+.token.used{
+  opacity:.25;
+  pointer-events:none;
+}
+.answer-token{
+  background:#eef2f5;
+}
+.scramble-label{
+  color:#626d78;
+  font-size:11.5px;
+  font-weight:800;
+}
+.scramble-actions{
+  display:flex;
+  gap:8px;
+  margin-top:2px;
+}
+.scramble-actions button{
+  padding:7px 10px;
+  border:1px solid #cbd1d8;
+  border-radius:8px;
+  background:#fff;
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+/* debug skip */
+.nav .skip{
+  margin-left:auto;
+  margin-right:0;
+  background:#f2f4f6;
+  color:#56616c;
+}
+.nav{
+  align-items:center;
+}
+
+
+/* Step 4 — visually distinct from Step 2 */
+.step4-passage{
+  display:grid;
+  gap:9px;
+  font-family:Georgia,"Times New Roman",serif;
+}
+.step4-sentence{
+  padding:7px 9px;
+  border-radius:8px;
+  font-size:15.4px;
+  line-height:1.55;
+  color:#555d66;
+}
+.step4-sentence.current{
+  background:#f7fbff;
+  box-shadow:inset 3px 0 0 #4b9ed8;
+  color:#17191d;
+}
+.step4-sentence.done{
+  color:#30363d;
+}
+.step4-collocation{
+  background:#bfe6f7;
+  color:#123c52;
+  border-radius:4px;
+  padding:1px 2px;
+  box-shadow:0 0 0 1px rgba(45,127,170,.16);
+  font-weight:700;
+}
+.step4-ko{
+  margin-top:5px;
+  padding:6px 8px;
+  border-radius:7px;
+  background:#eaf6ef;
+  color:#285c3b;
+  font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-size:12.8px;
+  line-height:1.42;
+}
+.pattern-list{
+  display:grid;
+  gap:6px;
+  margin-bottom:10px;
+}
+.pattern-row{
+  display:grid;
+  grid-template-columns:minmax(120px,.9fr) minmax(0,1.1fr);
+  gap:8px;
+  align-items:center;
+  padding:7px 9px;
+  border:1px solid #d6e6ef;
+  border-radius:8px;
+  background:#f6fbfe;
+}
+.pattern-en{
+  color:#174d68;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:12.8px;
+  font-weight:700;
+}
+.pattern-ko{
+  color:#58636d;
+  font-size:12px;
+}
+.step4-guide{
+  margin:-2px 0 9px;
+  color:#70808c;
+  font-size:11.5px;
+  line-height:1.4;
+}
+
+
+@media (max-width: 780px){
+  .right{
+    position:static !important;
+    height:auto !important;
+    overflow:visible;
+  }
+  .card{
+    overflow:visible;
+    max-height:none;
+  }
+  .nav{
+    position:sticky;
+    bottom:0;
+    z-index:20;
+    padding:9px 0 7px;
+    background:rgba(250,251,252,.96);
+    backdrop-filter:blur(6px);
+  }
+}
+
+
+/* Step 4 left: keep the passage looking like one normal paragraph */
+.step4-passage{
+  display:block !important;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:16.1px;
+  line-height:1.62;
+  color:#22262b;
+}
+.step4-inline-ko{
+  font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color:#285c3b;
+}
+.step4-current-en{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:14px;
+  line-height:1.55;
+  padding:10px 12px;
+  margin:0 0 10px;
+  border:1px solid #d4e6ef;
+  border-radius:9px;
+  background:#f7fbfe;
+}
+
+
+/* large centered grading toast */
+.toast{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(.96);
+  z-index:9999;
+  min-width:240px;
+  max-width:min(78vw,560px);
+  padding:20px 28px;
+  border-radius:18px;
+  background:#20252b;
+  color:#fff;
+  font-size:22px;
+  font-weight:900;
+  line-height:1.3;
+  text-align:center;
+  box-shadow:0 18px 50px rgba(0,0,0,.28);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .14s ease, transform .14s ease;
+}
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+.toast.ok{background:#216a43;}
+.toast.no{background:#9a3434;}
+.toast.info{background:#3d5266;}
+
+
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+.lives{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  user-select:none;
+  white-space:nowrap;
+}
+.heart{
+  display:inline-block;
+  font-size:25px;
+  line-height:1;
+  color:#d42d42;
+  transform-origin:center;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.5));
+}
+.heart.empty{
+  color:#c6cbd1;
+  filter:none;
+}
+.heart.lost{
+  animation:heartLost .58s ease both;
+}
+@keyframes heartLost{
+  0%{transform:scale(1);opacity:1}
+  16%{transform:scale(1.38) rotate(-9deg);opacity:.18}
+  32%{transform:scale(.88) rotate(8deg);opacity:1}
+  48%{transform:scale(1.28) rotate(-7deg);opacity:.16}
+  64%{transform:scale(.9) rotate(6deg);opacity:1}
+  82%{transform:scale(1.18);opacity:.25}
+  100%{transform:scale(1);opacity:1}
+}
+.step1-find-question{
+  margin:2px 0 14px;
+  font-size:29px;
+  line-height:1.28;
+  font-weight:900;
+  letter-spacing:-.04em;
+  color:#17191d;
+}
+.step1-find-word{
+  display:inline-block;
+  margin:0 0 10px;
+  padding:8px 11px;
+  border-radius:10px;
+  background:#eef5fb;
+  font-size:18px;
+  font-weight:900;
+  color:#244d68;
+}
+@media (max-width:900px){
+  .heart{font-size:23px}
+  .step1-find-question{font-size:24px}
+  .topbar-right{gap:8px}
+}
+
+
+.toast-heart-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:10px;
+}
+.toast-heart{
+  display:inline-block;
+  font-size:30px;
+  line-height:1;
+  color:#ff5a6d;
+  transform-origin:center;
+}
+.toast-heart.empty{
+  color:rgba(255,255,255,.36);
+}
+.toast-heart.dying{
+  animation:toastHeartDie .72s ease both;
+}
+@keyframes toastHeartDie{
+  0%{transform:scale(1);opacity:1}
+  18%{transform:scale(1.5) rotate(-10deg);opacity:.2}
+  36%{transform:scale(.86) rotate(9deg);opacity:1}
+  54%{transform:scale(1.35) rotate(-7deg);opacity:.15}
+  72%{transform:scale(.92) rotate(6deg);opacity:.9}
+  100%{transform:scale(.85);opacity:.28}
+}
+.toast-title{
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-.03em;
+}
+
+
+.toast-sub{
+  margin-top:8px;
+  font-size:17px;
+  font-weight:800;
+  opacity:.95;
+}
+.complete-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10020;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,24,29,.36);
+  backdrop-filter:blur(5px);
+}
+.complete-overlay.show{display:flex;}
+.complete-card{
+  width:min(520px,84vw);
+  padding:34px 30px 30px;
+  border-radius:22px;
+  background:#fff;
+  text-align:center;
+  box-shadow:0 24px 80px rgba(0,0,0,.28);
+}
+.complete-fanfare{
+  font-size:48px;
+  line-height:1.1;
+  margin-bottom:12px;
+  animation:fanfarePop .72s ease both;
+}
+.complete-title{
+  margin:0 0 18px;
+  font-size:28px;
+  line-height:1.3;
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#17191d;
+}
+.complete-submit-status{
+  min-height:20px;
+  margin:-7px 0 15px;
+  color:#2d7a45;
+  font-size:13px;
+  font-weight:800;
+}
+.complete-submit-status.error{color:#b42318;}
+.complete-retry{
+  border:0;
+  border-radius:12px;
+  padding:12px 20px;
+  background:#20252b;
+  color:#fff;
+  font:inherit;
+  font-size:15px;
+  font-weight:900;
+  cursor:pointer;
+}
+.complete-retry:disabled{
+  opacity:.58;
+  cursor:wait;
+}
+@keyframes fanfarePop{
+  0%{transform:scale(.6) rotate(-8deg);opacity:0}
+  55%{transform:scale(1.16) rotate(5deg);opacity:1}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+
+
+/* Front vocabulary preview */
+.front-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10040;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:linear-gradient(180deg,rgba(246,248,251,.98),rgba(238,242,247,.98));
+}
+.front-overlay.hidden{display:none;}
+.front-card{
+  width:min(760px,92vw);
+  max-height:88vh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-gutter:stable both-edges;
+  padding:32px 34px 26px;
+  border:1px solid #d8dde3;
+  border-radius:24px;
+  background:#fff;
+  box-shadow:0 24px 80px rgba(0,0,0,.14);
+}
+.front-kicker{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.08em;
+  color:#6b7580;
+  text-transform:uppercase;
+}
+.front-title{
+  margin:6px 0 8px;
+  font-size:30px;
+  line-height:1.18;
+  font-weight:950;
+  letter-spacing:-.04em;
+}
+.front-desc{
+  margin:0 0 20px;
+  font-size:14px;
+  line-height:1.6;
+  color:#65707c;
+}
+.vocab-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.vocab-head strong{
+  font-size:15px;
+}
+.vocab-page-count{
+  font-size:12px;
+  font-weight:800;
+  color:#7c8792;
+}
+.vocab-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.vocab-item{
+  min-width:0;
+  padding:13px 14px;
+  border:1px solid #e0e4e9;
+  border-radius:12px;
+  background:#fafbfc;
+}
+.vocab-en{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:16px;
+  font-weight:700;
+  color:#20252b;
+}
+.vocab-ko{
+  margin-top:5px;
+  font-size:13px;
+  line-height:1.4;
+  color:#58636f;
+}
+.vocab-stage{
+  display:grid;
+  grid-template-columns:46px minmax(0,1fr) 46px;
+  gap:8px;
+  align-items:stretch;
+  margin-top:4px;
+}
+.vocab-bank{
+  min-width:0;
+}
+.vocab-side-arrow{
+  position:static;
+  width:46px;
+  height:auto;
+  min-height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  padding:0;
+  background:transparent;
+  color:#34404c;
+  font-size:34px;
+  line-height:1;
+  font-weight:950;
+  cursor:pointer;
+  opacity:.8;
+  transform:none;
+  transition:transform .12s ease, opacity .12s ease;
+}
+.vocab-side-arrow.left,
+.vocab-side-arrow.right{
+  left:auto;
+  right:auto;
+}
+.vocab-side-arrow:hover:not(:disabled){
+  transform:scale(1.14);
+  opacity:1;
+}
+.vocab-side-arrow:active:not(:disabled){
+  transform:scale(.96);
+}
+.vocab-side-arrow:disabled{
+  opacity:.14;
+  cursor:default;
+}
+.front-dots{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  margin-top:14px;
+}
+.front-dot{
+  width:9px;
+  height:9px;
+  border-radius:99px;
+  background:#d2d8df;
+}
+.front-dot.active{
+  width:28px;
+  background:#3f4e5c;
+}
+.front-start{
+  display:block;
+  width:100%;
+  margin-top:18px;
+  padding:13px 18px;
+  border:0;
+  border-radius:12px;
+  background:#20252b;
+  color:#fff;
+  font:inherit;
+  font-size:15px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+/* Game over */
+.gameover-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10030;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,24,29,.42);
+  backdrop-filter:blur(5px);
+}
+.gameover-overlay.show{display:flex;}
+.gameover-card{
+  width:min(500px,84vw);
+  padding:34px 30px 30px;
+  border-radius:22px;
+  background:#fff;
+  text-align:center;
+  box-shadow:0 24px 80px rgba(0,0,0,.3);
+}
+.gameover-icon{
+  font-size:48px;
+  line-height:1.1;
+  margin-bottom:10px;
+}
+.gameover-title{
+  margin:0 0 8px;
+  font-size:32px;
+  font-weight:950;
+  letter-spacing:-.04em;
+  color:#1c2025;
+}
+.gameover-desc{
+  margin:0 0 20px;
+  font-size:14px;
+  line-height:1.5;
+  color:#6a747e;
+}
+.gameover-retry{
+  border:0;
+  border-radius:12px;
+  padding:12px 20px;
+  background:#20252b;
+  color:#fff;
+  font:inherit;
+  font-size:15px;
+  font-weight:900;
+  cursor:pointer;
+}
+@media (max-width:620px){
+  .front-card{padding:24px 20px 20px}
+  .front-title{font-size:26px}
+  .vocab-grid{grid-template-columns:1fr}
+  .vocab-stage{grid-template-columns:38px minmax(0,1fr) 38px;gap:5px}
+  .vocab-side-arrow{width:38px;font-size:28px}
+}
+
+</style>
+</head>
+<body>
+
+<div id="frontOverlay" class="front-overlay">
+  <div class="front-card">
+    <div class="front-kicker">오늘의 영어 독해</div>
+    <h1 class="front-title">24번을 풀기 전에 단어부터 한번 보고 갑시다.</h1>
+    <p class="front-desc">여기 나오는 핵심 단어와 표현입니다. 외울 만큼 보고, 좌우로 넘겨본 뒤 준비되면 바로 시작하세요.</p>
+
+    <div class="vocab-head">
+      <strong>미리 보는 단어</strong>
+      <span class="vocab-page-count" id="vocabPageCount"></span>
+    </div>
+
+    <div class="vocab-stage">
+      <button class="vocab-side-arrow left" id="vocabPrev" onclick="changeVocabPage(-1)" aria-label="이전 단어 페이지" title="이전 페이지">◀</button>
+      <div class="vocab-bank">
+        <div class="vocab-grid" id="vocabGrid"></div>
+      </div>
+      <button class="vocab-side-arrow right" id="vocabNext" onclick="changeVocabPage(1)" aria-label="다음 단어 페이지" title="다음 페이지">▶</button>
+    </div>
+
+    <div class="front-dots" id="vocabDots"></div>
+    <button class="front-start" onclick="startHomework()">학습 시작</button>
+  </div>
+</div>
+
+
+<div class="app">
+  <section class="left">
+    <div class="eyebrow">2026학년도 9월 모의평가 · 24번</div>
+    <h1>24번 제시문 · 학습용 재구성</h1>
+    <div class="left-desc">Topic → Clues → Content Check → Chunk & Collocation → 실제 제목 판단 순서로 읽습니다.</div>
+
+    <div class="passage-box">
+      <p class="passage" id="passage"></p>
+      <div class="footnotes">* monastery: 수도원 &nbsp;&nbsp; ** monk: 수도사 &nbsp;&nbsp; *** penance: 참회<br><span style="opacity:.72">※ 2026학년도 9월 모의평가 24번의 의미·정답 구조를 유지한 학습용 재구성.</span></div>
+    </div>
+  </section>
+
+  <section class="right">
+    <div class="topbar">
+      <span class="badge" id="badge"></span>
+      <div class="topbar-right">
+        <div class="lives" id="lives" aria-label="남은 생명"></div>
+        <span class="progress" id="progress"></span>
+      </div>
+    </div>
+
+    <div class="card" id="card"></div>
+
+    <div class="nav">
+      <button id="prev" onclick="prevStep()">← 이전</button>
+      <button class="next" id="next" onclick="nextStep()">다음 →</button>
+    </div>
+
+    <div class="dots" id="dots"></div>
+  </section>
+</div>
+
+<script>
+const HWPLUS_API_URL="https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app/api/saveHWPlus";
+const SUBMIT_MARKER_KEY="bhn_2026aug20_24_submit_marker_v1";
+const DIRECT_SUBCATEGORY="\uACF5\uC0AC\uC911";
+const DIRECT_HWTYPE="doneinweb";
+const DIRECT_COMMENT="bhn_2026aug20_24 completion";
+
+let completionSubmittedToday=false;
+let completionSubmissionInFlight=false;
+
+const vocabPreview=[
+  {en:"medieval",ko:"중세의"},
+  {en:"monastery",ko:"수도원"},
+  {en:"influence",ko:"영향, 영향력"},
+  {en:"civil institution",ko:"세속[민간] 기관"},
+  {en:"intellectual leadership",ko:"지적 지도력"},
+  {en:"contribute to ~",ko:"~에 기여하다"},
+
+  {en:"innovation",ko:"혁신"},
+  {en:"withdraw from ~",ko:"~에서 물러나다, 떨어져 나오다"},
+  {en:"wider community",ko:"더 넓은 공동체"},
+  {en:"devote A to B",ko:"A를 B에 바치다"},
+  {en:"worship",ko:"예배, 숭배"},
+  {en:"benefit",ko:"이익이 되다, 도움을 주다"},
+
+  {en:"sacrifice",ko:"희생"},
+  {en:"penance",ko:"참회, 속죄"},
+  {en:"salvation",ko:"구원"},
+  {en:"regard A as B",ko:"A를 B로 여기다"},
+  {en:"parallel",ko:"나란한, 병행하는"},
+  {en:"isolation",ko:"고립"}
+];
+const VOCAB_PER_PAGE=6;
+let vocabPage=0;
+
+const passageRaw=`Medieval monasteries functioned as major centers of influence. At their peak, they provided church and civil institutions with intellectual leadership and contributed to religious innovation, medicine, education, art, and agriculture. They achieved all of this while seeming to withdraw from the wider community. Monasteries were designed as places apart, where monks devoted their lives to a steady rhythm of worship, prayer, and study. Prayer and praise stood at the center of monastic life. Both monks and outsiders believed that this separated way of life benefited society as a whole. The sacrifice of ordinary human contact was understood as penance for the community as well as a path to the monks' own salvation. Monks were therefore regarded as living parallel lives whose isolation could help save both themselves and others.`;
+
+const sentences=[
+  "Medieval monasteries functioned as major centers of influence.",
+  "At their peak, they provided church and civil institutions with intellectual leadership and contributed to religious innovation, medicine, education, art, and agriculture.",
+  "They achieved all of this while seeming to withdraw from the wider community.",
+  "Monasteries were designed as places apart, where monks devoted their lives to a steady rhythm of worship, prayer, and study.",
+  "Prayer and praise stood at the center of monastic life.",
+  "Both monks and outsiders believed that this separated way of life benefited society as a whole.",
+  "The sacrifice of ordinary human contact was understood as penance for the community as well as a path to the monks' own salvation.",
+  "Monks were therefore regarded as living parallel lives whose isolation could help save both themselves and others."
+];
+
+const chunks=[
+  {id:"c1",text:"Medieval monasteries",tags:["topic"]},
+  {id:"c2",text:"major centers of influence",tags:["hint"]},
+  {id:"c3",text:"provided church and civil institutions with intellectual leadership",tags:["hint"]},
+  {id:"c4",text:"contributed to religious innovation, medicine, education, art, and agriculture",tags:["hint"]},
+  {id:"c5",text:"while seeming to withdraw from the wider community",tags:["hint"]},
+  {id:"c6a",text:"Monasteries",tags:["topic"]},
+  {id:"c6",text:"places apart",tags:[]},
+  {id:"c7",text:"devoted their lives to a steady rhythm of worship, prayer, and study",tags:[]},
+  {id:"c8",text:"this separated way of life benefited society as a whole",tags:["hint"]},
+  {id:"c9",text:"penance for the community as well as a path to the monks' own salvation",tags:["hint"]},
+  {id:"c10",text:"regarded as living parallel lives",tags:["hint"]},
+  {id:"c11",text:"help save both themselves and others",tags:["hint","evidence"]}
+];
+
+const steps=[
+  {
+    id:1,section:"Skim and Scan",mode:"topic",
+    q:"1. 이 글이 가장 직접적으로 다루는 Topic은 무엇일까요?",
+    help:"우측에서 고른 뒤, 왼쪽 본문에서 같은 소재 표현을 직접 클릭하세요.",
+    targets:["c1","c6a"],
+    choices:[
+      {text:"Medieval monasteries",correct:true},
+      {text:"civil institutions",correct:false},
+      {text:"agriculture",correct:false},
+      {text:"Prayer and praise",correct:false},
+      {text:"medicine",correct:false}
+    ],
+    meaning:[
+      {text:"수도원",correct:true},
+      {text:"수도사 개인의 기도",correct:false},
+      {text:"중세 도시의 행정 기관",correct:false},
+      {text:"교회의 종교 의식",correct:false},
+      {text:"농업 공동체",correct:false}
+    ]
+  },
+  {
+    id:2,section:"Clues",mode:"clue_sequence",
+    clues:[
+      {
+        chunk:"c2",
+        phrase:"major centers of influence",
+        ko:"사회에 큰 영향력을 행사한 중심지",
+        meanings:[
+          {text:"사회에 큰 영향력을 행사한 중심지",correct:true},
+          {text:"사회와의 접촉을 완전히 끊은 장소",correct:false},
+          {text:"종교적 권위를 거의 잃어버린 장소",correct:false},
+          {text:"왕의 직접 통제를 받던 종교 시설",correct:false},
+          {text:"지역 사회에 거의 영향이 없던 종교 시설",correct:false}
+        ]
+      },
+      {
+        chunk:"c3",
+        phrase:"provided church and civil institutions with intellectual leadership",
+        ko:"교회와 세속 기관에 지적 지도력을 제공했다",
+        meanings:[
+          {text:"교회와 세속 기관에 지적 지도력을 제공했다",correct:true},
+          {text:"교회와 세속 기관으로부터 지적 통제를 받았다",correct:false},
+          {text:"교회만을 대상으로 한 교육 기관으로 기능했다",correct:false},
+          {text:"세속 기관과의 지적 교류를 의도적으로 차단했다",correct:false},
+          {text:"세속 기관에 종교 의식만을 제공하는 역할을 했다",correct:false}
+        ]
+      },
+      {
+        chunk:"c4",
+        phrase:"contributed to religious innovation, medicine, education, art, and agriculture",
+        ko:"종교 혁신과 의학·교육·예술·농업 발전에 기여했다",
+        meanings:[
+          {text:"종교 혁신과 의학·교육·예술·농업 발전에 기여했다",correct:true},
+          {text:"종교 활동을 우선하며 의학·교육·예술의 발전을 막았다",correct:false},
+          {text:"여러 분야 중에서도 오직 농업 기술의 발전에만 기여했다",correct:false},
+          {text:"세속 문화와 학문을 수도원 밖으로 완전히 밀어냈다",correct:false},
+          {text:"종교 활동을 제외한 사회적 역할을 거의 맡지 않았다",correct:false}
+        ]
+      },
+      {
+        chunk:"c5",
+        phrase:"while seeming to withdraw from the wider community",
+        ko:"더 넓은 공동체에서 물러나 있는 것처럼 보이면서도",
+        meanings:[
+          {text:"더 넓은 공동체에서 물러나 있는 것처럼 보이면서도",correct:true},
+          {text:"더 넓은 공동체를 직접 통치하고 관리하면서",correct:false},
+          {text:"더 넓은 공동체와의 일상적 접촉을 늘려 가면서",correct:false},
+          {text:"더 넓은 공동체로부터 도움과 지원을 거부당하면서",correct:false},
+          {text:"더 넓은 공동체와 직접 생활을 공유하면서",correct:false}
+        ]
+      },
+      {
+        chunk:"c8",
+        phrase:"this separated way of life benefited society as a whole",
+        ko:"이렇게 분리된 삶이 사회 전체에 도움이 된다고 여겼다",
+        meanings:[
+          {text:"이렇게 분리된 삶이 사회 전체에 도움이 된다고 여겼다",correct:true},
+          {text:"이렇게 분리된 삶은 사회 전체와 무관하다고 여겼다",correct:false},
+          {text:"이렇게 분리된 삶은 수도사 개인에게만 도움이 된다고 여겼다",correct:false},
+          {text:"사회 전체가 이런 수도원 생활을 오히려 해롭다고 여겼다",correct:false},
+          {text:"이렇게 분리된 삶이 종교 기관에만 도움이 된다고 여겼다",correct:false}
+        ]
+      },
+      {
+        chunk:"c11",
+        phrase:"help save both themselves and others",
+        ko:"자신들뿐 아니라 다른 사람들의 구원에도 도움이 되다",
+        meanings:[
+          {text:"자신들뿐 아니라 다른 사람들의 구원에도 도움이 되다",correct:true},
+          {text:"자신들의 수도원만 외부의 위협으로부터 보호하다",correct:false},
+          {text:"자신들과 관련된 정부와 교회의 권력을 함께 약화시키다",correct:false},
+          {text:"수도사들이 다른 사람들과 완전히 분리되어 살도록 돕다",correct:false},
+          {text:"수도사들만 개인적인 구원을 얻도록 돕다",correct:false}
+        ]
+      }
+    ],
+    finalChoices:[
+      {text:"수도원은 사회와 떨어져 있었지만, 그 고립과 수행은 사회 전체에 실질적인 도움을 주었다.",correct:true},
+      {text:"수도원은 사회와 거리를 두었고, 그 목적도 수도사 개인의 종교적 구원에만 한정되었다.",correct:false},
+      {text:"중세 사회는 수도원의 영향력을 통제하기 위해 수도사들을 사회에서 의도적으로 고립시켰다.",correct:false},
+      {text:"수도원은 종교적 권위를 지키기 위해 의학·교육·예술 같은 세속적 활동을 의도적으로 거부했다.",correct:false},
+      {text:"수도원은 사회와 거리를 두었기 때문에 그 영향력 역시 수도원 내부에만 머물렀다.",correct:false}
+    ]
+  },
+  {
+    id:3,section:"Content Check",mode:"mcq",
+    q:"3. 글에서 가장 중요한 대비는 무엇일까요?",
+    choices:[
+      {text:"사회와 떨어진 생활 ↔ 사회 전체에 미친 폭넓은 영향",correct:true},
+      {text:"교회의 종교적 권력 ↔ 세속 정부의 정치적 권력",correct:false},
+      {text:"수도사들의 기도 생활 ↔ 수도원의 농업 노동과 생산",correct:false},
+      {text:"중세 수도원의 사회적 역할 ↔ 현대 수도원의 사회적 역할",correct:false},
+      {text:"수도사 개인의 종교적 성공 ↔ 수도원 공동체의 경제적 실패",correct:false}
+    ]
+  },
+  {
+    id:4,section:"Chunk & Collocation",mode:"scramble",
+    q:"4. 첫 문장부터 순서대로 Chunk & Collocation을 잡고 번역해봅시다.",
+    items:[
+      {
+        english:sentences[0],
+        patterns:[
+          {surface:"functioned as",pattern:"function as ~",ko:"~로 기능하다"},
+          {surface:"centers of influence",pattern:"a center of ~",ko:"~의 중심지"}
+        ],
+        tokens:["중세의 수도원들은","사회에 큰 영향력을 행사한 중심지로","기능했다."],
+        answer:["중세의 수도원들은","사회에 큰 영향력을 행사한 중심지로","기능했다."],
+        ko:"중세의 수도원들은 사회에 큰 영향력을 행사한 중심지로 기능했다."
+      },
+      {
+        english:sentences[1],
+        patterns:[
+          {surface:"provided church and civil institutions with",pattern:"provide A with B",ko:"A에게 B를 제공하다"},
+          {surface:"contributed to",pattern:"contribute to ~",ko:"~에 기여하다"},
+          {surface:"At their peak",pattern:"at one's peak",ko:"전성기에"}
+        ],
+        tokens:["전성기에","그들은","교회와 세속 기관에 지적 지도력을 제공했고","종교 혁신, 의학, 교육, 예술, 농업에","기여했다."],
+        answer:["전성기에","그들은","교회와 세속 기관에 지적 지도력을 제공했고","종교 혁신, 의학, 교육, 예술, 농업에","기여했다."],
+        ko:"전성기에 그들은 교회와 세속 기관에 지적 지도력을 제공했고 종교 혁신, 의학, 교육, 예술, 농업에 기여했다."
+      },
+      {
+        english:sentences[2],
+        patterns:[
+          {surface:"while seeming to",pattern:"while ~ing",ko:"~하면서도"},
+          {surface:"withdraw from",pattern:"withdraw from ~",ko:"~에서 물러나다"}
+        ],
+        tokens:["그들은","더 넓은 공동체에서 물러나 있는 것처럼 보이면서도","이 모든 일을","해냈다."],
+        answer:["그들은","더 넓은 공동체에서 물러나 있는 것처럼 보이면서도","이 모든 일을","해냈다."],
+        ko:"그들은 더 넓은 공동체에서 물러나 있는 것처럼 보이면서도 이 모든 일을 해냈다."
+      },
+      {
+        english:sentences[3],
+        patterns:[
+          {surface:"were designed as",pattern:"be designed as ~",ko:"~로 설계되다"},
+          {surface:"devoted their lives to",pattern:"devote A to B/~ing",ko:"A를 B/~하는 데 바치다"}
+        ],
+        tokens:["수도원은","세상과 떨어진 장소로 마련되었고,","그곳에서 수도사들은","예배·기도·공부의 꾸준한 리듬에","삶을 바쳤다."],
+        answer:["수도원은","세상과 떨어진 장소로 마련되었고,","그곳에서 수도사들은","예배·기도·공부의 꾸준한 리듬에","삶을 바쳤다."],
+        ko:"수도원은 세상과 떨어진 장소로 마련되었고, 그곳에서 수도사들은 예배·기도·공부의 꾸준한 리듬에 삶을 바쳤다."
+      },
+      {
+        english:sentences[4],
+        patterns:[
+          {surface:"at the center of",pattern:"at the center of ~",ko:"~의 중심에"}
+        ],
+        tokens:["기도와 찬양은","수도원 생활의","중심에 있었다."],
+        answer:["기도와 찬양은","수도원 생활의","중심에 있었다."],
+        ko:"기도와 찬양은 수도원 생활의 중심에 있었다."
+      },
+      {
+        english:sentences[5],
+        patterns:[
+          {surface:"believed that",pattern:"believe that S V",ko:"~라고 믿다"},
+          {surface:"as a whole",pattern:"as a whole",ko:"전체적으로"}
+        ],
+        tokens:["수도사들과 외부 사람들 모두","이렇게 분리된 삶의 방식이","사회 전체에","도움이 된다고","믿었다."],
+        answer:["수도사들과 외부 사람들 모두","이렇게 분리된 삶의 방식이","사회 전체에","도움이 된다고","믿었다."],
+        ko:"수도사들과 외부 사람들 모두 이렇게 분리된 삶의 방식이 사회 전체에 도움이 된다고 믿었다."
+      },
+      {
+        english:sentences[6],
+        patterns:[
+          {surface:"was understood as",pattern:"be understood as ~",ko:"~로 이해되다"},
+          {surface:"as well as",pattern:"A as well as B",ko:"B뿐 아니라 A도"}
+        ],
+        tokens:["평범한 인간관계를 포기하는 희생은","공동체를 위한 참회이자","수도사 자신의 구원으로 가는 길로도","이해되었다."],
+        answer:["평범한 인간관계를 포기하는 희생은","공동체를 위한 참회이자","수도사 자신의 구원으로 가는 길로도","이해되었다."],
+        ko:"평범한 인간관계를 포기하는 희생은 공동체를 위한 참회이자 수도사 자신의 구원으로 가는 길로도 이해되었다."
+      },
+      {
+        english:sentences[7],
+        patterns:[
+          {surface:"were therefore regarded as",pattern:"be regarded as ~",ko:"~로 여겨지다"},
+          {surface:"both themselves and others",pattern:"both A and B",ko:"A와 B 둘 다"}
+        ],
+        tokens:["따라서 수도사들은","그 고립이","자신과 다른 사람 모두의 구원에 도움이 될 수 있는","나란한 삶을 사는 사람들로","여겨졌다."],
+        answer:["따라서 수도사들은","그 고립이","자신과 다른 사람 모두의 구원에 도움이 될 수 있는","나란한 삶을 사는 사람들로","여겨졌다."],
+        ko:"따라서 수도사들은 그 고립이 자신과 다른 사람 모두의 구원에 도움이 될 수 있는 나란한 삶을 사는 사람들로 여겨졌다."
+      }
+    ]
+  },
+  {
+    id:5,section:"Title Logic",mode:"mcq",
+    q:"5. 제목에 반드시 같이 들어가야 할 두 방향은?",
+    choices:[
+      {text:"사회와의 분리 + 사회 전체에 대한 기여",correct:true},
+      {text:"종교적 기도 + 농업 기술의 발전",correct:false},
+      {text:"중세 사회 + 교회와 정부의 정치 권력",correct:false},
+      {text:"수도사들의 희생 + 중세 사회의 경제 성장",correct:false},
+      {text:"수도원의 교육 활동 + 의학 지식의 발전",correct:false}
+    ]
+  },
+  {
+    id:6,section:"Original Question",mode:"mcq",
+    q:"6. 24번 제목으로 가장 적절한 것을 고르세요.",
+    choices:[
+      {text:"Monastic Solitude: A Retreat from the Needs of Medieval Society",correct:false},
+      {text:"Monastic Influence: How Isolation Reduced Contact with Medieval Society",correct:false},
+      {text:"The Grace of Solitude: Detached from but Attached to Society",correct:true},
+      {text:"The Price of Devotion: Sacrifice as the Source of Medieval Progress",correct:false},
+      {text:"Prayer and Power: How Monasteries Came to Control Medieval Society",correct:false}
+    ]
+  },
+
+];
+
+function renderVocabPage(){
+  const total=Math.ceil(vocabPreview.length/VOCAB_PER_PAGE);
+  const start=vocabPage*VOCAB_PER_PAGE;
+  const items=vocabPreview.slice(start,start+VOCAB_PER_PAGE);
+
+  document.getElementById("vocabGrid").innerHTML=items.map(item=>`
+    <div class="vocab-item">
+      <div class="vocab-en">${esc(item.en)}</div>
+      <div class="vocab-ko">${esc(item.ko)}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("vocabPageCount").textContent=`${vocabPage+1} / ${total}`;
+  document.getElementById("vocabPrev").disabled=vocabPage===0;
+  document.getElementById("vocabNext").disabled=vocabPage===total-1;
+  document.getElementById("vocabDots").innerHTML=
+    Array.from({length:total},(_,i)=>`<span class="front-dot ${i===vocabPage?"active":""}"></span>`).join("");
+}
+
+function changeVocabPage(delta){
+  const total=Math.ceil(vocabPreview.length/VOCAB_PER_PAGE);
+  vocabPage=Math.max(0,Math.min(total-1,vocabPage+delta));
+  renderVocabPage();
+}
+
+function showFrontPage(){
+  vocabPage=0;
+  renderVocabPage();
+  document.getElementById("frontOverlay").classList.remove("hidden");
+}
+
+function hideFrontPage(){
+  document.getElementById("frontOverlay").classList.add("hidden");
+}
+
+function startHomework(){
+  hideFrontPage();
+}
+
+function showGameOver(){
+  const overlay=document.getElementById("gameOverOverlay");
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden","false");
+}
+
+function hideGameOver(){
+  const overlay=document.getElementById("gameOverOverlay");
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden","true");
+}
+
+function retryGame(){
+  hideGameOver();
+  resetGame();
+}
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function shuffledDifferent(tokens){
+  const indexed=tokens.map((text,i)=>({text,orig:i}));
+  let a=shuffle(indexed),guard=0;
+  while(a.length>1 && a.every((x,i)=>x.orig===i) && guard<8){
+    a=shuffle(indexed);
+    guard++;
+  }
+  return a;
+}
+
+const MAX_LIVES=5;
+let lives=MAX_LIVES;
+let current=0;
+let resetting=false;
+let toastTimer=null;
+const state={};
+
+function shuffleAllChoices(){
+  steps.forEach(step=>{
+    if(step.choices) step.choices=shuffle(step.choices);
+    if(step.meaning) step.meaning=shuffle(step.meaning);
+    if(step.clues) step.clues.forEach(c=>c.meanings=shuffle(c.meanings));
+    if(step.finalChoices) step.finalChoices=shuffle(step.finalChoices);
+    if(step.items) step.items.forEach(item=>{
+      item.shuffledTokens=shuffledDifferent(item.tokens);
+    });
+  });
+}
+
+function initState(){
+  Object.keys(state).forEach(k=>delete state[k]);
+  steps.forEach(step=>{
+    if(step.mode==="mcq"){
+      state[step.id]={selected:null,correct:false};
+    }else if(step.mode==="topic"){
+      state[step.id]={
+        selected:null,
+        choiceCorrect:false,
+        found:false,
+        meaningSelected:null,
+        meaningCorrect:false
+      };
+    }else if(step.mode==="clue_sequence"){
+      state[step.id]={
+        clueIndex:0,
+        meaningSelected:null,
+        meaningCorrect:false,
+        completed:0,
+        finalPhase:false,
+        finalSelected:null,
+        finalCorrect:false
+      };
+    }else if(step.mode==="scramble"){
+      state[step.id]={
+        itemIndex:0,
+        assembled:[],
+        correct:false,
+        checked:false
+      };
+    }
+  });
+}
+
+function renderLives(lostIndex=null){
+  const el=document.getElementById("lives");
+  if(!el) return;
+
+  el.innerHTML=Array.from({length:MAX_LIVES},(_,i)=>{
+    const alive=i<lives;
+    const classes=["heart"];
+    if(!alive) classes.push("empty");
+    if(i===lostIndex) classes.push("lost");
+    return `<span class="${classes.join(" ")}" aria-hidden="true">${alive ? "♥" : "♡"}</span>`;
+  }).join("");
+}
+
+function showToast(message,type="info",duration=850){
+  const el=document.getElementById("toast");
+  if(!el) return;
+  clearTimeout(toastTimer);
+  el.innerHTML=`<div class="toast-title">${esc(message)}</div>`;
+  el.className=`toast ${type} show`;
+  toastTimer=setTimeout(()=>{
+    el.className=`toast ${type}`;
+  },duration);
+}
+
+function showStep4WrongToast(duration=950){
+  const el=document.getElementById("toast");
+  if(!el) return;
+  clearTimeout(toastTimer);
+
+  el.innerHTML=`
+    <div class="toast-title">오답</div>
+    <div class="toast-sub">♥는 유지됩니다!</div>
+  `;
+  el.className="toast no show";
+
+  toastTimer=setTimeout(()=>{
+    el.className="toast no";
+  },duration);
+}
+
+function showWrongToast(previousLives,currentLives,duration=900){
+  const el=document.getElementById("toast");
+  if(!el) return;
+  clearTimeout(toastTimer);
+
+  const hearts=Array.from({length:MAX_LIVES},(_,i)=>{
+    const wasAlive=i<previousLives;
+    const isAlive=i<currentLives;
+
+    let cls="toast-heart";
+    let glyph="♡";
+
+    if(isAlive){
+      glyph="♥";
+    }else if(wasAlive && !isAlive){
+      glyph="♥";
+      cls+=" dying";
+    }else{
+      cls+=" empty";
+    }
+
+    return `<span class="${cls}" aria-hidden="true">${glyph}</span>`;
+  }).join("");
+
+  el.innerHTML=`
+    <div class="toast-title">오답</div>
+    <div class="toast-heart-row">${hearts}</div>
+  `;
+  el.className="toast no show";
+
+  setTimeout(()=>{
+    const dying=el.querySelector(".toast-heart.dying");
+    if(dying){
+      dying.textContent="♡";
+      dying.classList.remove("dying");
+      dying.classList.add("empty");
+    }
+  },650);
+
+  toastTimer=setTimeout(()=>{
+    el.className="toast no";
+  },duration);
+}
+
+function resetGame(){
+  current=0;
+  lives=MAX_LIVES;
+  resetting=false;
+  hideGameOver();
+  shuffleAllChoices();
+  initState();
+  render();
+  renderLives();
+}
+
+function registerCorrect(message="정답입니다"){
+  showToast(message,"ok");
+}
+
+function registerWrong(){
+  if(resetting) return;
+
+  const previousLives=lives;
+  const lostIndex=lives-1;
+  lives=Math.max(0,lives-1);
+
+  renderLives(lostIndex);
+  showWrongToast(previousLives,lives,950);
+
+  if(lives===0){
+    resetting=true;
+    setTimeout(showGameOver,950);
+  }
+}
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function highlightSurface(text,patterns){
+  const ranges=[];
+  patterns.forEach(p=>{
+    const at=text.indexOf(p.surface);
+    if(at>=0) ranges.push({start:at,end:at+p.surface.length});
+  });
+  ranges.sort((a,b)=>a.start-b.start || b.end-a.end);
+
+  const clean=[];
+  let last=-1;
+  ranges.forEach(r=>{
+    if(r.start>=last){
+      clean.push(r);
+      last=r.end;
+    }
+  });
+
+  let out="",cursor=0;
+  clean.forEach(r=>{
+    out+=esc(text.slice(cursor,r.start));
+    out+=`<span class="step4-collocation">${esc(text.slice(r.start,r.end))}</span>`;
+    cursor=r.end;
+  });
+  out+=esc(text.slice(cursor));
+  return out;
+}
+
+function renderStep4Left(step){
+  const st=state[step.id];
+  const passage=document.getElementById("passage");
+  document.querySelector(".footnotes").style.display="block";
+  passage.classList.remove("selectable");
+
+  const parts=step.items.map((item,i)=>{
+    const done=i<st.itemIndex || (i===st.itemIndex && st.correct);
+    return done
+      ? `<span class="step4-inline-ko">${esc(item.ko)}</span>`
+      : esc(item.english);
+  });
+
+  passage.innerHTML=`<div class="step4-passage">${parts.join(" ")}</div>`;
+}
+
+function renderCompletedTranslation(){
+  const passage=document.getElementById("passage");
+  const foot=document.querySelector(".footnotes");
+  const step4=steps.find(s=>s.id===4);
+
+  passage.classList.remove("selectable");
+  passage.innerHTML=`
+    <div class="step4-passage">
+      ${step4.items.map(item=>`<span class="step4-inline-ko">${esc(item.ko)}</span>`).join(" ")}
+    </div>
+  `;
+  foot.style.display="block";
+}
+
+function renderPassage(step){
+  if(step?.mode==="scramble"){
+    renderStep4Left(step);
+    return;
+  }
+
+  if(step?.id>=5){
+    renderCompletedTranslation();
+    return;
+  }
+
+  const passage=document.getElementById("passage");
+  const foot=document.querySelector(".footnotes");
+
+  if(step?.mode==="clue_sequence" && state[step.id].finalPhase){
+    passage.classList.remove("selectable");
+    passage.innerHTML=`
+      <div class="clue-summary">
+        ${step.clues.map(c=>`
+          <div class="clue-summary-item">
+            <div class="clue-summary-en">${esc(c.phrase)}</div>
+            <div class="clue-summary-ko">${esc(c.ko)}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    foot.style.display="block";
+    return;
+  }
+
+  foot.style.display="block";
+
+  let cursor=0,out="";
+  const ordered=chunks
+    .map(c=>({...c,start:passageRaw.indexOf(c.text)}))
+    .filter(c=>c.start>=0)
+    .sort((a,b)=>a.start-b.start);
+
+  for(const c of ordered){
+    out+=esc(passageRaw.slice(cursor,c.start));
+    let cls="chunk";
+
+    if(step?.mode==="clue_sequence"){
+      const st=state[step.id];
+      const currentClue=step.clues[st.clueIndex]?.chunk;
+      const old=step.clues.slice(0,st.clueIndex).map(x=>x.chunk);
+      if(old.includes(c.id)) cls+=" hint-old";
+      if(c.id===currentClue) cls+=" hint-current";
+    }
+
+    if(step?.mode==="topic" && state[step.id].found && step.targets.includes(c.id)){
+      cls+=" found";
+    }
+
+    out+=`<span class="${cls}" data-id="${c.id}">${esc(c.text)}</span>`;
+    cursor=c.start+c.text.length;
+  }
+
+  out+=esc(passageRaw.slice(cursor));
+  passage.innerHTML=out;
+
+  const topicSelectable=
+    step?.mode==="topic" &&
+    state[step.id].choiceCorrect &&
+    !state[step.id].found;
+
+  passage.classList.toggle("selectable",topicSelectable);
+}
+
+function choose(i){
+  if(resetting) return;
+  const step=steps[current],st=state[step.id];
+  st.selected=i;
+  st.correct=step.choices[i].correct;
+
+  if(st.correct){
+    registerCorrect();
+    render();
+
+    if(current===steps.length-1){
+      setTimeout(showCompletion,650);
+    }
+  }else{
+    registerWrong();
+    render();
+  }
+}
+
+function chooseTopic(i){
+  if(resetting) return;
+  const step=steps[current],st=state[step.id];
+  st.selected=i;
+  st.choiceCorrect=step.choices[i].correct;
+
+  if(st.choiceCorrect) registerCorrect();
+  else registerWrong();
+
+  render();
+}
+
+function chooseMeaning(i){
+  if(resetting) return;
+  const step=steps[current],st=state[step.id];
+  st.meaningSelected=i;
+  st.meaningCorrect=step.meaning[i].correct;
+
+  if(st.meaningCorrect) registerCorrect();
+  else registerWrong();
+
+  render();
+}
+
+function chooseClueMeaning(i){
+  if(resetting) return;
+  const step=steps[current],st=state[step.id],clue=step.clues[st.clueIndex];
+  st.meaningSelected=i;
+  st.meaningCorrect=clue.meanings[i].correct;
+
+  if(st.meaningCorrect) registerCorrect();
+  else registerWrong();
+
+  render();
+}
+
+function chooseClueFinal(i){
+  if(resetting) return;
+  const step=steps[current],st=state[step.id];
+  st.finalSelected=i;
+  st.finalCorrect=step.finalChoices[i].correct;
+
+  if(st.finalCorrect) registerCorrect();
+  else registerWrong();
+
+  render();
+}
+
+function addToken(i){
+  if(resetting) return;
+  const step=steps[current],st=state[step.id];
+  if(st.correct || st.assembled.includes(i)) return;
+  st.assembled.push(i);
+  st.checked=false;
+  render();
+}
+
+function removeToken(pos){
+  if(resetting) return;
+  const st=state[steps[current].id];
+  if(st.correct) return;
+  st.assembled.splice(pos,1);
+  st.checked=false;
+  render();
+}
+
+function resetScramble(){
+  if(resetting) return;
+  const st=state[steps[current].id];
+  st.assembled=[];
+  st.correct=false;
+  st.checked=false;
+  render();
+}
+
+function checkScramble(){
+  if(resetting) return;
+  const step=steps[current],st=state[step.id],item=step.items[st.itemIndex];
+  const chosen=st.assembled.map(i=>item.shuffledTokens[i].text);
+
+  st.checked=true;
+  st.correct=
+    chosen.length===item.answer.length &&
+    chosen.every((x,i)=>x===item.answer[i]);
+
+  // Step 4 is the only stage exempt from LIFE loss.
+  if(st.correct){
+    registerCorrect();
+  }else{
+    showStep4WrongToast();
+  }
+
+  render();
+}
+
+function onPassage(e){
+  if(resetting) return;
+  const step=steps[current];
+  const el=e.target.closest(".chunk");
+  if(!el || step.mode!=="topic") return;
+
+  const st=state[step.id];
+  if(!st.choiceCorrect || st.found) return;
+
+  const id=el.dataset.id;
+  if(step.targets.includes(id)){
+    st.found=true;
+    registerCorrect();
+    render();
+  }else{
+    registerWrong();
+    el.classList.add("wrong");
+    setTimeout(()=>el.classList.remove("wrong"),420);
+  }
+}
+
+document.getElementById("passage").addEventListener("click",onPassage);
+
+
+function render(){
+  const step=steps[current],st=state[step.id];
+
+  document.getElementById("badge").textContent=step.section;
+  document.getElementById("progress").textContent=`${current+1} / ${steps.length}`;
+  document.getElementById("prev").disabled=current===0 || resetting;
+  document.getElementById("next").style.display="";
+
+  renderPassage(step);
+
+  if(step.mode==="mcq"){
+    const choices=step.choices.map((c,i)=>{
+      let cls="choice";
+      if(st.selected===i) cls+=c.correct?" correct":" wrong";
+      return `<button class="${cls}" onclick="choose(${i})">${c.text}</button>`;
+    }).join("");
+
+    document.getElementById("card").innerHTML=`
+      <div class="step">STEP ${step.id}</div>
+      <h2 class="question">${step.q}</h2>
+      ${step.help?`<div class="help">${step.help}</div>`:""}
+      <div class="choices">${choices}</div>
+    `;
+
+    document.getElementById("next").disabled=!st.correct || resetting;
+    document.getElementById("next").textContent=
+      current===steps.length-1 ? "완료" : "다음 →";
+  }
+
+  if(step.mode==="topic"){
+    if(st.found){
+      // 3) Expression found -> meaning question.
+      const choices=step.meaning.map((m,i)=>{
+        let cls="choice";
+        if(st.meaningSelected===i) cls+=m.correct?" correct":" wrong";
+        return `<button class="${cls}" onclick="chooseMeaning(${i})">${m.text}</button>`;
+      }).join("");
+
+      document.getElementById("card").innerHTML=`
+        <div class="step">STEP ${step.id} · 3/3</div>
+        <h2 class="question">찾은 표현은 무슨 뜻일까요?</h2>
+        <div class="choices">${choices}</div>
+      `;
+
+      // Only after the meaning is correct does the Step 1 Next button activate.
+      document.getElementById("next").disabled=!st.meaningCorrect || resetting;
+
+    }else if(st.choiceCorrect){
+      // 2) Topic choice correct -> immediately switch to passage-find task.
+      document.getElementById("card").innerHTML=`
+        <div class="step">STEP ${step.id} · 2/3</div>
+        <div class="step1-find-question">왼쪽 본문에서<br>방금 고른 Topic 표현을 직접 찾아 클릭하세요.</div>
+        <div class="step1-find-word">${esc(step.choices[st.selected].text)}</div>
+        <div class="help" style="margin-top:10px">같은 Topic 표현이 여러 번 나오면 어느 위치를 눌러도 정답 처리됩니다.</div>
+      `;
+
+      // This subtask is completed by clicking the passage, not by Next.
+      document.getElementById("next").disabled=true;
+
+    }else{
+      // 1) Initial topic MCQ.
+      const choices=step.choices.map((c,i)=>{
+        let cls="choice";
+        if(st.selected===i) cls+=c.correct?" correct":" wrong";
+        return `<button class="${cls}" onclick="chooseTopic(${i})">${c.text}</button>`;
+      }).join("");
+
+      document.getElementById("card").innerHTML=`
+        <div class="step">STEP ${step.id} · 1/3</div>
+        <h2 class="question">${step.q}</h2>
+        <div class="help">${step.help}</div>
+        <div class="choices">${choices}</div>
+      `;
+
+      document.getElementById("next").disabled=true;
+    }
+
+    document.getElementById("next").textContent="다음 →";
+  }
+
+  if(step.mode==="clue_sequence"){
+    if(!st.finalPhase){
+      const clue=step.clues[st.clueIndex];
+      const choices=clue.meanings.map((m,i)=>{
+        let cls="choice";
+        if(st.meaningSelected===i) cls+=m.correct?" correct":" wrong";
+        return `<button class="${cls}" onclick="chooseClueMeaning(${i})">${m.text}</button>`;
+      }).join("");
+
+      document.getElementById("card").innerHTML=`
+        <div class="step">STEP ${step.id} · 힌트 ${st.clueIndex+1}/${step.clues.length}</div>
+        <h2 class="question">왼쪽에서 선명하게 표시된 clue는 무슨 뜻일까요?</h2>
+        <div class="quote-box">${clue.phrase}</div>
+        <div class="choices">${choices}</div>
+      `;
+
+      document.getElementById("next").disabled=!st.meaningCorrect || resetting;
+      document.getElementById("next").textContent=
+        st.clueIndex===step.clues.length-1 ? "최종 문제 →" : "다음 힌트 →";
+    }else{
+      const choices=step.finalChoices.map((c,i)=>{
+        let cls="choice";
+        if(st.finalSelected===i) cls+=c.correct?" correct":" wrong";
+        return `<button class="${cls}" onclick="chooseClueFinal(${i})">${c.text}</button>`;
+      }).join("");
+
+      document.getElementById("card").innerHTML=`
+        <div class="step">STEP ${step.id} · FINAL</div>
+        <h2 class="question">이 clue들을 전부 합하면, 결국 무슨 뜻일까요?</h2>
+        <div class="choices">${choices}</div>
+      `;
+
+      document.getElementById("next").disabled=!st.finalCorrect || resetting;
+      document.getElementById("next").textContent="다음 →";
+    }
+  }
+
+  if(step.mode==="scramble"){
+    const item=step.items[st.itemIndex];
+
+    const patterns=item.patterns.map(p=>`
+      <div class="pattern-row">
+        <div class="pattern-en">${esc(p.pattern)}</div>
+        <div class="pattern-ko">${esc(p.ko)}</div>
+      </div>
+    `).join("");
+
+    const bank=item.shuffledTokens.map((tok,i)=>`
+      <button class="token ${st.assembled.includes(i)?"used":""}" onclick="addToken(${i})">${esc(tok.text)}</button>
+    `).join("");
+
+    const assembled=st.assembled.map((idx,pos)=>`
+      <button class="token answer-token" onclick="removeToken(${pos})">${esc(item.shuffledTokens[idx].text)}</button>
+    `).join("");
+
+    document.getElementById("card").innerHTML=`
+      <div class="step">STEP ${step.id} · 문장 ${st.itemIndex+1}/${step.items.length}</div>
+      <h2 class="question">${step.q}</h2>
+
+      <div class="step4-current-en">${highlightSurface(item.english,item.patterns)}</div>
+      <div class="pattern-list">${patterns}</div>
+
+      <div class="scramble-wrap">
+        <div>
+          <div class="scramble-label">한국어 토큰</div>
+          <div class="token-bank">${bank}</div>
+        </div>
+        <div>
+          <div class="scramble-label">내 번역</div>
+          <div class="answer-bank">${assembled}</div>
+        </div>
+        <div class="scramble-actions">
+          <button onclick="resetScramble()">다시</button>
+          <button onclick="checkScramble()">정답 확인</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("next").disabled=!st.correct || resetting;
+    document.getElementById("next").textContent=
+      st.itemIndex===step.items.length-1 ? "다음 →" : "다음 문장 →";
+  }
+
+  document.getElementById("dots").innerHTML=
+    steps.map((_,i)=>`<span class="dot ${i===current?"active":""}"></span>`).join("");
+}
+
+function getCurrentUserId(){
+  try{
+    return String(new URLSearchParams(window.location.search || "").get("id") || "").trim();
+  }catch(_){
+    return "";
+  }
+}
+
+function getKstTodayString(){
+  const now=new Date(Date.now()+(9*60*60*1000));
+  return now.toISOString().slice(0,10);
+}
+
+function readSubmitMarker(){
+  try{
+    const raw=localStorage.getItem(SUBMIT_MARKER_KEY);
+    if(!raw) return null;
+    const parsed=JSON.parse(raw);
+    return parsed && typeof parsed==="object" ? parsed : null;
+  }catch(_){
+    return null;
+  }
+}
+
+function writeSubmitMarker(userId,dateStr){
+  localStorage.setItem(SUBMIT_MARKER_KEY,JSON.stringify({
+    userId:String(userId || ""),
+    date:String(dateStr || "")
+  }));
+}
+
+function clearSubmitMarker(){
+  localStorage.removeItem(SUBMIT_MARKER_KEY);
+}
+
+function hasLocalSubmittedToday(userId){
+  const marker=readSubmitMarker();
+  if(!marker) return false;
+  return String(marker.userId || "")===String(userId || "") &&
+    String(marker.date || "")===getKstTodayString();
+}
+
+async function fetchSubmittedTodayFromServer(userId){
+  const readUrl=HWPLUS_API_URL.replace("/saveHWPlus","/getHWPlus");
+  const res=await fetch(`${readUrl}?userId=${encodeURIComponent(userId)}`);
+  if(!res.ok) throw new Error(String(res.status));
+
+  const data=await res.json();
+  if(!Array.isArray(data)) return false;
+
+  const todayStr=getKstTodayString();
+  return data.some(item=>{
+    const timestamp=String(item.Timestamp || item.timestamp || "");
+    const subcategory=String(item.Subcategory || item.subcategory || "").trim();
+    const hwType=String(item.HWType || item.hwtype || "").trim();
+    const comment=String(item.Comment || item.comment || "").trim();
+    return timestamp.startsWith(todayStr) &&
+      subcategory===DIRECT_SUBCATEGORY &&
+      hwType===DIRECT_HWTYPE &&
+      comment===DIRECT_COMMENT;
+  });
+}
+
+function wait(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+async function waitForServerSubmission(userId,attempts=4,delayMs=450){
+  for(let i=0;i<attempts;i++){
+    try{
+      if(await fetchSubmittedTodayFromServer(userId)) return true;
+    }catch(_){
+    }
+    if(i<attempts-1) await wait(delayMs);
+  }
+  return false;
+}
+
+function setCompletionSubmissionStatus(message,isError=false){
+  const status=document.getElementById("completeSubmitStatus");
+  if(status){
+    status.textContent=message || "";
+    status.classList.toggle("error",isError);
+  }
+}
+
+function setCompletionSubmissionBusy(isBusy){
+  const retryButton=document.querySelector("#completeOverlay .complete-retry");
+  if(retryButton) retryButton.disabled=!!isBusy;
+}
+
+function buildCompletionSubmissionText(userId){
+  const stepResults=steps.map(step=>({
+    id:step.id,
+    section:step.section,
+    mode:step.mode,
+    state:state[step.id] || null
+  }));
+
+  return [
+    `userId: ${userId}`,
+    `date: ${getKstTodayString()}`,
+    "source: bhn_2026aug20_24.html",
+    "status: completed",
+    `livesRemaining: ${lives} / ${MAX_LIVES}`,
+    "",
+    JSON.stringify(stepResults,null,2)
+  ].join("\n");
+}
+
+async function submitCompletedHomework(){
+  if(completionSubmissionInFlight) return;
+
+  const userId=getCurrentUserId();
+  if(!userId){
+    setCompletionSubmissionStatus("id\uAC00 \uC5C6\uC5B4 \uC81C\uCD9C\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.",true);
+    return;
+  }
+
+  if(completionSubmittedToday){
+    completionSubmittedToday=true;
+    setCompletionSubmissionStatus("\uC219\uC81C \uC81C\uCD9C \uC644\uB8CC!");
+    return;
+  }
+
+  const hasLocalMarker=hasLocalSubmittedToday(userId);
+  completionSubmissionInFlight=true;
+  setCompletionSubmissionBusy(true);
+  setCompletionSubmissionStatus("\uC219\uC81C \uC81C\uCD9C \uC911...");
+
+  try{
+    try{
+      if(await fetchSubmittedTodayFromServer(userId)){
+        writeSubmitMarker(userId,getKstTodayString());
+        completionSubmittedToday=true;
+        setCompletionSubmissionStatus("\uC219\uC81C \uC81C\uCD9C \uC644\uB8CC!");
+        return;
+      }
+      if(hasLocalMarker) clearSubmitMarker();
+    }catch(_){
+      if(hasLocalMarker){
+        completionSubmittedToday=true;
+        setCompletionSubmissionStatus("\uC219\uC81C \uC81C\uCD9C \uC644\uB8CC!");
+        return;
+      }
+    }
+
+    const safeUserId=userId.replace(/[^A-Za-z0-9_-]/g,"_");
+    const file=new File(
+      [buildCompletionSubmissionText(userId)],
+      `bhn_2026aug20_24_${safeUserId}.txt`,
+      {type:"text/plain"}
+    );
+    const formData=new FormData();
+    formData.append("UserId",userId);
+    formData.append("Subcategory",DIRECT_SUBCATEGORY);
+    formData.append("HWType",DIRECT_HWTYPE);
+    formData.append("LessonNo",0);
+    formData.append("Comment",DIRECT_COMMENT);
+    formData.append("HWImage",file);
+
+    const res=await fetch(HWPLUS_API_URL,{method:"POST",body:formData});
+    const result=await res.json().catch(()=>({}));
+    if(!res.ok){
+      throw new Error(result && result.message ? String(result.message) : String(res.status));
+    }
+
+    const confirmed=await waitForServerSubmission(userId);
+    if(!confirmed) throw new Error("submission_not_confirmed");
+
+    writeSubmitMarker(userId,getKstTodayString());
+    completionSubmittedToday=true;
+    setCompletionSubmissionStatus("\uC219\uC81C \uC81C\uCD9C \uC644\uB8CC!");
+  }catch(err){
+    console.error(err);
+    clearSubmitMarker();
+    completionSubmittedToday=false;
+    setCompletionSubmissionStatus("\uC219\uC81C \uC81C\uCD9C \uC2E4\uD328 - \uB2E4\uC2DC \uC644\uB8CC\uD574 \uC8FC\uC138\uC694.",true);
+  }finally{
+    completionSubmissionInFlight=false;
+    setCompletionSubmissionBusy(false);
+  }
+}
+
+function showCompletion(){
+  const overlay=document.getElementById("completeOverlay");
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden","false");
+  void submitCompletedHomework();
+}
+
+function hideCompletion(){
+  const overlay=document.getElementById("completeOverlay");
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden","true");
+}
+
+function restartHomework(){
+  hideCompletion();
+  resetGame();
+  showFrontPage();
+}
+
+function nextStep(){
+  if(resetting) return;
+  const step=steps[current],st=state[step.id];
+
+  if(step.mode==="clue_sequence"){
+    if(!st.finalPhase){
+      if(!st.meaningCorrect) return;
+
+      st.completed=Math.max(st.completed,st.clueIndex+1);
+
+      if(st.clueIndex<step.clues.length-1){
+        st.clueIndex++;
+        st.meaningSelected=null;
+        st.meaningCorrect=false;
+        render();
+        return;
+      }
+
+      st.finalPhase=true;
+      st.meaningSelected=null;
+      st.meaningCorrect=false;
+      render();
+      return;
+    }
+
+    if(!st.finalCorrect) return;
+    current++;
+    render();
+    return;
+  }
+
+  if(step.mode==="scramble"){
+    if(!st.correct) return;
+
+    if(st.itemIndex<step.items.length-1){
+      st.itemIndex++;
+      st.assembled=[];
+      st.correct=false;
+      st.checked=false;
+      render();
+      return;
+    }
+
+    current++;
+    render();
+    return;
+  }
+
+  if(step.mode==="topic"){
+    if(!st.meaningCorrect) return;
+    current++;
+    render();
+    return;
+  }
+
+  if(step.mode==="mcq"){
+    if(!st.correct) return;
+
+    if(current===steps.length-1){
+      showCompletion();
+      return;
+    }
+
+    current++;
+    render();
+  }
+}
+
+function prevStep(){
+  if(resetting || current===0) return;
+  current--;
+  render();
+}
+
+shuffleAllChoices();
+initState();
+render();
+renderLives();
+renderVocabPage();
+
+</script>
+<div id="toast" class="toast" aria-live="polite"></div>
+
+
+<div id="gameOverOverlay" class="gameover-overlay" aria-hidden="true">
+  <div class="gameover-card">
+    <div class="gameover-icon">💔</div>
+    <h2 class="gameover-title">Game Over</h2>
+    <p class="gameover-desc">하트를 모두 잃었습니다. 단어와 글을 다시 보고 한번 더 도전해봅시다.</p>
+    <button class="gameover-retry" onclick="retryGame()">다시 도전해보기</button>
+  </div>
+</div>
+
+<div id="completeOverlay" class="complete-overlay" aria-hidden="true">
+  <div class="complete-card">
+    <div class="complete-fanfare">🎉✨🎊</div>
+    <h2 class="complete-title">오늘의 숙제가 끝났습니다🥰</h2>
+    <div id="completeSubmitStatus" class="complete-submit-status" aria-live="polite"></div>
+    <button class="complete-retry" onclick="restartHomework()">다시 해보기</button>
+  </div>
+</div>
+
+</body>
+</html>

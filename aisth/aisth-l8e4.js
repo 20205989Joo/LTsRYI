@@ -2,7 +2,6 @@
 // Independent runtime for Aisth Lesson 8 Exercise 4
 // Word-tap highlight mode (sentence-style, no detached token pills)
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 8;
 const TARGET_EXERCISE = 4;
 const PAGE_LABEL = "Aisth L8-E4";
@@ -24,7 +23,6 @@ const TEXT = {
   CORRECT: "정답!",
   WRONG: "오답",
   QTYPE_TAP: "Tap",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -49,6 +47,8 @@ let isCurrentLocked = false;
 let selectedTokenIndexes = new Set();
 let selectedPhrase = "";
 let typingMode = false;
+let l84KoreanTiles = [];
+let l84SelectedKoreanIds = [];
 
 const INDIRECT_RE = /\b(what|where|when|why|how|who|which|whose|whom|if|whether)\b/i;
 const LATIN_RE = /[A-Za-z]/;
@@ -65,16 +65,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -138,6 +140,7 @@ function injectRuntimeStyles() {
       margin-top: 8px;
       line-height: 1.75;
       font-size: 15px;
+      font-weight: 900;
       word-break: keep-all;
       white-space: pre-wrap;
     }
@@ -164,23 +167,50 @@ function injectRuntimeStyles() {
     }
 
     .tap-token.selected {
-      box-shadow: inset 0 0 0 1px rgba(126, 49, 6, 0.2);
+      border-radius:0;
+      box-shadow: inset 0 -3px 0 #7e3106;
     }
 
     .tap-token.role-hl-q {
-      background: rgba(242, 156, 191, 0.28);
-      box-shadow: inset 0 0 0 2px rgba(203, 102, 150, 0.3);
+      background:linear-gradient(90deg,#f17b2a 0%,#ffd84a 52%,#f5a400 100%);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      -webkit-text-fill-color:transparent;
+      box-shadow:none;
+      filter:drop-shadow(0 0 5px rgba(255,205,54,.48)) drop-shadow(0 1px 0 rgba(126,49,6,.14));
+      font-weight:950;
     }
 
     .tap-token.role-hl-s {
-      background: rgba(92, 187, 120, 0.24);
-      box-shadow: inset 0 0 0 2px rgba(60, 148, 88, 0.28);
+      background:transparent;
+      color:#2f9d57;
+      box-shadow:none;
+      font-weight:950;
     }
 
     .tap-token.role-hl-v {
-      background: rgba(255, 214, 102, 0.35);
-      box-shadow: inset 0 0 0 2px rgba(216, 166, 42, 0.3);
+      background:transparent;
+      color:#ba8400;
+      box-shadow:none;
+      font-weight:950;
     }
+
+    .tap-token.is-where.selected {
+      background:linear-gradient(90deg,#f17b2a 0%,#ffd84a 52%,#f5a400 100%);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      -webkit-text-fill-color:transparent;
+      box-shadow:none;
+      filter:drop-shadow(0 0 5px rgba(255,205,54,.48)) drop-shadow(0 1px 0 rgba(126,49,6,.14));
+      font-weight:950;
+    }
+
+    .l84-palette { display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:10px; }
+    .l84-palette-chip { display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid rgba(126,49,6,.12);border-radius:999px;background:#fff;color:#67584d;font-size:10px;font-weight:900; }
+    .l84-palette-dot { width:10px;height:10px;border-radius:50%;background:var(--dot);box-shadow:0 0 7px var(--dot); }
+    .l84-palette-dot.is-that { background:linear-gradient(90deg,#f17b2a 0%,#ffd84a 52%,#f5a400 100%);box-shadow:0 0 7px rgba(255,205,54,.72); }
 
     .tap-token.wrong-flash {
       background: rgba(200, 40, 40, 0.08);
@@ -259,6 +289,14 @@ function injectRuntimeStyles() {
       opacity: 1;
     }
 
+    .l84-answer-tray,.l84-word-bank { display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;min-height:62px;padding:10px;border-radius:13px;box-sizing:border-box; }
+    .l84-answer-tray { margin-bottom:9px;border:1.5px dashed rgba(118,87,181,.4);background:#fff; }
+    .l84-answer-tray.is-wrong { border-color:#d44a43;background:#fff0ef;animation:l84Shake .28s ease; }
+    .l84-word-bank { border:1px solid rgba(216,200,236,.9);background:#f6f1ff; }
+    .l84-ko-chip { appearance:none;min-height:32px;padding:5px 9px;border:1px solid #7657b5;border-radius:10px;background:linear-gradient(180deg,#faf8ff,#e5dcf8);color:#44227d;font-size:12px;font-weight:900;cursor:pointer; }
+    .l84-bank-empty { color:#9b8fa8;font-size:11px;font-weight:850; }
+    @keyframes l84Shake { 30%{transform:translateX(-5px)}65%{transform:translateX(5px)} }
+
     .btn-row {
       display: flex;
       gap: 10px;
@@ -325,25 +363,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -526,53 +579,32 @@ function renderQuestion() {
 
     <div class="box">
       <div class="question-instruction">${renderTextWithEmphasis(q.instruction || DEFAULT_INSTRUCTION)}</div>
-      <div class="sentence" id="tap-sentence">${renderSentenceTokens(q.tokens)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center" id="tap-sentence">${renderSentenceTokens(q.tokens)}</div>
+      <div class="l84-palette" aria-label="문장 색 팔레트">
+        <span class="l84-palette-chip"><i class="l84-palette-dot is-that"></i>Q · that / where</span>
+        <span class="l84-palette-chip"><i class="l84-palette-dot" style="--dot:#2f9d57"></i>S</span>
+        <span class="l84-palette-chip"><i class="l84-palette-dot" style="--dot:#ba8400"></i>V</span>
+      </div>
       <div id="feedback" class="feedback"></div>
     </div>
 
     <div id="type-box" class="box type-box">
       <div class="type-title">${escapeHtml(TEXT.TRANSLATE_TITLE)}</div>
-      <div class="type-panel">
-        <div class="type-ko" id="type-ko"></div>
-        <input id="type-input" class="type-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(TEXT.TYPE_HINT)}" />
-      </div>
+      <div class="type-panel" id="l84-token-panel"></div>
     </div>
 
-    <div class="btn-row">
-      <button class="quiz-btn hidden" id="submit-btn" type="button" disabled>${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
-    </div>
   `;
 
   wireSentenceTokenClicks();
-
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  if (submitBtn) submitBtn.addEventListener("click", () => handleTypingCheck(true));
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
-
-  const typeInput = document.getElementById("type-input");
-  if (typeInput) {
-    typeInput.addEventListener("input", () => {
-      const feedback = document.getElementById("feedback");
-      if (feedback) {
-        feedback.className = "feedback";
-        feedback.innerHTML = "";
-      }
-    });
-    typeInput.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") {
-        ev.preventDefault();
-        handleTypingCheck(true);
-      }
-    });
-  }
 }
 
 function renderSentenceTokens(tokens) {
   const list = Array.isArray(tokens) ? tokens : [];
   return list
-    .map((tok) => `<span class="tap-token" data-idx="${escapeHtmlAttr(tok.index)}">${escapeHtml(tok.text)}</span>`)
+    .map((tok) => {
+      const word = String(tok.text || "").toLowerCase().replace(/[^a-z]/g, "");
+      return `<span class="tap-token${word === "where" ? " is-where" : ""}" data-idx="${escapeHtmlAttr(tok.index)}">${escapeHtml(tok.text)}</span>`;
+    })
     .join(" ");
 }
 
@@ -629,26 +661,85 @@ function maybeEnterTypingMode() {
   selectedPhrase = selectedText;
 
   const typeBox = document.getElementById("type-box");
-  const koEl = document.getElementById("type-ko");
-  const input = document.getElementById("type-input");
-  const submitBtn = document.getElementById("submit-btn");
-
   applyRoleTokenHighlights(sorted, q);
   if (typeBox) typeBox.classList.add("on");
-  if (koEl) koEl.innerHTML = renderRoleTaggedText(q.koreanHint || "");
-  if (input) {
-    input.value = "";
-    input.placeholder = selectedPhrase;
-    const slotInputControl = window.AisthInputSlots
-      ? window.AisthInputSlots.enhance(input, { modelText: selectedPhrase, onEnter: () => handleTypingCheck(true) })
-      : null;
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
+  l84KoreanTiles = buildL84KoreanTiles(q.koreanHint, q.qNumber);
+  l84SelectedKoreanIds = [];
+  renderL84KoreanTokens(q);
+}
+
+function buildL84KoreanTiles(koreanHint, qNumber) {
+  const segments = parseRoleTaggedSegments(koreanHint);
+  const ordered = [];
+  segments.forEach((segment) => {
+    String(segment.text || "").split(/\s+/).filter(Boolean).forEach((text) => {
+      ordered.push({ id:`l84-${qNumber}-${ordered.length}`,originalIndex:ordered.length,text,role:segment.role });
+    });
+  });
+  if (!ordered.length) {
+    stripRoleTags(String(koreanHint || "")).split(/\s+/).filter(Boolean).forEach((text) => {
+      ordered.push({ id:`l84-${qNumber}-${ordered.length}`,originalIndex:ordered.length,text,role:"v" });
+    });
   }
-  if (submitBtn) {
-    submitBtn.classList.remove("hidden");
-    submitBtn.disabled = false;
+  if (ordered.length < 2) return ordered;
+  const shift = (Math.abs(Number(qNumber) || 1) % (ordered.length - 1)) + 1;
+  let mixed = ordered.slice(shift).concat(ordered.slice(0,shift));
+  if ((Number(qNumber) || 0) % 2 === 0) mixed = mixed.reverse();
+  return mixed;
+}
+
+function renderL84KoreanTokens(q) {
+  const panel = document.getElementById("l84-token-panel");
+  if (!panel) return;
+  const selectedSet = new Set(l84SelectedKoreanIds);
+  const selected = l84SelectedKoreanIds.map((id) => l84KoreanTiles.find((tile) => tile.id === id)).filter(Boolean);
+  const remaining = l84KoreanTiles.filter((tile) => !selectedSet.has(tile.id));
+  panel.innerHTML = `
+    <div class="l84-answer-tray" id="l84-answer-tray">${selected.map((tile,index) => renderL84KoreanChip(tile,`data-selected-index="${index}"`)).join("") || '<span class="l84-bank-empty">한국어 토큰을 차례대로 놓아보세요.</span>'}</div>
+    <div class="l84-word-bank">${remaining.map((tile) => renderL84KoreanChip(tile,`data-word-id="${escapeHtmlAttr(tile.id)}"`)).join("") || '<span class="l84-bank-empty">완성된 순서를 확인해보세요.</span>'}</div>
+  `;
+  panel.querySelectorAll("[data-selected-index]").forEach((button) => button.addEventListener("click", () => {
+    if (isCurrentLocked) return;
+    l84SelectedKoreanIds.splice(Number(button.dataset.selectedIndex),1);
+    document.getElementById("l84-answer-tray")?.classList.remove("is-wrong");
+    renderL84KoreanTokens(q);
+  }));
+  panel.querySelectorAll("[data-word-id]").forEach((button) => button.addEventListener("click", () => {
+    if (isCurrentLocked) return;
+    l84SelectedKoreanIds.push(String(button.dataset.wordId || ""));
+    renderL84KoreanTokens(q);
+    if (l84SelectedKoreanIds.length === l84KoreanTiles.length) submitL84KoreanTokens(q);
+  }));
+}
+
+function renderL84KoreanChip(tile, attrs) {
+  const roleClass = tile.role === "q" ? "ko-role-q" : tile.role === "s" ? "ko-role-s" : "ko-role-v";
+  return `<button class="l84-ko-chip ${roleClass}" type="button" ${attrs}>${escapeHtml(tile.text)}</button>`;
+}
+
+function submitL84KoreanTokens(q) {
+  if (isCurrentLocked) return;
+  const selected = l84SelectedKoreanIds.map((id) => l84KoreanTiles.find((tile) => tile.id === id)).filter(Boolean);
+  if (!selected.every((tile,index) => tile.originalIndex === index)) {
+    document.getElementById("l84-answer-tray")?.classList.add("is-wrong");
+    showToast("no",TEXT.WRONG);
+    return;
   }
+  isCurrentLocked = true;
+  const userRaw = selected.map((tile) => tile.text).join(" ");
+  document.querySelectorAll(".tap-token,.l84-ko-chip").forEach((el) => { el.style.pointerEvents="none"; });
+  results.push({
+    no:currentIndex+1,
+    qNumber:q.qNumber,
+    question:q.sentence,
+    selected:userRaw,
+    answer:stripRoleTags(q.koreanHint),
+    instruction:q.instruction,
+    correct:true,
+  });
+  storeLatestResultSnapshot();
+  showToast("ok",TEXT.CORRECT);
+  scheduleAutoNext();
 }
 
 function handleTypingCheck(showWrongOnEnter) {
@@ -686,8 +777,7 @@ function handleTypingCheck(showWrongOnEnter) {
   input.disabled = true;
   if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
@@ -715,6 +805,13 @@ function flashWrongTokens(indexes) {
     el.classList.add("wrong-flash");
     setTimeout(() => el.classList.remove("wrong-flash"), 150);
   });
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -752,9 +849,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -806,6 +908,7 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
@@ -911,14 +1014,18 @@ function renderRoleTaggedText(value) {
   let last = 0;
   let m;
   while ((m = ROLE_TAG_RE.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     const role = String(m[1] || "").toLowerCase();
     const cls = role === "q" ? "ko-role-q" : role === "s" ? "ko-role-s" : "ko-role-v";
     out += `<span class="${cls}">${escapeHtml(String(m[2] ?? "").trim())}</span>`;
     last = ROLE_TAG_RE.lastIndex;
   }
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out.replaceAll("\n", "<br/>");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -929,12 +1036,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 
@@ -962,7 +1069,7 @@ function showResultPopup() {
         <div><b>Q${idx + 1}</b> ${escapeHtml(q.sentence)}</div>
         <div style="margin-top:4px;"><span class="${stateClass}">${state}</span></div>
         <div>${TEXT.MY_ANSWER}: ${escapeHtml(user)}</div>
-        <div>${TEXT.ANSWER}: ${escapeHtml(q.answer)}</div>
+        <div>${TEXT.ANSWER}: ${escapeHtml(row?.answer || q.answer)}</div>
       </div>
     `;
   }).join("");

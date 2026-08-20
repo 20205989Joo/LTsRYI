@@ -1,7 +1,6 @@
 ﻿// aisth-l5e2.js
 // Independent runtime for Aisth Lesson 5 Exercise 2
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 5;
 const TARGET_EXERCISE = 2;
 const PAGE_LABEL = "Aisth L5-E2";
@@ -25,7 +24,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -60,16 +58,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -211,6 +211,163 @@ function injectRuntimeStyles() {
       margin-bottom: 8px;
     }
 
+    .l52-question-box .question-instruction {
+      margin: 3px 0 12px;
+      color: #111;
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 950;
+      word-break: keep-all;
+    }
+
+    .l52-question-box .sentence {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 112px;
+      padding: 18px 12px;
+      color: #203736;
+      font-size: 17px;
+      font-weight: 850;
+      line-height: 1.75;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .l52-question-box .hint-line {
+      margin-top: 9px;
+      color: #5a4637;
+      font-size: 13px;
+      font-weight: 750;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .l52-verb-pill {
+      margin: 0 0 10px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--aisth-role-v, #d8a21b);
+      box-shadow: none;
+      font-size: 24px;
+      font-weight: 950;
+      line-height: 1.15;
+    }
+
+    .l52-prompt-slot.is-have {
+      border-color: rgba(241,123,42,.56);
+      background: #fff2e7;
+      color: #d96317;
+    }
+
+    .l52-prompt-slot.is-pp {
+      border-color: #8a8a8a;
+      background: linear-gradient(135deg,#f8f8f8 0%,#ececec 28%,#d4d4d4 53%,#f7f7f7 76%,#c9c9c9 100%);
+      color: #242424;
+    }
+
+    .l52-answer-box {
+      overflow: visible;
+    }
+
+    .l52-slot-pair {
+      display: grid;
+      grid-template-columns: minmax(0,1fr);
+      align-items: start;
+      gap: 10px;
+    }
+
+    .l52-slot-pair.is-single {
+      grid-template-columns: minmax(0,1fr);
+    }
+
+    .l52-role-block {
+      min-width: 0;
+      padding: 7px 5px 4px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.72);
+    }
+
+    .l52-role-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 20px;
+      margin-bottom: 2px;
+      border-radius: 999px;
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .l52-role-label.is-have {
+      border: 1px solid rgba(241,123,42,.42);
+      background: #fff2e7;
+      color: #d96317;
+    }
+
+    .l52-role-label.is-pp {
+      border: 1px solid #8a8a8a;
+      background: linear-gradient(135deg,#f8f8f8 0%,#ddd 52%,#fff 72%,#c9c9c9 100%);
+      color: #242424;
+    }
+
+    #quiz-area .l52-have-control .aisth-slot-cell:not(.is-slot-correct):not(.is-slot-wrong):not(.is-placeholder) {
+      border-color: rgba(241,123,42,.58);
+      border-bottom-color: #dc671d;
+      background: linear-gradient(180deg,#fffaf6 0%,#fff0e4 58%,#ffe1ca 100%);
+      color: #d96317;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.94), 0 3px 8px rgba(217,99,23,.10);
+    }
+
+    #quiz-area .l52-pp-control .aisth-slot-cell:not(.is-slot-correct):not(.is-slot-wrong):not(.is-placeholder) {
+      border-color: #929292;
+      border-bottom-color: #626262;
+      background: linear-gradient(135deg,#fafafa 0%,#ededed 28%,#d1d1d1 52%,#fff 72%,#c6c6c6 100%);
+      color: #232323;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.96), 0 3px 8px rgba(0,0,0,.10);
+    }
+
+    #quiz-area .l52-have-control:focus-within .aisth-slot-cell.is-active:not(.is-placeholder),
+    #quiz-area .l52-pp-control:focus-within .aisth-slot-cell.is-active:not(.is-placeholder) {
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.96), 0 0 0 2px rgba(90,90,90,.11), 0 6px 12px rgba(0,0,0,.12);
+    }
+
+    .l52-slot-pair .aisth-slot-control {
+      gap: 6px 3px;
+      padding-top: 6px;
+    }
+
+    .l52-slot-pair .aisth-slot-shell {
+      gap: 2px;
+    }
+
+    .l52-slot-pair .aisth-slot-cell {
+      width: 21px;
+      height: 34px;
+      font-size: 16px;
+    }
+
+    #quiz-area .l52-answer-box .l52-static-apostrophe {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+      padding: 0 1px;
+      color: #232323;
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    #quiz-area .l52-have-control .l52-static-apostrophe {
+      color: #d96317;
+    }
+
     input::placeholder,
     textarea::placeholder {
       color: #b9b2aa;
@@ -287,25 +444,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -514,85 +686,201 @@ function renderQuestion() {
   isCurrentLocked = false;
 
   const qSource = q.type === "blank" ? (q.blankStem || q.question) : q.question;
-  const qBody = renderBlankBodyWithAB(qSource, q.type);
-
-  const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
-    : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
+  const qBody = renderBlankBodyWithAB(qSource, q.type, q.blankSlotCount);
 
   const inputHtml = q.type === "blank"
-    ? `
-      <div class="dual-input-row">
-        <div class="dual-input-col">
-          <input id="user-answer-front" class="short-input dual-input" type="text" autocomplete="off" placeholder="A" />
-        </div>
-        <div class="dual-input-col">
-          <input id="user-answer-back" class="short-input dual-input" type="text" autocomplete="off" placeholder="B" />
-        </div>
-      </div>
-    `
-    : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
+    ? renderL52BlankInputHtml(q)
+    : `<input id="user-answer" class="short-input l52-rewrite-source" type="text" autocomplete="off" inputmode="latin" lang="en" autocapitalize="none" spellcheck="false" />`;
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
-    <div class="box">
+    <div class="box l52-question-box">
       <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
       <div class="sentence aisth-question-surface">
-        ${q.type === "blank" && q.blankVerbHint ? `<span class="pill verb-pill">${escapeHtml(q.blankVerbHint)}</span>` : ""}
+        ${q.type === "blank" && q.blankVerbHint ? `<span class="pill verb-pill l52-verb-pill">${escapeHtml(q.blankVerbHint)}</span>` : ""}
         <div>${qBody}</div>
+        ${q.type === "blank" && q.blankKoHint ? `<div class="hint-line">(${escapeHtml(q.blankKoHint)})</div>` : ""}
       </div>
-      ${q.type === "blank" && q.blankKoHint ? `<div class="hint-line">(${escapeHtml(q.blankKoHint)})</div>` : ""}
     </div>
 
-    <div class="box" style="background:#fff;">
+    <div class="box aisth-letter-answer-box l52-answer-box">
+      <div class="aisth-answer-tool-row">
+        <span aria-hidden="true"></span>
+        <span class="aisth-type-pill">type!</span>
+        <span class="aisth-answer-tool-end"><button class="aisth-hint-tool" id="hint-btn" type="button" aria-label="hint"><span class="aisth-hint-bulb" aria-hidden="true">!</span><span>hint</span></button></span>
+      </div>
       ${inputHtml}
       <div id="feedback" class="feedback"></div>
     </div>
 
     <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
+  const hintBtn = document.getElementById("hint-btn");
   const nextBtn = document.getElementById("next-btn");
   const input = document.getElementById("user-answer");
   const frontInput = document.getElementById("user-answer-front");
   const backInput = document.getElementById("user-answer-back");
+  const frontSlotControl = frontInput && q.expectedFront && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(frontInput, { modelText: makeL52EditableModelText(q.expectedFront), onEnter: submitCurrentAnswer })
+    : null;
+  const backModel = q.type === "blank" ? (q.expectedBack || q.answer) : "";
+  const backSlotControl = backInput && backModel && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(backInput, { modelText: makeL52EditableModelText(backModel), onEnter: submitCurrentAnswer })
+    : null;
   const slotInputControl = input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
+    ? window.AisthInputSlots.enhance(input, { modelText: makeL52EditableModelText(q.answer), onEnter: submitCurrentAnswer })
     : null;
 
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
+  if (frontSlotControl?.control) frontSlotControl.control.classList.add("l52-have-control");
+  if (backSlotControl?.control) backSlotControl.control.classList.add("l52-pp-control");
+  if (slotInputControl?.control) slotInputControl.control.classList.add("l52-pp-control");
+  if (frontSlotControl?.control) installL52StaticApostrophes(q.expectedFront, frontSlotControl.control);
+  if (backSlotControl?.control) installL52StaticApostrophes(backModel, backSlotControl.control);
+  if (slotInputControl?.control) installL52StaticApostrophes(q.answer, slotInputControl.control);
 
-  if (q.type === "blank" && (frontInput || backInput)) {
-    if (frontInput) frontInput.focus();
+  const activeSlots = [
+    { input: frontInput, api: frontSlotControl, model: q.expectedFront },
+    { input: backInput, api: backSlotControl, model: backModel },
+    { input, api: slotInputControl, model: q.answer },
+  ].filter((item) => item.input && item.api?.control && item.model);
 
-    [frontInput, backInput].filter(Boolean).forEach((el) => {
-      el.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") {
-          ev.preventDefault();
-          submitCurrentAnswer();
-        }
-      });
-    });
-  } else if (input) {
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" && q.type === "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-      if (ev.key === "Enter" && ev.ctrlKey && q.type !== "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
+  activeSlots.forEach((item, itemIndex) => {
+    applyL52PlaceholderAnimationDelays(item.api.control);
+    item.input.addEventListener("input", () => updateL52AnswerState(q, activeSlots, itemIndex));
+  });
+
+  if (hintBtn) {
+    hintBtn.addEventListener("click", () => {
+      activeSlots.forEach((item) => revealL52FirstSlotPlaceholder(item.api.control, item.model));
+      hintBtn.disabled = true;
     });
   }
+  if (nextBtn) nextBtn.addEventListener("click", goNext);
+
+  updateL52AnswerState(q, activeSlots);
+  if (activeSlots[0]?.api) activeSlots[0].api.focus();
+}
+
+function renderL52BlankInputHtml(q) {
+  const hasFront = (q?.blankSlotCount || 0) >= 2 && Boolean(q?.expectedFront);
+  return `
+    <div class="l52-slot-pair${hasFront ? "" : " is-single"}">
+      ${hasFront ? `
+        <div class="l52-role-block">
+          <span class="l52-role-label is-have">A</span>
+          <input id="user-answer-front" class="short-input" type="text" autocomplete="off" inputmode="latin" lang="en" autocapitalize="none" spellcheck="false" aria-label="A answer" />
+        </div>
+      ` : ""}
+      <div class="l52-role-block">
+        <span class="l52-role-label is-pp">B</span>
+        <input id="user-answer-back" class="short-input" type="text" autocomplete="off" inputmode="latin" lang="en" autocapitalize="none" spellcheck="false" aria-label="B answer" />
+      </div>
+    </div>
+  `;
+}
+
+function updateL52AnswerState(q, activeSlots, changedIndex = -1) {
+  if (!q || isCurrentLocked || !Array.isArray(activeSlots) || !activeSlots.length) return;
+  const slotStates = activeSlots.map((item) => updateL52SingleSlotState(item.input, item.api.control, item.model));
+  const allCorrect = slotStates.every(Boolean);
+  if (allCorrect) {
+    submitCurrentAnswer();
+    return;
+  }
+  if (changedIndex >= 0 && slotStates[changedIndex] && activeSlots[changedIndex + 1]?.api) {
+    activeSlots[changedIndex + 1].api.focus();
+  }
+}
+
+function updateL52SingleSlotState(sourceInput, control, modelText) {
+  if (!sourceInput || !control || !modelText) return false;
+  const modelChars = getL52AnswerChars(pickL52SlotModelText(modelText));
+  const userChars = getL52AnswerChars(sourceInput.value);
+  const cells = Array.from(control.querySelectorAll(".aisth-slot-cell"));
+  let allCorrect = modelChars.length > 0 && userChars.length >= modelChars.length;
+
+  cells.forEach((cell, idx) => {
+    const userChar = userChars[idx] || "";
+    const modelChar = modelChars[idx] || "";
+    const isFilled = Boolean(userChar);
+    const ok = isFilled && userChar.toLowerCase() === modelChar.toLowerCase();
+    cell.classList.toggle("is-slot-correct", ok);
+    cell.classList.toggle("is-slot-wrong", isFilled && !ok);
+    if (!ok) allCorrect = false;
+  });
+  return allCorrect;
+}
+
+function revealL52FirstSlotPlaceholder(control, modelText) {
+  if (!control) return;
+  const firstChar = getL52AnswerChars(pickL52SlotModelText(modelText))[0] || "";
+  if (!firstChar) return;
+  control.classList.remove("is-full-hint");
+  control.classList.add("has-revealed-hint");
+  control.dataset.placeholderChars = firstChar;
+  const flowInput = control.querySelector(".aisth-slot-input");
+  if (flowInput) flowInput.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function applyL52PlaceholderAnimationDelays(control) {
+  if (!control) return;
+  Array.from(control.querySelectorAll(".aisth-slot-cell")).forEach((cell, idx) => {
+    cell.style.setProperty("--aisth-placeholder-delay", `${(idx * 0.16).toFixed(2)}s`);
+  });
+}
+
+function pickL52SlotModelText(value) {
+  return String(value || "").replace(/[.?!~]+$/g, "").trim();
+}
+
+function getL52AnswerChars(value) {
+  return Array.from(String(value || "").replace(/[\s’']/g, ""));
+}
+
+function makeL52EditableModelText(value) {
+  return pickL52SlotModelText(value).replace(/[’']/g, "");
+}
+
+function installL52StaticApostrophes(modelText, control) {
+  if (!control || !/[’']/.test(String(modelText || ""))) return;
+  const words = pickL52SlotModelText(modelText).split(/\s+/).filter(Boolean);
+  const shells = Array.from(control.querySelectorAll(".aisth-slot-shell"));
+
+  words.forEach((word, wordIndex) => {
+    const shell = shells[wordIndex];
+    if (!shell) return;
+    const cells = Array.from(shell.querySelectorAll(".aisth-slot-cell"));
+    let letterIndex = 0;
+    Array.from(word).forEach((char) => {
+      if (!/[’']/.test(char)) {
+        letterIndex += 1;
+        return;
+      }
+      const apostrophe = document.createElement("span");
+      apostrophe.className = "l52-static-apostrophe";
+      apostrophe.setAttribute("aria-hidden", "true");
+      apostrophe.textContent = "'";
+      const previousCell = cells[Math.max(0, letterIndex - 1)];
+      if (previousCell) previousCell.insertAdjacentElement("afterend", apostrophe);
+      else shell.prepend(apostrophe);
+    });
+  });
+
+  const flowInput = control.querySelector(".aisth-slot-input");
+  if (!flowInput) return;
+  flowInput.addEventListener("beforeinput", (event) => {
+    if (/[’']/.test(String(event.data || ""))) event.preventDefault();
+  });
+  flowInput.addEventListener("input", () => {
+    if (!/[’']/.test(flowInput.value)) return;
+    const nextValue = flowInput.value.replace(/[’']/g, "");
+    flowInput.value = nextValue;
+    try { flowInput.setSelectionRange(nextValue.length, nextValue.length); } catch (_) {}
+  }, true);
 }
 
 function submitCurrentAnswer() {
@@ -654,11 +942,16 @@ function submitCurrentAnswer() {
   isCurrentLocked = true;
   if (input) input.disabled = true;
   if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
-  if (frontInput) frontInput.disabled = true;
-  if (backInput) backInput.disabled = true;
+  if (frontInput) {
+    frontInput.disabled = true;
+    if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(frontInput, true);
+  }
+  if (backInput) {
+    backInput.disabled = true;
+    if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(backInput, true);
+  }
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
@@ -677,6 +970,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -714,9 +1014,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -785,11 +1090,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -800,16 +1110,16 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 
-function renderBlankBodyWithAB(value, type) {
+function renderBlankBodyWithAB(value, type, blankSlotCount = 0) {
   let blankIndex = 0;
   const base = renderTextWithEmphasis(value);
 
@@ -818,7 +1128,8 @@ function renderBlankBodyWithAB(value, type) {
     if (type !== "blank") return `<span class="blank-slot">${m}</span>`;
 
     let label = "";
-    if (blankIndex === 1) label = "A";
+    if (blankSlotCount === 1 && blankIndex === 1) label = "B";
+    if (blankSlotCount !== 1 && blankIndex === 1) label = "A";
     if (blankIndex === 2) label = "B";
 
     if (!label) return `<span class="blank-slot">${m}</span>`;
@@ -828,7 +1139,8 @@ function renderBlankBodyWithAB(value, type) {
     const rightCount = Math.max(0, underscoreCount - 1 - leftCount);
     const leftSide = "_".repeat(leftCount);
     const rightSide = "_".repeat(rightCount);
-    return `<span class="blank-slot">${leftSide}${label}${rightSide}</span>`;
+    const roleClass = label === "A" ? " is-have" : " is-pp";
+    return `<span class="blank-slot l52-prompt-slot${roleClass}">${leftSide}${label}${rightSide}</span>`;
   });
 }
 

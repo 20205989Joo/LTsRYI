@@ -12,6 +12,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const baseOffset = 10;
   const gap = 90;
+  const dishEntries = [];
 
   function getDayManager() {
     return window.DayManager || null;
@@ -170,6 +171,7 @@ window.addEventListener('DOMContentLoaded', () => {
     dish.dataset.level = item.Level ?? '';
     dish.dataset.lessonNo =
       item.LessonNo != null ? String(item.LessonNo) : '';
+    dishEntries.push({ item, dish });
 
     // ✅ 부제목용 Level / Day 계산
     const meta = getLevelDayMeta(canonicalSub, item.Level, item.LessonNo);
@@ -390,10 +392,42 @@ window.addEventListener('DOMContentLoaded', () => {
       });
 
       if (target) {
-        // DOM 렌더링이 모두 끝난 뒤 살짝 딜레이 후 팝업 오픈
-        setTimeout(() => {
-          window.showDishPopup(target);
-        }, 50);
+        const targetDish = dishEntries.find(entry => entry.item === target)?.dish;
+        const useReadyDish = document.body.classList.contains('page-tray') && targetDish;
+
+        if (useReadyDish) {
+          targetDish.classList.add('is-submit-ready');
+          targetDish.setAttribute('role', 'button');
+          targetDish.setAttribute('tabindex', '0');
+          targetDish.setAttribute('aria-label', '\uD0ED\uD558\uC5EC \uD559\uC2B5 \uC644\uB8CC \uC81C\uCD9C');
+
+          targetDish.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            document.body.classList.add('is-dish-quick-completing');
+            window.showDishPopup(target);
+            const completeButton = document.querySelector('#popup-container #upload-btn');
+            if (completeButton) {
+              completeButton.click();
+              window.setTimeout(() => {
+                document.body.classList.remove('is-dish-quick-completing');
+              }, 0);
+            } else {
+              document.body.classList.remove('is-dish-quick-completing');
+            }
+          }, true);
+
+          targetDish.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            targetDish.click();
+          });
+        } else {
+          // DOM 렌더링이 모두 끝난 뒤 살짝 딜레이 후 팝업 오픈
+          setTimeout(() => {
+            window.showDishPopup(target);
+          }, 50);
+        }
       }
     } catch (err) {
       console.warn('자동 팝업 열기 실패:', err);

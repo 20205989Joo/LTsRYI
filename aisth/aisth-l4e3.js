@@ -1,11 +1,11 @@
 ﻿// aisth-l4e3.js
 // Independent runtime for Aisth Lesson 4 Exercise 3
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 4;
 const TARGET_EXERCISE = 3;
 const PAGE_LABEL = "Aisth L4-E3";
 const MAX_QUESTIONS = 0; // 0 = unlimited
+const SCRAMBLE_INSTRUCTION = "단어를 순서대로 배열해보세요.";
 
 const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
 const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요.";
@@ -25,7 +25,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -51,7 +50,7 @@ const ANSWER_OVERRIDES_Q1_TO_Q10 = {
 
 let subcategory = "Grammar";
 let level = "aisth";
-let day = "015";
+let day = "014";
 let quizTitle = "quiz_Grammar_aisth_l4e3";
 let userId = "";
 
@@ -62,6 +61,8 @@ let results = [];
 let isCurrentLocked = false;
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
+let currentWordTiles = [];
+let selectedWordIds = [];
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -73,16 +74,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -144,6 +147,189 @@ function injectRuntimeStyles() {
       font-size: 14px;
       word-break: keep-all;
       white-space: pre-wrap;
+    }
+
+    .l43-question-box .question-instruction {
+      color: #111;
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 950;
+      word-break: keep-all;
+      margin: 16px 0 12px;
+    }
+
+    .l43-question-box .sentence {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 108px;
+      padding: 18px 14px;
+      margin-top: 12px;
+      color: #203736;
+      font-size: 17px;
+      font-weight: 850;
+      line-height: 1.75;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .l43-en-line,
+    .l43-ko-line {
+      white-space: pre-wrap;
+    }
+
+    .l43-ko-line {
+      margin-top: 9px;
+      color: #5a4637;
+      font-size: 12.5px;
+      font-weight: 750;
+    }
+
+    .l43-if-marker,
+    .l43-ko-condition {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border: 1px solid #7657b5;
+      border-radius: 8px;
+      background: #efe9ff;
+      color: #44227d;
+      font-weight: 950;
+      line-height: 1.12;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+      white-space: nowrap;
+    }
+
+    .l43-if-marker {
+      min-height: 29px;
+      padding: 4px 12px;
+      font-size: 15px;
+      vertical-align: -0.18em;
+    }
+
+    .l43-ko-condition {
+      min-height: 28px;
+      font-size: 13px;
+    }
+
+    .l43-scramble {
+      margin-top: 14px;
+    }
+
+    .l43-answer-tray,
+    .l43-word-bank {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 62px;
+      padding: 11px;
+      border-radius: 14px;
+      box-sizing: border-box;
+    }
+
+    .l43-answer-tray {
+      border: 1.5px dashed rgba(126, 49, 6, 0.38);
+      background: rgba(255, 255, 255, 0.76);
+      transition: border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .l43-answer-tray.is-wrong {
+      border-color: #d44a43;
+      background: rgba(255, 235, 233, 0.86);
+      animation: l43-tray-shake 0.28s ease both;
+    }
+
+    .l43-word-bank {
+      margin-top: 10px;
+      border: 1px solid rgba(233, 199, 167, 0.84);
+      background: rgba(255, 247, 233, 0.92);
+    }
+
+    .l43-tray-empty {
+      color: #a39488;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .l43-token-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .l43-word-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 33px;
+      padding: 5px 9px;
+      border: 1px solid #7657b5;
+      border-radius: 11px;
+      background: linear-gradient(180deg, #f7f3ff 0%, #efe9ff 58%, #dfd3f8 100%);
+      color: #44227d;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), inset 0 -3px 5px rgba(68, 34, 125, 0.10), 0 4px 8px rgba(68, 34, 125, 0.12);
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.14s ease, box-shadow 0.14s ease;
+    }
+
+    .l43-word-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), inset 0 -3px 5px rgba(68, 34, 125, 0.10), 0 6px 11px rgba(68, 34, 125, 0.18);
+    }
+
+    .l43-word-chip:active {
+      transform: translateY(1px);
+    }
+
+    .l43-word-chip.is-role-subject {
+      color: #2f8f55;
+    }
+
+    .l43-word-chip.is-role-verb {
+      color: var(--aisth-role-v-border, #c88a12);
+    }
+
+    .l43-word-chip.is-role-target {
+      color: #dc3f3f;
+    }
+
+    .l43-word-chip.is-role-detail {
+      color: #111;
+    }
+
+    .l43-word-chip.is-condition {
+      border-color: #5e468f;
+      background: linear-gradient(180deg, #947fc2 0%, #7657b5 58%, #5e468f 100%);
+      color: #fff;
+      text-shadow: 0 1px 1px rgba(33, 18, 61, 0.42);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 4px 8px rgba(68, 34, 125, 0.12);
+    }
+
+    .l43-word-chip.is-condition.is-in-answer {
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 0 0 2px rgba(118, 87, 181, 0.16), 0 5px 10px rgba(68, 34, 125, 0.16);
+    }
+
+    .l43-word-chip:disabled {
+      cursor: default;
+      opacity: 0.76;
+      transform: none;
+    }
+
+    @keyframes l43-tray-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
     }
 
     .blank-slot {
@@ -261,25 +447,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -449,78 +650,244 @@ function renderQuestion() {
   }
 
   isCurrentLocked = false;
+  currentWordTiles = buildScrambledWordTiles(q.answer, q.qNumber);
+  selectedWordIds = [];
 
-  const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
-
-  const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
-    : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
-
-  const inputHtml = q.type === "blank"
-    ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
-    : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
+  const promptLines = splitQuestionLines(q.question);
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
-    <div class="box">
-      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
-    </div>
-
-    <div class="box" style="background:#fff;">
-      ${inputHtml}
+    <div class="box l43-question-box">
+      <div class="question-instruction">${escapeHtml(SCRAMBLE_INSTRUCTION)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center">
+        <div class="l43-en-line">${renderConditionalEnglish(promptLines.english)}</div>
+        ${promptLines.korean ? `<div class="l43-ko-line">${renderConditionalKorean(promptLines.korean)}</div>` : ""}
+      </div>
+      <div class="l43-scramble">
+        <div id="l43-answer-tray" class="l43-answer-tray" aria-label="완성한 문장"></div>
+        <div id="l43-word-bank" class="l43-word-bank" aria-label="섞인 단어"></div>
+      </div>
       <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
     </div>
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const input = document.getElementById("user-answer");
-  const slotInputControl = input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
-    : null;
+  renderScrambleControls();
+}
 
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
+function splitQuestionLines(value) {
+  const lines = normalizeEscapedBreaks(String(value ?? "")).split(/\r?\n/);
+  return {
+    english: String(lines.shift() || "").trim(),
+    korean: lines.join(" ").trim(),
+  };
+}
 
-  if (input) {
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" && q.type === "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-      if (ev.key === "Enter" && ev.ctrlKey && q.type !== "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-    });
+function renderConditionalEnglish(value) {
+  const text = stripEmphasisMarkers(String(value ?? ""));
+  const re = /If(?=\s|_|[(),.]|$)|_{2,}/gi;
+  let out = "";
+  let last = 0;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    out += escapeHtml(text.slice(last, match.index));
+    out += /^if$/i.test(match[0])
+      ? `<span class="l43-if-marker">${escapeHtml(match[0])}</span>`
+      : `<span class="blank-slot">${escapeHtml(match[0])}</span>`;
+    last = re.lastIndex;
   }
+  out += escapeHtml(text.slice(last));
+  return out;
+}
+
+function renderConditionalKorean(value) {
+  const text = normalizeEscapedBreaks(String(value ?? ""));
+  const emphasized = /\*\*(.*?)\*\*/s.exec(text);
+  if (emphasized) {
+    const before = text.slice(0, emphasized.index);
+    const target = String(emphasized[1] || "").trim();
+    const after = text.slice(emphasized.index + emphasized[0].length);
+    return `${escapeHtml(before)}<span class="l43-ko-condition">${escapeHtml(target)}</span>${escapeHtml(after)}`;
+  }
+
+  const clean = stripEmphasisMarkers(text);
+  const prefix = clean.startsWith("(") ? "(" : "";
+  const content = prefix ? clean.slice(1) : clean;
+  const condition = /^(.+?(?:때까지는|자마자|동안은|중에는|다면|라면|으면|전에|후에|때는|되면|하면|면|때))(?=\s|[,.)!?]|$)/.exec(content);
+  if (!condition) return escapeHtml(clean);
+  return `${escapeHtml(prefix)}<span class="l43-ko-condition">${escapeHtml(condition[1])}</span>${escapeHtml(content.slice(condition[1].length))}`;
+}
+
+function buildScrambledWordTiles(answer, qNumber) {
+  const wordTexts = stripEmphasisMarkers(String(answer ?? ""))
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const roles = classifyL43WordRoles(wordTexts);
+  const words = wordTexts.map((text, originalIndex) => ({
+      id: `${qNumber}-${originalIndex}`,
+      originalIndex,
+      text,
+      role: roles[originalIndex] || "detail",
+    }));
+
+  if (words.length < 2) return words;
+  const offset = (Math.abs(Number(qNumber) || 1) % (words.length - 1)) + 1;
+  let scrambled = words.slice(offset).concat(words.slice(0, offset));
+  if ((Number(qNumber) || 0) % 2 === 0) scrambled = scrambled.reverse();
+  if (scrambled.every((tile, idx) => tile.id === words[idx].id)) {
+    scrambled = words.slice(1).concat(words[0]);
+  }
+  return scrambled;
+}
+
+function renderScrambleControls() {
+  const answerTray = document.getElementById("l43-answer-tray");
+  const wordBank = document.getElementById("l43-word-bank");
+  if (!answerTray || !wordBank) return;
+
+  const selectedTiles = selectedWordIds
+    .map((id) => currentWordTiles.find((tile) => tile.id === id))
+    .filter(Boolean);
+  const selectedSet = new Set(selectedWordIds);
+  const remainingTiles = currentWordTiles.filter((tile) => !selectedSet.has(tile.id));
+
+  answerTray.innerHTML = selectedTiles.length
+    ? renderL43TokenRows(selectedTiles, "selected")
+    : `<span class="l43-tray-empty">단어를 차례대로 눌러보세요.</span>`;
+  wordBank.innerHTML = renderL43TokenRows(remainingTiles, "bank");
+
+  answerTray.querySelectorAll(".l43-word-chip").forEach((button) => {
+    button.addEventListener("click", () => removeSelectedWord(Number(button.dataset.selectedIndex)));
+  });
+  wordBank.querySelectorAll(".l43-word-chip").forEach((button) => {
+    button.addEventListener("click", () => selectScrambleWord(String(button.dataset.wordId || "")));
+  });
+
+  if (isCurrentLocked) {
+    answerTray.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+    wordBank.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+  }
+}
+
+function renderL43TokenRows(tiles, location) {
+  if (!tiles.length) return "";
+  const splitIndex = tiles.length > 3 ? Math.ceil(tiles.length / 2) : tiles.length;
+  const rows = [tiles.slice(0, splitIndex), tiles.slice(splitIndex)].filter((row) => row.length);
+  let selectedOffset = 0;
+  return rows.map((row) => {
+    const html = row.map((tile, rowIndex) => renderWordChip(tile, location, selectedOffset + rowIndex)).join("");
+    selectedOffset += row.length;
+    return `<div class="l43-token-row">${html}</div>`;
+  }).join("");
+}
+
+function renderWordChip(tile, location, selectedIndex = -1) {
+  const role = tile.role || "detail";
+  const roleClass = role === "condition" ? " is-condition" : ` is-role-${role}`;
+  const locationClass = location === "selected" ? " is-in-answer" : " is-in-bank";
+  const attrs = location === "bank"
+    ? `data-word-id="${escapeHtmlAttr(tile.id)}"`
+    : `data-selected-index="${selectedIndex}"`;
+  return `<button type="button" class="l43-word-chip${roleClass}${locationClass}" ${attrs}>${escapeHtml(tile.text)}</button>`;
+}
+
+function classifyL43WordRoles(wordTexts) {
+  const roles = wordTexts.map(() => "detail");
+  const words = wordTexts.map((word) => normalizeL43RoleWord(word));
+  if (!words.length) return roles;
+
+  const conditionSingles = new Set(["if", "when", "unless", "before", "after", "while", "until"]);
+  let cursor = 0;
+  if (words[0] === "as" && words[1] === "soon" && words[2] === "as") {
+    roles[0] = roles[1] = roles[2] = "condition";
+    cursor = 3;
+  } else if (words[0] === "soon" && words[1] === "as") {
+    roles[0] = roles[1] = "condition";
+    cursor = 2;
+  } else if (conditionSingles.has(words[0])) {
+    roles[0] = "condition";
+    cursor = 1;
+  }
+
+  if (cursor >= words.length) return roles;
+  const subjectDeterminers = new Set(["a", "an", "the", "my", "your", "his", "her", "our", "their"]);
+  const subjectStart = cursor;
+  roles[cursor] = "subject";
+  cursor += 1;
+  if (subjectDeterminers.has(words[subjectStart]) && cursor < words.length) {
+    roles[cursor] = "subject";
+    cursor += 1;
+  }
+
+  const fusedSubjectVerb = /^(?:i['’]m|you['’]re|he['’]s|she['’]s|it['’]s|we['’]re|they['’]re)$/i.test(words[subjectStart]);
+  if (cursor >= words.length) return roles;
+  if (fusedSubjectVerb) {
+    for (let idx = cursor; idx < words.length; idx += 1) roles[idx] = "detail";
+    return roles;
+  }
+
+  const firstVerbIndex = cursor;
+  roles[firstVerbIndex] = "verb";
+  cursor += 1;
+
+  const firstVerb = words[firstVerbIndex];
+  const auxiliaryVerb = /^(?:do|does|did|don['’]t|doesn['’]t|didn['’]t|can|can['’]t|could|couldn['’]t|will|won['’]t|would|wouldn['’]t|should|shouldn['’]t|may|might|must|mustn['’]t)$/i.test(firstVerb);
+  const beVerb = /^(?:am|is|are|was|were|be|been|being)$/i.test(firstVerb);
+  if (cursor < words.length && (auxiliaryVerb || (beVerb && /ing$/i.test(words[cursor])))) {
+    roles[cursor] = "verb";
+    cursor += 1;
+  }
+
+  const detailWords = new Set(["up", "out", "home", "late", "early", "hard", "loudly", "now", "yes", "done", "over", "near", "tired", "angry", "nervous", "safe", "happy", "quiet", "better", "first", "saturday", "lunchtime", "bad"]);
+  const prepositions = new Set(["at", "by", "for", "from", "in", "into", "of", "off", "on", "out", "over", "through", "to", "under", "with", "without"]);
+  const linkingPredicate = beVerb;
+  let detailMode = linkingPredicate;
+  for (let idx = cursor; idx < words.length; idx += 1) {
+    const word = words[idx];
+    if (detailMode || prepositions.has(word) || detailWords.has(word) || /ly$/i.test(word)) {
+      detailMode = true;
+      roles[idx] = "detail";
+    } else {
+      roles[idx] = "target";
+    }
+  }
+  return roles;
+}
+
+function normalizeL43RoleWord(word) {
+  return String(word || "")
+    .toLowerCase()
+    .replace(/^[^a-z’']+|[^a-z’']+$/g, "");
+}
+
+function selectScrambleWord(wordId) {
+  if (isCurrentLocked || !wordId || selectedWordIds.includes(wordId)) return;
+  selectedWordIds.push(wordId);
+  const tray = document.getElementById("l43-answer-tray");
+  if (tray) tray.classList.remove("is-wrong");
+  renderScrambleControls();
+  if (selectedWordIds.length === currentWordTiles.length) submitCurrentAnswer();
+}
+
+function removeSelectedWord(selectedIndex) {
+  if (isCurrentLocked || !Number.isInteger(selectedIndex) || selectedIndex < 0) return;
+  selectedWordIds.splice(selectedIndex, 1);
+  const tray = document.getElementById("l43-answer-tray");
+  if (tray) tray.classList.remove("is-wrong");
+  renderScrambleControls();
 }
 
 function submitCurrentAnswer() {
   if (isCurrentLocked) return;
-
   const q = questions[currentIndex];
-  const input = document.getElementById("user-answer");
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
+  if (!q || selectedWordIds.length !== currentWordTiles.length) return;
 
-  if (!q || !input) return;
-
-  const userRaw = String(input.value || "").trim();
-  if (!userRaw) {
-    showToast("no", TEXT.INPUT_REQUIRED);
-    return;
-  }
+  const userRaw = selectedWordIds
+    .map((id) => currentWordTiles.find((tile) => tile.id === id)?.text || "")
+    .join(" ")
+    .trim();
   const ok = isAnswerCorrect(q.type, userRaw, q.answer);
 
   if (!ok) {
@@ -528,16 +895,19 @@ function submitCurrentAnswer() {
       feedback.className = "feedback";
       feedback.innerHTML = "";
     }
+    const tray = document.getElementById("l43-answer-tray");
+    if (tray) {
+      tray.classList.remove("is-wrong");
+      void tray.offsetWidth;
+      tray.classList.add("is-wrong");
+    }
     showToast("no", TEXT.WRONG);
     return;
   }
 
   isCurrentLocked = true;
-  input.disabled = true;
-  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  renderScrambleControls();
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
@@ -556,6 +926,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -593,9 +970,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -664,11 +1046,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -679,12 +1066,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

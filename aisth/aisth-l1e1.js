@@ -542,9 +542,11 @@ window.addEventListener("DOMContentLoaded", () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   rawRows = L1E1_ROWS.map((row) => ({ ...row }));
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -612,9 +614,9 @@ function injectRuntimeStyles() {
       display: inline-block;
       padding: 1px 6px;
       border-radius: 7px;
-      border: 1px dashed #d5a22a;
-      background: #fff8e4;
-      color: #7e3106;
+      border: 1px dashed var(--aisth-role-v-border, #c88a12);
+      background: var(--aisth-role-v-bg, #fff4cc);
+      color: var(--aisth-role-v-text, #7a4a00);
       font-weight: 900;
       margin: 0 2px;
     }
@@ -953,6 +955,64 @@ function injectRuntimeStyles() {
       line-height: 1.35;
     }
 
+    .pair-en-question .aisth-slot-control {
+      width: auto;
+      display: inline-flex;
+      flex-wrap: nowrap;
+      padding: 0;
+      gap: 4px;
+      vertical-align: middle;
+    }
+
+    #quiz-area .pair-en-question .aisth-slot-cell {
+      width: 30px;
+      min-width: 30px;
+      height: 42px;
+      border-color: rgba(102, 126, 214, 0.62);
+      border-bottom-color: rgba(77, 87, 170, 0.78);
+      background: linear-gradient(180deg, #fbfcff 0%, #edf1ff 56%, #dfe7ff 100%);
+      color: #24305f;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 8px rgba(58, 70, 152, 0.10);
+      font-size: 20px;
+    }
+
+    #quiz-area .pair-en-question .aisth-slot-cell.is-filled {
+      border-color: rgba(95, 112, 214, 0.74);
+      border-bottom-color: rgba(68, 76, 170, 0.92);
+      background: linear-gradient(180deg, #f7f9ff 0%, #e8edff 100%);
+    }
+
+    #quiz-area .pair-en-question .aisth-slot-cell.is-placeholder {
+      color: rgba(80, 86, 108, 0.24);
+      border-color: rgba(142, 151, 188, 0.30);
+      border-bottom-color: rgba(112, 119, 156, 0.38);
+      background: linear-gradient(180deg, rgba(250,251,255,0.76) 0%, rgba(235,239,250,0.50) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.78);
+    }
+
+    #quiz-area .pair-en-question .aisth-slot-control:focus-within .aisth-slot-cell.is-active {
+      border-color: rgba(90, 137, 244, 0.92);
+      border-bottom-color: #4f6ee9;
+      background: #f7faff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 0 0 2px rgba(93, 132, 255, 0.16), 0 6px 13px rgba(63, 87, 190, 0.18);
+    }
+
+    #quiz-area .pair-en-question .aisth-slot-cell.is-slot-correct {
+      border-color: rgba(47, 170, 98, 0.86);
+      border-bottom-color: #219653;
+      background: linear-gradient(180deg, #f7fff9 0%, #dff7e8 100%);
+      color: #145d33;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.92), 0 0 0 2px rgba(43, 184, 101, 0.16), 0 0 12px rgba(43, 184, 101, 0.30);
+    }
+
+    #quiz-area .pair-en-question .aisth-slot-cell.is-slot-wrong {
+      border-color: rgba(220, 63, 75, 0.90);
+      border-bottom-color: #c72b39;
+      background: linear-gradient(180deg, #fff8f9 0%, #ffe1e5 100%);
+      color: #9d1f2d;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 0 0 2px rgba(220, 63, 75, 0.14), 0 0 12px rgba(220, 63, 75, 0.28);
+    }
+
     .pair-be-input {
       width: 76px;
       min-height: 42px;
@@ -990,11 +1050,11 @@ function injectRuntimeStyles() {
     }
 
     .focus-token {
-      background: rgba(255, 208, 90, 0.45);
+      background: var(--aisth-role-v-bg, #fff4cc);
       border-radius: 6px;
       padding: 0 3px;
-      box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
-      color: #7e3106;
+      box-shadow: inset 0 0 0 1px rgba(200, 138, 18, 0.24), 0 0 10px var(--aisth-role-v-glow, rgba(216,162,27,.30));
+      color: var(--aisth-role-v-text, #7a4a00);
       font-weight: 900;
     }
 
@@ -1106,6 +1166,26 @@ function wirePopupEvents() {
   });
 }
 
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local-custom",
+    title: "aisth-l1e1.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
+}
 
 function buildQuestionsFromRows() {
   const filtered = rawRows
@@ -1233,9 +1313,10 @@ function detectType(question) {
   return String(question || "").includes("___") ? "blank" : "rewrite";
 }
 
-function buildL1IntroChip(text, variant) {
+function buildL1IntroChip(text, variant, role) {
   const variantClass = variant === "ko" ? " is-ko" : " is-en";
-  return `<span class="lip-word-chip-demo${variantClass}">${escapeHtml(text)}</span>`;
+  const roleClass = role === "verb" ? " is-verb-role" : "";
+  return `<span class="lip-word-chip-demo${variantClass}${roleClass}">${escapeHtml(text)}</span>`;
 }
 
 function buildL1PurpleHighlight(text) {
@@ -1246,9 +1327,9 @@ function buildL1Step1ExampleHtml() {
   return `
     <div class="lip-example-stack">
       <div class="lip-example-line">
-        ${buildL1IntroChip("be", "en")}
+        ${buildL1IntroChip("be", "en", "verb")}
         <span class="lip-example-symbol">=</span>
-        ${buildL1IntroChip("\uC774\uB2E4", "ko")}
+        ${buildL1IntroChip("\uC774\uB2E4", "ko", "verb")}
       </div>
     </div>
   `;
@@ -1270,7 +1351,7 @@ function buildL1Step2ExampleHtml() {
   return `
     <div class="lip-rotator-demo">
       <div class="lip-rotator-prefix">
-        ${buildL1IntroChip("be", "en")}
+        ${buildL1IntroChip("be", "en", "verb")}
         <span class="lip-example-symbol">+</span>
       </div>
       <div class="lip-rotator-window">
@@ -1299,7 +1380,7 @@ function buildL1Step4ExampleHtml() {
     <div class="lip-example-stack">
       <div class="lip-example-line">
         <span class="lip-sentence-link">I\uB294</span>
-        ${buildL1IntroChip("am", "en")}
+        ${buildL1IntroChip("am", "en", "verb")}
       </div>
       <div class="lip-example-line">
         <span class="lip-sentence-link">\uB2E8\uC218\uB294</span>
@@ -1307,7 +1388,7 @@ function buildL1Step4ExampleHtml() {
       </div>
       <div class="lip-example-line">
         <span class="lip-sentence-link">${buildL1PurpleHighlight("\uBCF5\uC218")}\uB294</span>
-        ${buildL1IntroChip("are", "en")}
+        ${buildL1IntroChip("are", "en", "verb")}
       </div>
     </div>
   `;
@@ -1535,11 +1616,21 @@ function renderBePairQuestion(area, q) {
         }))
         .filter(Boolean)
     : [];
+  const enSlotControl = enInput && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(enInput, {
+        modelText: q.enAnswer,
+        placeholderText: q.qNumber === 1 ? q.enAnswer : "",
+      })
+    : null;
+  if (enInput && window.AisthInputSlots) {
+    window.AisthInputSlots.setDisabled(enInput, true);
+    enInput.addEventListener("input", () => updateBePairEnglishSlots(q, enInput, enSlotControl?.control));
+  }
 
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
   if (nextBtn) nextBtn.addEventListener("click", goNext);
   if (passBtn) passBtn.addEventListener("click", submitCurrentAnswer);
-  [...bodyInputs, enInput].forEach((input) => {
+  bodyInputs.forEach((input) => {
     if (!input) return;
     input.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter") {
@@ -1680,6 +1771,7 @@ function revealBePairEnglishStage(q, koUser) {
   const koTemplate = document.getElementById("pair-ko-template");
   const enRest = document.getElementById("pair-en-rest");
   const enInput = document.getElementById("en-answer");
+  const submitBtn = document.getElementById("submit-btn");
   const stack = koStage?.closest(".pair-stack");
 
   if (koTemplate) {
@@ -1694,7 +1786,9 @@ function revealBePairEnglishStage(q, koUser) {
     answerBox.classList.add("is-in");
   }
   if (enRest) enRest.setAttribute("aria-hidden", "true");
-  if (enInput) enInput.disabled = true;
+  if (enInput && window.AisthInputSlots) window.AisthInputSlots.setDisabled(enInput, true);
+  else if (enInput) enInput.disabled = true;
+  if (submitBtn) submitBtn.hidden = true;
 
   window.setTimeout(() => {
     if (koStage && sourceBox && answerBox) {
@@ -1711,11 +1805,15 @@ function revealBePairEnglishStage(q, koUser) {
     if (stack) stack.classList.add("is-step2");
     if (answerBox) answerBox.classList.add("is-expanded");
     if (enRest) enRest.setAttribute("aria-hidden", "false");
-    if (enInput) enInput.disabled = false;
+    if (enInput && window.AisthInputSlots) window.AisthInputSlots.setDisabled(enInput, false);
+    else if (enInput) enInput.disabled = false;
   }, 580);
 
   window.setTimeout(() => {
-    if (enInput) enInput.focus();
+    const control = document.getElementById(enInput?.dataset.aisthSlotControlId || "");
+    const flowInput = control?.querySelector(".aisth-slot-input");
+    if (flowInput) flowInput.focus();
+    else if (enInput) enInput.focus();
   }, 720);
 }
 
@@ -1755,8 +1853,7 @@ function submitCurrentAnswer() {
   input.disabled = true;
   if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
@@ -1853,8 +1950,33 @@ function submitBePairAnswer(q) {
     return;
   }
 
+  completeBePairEnglishAnswer(q, enInput, enRaw);
+}
+
+function updateBePairEnglishSlots(q, enInput, control) {
+  if (!q || !enInput || !control) return;
+  const expected = Array.from(String(q.enAnswer || "").replace(/\s+/g, "").toLowerCase());
+  const actual = Array.from(String(enInput.value || "").replace(/\s+/g, "").toLowerCase());
+  control.querySelectorAll(".aisth-slot-cell").forEach((cell, index) => {
+    cell.classList.toggle("is-slot-correct", Boolean(actual[index]) && actual[index] === expected[index]);
+    cell.classList.toggle("is-slot-wrong", Boolean(actual[index]) && actual[index] !== expected[index]);
+  });
+
+  if (q.pairStage !== "en" || isCurrentLocked || actual.length !== expected.length) return;
+  if (actual.every((char, index) => char === expected[index])) {
+    completeBePairEnglishAnswer(q, enInput, String(enInput.value || "").trim());
+  }
+}
+
+function completeBePairEnglishAnswer(q, enInput, enRaw) {
+  if (isCurrentLocked || !q || !enInput) return;
+
   isCurrentLocked = true;
-  enInput.disabled = true;
+  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(enInput, true);
+  else enInput.disabled = true;
+  const submitBtn = document.getElementById("submit-btn");
+  const nextBtn = document.getElementById("next-btn");
+  const feedback = document.getElementById("feedback");
   if (submitBtn) submitBtn.disabled = true;
   if (nextBtn) nextBtn.disabled = true;
 
@@ -1896,6 +2018,13 @@ function buildKoreanUserFromSlots(ko, inputs) {
   return `${ko.subject}${ko.particle} ${body}${ko.ending}`;
 }
 
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
+}
+
 function goNext() {
   currentIndex += 1;
   if (currentIndex >= questions.length) {
@@ -1931,9 +2060,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -2002,11 +2136,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -2017,12 +2156,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

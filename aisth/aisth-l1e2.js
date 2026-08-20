@@ -1,7 +1,6 @@
 ﻿// aisth-l1e2.js
 // Independent runtime for Aisth Lesson 1 Exercise 2 (noun vs adjective classification)
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 1;
 const TARGET_EXERCISE = 2;
 const PAGE_LABEL = "Aisth L1-E2";
@@ -19,7 +18,6 @@ const TEXT = {
   CORRECT: "정답!",
   WRONG: "오답",
   QTYPE: "품사 분류",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -101,16 +99,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -174,19 +174,51 @@ function injectRuntimeStyles() {
       white-space: pre-wrap;
     }
 
+    .l12-prompt-surface {
+      display: block !important;
+      text-align: center !important;
+      white-space: normal !important;
+    }
+
     .sentence-inner {
-      display: block;
       width: 100%;
       white-space: normal;
     }
 
+    .l12-prompt-shell {
+      display: grid;
+      grid-template-rows: minmax(30px, auto) auto minmax(30px, auto);
+      align-items: center;
+      align-content: center;
+      min-height: 100%;
+    }
+
+    .l12-prompt-spacer {
+      min-height: 30px;
+    }
+
+    .l12-sentence-line {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.55;
+    }
+
+    .l12-prompt-surface .aisth-sentence-flow {
+      display: inline !important;
+      width: auto !important;
+      max-width: 100% !important;
+      white-space: normal !important;
+    }
+
     .word-meaning {
-      min-height: 26px;
-      margin-top: 11px;
+      min-height: 30px;
+      margin-top: 0;
       color: #5b4c42;
       font-size: 13px;
       font-weight: 900;
       line-height: 1.35;
+      text-align: center;
       opacity: 0;
       transform: translateY(5px);
       transition: opacity 0.18s ease, transform 0.22s ease;
@@ -232,10 +264,11 @@ function injectRuntimeStyles() {
 
     .choice-btn {
       flex: 1;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
+      gap: 0;
       min-height: 54px;
       border: 1px solid rgba(87,184,191,0.72);
       border-bottom: 4px solid rgba(39,133,148,0.58);
@@ -290,6 +323,10 @@ function injectRuntimeStyles() {
     }
 
     .choice-abbr {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -312,6 +349,7 @@ function injectRuntimeStyles() {
       font-size: 17px;
       font-weight: 950;
       letter-spacing: 0;
+      text-align: center;
     }
 
     .choice-btn.active .choice-abbr {
@@ -395,25 +433,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -444,9 +497,10 @@ function buildQuestionsFromRows() {
   });
 }
 
-function buildL12Chip(text, variant) {
+function buildL12Chip(text, variant, role) {
   const variantClass = variant === "ko" ? " is-ko" : " is-en";
-  return `<span class="lip-word-chip-demo${variantClass}">${escapeHtml(text)}</span>`;
+  const roleClass = role === "verb" ? " is-verb-role" : "";
+  return `<span class="lip-word-chip-demo${variantClass}${roleClass}">${escapeHtml(text)}</span>`;
 }
 
 function buildL12Step1ExampleHtml() {
@@ -482,12 +536,12 @@ function buildL12Step3ExampleHtml() {
   return `
     <div class="lip-example-stack">
       <div class="lip-example-line">
-        ${buildL12Chip("be", "en")}
+        ${buildL12Chip("be", "en", "verb")}
         <span class="lip-example-symbol">+</span>
         ${buildL12Chip("Mina", "en")}
       </div>
       <div class="lip-example-line">
-        ${buildL12Chip("be", "en")}
+        ${buildL12Chip("be", "en", "verb")}
         <span class="lip-example-symbol">+</span>
         ${buildL12Chip("happy", "en")}
       </div>
@@ -604,9 +658,10 @@ function renderQuestion() {
 
     <div class="box">
       <div class="question-instruction">${escapeHtml(FIXED_INSTRUCTION)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">
-        <div class="sentence-inner">
-          <span class="aisth-sentence-flow">${renderQuestionWithHighlight(q.question)}</span>
+      <div class="sentence aisth-question-surface aisth-question-center l12-prompt-surface">
+        <div class="sentence-inner l12-prompt-shell">
+          <div class="l12-prompt-spacer" aria-hidden="true"></div>
+          <div class="l12-sentence-line"><span class="aisth-sentence-flow">${renderQuestionWithHighlight(q.question)}</span></div>
           <div id="word-meaning" class="word-meaning"></div>
         </div>
       </div>
@@ -797,6 +852,10 @@ function revealWordMeaning(q) {
   target.classList.add("is-in");
 }
 
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
+}
+
 function renderQuestionWithHighlight(raw) {
   const text = normalizeEscapedBreaks(String(raw ?? ""));
   const re = /\*\*(.*?)\*\*/gs;
@@ -805,13 +864,13 @@ function renderQuestionWithHighlight(raw) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     const inner = String(m[1] ?? "").replace(/\s+/g, " ").trim();
     out += `<span class="focus-token">${escapeHtml(inner)}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 
@@ -823,7 +882,8 @@ function normalizeEscapedBreaks(value) {
   return String(value ?? "")
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
-    .replaceAll("\\r", "\n");
+    .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n");
 }
 
 function showResultPopup() {

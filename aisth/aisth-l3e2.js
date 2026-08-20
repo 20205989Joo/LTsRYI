@@ -1,13 +1,61 @@
 ﻿// aisth-l3e2.js
 // Independent runtime for Aisth Lesson 3 Exercise 2
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 3;
 const TARGET_EXERCISE = 2;
 const PAGE_LABEL = "Aisth L3-E2";
 const MAX_QUESTIONS = 0; // 0 = unlimited
 
-const FIXED_INSTRUCTION = "메인동사를 앞으로 끌어놓고 의문문을 완성해보세요.";
+const L32_DIRECT_QUESTION_ROWS = [
+  { question: "I **like** apples. (나는 사과를 **좋아해**.)", answer: "I don't like apples.", target: "don't like", focusRole: "verb" },
+  { question: "She **is** happy. (그녀는 **행복해**.)", answer: "She isn't happy.", target: "isn't", focusRole: "verb" },
+  { question: "We **have** a dog. (우리는 개가 **있어**.)", answer: "We don't have a dog.", target: "don't have", focusRole: "verb" },
+  { question: "He **plays** soccer. (그는 축구를 **해**.)", answer: "He doesn't play soccer.", target: "doesn't play", focusRole: "verb" },
+  { question: "They **are** at school. (그들은 학교에 **있어**.)", answer: "They aren't at school.", target: "aren't", focusRole: "verb" },
+  { question: "You **can** swim. (너는 수영할 수 **있어**.)", answer: "You can't swim.", target: "can't", focusRole: "verb" },
+  { question: "I **am** hungry. (나는 **배고파**.)", answer: "I am not hungry.", target: "am not", focusRole: "verb" },
+  { question: "She **goes** to bed early. (그녀는 일찍 잠자리에 **들어**.)", answer: "She doesn't go to bed early.", target: "doesn't go", focusRole: "verb" },
+  { question: "We **are** ready. (우리는 준비**됐어**.)", answer: "We aren't ready.", target: "aren't", focusRole: "verb" },
+  { question: "He **has** a new phone. (그는 새 핸드폰이 **있어**.)", answer: "He doesn't have a new phone.", target: "doesn't have", focusRole: "verb" },
+  { question: "I **saw** something. (나는 뭔가를 **봤어**.)", answer: "I didn't see anything.", target: "didn't see anything", focusRole: "verb" },
+  { question: "I saw **something**. (나는 **뭔가를** 봤어.)", answer: "I saw nothing.", target: "nothing", focusRole: "negative" },
+  { question: "Somebody **called** you. (누군가가 **전화했어**.)", answer: "You didn't get any calls.", target: "didn't get any calls", focusRole: "verb" },
+  { question: "**Somebody** called you. (**누군가가** 전화했어.)", answer: "Nobody called you.", target: "Nobody", focusRole: "negative" },
+  { question: "She always **smiles**. (그녀는 항상 **웃어**.)", answer: "She doesn't always smile.", target: "doesn't always smile", focusRole: "verb" },
+  { question: "She **always** smiles. (그녀는 **항상** 웃어.)", answer: "She never smiles.", target: "never", focusRole: "negative" },
+  { question: "**Everyone** is here. (**모두가** 여기에 있어.)", answer: "Not everyone is here.", target: "Not everyone", focusRole: "negative" },
+  { question: "**Everyone** is here. (**모두가** 여기에 있어.)", answer: "Nobody is here.", target: "Nobody", focusRole: "negative" },
+  { question: "He **goes out** every day. (그는 **외출해** 매일.)", answer: "He doesn't go out every day.", target: "doesn't go out", focusRole: "verb" },
+  { question: "He goes out **every day**. (그는 외출해 **매일**.)", answer: "He never goes out.", target: "never", focusRole: "negative" },
+  { question: "I **said** something. (나는 **말했어** 무언가를.)", answer: "I didn't say anything.", target: "didn't say anything", focusRole: "verb" },
+  { question: "I said **something**. (나는 말했어 **무언가를**.)", answer: "I said nothing.", target: "nothing", focusRole: "negative" },
+  { question: "Someone **opened** the door. (문을 **열었어** 누군가가.)", answer: "The door wasn't opened.", target: "wasn't opened", focusRole: "verb" },
+  { question: "**Someone** opened the door. (**누군가가** 문을 열었어.)", answer: "No one opened the door.", target: "No one", focusRole: "negative" },
+  { question: "I **eat** everything. (나는 먹어 모든 걸.)", answer: "I don't eat everything.", target: "don't eat", focusRole: "verb" },
+  { question: "I eat **everything**. (나는 먹어 **모든 걸**.)", answer: "I eat nothing.", target: "nothing", focusRole: "negative" },
+  { question: "She **talks** to everyone. (그녀는 모두에게 **말한다**.)", answer: "She doesn't talk to everyone.", target: "doesn't talk", focusRole: "verb" },
+  { question: "She talks to **everyone**. (그녀는 모두에게 말한다.)", answer: "She talks to no one.", target: "no one", focusRole: "negative" },
+  { question: "They **did** something special. (그들은 뭔가 특별한 걸 **했다**.)", answer: "They didn't do anything special.", target: "didn't do anything special", focusRole: "verb" },
+  { question: "They did **something** special. (그들은 **뭔가** 특별한 걸 했다.)", answer: "They did nothing special.", target: "nothing", focusRole: "negative" },
+].map((row, idx) => ({
+  Lesson: TARGET_LESSON,
+  Exercise: TARGET_EXERCISE,
+  Title: "부정문",
+  Question: row.question,
+  QNumber: idx + 1,
+  Answer: row.answer,
+  Target: idx === 14 ? "doesn't smile" : row.target,
+  FixedMiddle: idx === 14 ? "always" : "",
+  FocusRole: row.focusRole,
+  Instruction: "강조된 성분을 부정문으로 바꿔보세요.",
+  KoreanHint: "",
+  ClauseRole: "",
+}));
+
+const L32_HARD_QUESTION_NUMBERS = new Set([16, 17, 18, 20]);
+
+const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
+const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요.";
 
 const TEXT = {
   START: "🚀 시작",
@@ -16,13 +64,15 @@ const TEXT = {
   PIN: "📌",
   NO_QUESTIONS: "해당 Lesson/Exercise의 문제가 없습니다.",
   INPUT_REQUIRED: "입력 후 제출하세요.",
-  PICK_VERB_FIRST: "먼저 메인동사를 드래그하세요.",
+  PICK_VERB_FIRST: "먼저 강조 동사(또는 보조동사)를 옮기세요.",
   CORRECT: "정답!",
   WRONG: "오답",
-  QTYPE: "의문문 변환",
-  DRAG_HINT: "메인동사를 누르거나 끌어 앞칸으로 옮기세요.",
-  NO_DRAG_ROW: "이 문항은 드래그 단계 없이 바로 입력하세요.",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
+  QTYPE_BLANK: "빈칸형",
+  QTYPE_REWRITE: "서술형",
+  INPUT_HINT_FALLBACK: "정답을 입력하세요.",
+  PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
+  PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
+  PLACE_EX_PREFIX: "(ex. ",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -45,8 +95,10 @@ let currentIndex = 0;
 let results = [];
 let isCurrentLocked = false;
 let rewritePlaceholderExample = "";
+let blankPlaceholderExample = "";
 let dragPlaced = false;
 let dragLead = "";
+let notSelected = false;
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -58,16 +110,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -108,8 +162,8 @@ function injectRuntimeStyles() {
       background: #fff3e0;
       border: 1px solid #e9c7a7;
       border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
+      padding: 10px;
+      margin-bottom: 8px;
     }
 
     .q-label {
@@ -123,9 +177,9 @@ function injectRuntimeStyles() {
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 12px;
-      padding: 12px;
-      margin-top: 8px;
-      line-height: 1.65;
+      padding: 10px;
+      margin-top: 6px;
+      line-height: 1.55;
       font-size: 14px;
       word-break: keep-all;
       white-space: pre-wrap;
@@ -154,8 +208,147 @@ function injectRuntimeStyles() {
     .drag-line {
       display: block;
       line-height: 1.75;
-      word-break: keep-all;
       white-space: normal;
+      word-break: keep-all;
+    }
+
+    .line-ko {
+      margin-top: 4px;
+      color: #6d5b4d;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .l32-question-box {
+      padding: 14px;
+      background: #fff3e0;
+      border-color: #e9c7a7;
+    }
+
+    .l32-question-surface {
+      padding: 18px 12px;
+      border-color: #ecd8c1;
+      background: #fff;
+      text-align: center;
+      box-shadow: 0 7px 18px rgba(103,63,22,.07);
+    }
+
+    .l32-line-en {
+      color: #34261d;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.55;
+    }
+
+    .l32-question-surface .line-ko {
+      margin-top: 7px;
+      color: #75685e;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .l32-question-surface .l32-focus-token {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 5px;
+      border-radius: 7px;
+      font-weight: 950;
+      line-height: 1.32;
+    }
+
+    .l32-question-surface .l32-focus-token.is-verb {
+      border: 1px solid var(--aisth-role-v-border, #c88a12);
+      background: var(--aisth-role-v-bg, #fff4cc);
+      color: var(--aisth-role-v-text, #7a4a00);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 0 10px var(--aisth-role-v-glow, rgba(216,162,27,.30));
+    }
+
+    .l32-question-surface .l32-focus-token.is-negative {
+      border: 1px solid rgba(205,72,82,.24);
+      background: rgba(226,79,91,.12);
+      color: #a82935;
+      box-shadow: none;
+    }
+
+    .l32-answer-box {
+      padding: 12px 10px 16px;
+      background: #fff;
+      border-color: #e4d8cc;
+    }
+
+    #quiz-area .l32-answer-box .aisth-slot-cell.is-negative-highlight {
+      border-color: rgba(205,72,82,.62);
+      border-bottom-color: #b6323f;
+      background: linear-gradient(180deg,#fffafb 0%,#ffe2e6 100%);
+      color: #9f2632;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 3px 8px rgba(190,48,61,.12);
+    }
+
+    #quiz-area .l32-answer-box .aisth-slot-cell.is-negative-highlight.is-slot-wrong {
+      border-color: #bb2433;
+      background: linear-gradient(180deg,#fff2f4 0%,#ffcfd5 100%);
+      box-shadow: 0 0 0 2px rgba(198,43,57,.16), 0 0 12px rgba(198,43,57,.25);
+    }
+
+    #quiz-area .l32-answer-box .aisth-slot-cell.is-suffix-highlight {
+      border-color: rgba(136,84,208,.76);
+      border-bottom-color: #6c3ac7;
+      background: rgba(136,84,208,.16);
+      color: #6c3ac7;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78), inset 0 0 0 1px rgba(136,84,208,.24), 0 3px 8px rgba(108,58,199,.12);
+    }
+
+    #quiz-area .l32-answer-box .aisth-slot-cell.is-suffix-highlight.is-slot-wrong {
+      border-color: #bb2433;
+      border-bottom-color: #bb2433;
+      background: linear-gradient(180deg,#fff2f4 0%,#ffcfd5 100%);
+      color: #9f2632;
+      box-shadow: 0 0 0 2px rgba(198,43,57,.16), 0 0 12px rgba(198,43,57,.25);
+    }
+
+    .l32-fixed-middle {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 2px;
+      color: #34261d;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .l32-hard-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 7px;
+    }
+
+    .l32-hard-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 8px;
+      border: 1px solid #b82f3c;
+      border-radius: 999px;
+      background: #d94754;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      box-shadow: 0 3px 7px rgba(184,47,60,.18);
+    }
+
+    #quiz-area .l32-answer-box .l32-static-apostrophe {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+      padding: 0 1px;
+      color: #8b2630;
+      font-size: 18px;
+      font-weight: 950;
+      line-height: 1;
     }
 
     .front-slot {
@@ -163,7 +356,7 @@ function injectRuntimeStyles() {
       align-items: center;
       justify-content: center;
       vertical-align: baseline;
-      margin-right: 5px;
+      margin: 0 5px;
       min-width: 30px;
       height: 1.15em;
       padding: 0 4px;
@@ -195,6 +388,7 @@ function injectRuntimeStyles() {
       background: rgba(255, 208, 90, 0.45);
       color: #7e3106;
       font-weight: 900;
+      white-space: nowrap;
       cursor: grab;
       user-select: none;
     }
@@ -204,6 +398,9 @@ function injectRuntimeStyles() {
       animation: slime-pull 0.32s ease-out;
       transform-origin: 50% 58%;
       filter: saturate(1.06);
+    }
+    .drag-token.hover-not {
+      box-shadow: 0 0 0 1px rgba(196, 69, 58, 0.22) inset, 0 0 8px rgba(196, 69, 58, 0.2);
     }
 
     .drag-token.used-dim {
@@ -219,7 +416,8 @@ function injectRuntimeStyles() {
 
     .verb-wrap {
       position: relative;
-      display: inline-block;
+      display: inline-flex;
+      align-items: baseline;
     }
 
     .aux-pop-token {
@@ -233,6 +431,7 @@ function injectRuntimeStyles() {
       background: rgba(255, 208, 90, 0.56);
       color: #7e3106;
       font-weight: 900;
+      white-space: nowrap;
       opacity: 0;
       pointer-events: none;
       transform: translate(0, 6px) scale(0.86);
@@ -245,6 +444,9 @@ function injectRuntimeStyles() {
       pointer-events: auto;
       cursor: grab;
       transform: translate(0, 0) scale(1);
+    }
+    .aux-pop-token.hover-not {
+      box-shadow: 0 0 0 1px rgba(196, 69, 58, 0.22) inset, 0 0 8px rgba(196, 69, 58, 0.2);
     }
 
     .aux-pop-token.dragging {
@@ -262,6 +464,16 @@ function injectRuntimeStyles() {
 
     .aux-pop-token.lifted {
       opacity: 0;
+    }
+
+    .aux-pop-token.docked {
+      position: static;
+      left: auto;
+      top: auto;
+      opacity: 1;
+      transform: none;
+      pointer-events: none;
+      margin-right: 2px;
     }
 
     .verb-wrap.split-open .drag-token {
@@ -285,6 +497,56 @@ function injectRuntimeStyles() {
       background: rgba(255, 208, 90, 0.55);
     }
 
+    .ghost-chip.neg-glow,
+    .drag-token.neg-glow,
+    .aux-pop-token.neg-glow {
+      color: #7b2a23;
+      background: rgba(255, 221, 215, 0.75);
+      box-shadow: 0 0 0 1px rgba(200, 82, 70, 0.2) inset, 0 0 8px rgba(210, 84, 71, 0.25);
+      text-shadow: 0 0 6px rgba(210, 84, 71, 0.28);
+    }
+
+    .ko-neg-add {
+      color: #7b2a23;
+      background: rgba(255, 221, 215, 0.75);
+      border-radius: 4px;
+      padding: 0 1px;
+      box-shadow: 0 0 0 1px rgba(200, 82, 70, 0.2) inset, 0 0 8px rgba(210, 84, 71, 0.25);
+      text-shadow: 0 0 6px rgba(210, 84, 71, 0.28);
+    }
+
+    .not-row {
+      margin-top: 2px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .not-token {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(126, 49, 6, 0.22);
+      background: rgba(255, 255, 255, 0.85);
+      color: #7e3106;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .not-token:active {
+      cursor: grabbing;
+    }
+
+    .not-token.active {
+      border-color: rgba(196, 69, 58, 0.45);
+      background: rgba(255, 221, 215, 0.85);
+      color: #7b2a23;
+      box-shadow: 0 0 7px rgba(196, 69, 58, 0.22);
+    }
+
     textarea,
     .short-input {
       width: 100%;
@@ -297,42 +559,16 @@ function injectRuntimeStyles() {
       background: #fff;
     }
 
-    textarea { resize: vertical; }
+    textarea {
+      resize: vertical;
+      min-height: 58px;
+    }
 
     .short-input {
       font-size: 18px;
       font-weight: 900;
       text-align: center;
       letter-spacing: 0.3px;
-    }
-
-    .answer-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      max-width: 360px;
-      margin: 0 auto;
-    }
-
-    .answer-row .short-input {
-      flex: 0 1 auto;
-      width: 320px;
-      max-width: calc(100% - 34px);
-    }
-
-    .answer-mark {
-      flex: 0 0 auto;
-      display: inline-block;
-      min-width: 16px;
-      text-align: center;
-      font-size: 24px;
-      font-weight: 900;
-      color: #7e3106;
-      line-height: 1;
-      opacity: 1;
-      visibility: visible;
-      user-select: none;
     }
     input::placeholder,
     textarea::placeholder {
@@ -424,25 +660,37 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  return L32_DIRECT_QUESTION_ROWS.map((row) => ({ ...row }));
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "direct-js",
+    title: "aisth-l3e2.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -450,19 +698,40 @@ function buildQuestionsFromRows() {
     .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === TARGET_EXERCISE)
     .sort((a, b) => Number(a["QNumber"]) - Number(b["QNumber"]));
 
+  filtered = [
+    ...filtered.filter((row) => !L32_HARD_QUESTION_NUMBERS.has(Number(row["QNumber"]))),
+    ...filtered.filter((row) => L32_HARD_QUESTION_NUMBERS.has(Number(row["QNumber"]))),
+  ];
+
   if (MAX_QUESTIONS > 0) filtered = filtered.slice(0, MAX_QUESTIONS);
 
+  const modeByType = deriveInstructionModeByType(filtered);
+
   const firstRowAnswer = cleanAnswerForScoring(normalizeEscapedBreaks(String(filtered[0]?.["Answer"] ?? "").trim()));
-  rewritePlaceholderExample = clipExample(firstRowAnswer || "Do you ...?");
+  const firstRewriteAnswer = cleanAnswerForScoring(normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "rewrite")?.["Answer"] ?? "").trim()));
+  const firstBlankAnswer = cleanAnswerForScoring(normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "blank")?.["Answer"] ?? "").trim()));
+
+  rewritePlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstRewriteAnswer || "example"));
+  blankPlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstBlankAnswer || "answer"));
 
   questions = filtered.map((row, idx) => {
     const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
-    const answerRaw = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
-    const answer = cleanAnswerForScoring(answerRaw);
+    const answerRaw = normalizeEscapedBreaks(String(row["Answer"] ?? "").trim());
+    const fullAnswer = cleanAnswerForScoring(answerRaw);
+    const answer = cleanAnswerForScoring(String(row["Target"] ?? fullAnswer));
     const title = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Title"] ?? "").trim()));
-    const rawInstruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
+    const type = "blank";
+    const parts = splitQuestionForDisplay(question);
+
+    const fallbackInst = type === "blank" ? DEFAULT_BLANK_INSTRUCTION : DEFAULT_REWRITE_INSTRUCTION;
+    const modeInst = modeByType[type] || fallbackInst;
+
     const qNumber = Number(row["QNumber"]) || idx + 1;
-    const instruction = rawInstruction || FIXED_INSTRUCTION;
+    const rawInstruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
+
+    let instruction = rawInstruction || modeInst;
+    if (qNumber === 1 && modeInst) instruction = modeInst;
+    if (isInstructionLeakingAnswer(instruction, answer, type)) instruction = modeInst;
 
     return {
       no: idx + 1,
@@ -471,88 +740,228 @@ function buildQuestionsFromRows() {
       answer,
       instruction,
       title,
-      dragMeta: buildDragMeta(question, answer),
+      type,
+      questionEnglish: parts.english,
+      questionKorean: parts.korean,
+      focusRole: String(row["FocusRole"] || "negative"),
+      fixedMiddle: String(row["FixedMiddle"] || ""),
+      isHard: L32_HARD_QUESTION_NUMBERS.has(qNumber),
+      fullAnswer,
+      dragMeta: buildDragMetaForNegative(parts.english, fullAnswer),
     };
   });
+}
+
+function deriveInstructionModeByType(rows) {
+  const bucket = { rewrite: new Map(), blank: new Map() };
+
+  rows.forEach((row) => {
+    const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
+    const answer = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
+    const instruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
+    const type = detectType(question);
+
+    if (!instruction) return;
+    if (isInstructionLeakingAnswer(instruction, answer, type)) return;
+
+    const m = bucket[type];
+    m.set(instruction, (m.get(instruction) || 0) + 1);
+  });
+
+  return {
+    rewrite: pickTopKey(bucket.rewrite),
+    blank: pickTopKey(bucket.blank),
+  };
+}
+
+function pickTopKey(mapObj) {
+  let topKey = "";
+  let topCount = -1;
+  for (const [k, c] of mapObj.entries()) {
+    if (c > topCount) {
+      topKey = k;
+      topCount = c;
+    }
+  }
+  return topKey;
+}
+
+function detectType(question) {
+  return String(question || "").includes("___") ? "blank" : "rewrite";
 }
 
 const BE_VERBS = new Set(["am", "is", "are", "was", "were"]);
 const KEEP_AUX = new Set(["can", "will", "should", "must", "may", "might", "could", "would", "shall"]);
 const DO_AUX = new Set(["do", "does", "did"]);
-const SUBJECT_WORDS = new Set(["i", "you", "he", "she", "it", "we", "they", "the", "a", "an", "this", "that", "these", "those"]);
 
-function buildDragMeta(question, answer) {
-  const lines = normalizeEscapedBreaks(String(question || ""))
-    .split("\n")
-    .map((x) => x.trim())
-    .filter(Boolean);
-  const lineIndex = lines.findIndex((x) => /[A-Za-z]/.test(x));
-  if (lineIndex < 0) {
-    return { canDrag: false, lines, lineIndex: -1, tokens: [], verbIndex: -1, ghostLead: "" };
+function splitQuestionForDisplay(question) {
+  const text = normalizeEscapedBreaks(String(question || "")).trim();
+  const m = text.match(/^(.*?)(\(([^()]*)\))\s*$/s);
+  if (m && /[가-힣]/.test(String(m[3] || ""))) {
+    return {
+      english: String(m[1] || "").trim(),
+      korean: String(m[2] || "").trim(),
+    };
+  }
+  return { english: text, korean: "" };
+}
+
+function cleanAnswerForScoring(raw) {
+  let s = stripEmphasisMarkers(normalizeEscapedBreaks(String(raw ?? ""))).trim();
+  if (!s) return "";
+
+  const arrowParts = s.split(/(?:->|→)/);
+  if (arrowParts.length > 1) s = String(arrowParts[arrowParts.length - 1] || "").trim();
+
+  const outer = s.match(/^\((.*)\)$/);
+  if (outer) s = String(outer[1] || "").trim();
+
+  const tailNote = s.match(/^(.+?)\s*\([^)]*\)\s*$/);
+  if (tailNote && tailNote[1].trim()) s = tailNote[1].trim();
+
+  return s;
+}
+
+function buildDragMetaForNegative(questionEnglish, answer) {
+  const raw = normalizeEscapedBreaks(String(questionEnglish || "")).trim();
+  if (!raw || !/[A-Za-z]/.test(raw)) {
+    return {
+      canDrag: false,
+      tokens: [],
+      verbIndex: -1,
+      ghostLead: "",
+      keepSourceToken: false,
+      baseVerb: "",
+      insertIndex: 1,
+    };
   }
 
-  const dragLine = lines[lineIndex];
-  const tokens = dragLine.split(/\s+/).filter(Boolean);
+  const plain = stripEmphasisMarkers(raw);
+  const tokens = plain.split(/\s+/).filter(Boolean);
   if (!tokens.length) {
-    return { canDrag: false, lines, lineIndex, tokens: [], verbIndex: -1, ghostLead: "" };
+    return {
+      canDrag: false,
+      tokens: [],
+      verbIndex: -1,
+      ghostLead: "",
+      keepSourceToken: false,
+      baseVerb: "",
+      insertIndex: 1,
+    };
   }
 
   const answerWords = parseAnswerWords(answer);
-  const verbIndex = detectMainVerbIndex(tokens, answerWords);
-  if (verbIndex < 0) {
-    return { canDrag: false, lines, lineIndex, tokens, verbIndex: -1, ghostLead: "" };
+  const neg = detectNegativeLeadFromAnswer(answerWords);
+  if (!neg.supported) {
+    return {
+      canDrag: false,
+      tokens,
+      verbIndex: -1,
+      ghostLead: "",
+      keepSourceToken: false,
+      baseVerb: "",
+      insertIndex: 1,
+    };
   }
 
-  const draggedNorm = normalizeWordToken(tokens[verbIndex]);
-  const leadMeta = computeGhostLead(draggedNorm, answerWords);
+  const qSubject = normalizeWordToken(tokens[0]);
+  const aSubject = normalizeWordToken(answerWords[0] || "");
+  if (!qSubject || !aSubject || qSubject !== aSubject) {
+    return {
+      canDrag: false,
+      tokens,
+      verbIndex: -1,
+      ghostLead: "",
+      keepSourceToken: false,
+      baseVerb: "",
+      insertIndex: 1,
+    };
+  }
+
+  const verbIndex = detectVerbIndexForNegative(tokens, raw, neg);
+  if (verbIndex < 0) {
+    return {
+      canDrag: false,
+      tokens,
+      verbIndex: -1,
+      ghostLead: "",
+      keepSourceToken: false,
+      baseVerb: "",
+      insertIndex: 1,
+    };
+  }
+
   return {
     canDrag: true,
-    lines,
-    lineIndex,
     tokens,
     verbIndex,
-    ghostLead: leadMeta.ghostLead,
-    keepSourceToken: leadMeta.keepSourceToken,
+    ghostLead: neg.aux,
+    keepSourceToken: DO_AUX.has(neg.aux),
+    baseVerb: DO_AUX.has(neg.aux) ? (neg.baseVerb || inferBaseVerbFromToken(tokens[verbIndex])) : "",
+    insertIndex: 1,
   };
 }
 
-function detectMainVerbIndex(tokens, answerWords) {
-  const norms = tokens.map((t) => normalizeWordToken(t));
-  for (let i = 0; i < norms.length; i++) {
-    if (BE_VERBS.has(norms[i]) || KEEP_AUX.has(norms[i])) return i;
+function detectNegativeLeadFromAnswer(answerWords) {
+  const words = [...answerWords];
+  for (let i = 0; i < words.length - 1; i++) {
+    const w = normalizeWordToken(words[i]);
+    const n = normalizeWordToken(words[i + 1]);
+    if ((BE_VERBS.has(w) || KEEP_AUX.has(w) || DO_AUX.has(w)) && n === "not") {
+      return {
+        supported: true,
+        aux: w,
+        baseVerb: DO_AUX.has(w) ? normalizeWordToken(words[i + 2] || "") : "",
+      };
+    }
   }
-
-  const lead = answerWords[0] || "";
-  const subject = answerWords[1] || "";
-  const baseVerb = answerWords[2] || "";
-  if (DO_AUX.has(lead)) {
-    return findLexicalVerbIndex(norms, baseVerb, subject);
-  }
-
-  return findLexicalVerbIndex(norms, baseVerb, subject);
+  return { supported: false, aux: "", baseVerb: "" };
 }
 
-function findLexicalVerbIndex(normTokens, baseVerb, subjectWord) {
-  if (baseVerb) {
-    const forms = buildVerbForms(baseVerb);
-    for (let i = 0; i < normTokens.length; i++) {
-      if (forms.has(normTokens[i])) return i;
+function detectVerbIndexForNegative(tokens, questionWithMarks, neg) {
+  const norms = tokens.map((t) => normalizeWordToken(t));
+  if (BE_VERBS.has(neg.aux) || KEEP_AUX.has(neg.aux)) {
+    return norms.indexOf(neg.aux);
+  }
+
+  const emphasized = extractFirstEmphasisWord(questionWithMarks);
+  if (emphasized) {
+    const idx = norms.indexOf(emphasized);
+    if (idx >= 0) return idx;
+  }
+
+  if (neg.baseVerb) {
+    const forms = buildVerbForms(neg.baseVerb);
+    for (let i = 0; i < norms.length; i++) {
+      if (forms.has(norms[i])) return i;
     }
   }
 
-  if (subjectWord) {
-    const si = normTokens.indexOf(subjectWord);
-    if (si >= 0) {
-      for (let i = si + 1; i < normTokens.length; i++) {
-        if (/^[a-z]+$/.test(normTokens[i])) return i;
-      }
-    }
+  for (let i = 1; i < norms.length; i++) {
+    if (/^[a-z]+$/.test(norms[i])) return i;
   }
+  return -1;
+}
 
-  for (let i = 1; i < normTokens.length; i++) {
-    if (/^[a-z]+$/.test(normTokens[i]) && !SUBJECT_WORDS.has(normTokens[i])) return i;
-  }
-  return normTokens.length > 1 ? 1 : 0;
+function extractFirstEmphasisWord(questionWithMarks) {
+  const m = String(questionWithMarks || "").match(/\*\*(.*?)\*\*/s);
+  if (!m) return "";
+  const first = String(m[1] || "").trim().split(/\s+/)[0] || "";
+  return normalizeWordToken(first);
+}
+
+function inferBaseVerbFromToken(token) {
+  const t = normalizeWordToken(token);
+  if (!t) return "";
+  if (t === "has") return "have";
+  if (t === "does") return "do";
+  if (t === "goes") return "go";
+  if (t === "tries") return "try";
+  if (t.endsWith("ies") && t.length > 3) return t.slice(0, -3) + "y";
+  if (t.endsWith("es") && t.length > 2) return t.slice(0, -2);
+  if (t.endsWith("s") && t.length > 1) return t.slice(0, -1);
+  if (t.endsWith("ed") && t.length > 2) return t.slice(0, -2);
+  return t;
 }
 
 function buildVerbForms(baseVerb) {
@@ -570,42 +979,32 @@ function buildVerbForms(baseVerb) {
   return out;
 }
 
-function computeGhostLead(draggedNorm, answerWords) {
-  if (BE_VERBS.has(draggedNorm) || KEEP_AUX.has(draggedNorm)) {
-    return { ghostLead: capitalizeWord(draggedNorm), keepSourceToken: false };
-  }
-
-  const lead = String(answerWords?.[0] || "").toLowerCase().trim();
-  const aux = DO_AUX.has(lead) ? lead : "do";
-  return { ghostLead: capitalizeWord(aux), keepSourceToken: true };
-}
-
 function parseAnswerWords(answer) {
-  return cleanAnswerForScoring(answer)
-    .replace(/[’‘`]/g, "'")
+  return canonicalizeNegationText(cleanAnswerForScoring(answer))
     .toLowerCase()
     .match(/[a-z']+/g) || [];
+}
+
+function canonicalizeNegationText(value) {
+  return String(value ?? "")
+    .replace(/[’‘`]/g, "'")
+    .replace(/\bcannot\b/gi, "can not")
+    .replace(/\bcant\b/gi, "can not")
+    .replace(/\bwont\b/gi, "will not")
+    .replace(/\b(do|does|did|is|are|was|were|could|would|should|must|might|need|has|have|had)nt\b/gi, "$1 not")
+    .replace(/\bwon't\b/gi, "will not")
+    .replace(/\bshan't\b/gi, "shall not")
+    .replace(/\bcan't\b/gi, "can not")
+    .replace(/\bain't\b/gi, "is not")
+    .replace(/\b([a-z]+)n't\b/gi, "$1 not")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function normalizeWordToken(token) {
   return String(token || "")
     .toLowerCase()
     .replace(/^[^a-z]+|[^a-z]+$/g, "");
-}
-
-function capitalizeWord(word) {
-  const s = String(word || "").trim();
-  if (!s) return "";
-  return s[0].toUpperCase() + s.slice(1).toLowerCase();
-}
-
-function cleanAnswerForScoring(raw) {
-  let s = stripEmphasisMarkers(normalizeEscapedBreaks(String(raw ?? ""))).trim();
-  const outer = s.match(/^\((.*)\)$/);
-  if (outer) s = String(outer[1] || "").trim();
-  const tailNote = s.match(/^(.+?)\s*\([^)]*\)\s*$/);
-  if (tailNote && tailNote[1].trim()) s = tailNote[1].trim();
-  return s;
 }
 
 function renderIntro() {
@@ -631,7 +1030,7 @@ function renderIntro() {
 
   const total = questions.length;
   const title = questions[0]?.title || PAGE_LABEL;
-  const firstInst = stripEmphasisMarkers(questions[0]?.instruction || FIXED_INSTRUCTION);
+  const firstInst = stripEmphasisMarkers(questions[0]?.instruction || TEXT.INPUT_HINT_FALLBACK);
 
   area.innerHTML = `
     <div class="box">
@@ -681,77 +1080,314 @@ function renderQuestion() {
   }
 
   isCurrentLocked = false;
-  dragPlaced = !q.dragMeta?.canDrag;
-  dragLead = "";
-  const dragEnabled = !!q.dragMeta?.canDrag;
-  const placeholderRaw = dragEnabled
-    ? (rewritePlaceholderExample || "you tired?")
-    : (rewritePlaceholderExample || "Do you ...?");
-  const placeholder = stripTrailingQuestionMark(placeholderRaw);
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
-    <div class="box">
-      <div class="question-instruction">${renderTextWithEmphasis(FIXED_INSTRUCTION)}</div>
-      <div class="sentence">${renderDragSentenceHtml(q)}</div>
-    </div>
-
-    <div class="box" style="background:#fff; display:${dragEnabled ? "none" : "block"};" id="compose-box">
-      <div class="answer-row">
-        <input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />
-        <span class="answer-mark" aria-hidden="true">?</span>
+    <div class="box l32-question-box">
+      ${q.isHard ? '<div class="l32-hard-row"><span class="l32-hard-badge">HARD!</span></div>' : ""}
+      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
+      <div class="sentence aisth-question-surface l32-question-surface">
+        <div class="l32-line-en">${renderL32QuestionEmphasis(q.questionEnglish || q.question, q.focusRole)}</div>
+        ${q.questionKorean ? `<div class="line-ko">${renderL32QuestionEmphasis(q.questionKorean, q.focusRole)}</div>` : ""}
       </div>
-      <div id="feedback" class="feedback"></div>
     </div>
 
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+    <div class="box aisth-letter-answer-box l32-answer-box">
+      <div class="aisth-answer-tool-row">
+        <span aria-hidden="true"></span>
+        <span class="aisth-type-pill">type!</span>
+        <span aria-hidden="true"></span>
+      </div>
+      <input id="user-answer" class="short-input l32-slot-source-input" type="text" autocomplete="off" inputmode="latin" lang="en" autocapitalize="none" spellcheck="false" />
+      <div id="feedback" class="feedback"></div>
     </div>
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const input = document.getElementById("user-answer");
-
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
-  wireDragUI(q);
+  const editableModelText = makeL32EditableModelText(q.answer);
+  const slotInputControl = input && window.AisthInputSlots
+    ? window.AisthInputSlots.enhance(input, {
+      modelText: editableModelText,
+      onEnter: () => updateL32SlotAnswerState(q, input, slotInputControl?.control),
+    })
+    : null;
 
   if (input) {
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") {
-        ev.preventDefault();
-        submitCurrentAnswer();
+    if (slotInputControl) {
+      const flowInput = slotInputControl.control?.querySelector(".aisth-slot-input");
+      if (flowInput) {
+        const rawTypingAllowance = Array.from(pickL32SlotModelText(q.answer)).length + 8;
+        flowInput.maxLength = Math.max(flowInput.maxLength, rawTypingAllowance);
       }
-    });
-    if (!dragEnabled) input.focus();
+      installL32StaticApostrophes(q.answer, slotInputControl.control);
+      markL32NegativeSlots(q.answer, slotInputControl.control);
+      markL32DoesSuffixSlots(q.answer, slotInputControl.control);
+      installL32FixedMiddle(q, slotInputControl.control);
+      input.addEventListener("input", () => updateL32SlotAnswerState(q, input, slotInputControl.control));
+      updateL32SlotAnswerState(q, input, slotInputControl.control);
+      slotInputControl.focus();
+    } else {
+      input.focus();
+    }
   }
+}
+
+function renderL32QuestionEmphasis(value, focusRole) {
+  const text = normalizeEscapedBreaks(String(value ?? ""));
+  const roleClass = focusRole === "verb" ? "is-verb" : "is-negative";
+  const re = /\*\*(.*?)\*\*/gs;
+  let out = "";
+  let last = 0;
+  let match;
+
+  while ((match = re.exec(text)) !== null) {
+    out += escapeHtmlWithBreaks(text.slice(last, match.index));
+    out += `<span class="l32-focus-token ${roleClass}">${escapeHtml(String(match[1] ?? "").trim())}</span>`;
+    last = re.lastIndex;
+  }
+
+  out += escapeHtmlWithBreaks(text.slice(last));
+  return out;
+}
+
+function updateL32SlotAnswerState(q, sourceInput, control) {
+  if (!q || !sourceInput || !control || isCurrentLocked) return;
+
+  const modelChars = getL32AnswerChars(pickL32SlotModelText(q.answer));
+  const userChars = getL32AnswerChars(sourceInput.value);
+  const cells = Array.from(control.querySelectorAll(".aisth-slot-cell"));
+  let allCorrect = modelChars.length > 0 && userChars.length >= modelChars.length;
+
+  cells.forEach((cell, idx) => {
+    const userChar = userChars[idx] || "";
+    const modelChar = modelChars[idx] || "";
+    const isFilled = Boolean(userChar);
+    const ok = isFilled && userChar.toLowerCase() === modelChar.toLowerCase();
+    cell.classList.toggle("is-slot-correct", ok);
+    cell.classList.toggle("is-slot-wrong", isFilled && !ok);
+    if (!ok) allCorrect = false;
+  });
+
+  if (allCorrect) submitCurrentAnswer();
+}
+
+function installL32StaticApostrophes(modelText, control) {
+  if (!control || !/[’']/.test(String(modelText || ""))) return;
+  const words = pickL32SlotModelText(modelText).split(/\s+/).filter(Boolean);
+  const shells = Array.from(control.querySelectorAll(".aisth-slot-shell"));
+
+  words.forEach((word, wordIndex) => {
+    const shell = shells[wordIndex];
+    if (!shell) return;
+    const cells = Array.from(shell.querySelectorAll(".aisth-slot-cell"));
+    let letterIndex = 0;
+
+    Array.from(word).forEach((char) => {
+      if (!/[’']/.test(char)) {
+        letterIndex += 1;
+        return;
+      }
+      const apostrophe = document.createElement("span");
+      apostrophe.className = "l32-static-apostrophe";
+      apostrophe.setAttribute("aria-hidden", "true");
+      apostrophe.textContent = "'";
+      const previousCell = cells[Math.max(0, letterIndex - 1)];
+      if (previousCell) previousCell.insertAdjacentElement("afterend", apostrophe);
+      else shell.prepend(apostrophe);
+    });
+  });
+
+  const flowInput = control?.querySelector(".aisth-slot-input");
+  if (!flowInput) return;
+  flowInput.addEventListener("beforeinput", (event) => {
+    if (/[’']/.test(String(event.data || ""))) event.preventDefault();
+  });
+  flowInput.addEventListener("input", () => {
+    if (!/[’']/.test(flowInput.value)) return;
+    const nextValue = flowInput.value.replace(/[’']/g, "");
+    flowInput.value = nextValue;
+    try { flowInput.setSelectionRange(nextValue.length, nextValue.length); } catch (_) {}
+  }, true);
+}
+
+function markL32NegativeSlots(modelText, control) {
+  if (!control) return;
+  const negativeWords = /^(?:don't|doesn't|didn't|isn't|aren't|can't|wasn't|not|no|nobody|nothing|never)$/i;
+  const words = pickL32SlotModelText(modelText).split(/\s+/).filter(Boolean);
+  const cells = Array.from(control.querySelectorAll(".aisth-slot-cell"));
+  let offset = 0;
+
+  words.forEach((word) => {
+    const cleanWord = word.replace(/^[^A-Za-z']+|[^A-Za-z']+$/g, "");
+    const length = Array.from(word.replace(/[’']/g, "")).length;
+    if (negativeWords.test(cleanWord)) {
+      for (let idx = offset; idx < offset + length; idx += 1) {
+        if (cells[idx]) cells[idx].classList.add("is-negative-highlight");
+      }
+    }
+    offset += length;
+  });
+}
+
+function markL32DoesSuffixSlots(modelText, control) {
+  if (!control) return;
+  const words = pickL32SlotModelText(modelText).split(/\s+/).filter(Boolean);
+  const cells = Array.from(control.querySelectorAll(".aisth-slot-cell"));
+  let offset = 0;
+
+  words.forEach((word) => {
+    const cleanWord = word.replace(/^[^A-Za-z'’]+|[^A-Za-z'’]+$/g, "");
+    const length = Array.from(word.replace(/[’']/g, "")).length;
+    if (/^does(?:n['’]?t)?$/i.test(cleanWord)) {
+      [offset + 2, offset + 3].forEach((idx) => {
+        if (cells[idx]) cells[idx].classList.add("is-suffix-highlight");
+      });
+    }
+    offset += length;
+  });
+}
+
+function installL32FixedMiddle(q, control) {
+  const fixedText = String(q?.fixedMiddle || "").trim();
+  if (!fixedText || !control) return;
+  const shells = Array.from(control.querySelectorAll(".aisth-slot-shell"));
+  if (shells.length < 2) return;
+
+  const fixed = document.createElement("span");
+  fixed.className = "l32-fixed-middle";
+  fixed.textContent = fixedText;
+  const gap = shells[0].nextElementSibling;
+  if (gap?.classList.contains("aisth-slot-word-gap")) gap.replaceWith(fixed);
+  else shells[0].insertAdjacentElement("afterend", fixed);
+}
+
+function pickL32SlotModelText(value) {
+  return String(value || "").replace(/[.?!~]+$/g, "").trim();
+}
+
+function makeL32EditableModelText(value) {
+  return pickL32SlotModelText(value).replace(/[’']/g, "");
+}
+
+function getL32AnswerChars(value) {
+  return Array.from(String(value || "").replace(/[\s’']/g, ""));
 }
 
 function renderDragSentenceHtml(q) {
   const meta = q.dragMeta;
   if (!meta?.canDrag) {
-    return renderTextWithEmphasis(q.question);
+    return renderTextWithEmphasis(q.questionEnglish || q.question);
   }
-
-  return meta.lines.map((line, idx) => {
-    if (idx !== meta.lineIndex) return renderTextWithEmphasis(line);
-    return renderDraggableLine(meta);
-  }).join("<br/>");
+  return renderDraggableLine(meta);
 }
 
 function renderDraggableLine(meta) {
-  return `<div class="drag-line"><span class="front-slot empty" id="lead-inline-slot" title="${escapeHtmlAttr(TEXT.DRAG_HINT)}">&nbsp;</span>${meta.tokens.map((token, idx) => {
+  const parts = [];
+  meta.tokens.forEach((token, idx) => {
     if (idx === meta.verbIndex) {
       if (meta.keepSourceToken) {
-        return `<span class="verb-wrap"><span class="aux-pop-token" id="spawn-aux-token" draggable="false">${escapeHtml(meta.ghostLead)}</span><span class="drag-token" id="drag-verb-token" draggable="false">${escapeHtml(token)}</span></span>`;
+        parts.push(
+          `<span class="verb-wrap"><span class="aux-pop-token" id="spawn-aux-token" draggable="false">${escapeHtml(meta.ghostLead)}</span><span class="drag-token" id="drag-verb-token" draggable="false">${escapeHtml(token)}</span></span>`
+        );
+        return;
       }
-      return `<span class="drag-token" id="drag-verb-token" draggable="true">${escapeHtml(token)}</span>`;
+      parts.push(`<span class="drag-token" id="aux-direct-token" draggable="false">${escapeHtml(token)}</span>`);
+      return;
     }
-    return `<span>${escapeHtml(token)}</span>`;
-  }).join(" ")}</div>`;
+
+    parts.push(`<span>${escapeHtml(token)}</span>`);
+  });
+
+  return `<div class="drag-line">${parts.join(" ")}</div>`;
+}
+
+function renderKoreanLine(q) {
+  if (!q?.questionKorean) return "";
+  if (!notSelected || !q.dragMeta?.canDrag) return renderTextWithEmphasis(q.questionKorean);
+  return renderNegativeKoreanWithEmphasis(q.questionKorean);
+}
+
+function refreshKoreanLine(q) {
+  const el = document.getElementById("line-ko-text");
+  if (!el) return;
+  el.innerHTML = renderKoreanLine(q);
+}
+
+function renderNegativeKoreanWithEmphasis(value) {
+  const text = normalizeEscapedBreaks(String(value ?? ""));
+  const re = /\*\*(.*?)\*\*/s;
+  const m = re.exec(text);
+  if (!m) return renderTextWithEmphasis(value);
+
+  const before = text.slice(0, m.index);
+  const target = String(m[1] ?? "").trim();
+  const afterStart = m.index + String(m[0] ?? "").length;
+  const after = text.slice(afterStart);
+  const negInfo = negateKoreanPhraseInfo(target);
+  const negHtml = renderNegativeKoreanCoreHtml(negInfo);
+
+  return `${escapeHtml(before)}<span class="focus-token">${negHtml}</span>${escapeHtml(after)}`;
+}
+
+function renderNegativeKoreanCoreHtml(info) {
+  if (!info) return "";
+  if (info.kind === "prefix") {
+    const prefixRaw = String(info.prefix || "").trimEnd();
+    const hasSpace = /\s$/.test(String(info.prefix || ""));
+    return `<span class="ko-neg-add">${escapeHtml(prefixRaw)}</span>${hasSpace ? " " : ""}${escapeHtml(info.base || "")}`;
+  }
+  if (info.kind === "suffix") {
+    return `${escapeHtml(info.base || "")}<span class="ko-neg-add">${escapeHtml(info.suffix || "")}</span>`;
+  }
+  return escapeHtml(info.text || "");
+}
+
+function negateKoreanPhraseInfo(phrase) {
+  const src = String(phrase ?? "").trim();
+  if (!src) return { kind: "plain", text: src };
+  if (/^(안|못)\s/.test(src)) return { kind: "plain", text: src };
+
+  const direct = new Map([
+    ["좋아해", { kind: "prefix", prefix: "안 ", base: "좋아해", text: "안 좋아해" }],
+    ["행복해", { kind: "suffix", base: "행복하", suffix: "지 않아", text: "행복하지 않아" }],
+    ["있어", { kind: "plain", text: "없어" }],
+    ["해", { kind: "prefix", prefix: "안 ", base: "해", text: "안 해" }],
+    ["했어", { kind: "prefix", prefix: "안 ", base: "했어", text: "안 했어" }],
+    ["배고파", { kind: "suffix", base: "배고프", suffix: "지 않아", text: "배고프지 않아" }],
+    ["들어", { kind: "prefix", prefix: "안 ", base: "들어", text: "안 들어" }],
+    ["됐어", { kind: "prefix", prefix: "안 ", base: "됐어", text: "안 됐어" }],
+    ["웃어", { kind: "prefix", prefix: "안 ", base: "웃어", text: "안 웃어" }],
+    ["외출해", { kind: "prefix", prefix: "안 ", base: "외출해", text: "안 외출해" }],
+    ["봤어", { kind: "prefix", prefix: "안 ", base: "봤어", text: "안 봤어" }],
+    ["말했어", { kind: "prefix", prefix: "안 ", base: "말했어", text: "안 말했어" }],
+    ["열었어", { kind: "prefix", prefix: "안 ", base: "열었어", text: "안 열었어" }],
+    ["먹어", { kind: "prefix", prefix: "안 ", base: "먹어", text: "안 먹어" }],
+    ["한다", { kind: "prefix", prefix: "안 ", base: "한다", text: "안 한다" }],
+    ["말한다", { kind: "prefix", prefix: "안 ", base: "말한다", text: "안 말한다" }],
+    ["했다", { kind: "prefix", prefix: "안 ", base: "했다", text: "안 했다" }],
+  ]);
+  if (direct.has(src)) return direct.get(src);
+
+  if (src.endsWith("있어")) return { kind: "plain", text: `${src.slice(0, -2)}없어` };
+  if (src.endsWith("있다")) return { kind: "plain", text: `${src.slice(0, -2)}없다` };
+  if (src.endsWith("해")) return { kind: "prefix", prefix: "안 ", base: src, text: `안 ${src}` };
+  if (src.endsWith("한다")) return { kind: "prefix", prefix: "안 ", base: src, text: `안 ${src}` };
+
+  return { kind: "prefix", prefix: "안 ", base: src, text: `안 ${src}` };
+}
+
+function wireNotToken(q) {
+  const btn = document.getElementById("not-token-btn");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    if (isCurrentLocked) return;
+    const ok = tryAttachNotToTarget(q);
+    if (!ok && q.dragMeta?.keepSourceToken) {
+      showToast("no", TEXT.PICK_VERB_FIRST);
+    }
+  });
 }
 
 function wireDragUI(q) {
@@ -760,87 +1396,142 @@ function wireDragUI(q) {
 
   const token = document.getElementById("drag-verb-token");
   const auxToken = document.getElementById("spawn-aux-token");
-  const dropSlot = document.getElementById("lead-inline-slot");
-  if (!token || !dropSlot) return;
-  let dragGhostNode = null;
-  const dragToken = meta.keepSourceToken ? auxToken : token;
+  const directAux = document.getElementById("aux-direct-token");
+  const notToken = document.getElementById("not-token-btn");
+  if (!notToken) return;
 
-  if (meta.keepSourceToken && auxToken) {
-    token.addEventListener("click", () => revealAuxToken(auxToken));
+  let dragGhostNode = null;
+  let draggingNot = false;
+
+  if (meta.keepSourceToken && token && auxToken) {
+    token.addEventListener("click", () => revealAuxToken(auxToken, q));
     token.addEventListener("dragstart", (ev) => ev.preventDefault());
-  } else {
-    token.addEventListener("click", () => completeVerbDrag(q));
+  } else if (directAux) {
+    dragLead = q.dragMeta?.ghostLead || normalizeWordToken(directAux.textContent || "");
   }
 
-  if (!dragToken) return;
-
-  dragToken.addEventListener("dragstart", (ev) => {
-    if (isCurrentLocked || dragPlaced) {
+  notToken.addEventListener("dragstart", (ev) => {
+    if (isCurrentLocked) {
       ev.preventDefault();
       return;
     }
-    if (meta.keepSourceToken && auxToken && !auxToken.classList.contains("ready")) {
+    if (meta.keepSourceToken && (!auxToken || !auxToken.classList.contains("ready"))) {
+      showToast("no", TEXT.PICK_VERB_FIRST);
       ev.preventDefault();
       return;
     }
 
-    dragToken.classList.remove("dragging");
-    // Force reflow so repeated drags replay the pull animation.
-    void dragToken.offsetWidth;
-    dragToken.classList.add("dragging");
-    if (meta.keepSourceToken && auxToken) {
-      requestAnimationFrame(() => {
-        if (!dragPlaced) auxToken.classList.add("lifted");
-      });
-    }
-
-    const ghostText = String(q.dragMeta?.ghostLead || dragToken.textContent || "").trim();
-    dragGhostNode = createDragGhostNode(ghostText || "Do");
+    draggingNot = true;
+    dragGhostNode = createDragGhostNode("not");
 
     if (ev.dataTransfer) {
-      ev.dataTransfer.setData("text/plain", "verb");
+      ev.dataTransfer.setData("text/plain", "not");
       ev.dataTransfer.effectAllowed = "move";
-      ev.dataTransfer.setDragImage(dragGhostNode, 18, 12);
+      ev.dataTransfer.setDragImage(dragGhostNode, 14, 8);
     }
   });
-  dragToken.addEventListener("dragend", () => {
-    dropSlot.classList.remove("hover");
-    dragToken.classList.remove("dragging");
-    if (auxToken) auxToken.classList.remove("lifted");
+
+  notToken.addEventListener("dragend", () => {
+    draggingNot = false;
+    clearNotHover(auxToken, directAux);
     if (dragGhostNode) {
       dragGhostNode.remove();
       dragGhostNode = null;
     }
   });
 
-  dropSlot.addEventListener("dragover", (ev) => {
-    if (isCurrentLocked || dragPlaced) return;
-    ev.preventDefault();
-    dropSlot.classList.add("hover");
-  });
-  dropSlot.addEventListener("dragleave", () => dropSlot.classList.remove("hover"));
-  dropSlot.addEventListener("drop", (ev) => {
-    if (isCurrentLocked || dragPlaced) return;
-    ev.preventDefault();
-    dropSlot.classList.remove("hover");
+  bindNotDropTarget(auxToken, () => meta.keepSourceToken && !!auxToken?.classList.contains("ready"), () => {
+    if (isCurrentLocked || !draggingNot) return;
     if (dragGhostNode) {
       dragGhostNode.remove();
       dragGhostNode = null;
     }
-    completeVerbDrag(q);
+    draggingNot = false;
+    applyNotToTarget(q, auxToken);
+  });
+
+  bindNotDropTarget(directAux, () => !meta.keepSourceToken, () => {
+    if (isCurrentLocked || !draggingNot) return;
+    if (dragGhostNode) {
+      dragGhostNode.remove();
+      dragGhostNode = null;
+    }
+    draggingNot = false;
+    applyNotToTarget(q, directAux);
   });
 }
 
-function revealAuxToken(auxToken) {
+function bindNotDropTarget(targetEl, canDropFn, onDropped) {
+  if (!targetEl) return;
+
+  targetEl.addEventListener("dragover", (ev) => {
+    if (!canDropFn()) return;
+    ev.preventDefault();
+    targetEl.classList.add("hover-not");
+  });
+  targetEl.addEventListener("dragleave", () => targetEl.classList.remove("hover-not"));
+  targetEl.addEventListener("drop", (ev) => {
+    if (!canDropFn()) return;
+    ev.preventDefault();
+    targetEl.classList.remove("hover-not");
+    onDropped();
+  });
+}
+
+function clearNotHover(auxToken, directAux) {
+  if (auxToken) auxToken.classList.remove("hover-not");
+  if (directAux) directAux.classList.remove("hover-not");
+}
+
+function tryAttachNotToTarget(q) {
+  const target = resolveNotTarget(q);
+  if (!target) return false;
+  applyNotToTarget(q, target);
+  return true;
+}
+
+function resolveNotTarget(q) {
+  if (q.dragMeta?.keepSourceToken) {
+    const auxToken = document.getElementById("spawn-aux-token");
+    if (!auxToken || !auxToken.classList.contains("ready")) return null;
+    return auxToken;
+  }
+  return document.getElementById("aux-direct-token");
+}
+
+function applyNotToTarget(q, targetEl) {
+  if (!q.dragMeta?.canDrag || !targetEl) return;
+
+  dragLead = q.dragMeta?.ghostLead || dragLead || "";
+  if (!dragLead) return;
+
+  notSelected = true;
+  dragPlaced = true;
+
+  const notBtn = document.getElementById("not-token-btn");
+  if (notBtn) notBtn.classList.add("active");
+
+  targetEl.classList.remove("hover-not");
+  updateLeadVisual(q);
+
+  const input = document.getElementById("user-answer");
+  if (input) input.focus();
+}
+
+function revealAuxToken(auxToken, q) {
   if (!auxToken) return;
   const wrap = auxToken.closest(".verb-wrap");
+
+  dragLead = q.dragMeta?.ghostLead || dragLead || "";
+
   auxToken.classList.remove("used");
   auxToken.classList.add("ready");
-  auxToken.setAttribute("draggable", "true");
+  auxToken.classList.remove("docked");
+  auxToken.setAttribute("draggable", "false");
+  auxToken.textContent = getComposedLead(q);
   if (wrap) wrap.classList.add("split-open");
 
   auxToken.classList.remove("burst");
-  // Force reflow so repeated taps replay the burst animation.
   void auxToken.offsetWidth;
   auxToken.classList.add("burst");
 }
@@ -864,38 +1555,41 @@ function createDragGhostNode(text) {
   return node;
 }
 
-function completeVerbDrag(q) {
-  if (isCurrentLocked || dragPlaced || !q.dragMeta?.canDrag) return;
+function getComposedLead(q) {
+  const base = dragLead || q.dragMeta?.ghostLead || "";
+  if (!base) return "";
+  return notSelected ? `${base} not` : base;
+}
 
-  const token = document.getElementById("drag-verb-token");
+function isDoNotLead(lead) {
+  return /\b(do|does|did)\s+not\b/i.test(String(lead || ""));
+}
+
+function updateLeadVisual(q) {
+  const lead = getComposedLead(q);
+  if (!lead) return;
+  const doNotGlow = isDoNotLead(lead);
+  const hasNot = /\bnot\b/i.test(lead);
   const auxToken = document.getElementById("spawn-aux-token");
-  const wrap = token?.closest(".verb-wrap");
-  const dropSlot = document.getElementById("lead-inline-slot");
-  const composeBox = document.getElementById("compose-box");
-  const input = document.getElementById("user-answer");
-  if (!dropSlot || !composeBox) return;
+  const directAux = document.getElementById("aux-direct-token");
+  const verbToken = document.getElementById("drag-verb-token");
 
-  dragPlaced = true;
-  dragLead = q.dragMeta.ghostLead;
-
-  dropSlot.classList.add("ready");
-  dropSlot.classList.remove("empty");
-  dropSlot.innerHTML = `<span class="ghost-chip">${escapeHtml(dragLead)}</span>`;
-  composeBox.style.display = "block";
-
-  if (token) {
-    if (wrap) wrap.classList.remove("split-open");
-    token.classList.remove("dragging");
-    token.classList.remove("used-dim", "used-hide");
-    if (q.dragMeta?.keepSourceToken) token.classList.add("used-dim");
-    else token.classList.add("used-hide");
+  if (q.dragMeta?.keepSourceToken) {
+    if (auxToken && auxToken.classList.contains("ready")) {
+      auxToken.textContent = lead;
+      auxToken.classList.toggle("neg-glow", doNotGlow);
+      auxToken.classList.toggle("docked", hasNot);
+    }
+    if (verbToken) {
+      verbToken.classList.add("used-dim");
+      verbToken.classList.toggle("neg-glow", doNotGlow);
+    }
+  } else if (directAux) {
+    directAux.textContent = lead;
+    directAux.classList.add("neg-glow");
   }
-  if (auxToken) {
-    auxToken.classList.remove("dragging", "burst", "ready");
-    auxToken.classList.add("used");
-    auxToken.setAttribute("draggable", "false");
-  }
-  if (input) input.focus();
+
+  refreshKoreanLine(q);
 }
 
 function submitCurrentAnswer() {
@@ -909,23 +1603,12 @@ function submitCurrentAnswer() {
 
   if (!q || !input) return;
 
-  if (q.dragMeta?.canDrag && !dragPlaced) {
-    showToast("no", TEXT.PICK_VERB_FIRST);
-    return;
-  }
-
   const userRaw = String(input.value || "").trim();
   if (!userRaw) {
     showToast("no", TEXT.INPUT_REQUIRED);
     return;
   }
-
-  const userWithLead = q.dragMeta?.canDrag
-    ? composeLeadAnswer(dragLead, userRaw)
-    : userRaw;
-  const ok = q.dragMeta?.canDrag
-    ? isAnswerCorrect(userWithLead, q.answer) || isAnswerCorrect(userRaw, q.answer)
-    : isAnswerCorrect(userRaw, q.answer);
+  const ok = isAnswerCorrect(q.type, userRaw, q.answer);
 
   if (!ok) {
     if (feedback) {
@@ -938,14 +1621,15 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   input.disabled = true;
+  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
+    type: q.type,
     question: q.question,
-    selected: userWithLead,
+    selected: userRaw,
     answer: q.answer,
     instruction: q.instruction,
     correct: true,
@@ -960,6 +1644,13 @@ function submitCurrentAnswer() {
   showToast("ok", TEXT.CORRECT);
 }
 
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
+}
+
 function goNext() {
   currentIndex += 1;
   if (currentIndex >= questions.length) {
@@ -969,28 +1660,15 @@ function goNext() {
   renderQuestion();
 }
 
-function composeLeadAnswer(lead, typed) {
-  const head = String(lead || "").trim();
-  const body = String(typed || "").trim();
-  if (!head) return body;
-  if (!body) return head;
-
-  const headLoose = normalizeLoose(head);
-  const first = body.split(/\s+/)[0] || "";
-  if (normalizeLoose(first) === headLoose) return body;
-  if (normalizeLoose(body).startsWith(headLoose)) return body;
-  return `${head} ${body}`.replace(/\s+/g, " ").trim();
-}
-
-function isAnswerCorrect(userRaw, modelRaw) {
-  const userStrict = normalizeForCompare(userRaw);
-  const userLoose = normalizeLoose(userRaw);
+function isAnswerCorrect(type, userRaw, modelRaw) {
+  const userStrict = normalizeForCompare(userRaw, type);
+  const userLoose = normalizeLoose(userRaw, type);
   if (!userStrict && !userLoose) return false;
 
   const candidates = buildModelCandidates(modelRaw);
   for (const cand of candidates) {
-    const candStrict = normalizeForCompare(cand);
-    const candLoose = normalizeLoose(cand);
+    const candStrict = normalizeForCompare(cand, type);
+    const candLoose = normalizeLoose(cand, type);
     if (userStrict && candStrict && userStrict === candStrict) return true;
     if (userLoose && candLoose && userLoose === candLoose) return true;
   }
@@ -1008,9 +1686,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -1038,20 +1721,33 @@ function buildModelCandidates(modelRaw) {
   return [...set];
 }
 
-function normalizeForCompare(value) {
-  let s = stripEmphasisMarkers(normalizeEscapedBreaks(String(value ?? "")))
-    .replace(/[’‘`]/g, "'")
-    .replace(/[“”]/g, '"')
+function isInstructionLeakingAnswer(instruction, answer, type) {
+  const i1 = normalizeForCompare(instruction, type);
+  const a1 = normalizeForCompare(answer, type);
+  if (i1 && a1 && i1 === a1) return true;
+
+  const i2 = normalizeLoose(instruction, type);
+  const a2 = normalizeLoose(answer, type);
+  return !!i2 && !!a2 && i2 === a2;
+}
+
+function normalizeForCompare(value, type) {
+  let s = canonicalizeNegationText(
+    stripEmphasisMarkers(normalizeEscapedBreaks(String(value ?? "")))
+      .replace(/[“”]/g, '"')
+  )
     .replace(/\s+/g, " ")
     .trim()
     .replace(/[.?!~]+$/g, "")
     .trim();
 
+  if (type === "blank") s = s.toLowerCase();
+
   return s;
 }
 
-function normalizeLoose(value) {
-  return normalizeForCompare(value)
+function normalizeLoose(value, type) {
+  return normalizeForCompare(value, type)
     .toLowerCase()
     .replace(/[\s'"`.,!?~:;()\[\]{}_-]+/g, "");
 }
@@ -1062,20 +1758,21 @@ function clipExample(s) {
   return oneLine.length > 36 ? oneLine.slice(0, 36) + "..." : oneLine;
 }
 
-function stripTrailingQuestionMark(s) {
-  return String(s ?? "").replace(/[?？]+\s*$/g, "").trim();
-}
-
 function normalizeEscapedBreaks(value) {
   return String(value ?? "")
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -1086,12 +1783,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

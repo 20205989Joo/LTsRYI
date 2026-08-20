@@ -5,7 +5,7 @@
     "l0e1", "l0e2",
     "l1e1", "l1e2", "l1e3", "l1e4",
     "l2e1", "l2e2", "l2e3",
-    "l3e1", "l3e2", "l3e3", "l3e4", "l3e5",
+    "l3e1", "l3e2", "l3e3", "l3e4",
     "l4e1", "l4e2", "l4e3",
     "l5e1", "l5e2", "l5e3", "l5e4",
     "l6e1", "l6e2", "l6e3", "l6e4", "l6e5",
@@ -26,7 +26,8 @@
     normalizeLesson: normalizeLesson,
     setQuestionDebugList: setQuestionDebugList,
     clearQuestionDebugList: clearQuestionDebugList,
-    loadExcelQuestionDebugList: loadExcelQuestionDebugList
+    loadExcelQuestionDebugList: loadExcelQuestionDebugList,
+    requestQuestionJump: requestQuestionJump
   };
 
   writeSelectedLessonScript();
@@ -117,6 +118,7 @@
     });
 
     renderQuestionDebugList();
+    wireQuestionDebugJumps();
     ensureFallbackQuestionDebugList();
   }
 
@@ -159,7 +161,7 @@
       var question = item && item.question ? item.question : "";
       var answer = item && item.answer ? item.answer : "";
       return [
-        '<li class="aisth-dev-qa-item">',
+        '<li class="aisth-dev-qa-item" role="button" tabindex="0" data-aisth-dev-jump-index="' + idx + '">',
         '  <div class="aisth-dev-qa-q"><span class="aisth-dev-qa-no">Q' + escapeHtml(no) + '</span>' + escapeDebugText(question) + '</div>',
         '  <div class="aisth-dev-qa-a">A. ' + escapeDebugText(answer) + '</div>',
         '</li>'
@@ -167,9 +169,53 @@
     }).join("") + '</ol>';
   }
 
+  function wireQuestionDebugJumps() {
+    var panel = document.getElementById("aisth-dev-question-list");
+    if (!panel || panel.dataset.aisthJumpWired === "1") return;
+    panel.dataset.aisthJumpWired = "1";
+
+    panel.addEventListener("click", function (ev) {
+      var item = findJumpItem(ev.target);
+      if (!item) return;
+      requestQuestionJump(Number(item.getAttribute("data-aisth-dev-jump-index")));
+    });
+
+    panel.addEventListener("keydown", function (ev) {
+      if (ev.key !== "Enter" && ev.key !== " ") return;
+      var item = findJumpItem(ev.target);
+      if (!item) return;
+      ev.preventDefault();
+      requestQuestionJump(Number(item.getAttribute("data-aisth-dev-jump-index")));
+    });
+  }
+
+  function findJumpItem(target) {
+    if (!target || !target.closest) return null;
+    return target.closest("[data-aisth-dev-jump-index]");
+  }
+
+  function requestQuestionJump(index) {
+    if (!Number.isFinite(index) || index < 0) return false;
+
+    var handled = false;
+    if (window.AisthQuestionNavigator && typeof window.AisthQuestionNavigator.goTo === "function") {
+      handled = window.AisthQuestionNavigator.goTo(index) === true;
+    }
+
+    if (!handled) {
+      window.dispatchEvent(new CustomEvent("aisth:question-jump", {
+        detail: { index: index, lesson: selectedLesson }
+      }));
+    }
+
+    return true;
+  }
+
 
   function ensureFallbackQuestionDebugList() {
     if (debugListState.items && debugListState.items.length) return;
+
+    if (loadLocalQuestionDebugList()) return;
     if (fallbackDebugPromise) return;
 
     debugListState.emptyText = "엑셀에서 문제-답 불러오는 중";
@@ -185,6 +231,28 @@
     });
   }
 
+  function loadLocalQuestionDebugList() {
+    var parts = getSelectedLessonParts();
+    if (!parts || !window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") return false;
+
+    var rows = window.AisthLocalQuestionData.getRows(parts.lesson, parts.exercise);
+    if (!rows || !rows.length) return false;
+
+    var items = rows.map(function (row, idx) {
+      return {
+        no: cleanDebugText(row["QNumber"] || row["No"] || row["번호"] || row["Q"] || idx + 1),
+        question: buildExcelDebugQuestion(row),
+        answer: cleanDebugText(row["Answer"] || row["정답"] || "")
+      };
+    });
+
+    setQuestionDebugList(items, {
+      label: formatLessonLabel(selectedLesson),
+      source: "local",
+      title: "aisth-local-question-data.js"
+    });
+    return true;
+  }
   async function loadExcelQuestionDebugList() {
     var parts = getSelectedLessonParts();
     if (!parts) {

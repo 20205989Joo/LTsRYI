@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dish Quiz 1 · 25D</title>
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="styles-room.css" />
+  <link rel="stylesheet" href="dish-wordflow-25d.css?v=20260731m" />
+</head>
+<body class="wordflow-25d" data-word-stage="quiz1">
+  <div class="main-page">
+    <div id="cafe_int">
+      <div id="quiz-area"></div>
+      <button id="back-btn" type="button">Back</button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="result-popup">
+    <div class="popup-content" id="result-content">
+      <div>Quiz result</div>
+      <div id="result-detail"></div>
+      <button class="quiz-btn" type="button" onclick="document.getElementById('result-popup').style.display='none'">Close</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="day_manager.js"></script>
+  <script src="dish-review.js"></script>
+  <script src="dish-retake-lock.js"></script>
+  <script src="dish-wordflow-shell.js?v=20260731i"></script>
+  <script src="dish-quiz.js?v=wordflow-q1-20260731h"></script>
+</body>
+</html>

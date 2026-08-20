@@ -1,7 +1,6 @@
 // aisth-l8e6.js
 // Pair-based prototype for Aisth Lesson 8 Exercise 6
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 8;
 const TARGET_EXERCISE = 6;
 const PAGE_LABEL = "Aisth L8-E6";
@@ -24,7 +23,6 @@ const TEXT = {
   OPTION_B: "B",
   SUBMIT: "제출",
   NEXT: "다음",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -58,16 +56,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -120,17 +120,7 @@ function injectRuntimeStyles() {
     }
 
     .arrow-q {
-      margin-top: 10px;
-      background: #fff;
-      border: 1px dashed #d9c0a7;
-      border-radius: 10px;
-      padding: 11px 12px;
-      min-height: 48px;
-      font-size: 14px;
       font-weight: 900;
-      color: #7e3106;
-      line-height: 1.5;
-      word-break: keep-all;
     }
 
     .ask-line {
@@ -223,25 +213,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -280,18 +285,23 @@ function buildQuestionsFromRows() {
     const arrowQuestion = target.arrowQuestion || fallback.arrowQuestion || "";
     const instruction = cleanInstruction(target.instruction || fallback.instruction || DEFAULT_INSTRUCTION);
 
+    const optionRows = [
+      { label: TEXT.OPTION_A, text: String(left.sentence || "") },
+      { label: TEXT.OPTION_B, text: String(right.sentence || "") },
+    ];
+    const pairQuestion = `${optionRows[0].label}. ${optionRows[0].text}\n${optionRows[1].label}. ${optionRows[1].text}\n→ ${arrowQuestion}`;
     pairs.push({
       pairNo: pairs.length + 1,
+      qNumber: pairs.length + 1,
       title: left.title || right.title || PAGE_LABEL,
       instruction,
       left,
       right,
       arrowQuestion,
       correctOptionIndex: targetIndex,
-      options: [
-        { label: TEXT.OPTION_A, text: left.sentence },
-        { label: TEXT.OPTION_B, text: right.sentence },
-      ],
+      options: optionRows,
+      question: pairQuestion,
+      answer: String(optionRows[targetIndex]?.text || ""),
     });
   }
 
@@ -405,7 +415,7 @@ function renderQuestion() {
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
-      <div class="arrow-q">${escapeHtml(q.arrowQuestion || "...")}</div>
+      <div class="sentence aisth-question-surface aisth-question-center arrow-q">${escapeHtml(q.arrowQuestion || "...")}</div>
       <div class="ask-line">${escapeHtml(TEXT.ASK_LINE)}</div>
 
       <div class="aisth-choice-list">${optionsHtml}</div>
@@ -413,8 +423,8 @@ function renderQuestion() {
     </div>
 
     <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>${escapeHtml(TEXT.NEXT)}</button>
+      <button class="quiz-btn" id="submit-btn" type="button" style="display:none;" aria-hidden="true" tabindex="-1">${escapeHtml(TEXT.SUBMIT)}</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
@@ -434,6 +444,7 @@ function wireChoiceEvents() {
       if (!Number.isInteger(idx) || idx < 0) return;
       selectedOptionIndex = idx;
       refreshChoiceSelection();
+      submitCurrentAnswer();
     };
 
     el.addEventListener("click", activate);
@@ -480,8 +491,7 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     el.style.pointerEvents = "none";
   });
@@ -515,6 +525,13 @@ function buildQuestionPlainText(q) {
     `A. ${q.options[0]?.text || ""}`,
     `B. ${q.options[1]?.text || ""}`,
   ].join("\n");
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -621,7 +638,12 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -632,12 +654,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

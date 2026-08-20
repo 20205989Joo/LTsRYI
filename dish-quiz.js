@@ -39,6 +39,7 @@ function storeQuizResultWithMap(resultObject) {
   const map = readQuizResultsMap();
   map[quizKey] = resultObject;
   localStorage.setItem('QuizResultsMap', JSON.stringify(map));
+  window.dispatchEvent(new CustomEvent('dish:result-saved', { detail: resultObject }));
 }
 
 function isTesterUser() {
@@ -55,6 +56,7 @@ function getScoredResults(resultRows) {
 }
 
 function renderAssistWheelButton() {
+  if (!isTesterUser()) return;
   if (document.getElementById('assist-wheel-toggle')) return;
 
   if (!document.getElementById('assist-wheel-style')) {
@@ -301,6 +303,77 @@ window.addEventListener('DOMContentLoaded', async () => {
   renderInstruction();
 });
 
+function renderDishQuiz1TitleDemo() {
+  if (!document.body.matches('.wordflow-25d[data-word-stage="quiz1"]')) return '';
+
+  return `
+    <div class="wf-q1-title-demo" aria-hidden="true">
+      <div class="wf-q1-demo-head">
+        <span>QUESTION DEMO</span>
+        <strong>3 SEC</strong>
+      </div>
+      <div class="wf-q1-demo-timer"><i></i></div>
+      <div class="wf-q1-demo-word">bloom</div>
+      <div class="wf-q1-demo-choices">
+        <span data-choice="A">\uB2EC\uB9AC\uB2E4</span>
+        <span data-choice="B" class="is-answer">\uAF43\uD53C\uB2E4</span>
+        <span data-choice="C">\uC7A0\uB4E4\uB2E4</span>
+      </div>
+      <div class="wf-q1-demo-instruction">CHOOSE THE RIGHT MEANING</div>
+      <div class="wf-q1-demo-complete">CORRECT!</div>
+    </div>
+  `;
+}
+
+function startDishQuiz1TitleDemo() {
+  const demo = document.querySelector('#quiz-area .wf-q1-title-demo');
+  if (!demo) return;
+
+  const timer = demo.querySelector('.wf-q1-demo-timer > i');
+  const word = demo.querySelector('.wf-q1-demo-word');
+  const answer = demo.querySelector('.wf-q1-demo-choices > .is-answer');
+  const instruction = demo.querySelector('.wf-q1-demo-instruction');
+  const complete = demo.querySelector('.wf-q1-demo-complete');
+
+  const run = () => {
+    if (!demo.isConnected) return;
+    let remaining = 100;
+    word?.classList.remove('is-correct');
+    answer?.classList.remove('is-demo-pressing', 'is-selected');
+    instruction?.classList.remove('is-hidden');
+    complete?.classList.remove('is-visible');
+    if (timer) timer.style.width = '100%';
+
+    const timerInterval = window.setInterval(() => {
+      if (!demo.isConnected) {
+        window.clearInterval(timerInterval);
+        return;
+      }
+      remaining = Math.max(18, remaining - 3);
+      if (timer) timer.style.width = `${remaining}%`;
+    }, 45);
+
+    window.setTimeout(() => {
+      if (!demo.isConnected) return;
+      answer?.classList.add('is-demo-pressing');
+    }, 1260);
+
+    window.setTimeout(() => {
+      if (!demo.isConnected) return;
+      window.clearInterval(timerInterval);
+      answer?.classList.remove('is-demo-pressing');
+      answer?.classList.add('is-selected');
+      word?.classList.add('is-correct');
+      instruction?.classList.add('is-hidden');
+      complete?.classList.add('is-visible');
+    }, 1420);
+
+    window.setTimeout(run, 2850);
+  };
+
+  run();
+}
+
 function renderInstruction() {
   const quizArea = document.getElementById('quiz-area');
   quizArea.innerHTML = `
@@ -313,6 +386,7 @@ function renderInstruction() {
       font-size: 14px;
     ">
       <div style="font-size:18px; font-weight:bold; color: #7e3106; margin-bottom: 12px;">📘 시험 안내</div>
+      ${renderDishQuiz1TitleDemo()}
       <ul style="margin-bottom: 16px; padding-left: 20px; line-height: 1.6;">
         <li>총 20문제가 출제됩니다.</li>
         <li>각 문제당 <b>3초</b>의 시간이 주어집니다.</li>
@@ -329,6 +403,12 @@ function renderInstruction() {
   if (infoItems[0]) infoItems[0].textContent = 'Total 30 questions: 20 current + 10 review.';
 
   const startBtn = quizArea.querySelector('button.quiz-btn');
+  if (document.body.matches('.wordflow-25d[data-word-stage="quiz1"]')) {
+    const title = quizArea.querySelector(':scope > div > div:first-child');
+    if (title) title.textContent = 'MEANING MATCH';
+    if (startBtn) startBtn.textContent = 'PRESS START';
+    startDishQuiz1TitleDemo();
+  }
   startBtn?.removeAttribute('onclick');
   startBtn?.addEventListener('click', () => {
     startQuiz().catch(error => {
@@ -427,7 +507,11 @@ function renderQuestion() {
   const q = questions[currentIndex];
 
   quizArea.innerHTML = `
-    <div style="font-weight:bold; font-size:18px; margin-bottom:10px;">
+    <div
+      data-question-current="${currentIndex + 1}"
+      data-question-total="${questions.length}"
+      style="font-weight:bold; font-size:18px; margin-bottom:10px;"
+    >
       ${currentIndex + 1}. ${q.word}
     </div>
     <div id="timer-bar" style="
@@ -445,6 +529,26 @@ function renderQuestion() {
     </div>
     <div id="feedback" style="margin-top:12px; font-weight:bold;"></div>
   `;
+
+  if (document.body.matches('.wordflow-25d[data-word-stage="quiz1"]')) {
+    quizArea.querySelectorAll('.quiz-btn').forEach(button => {
+      const cancelPress = () => {
+        button.classList.remove('is-pressing');
+      };
+      button.addEventListener('pointerdown', () => {
+        button.classList.add('is-pressing');
+      });
+      button.addEventListener('pointercancel', cancelPress);
+      button.addEventListener('pointerleave', cancelPress);
+      button.addEventListener('click', () => {
+        quizArea.querySelectorAll('.quiz-btn.is-selected').forEach(item => {
+          item.classList.remove('is-selected');
+        });
+        button.classList.remove('is-pressing');
+        button.classList.add('is-selected');
+      });
+    });
+  }
 
   const bar = document.getElementById('timer-bar');
   if (bar) {
@@ -511,6 +615,26 @@ function checkAnswer(selected) {
     feedback.textContent = correct ? '정답입니다 ✅' : '오답입니다 ❌';
   }
 
+  if (document.body.matches('.wordflow-25d[data-word-stage="quiz1"]')) {
+    const quizArea = document.getElementById('quiz-area');
+    quizArea?.classList.remove('is-correct', 'is-wrong');
+    quizArea?.classList.add(correct ? 'is-correct' : 'is-wrong');
+
+    const choiceButtons = Array.from(document.querySelectorAll('#quiz-area .wf-q1-options .quiz-btn'));
+    choiceButtons.forEach((button, index) => {
+      button.classList.remove('is-correct-choice', 'is-wrong-choice', 'is-answer-choice');
+      const option = q.options[index];
+      if (!correct && option === q.answer) {
+        button.classList.add('is-answer-choice');
+      }
+      if (selected != null && option === selected) {
+        button.classList.add(correct ? 'is-correct-choice' : 'is-wrong-choice');
+      }
+    });
+  }
+
+  showDishQuiz1AnswerToast(correct, selected == null);
+
   // 🔧 버튼 중복 클릭 방지
   const buttons = document.querySelectorAll('#quiz-area .quiz-btn');
   buttons.forEach(btn => {
@@ -521,6 +645,220 @@ function checkAnswer(selected) {
     currentIndex++;
     renderQuestion();
   }, 800);
+}
+
+function showDishQuiz1AnswerToast(correct, timedOut) {
+  if (!document.body.matches('.wordflow-25d[data-word-stage="quiz1"]')) return;
+  document.querySelector('.dish-q1-direct-toast')?.remove();
+
+  const toast = document.createElement('div');
+  const positive = correct === true;
+  toast.className = `dish-q1-direct-toast ${positive ? 'correct' : 'wrong'}`;
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'assertive');
+  toast.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 30000;
+    width: min(226px, calc(100vw - 48px));
+    min-height: 82px;
+    padding: 12px 16px;
+    border: 2px solid rgba(255,248,224,0.9);
+    border-radius: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    box-sizing: border-box;
+    color: #fff;
+    background: ${positive
+      ? 'linear-gradient(145deg, #65a77d 0%, #2e7555 100%)'
+      : 'linear-gradient(145deg, #df786a 0%, #ad4842 100%)'};
+    box-shadow:
+      0 6px 0 ${positive ? '#245f46' : '#873934'},
+      0 17px 34px ${positive ? 'rgba(29,92,60,0.3)' : 'rgba(128,47,43,0.3)'},
+      inset 0 1px 0 rgba(255,255,255,0.32),
+      inset 0 -4px 9px rgba(45,25,18,0.12);
+    opacity: 1;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  `;
+  toast.innerHTML = `
+    <strong style="
+      position:relative;
+      z-index:2;
+      width:44px;
+      height:44px;
+      flex:0 0 44px;
+      border:2px solid rgba(255,250,230,.82);
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      color:${positive ? '#2d7654' : '#b14943'};
+      background:#fff8e8;
+      box-shadow:
+        inset 0 1px 0 #fff,
+        0 3px 7px rgba(38,42,31,.16);
+      font:700 30px/1 Arial,sans-serif;
+    ">${positive ? '✓' : '×'}</strong>
+    <span style="position:relative; z-index:2; min-width:0; text-align:left;">
+      <small style="
+        display:block;
+        margin-bottom:3px;
+        color:rgba(255,249,229,.76);
+        font-size:8px;
+        font-weight:900;
+        letter-spacing:.16em;
+      ">ANSWER CHECK</small>
+      <b style="
+        display:block;
+        color:#fffaf0;
+        font-size:17px;
+        font-weight:950;
+        line-height:1;
+        letter-spacing:.04em;
+        text-shadow:0 1px 2px rgba(25,45,32,.2);
+      ">${positive ? 'CORRECT' : timedOut ? 'TIME OUT' : 'WRONG'}</b>
+    </span>
+    <i aria-hidden="true" style="
+      position:absolute;
+      right:-8px;
+      bottom:-12px;
+      width:62px;
+      height:62px;
+      border:10px solid rgba(255,249,225,.08);
+      border-radius:50%;
+      transform:rotate(-18deg);
+    "></i>
+    <i aria-hidden="true" style="
+      position:absolute;
+      top:9px;
+      right:12px;
+      width:8px;
+      height:14px;
+      border:1px solid rgba(255,245,210,.28);
+      border-radius:100% 0 100% 0;
+      transform:rotate(28deg);
+    "></i>
+  `;
+
+  document.body.appendChild(toast);
+  toast.animate([
+    {
+      opacity: 0,
+      transform: 'translate(-50%, -46%) scale(.82)'
+    },
+    {
+      opacity: 1,
+      transform: 'translate(-50%, -52%) scale(1.04)',
+      offset: 0.18
+    },
+    {
+      opacity: 1,
+      transform: 'translate(-50%, -50%) scale(1)',
+      offset: 0.76
+    },
+    {
+      opacity: 0,
+      transform: 'translate(-50%, -55%) scale(.97)'
+    }
+  ], {
+    duration: 760,
+    easing: 'cubic-bezier(.2,.86,.24,1)',
+    fill: 'forwards'
+  });
+  setTimeout(() => toast.remove(), 790);
+}
+
+function escapeDishQuiz1ResultHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[character]));
+}
+
+function formatDishQuiz1ResultSource(result) {
+  if (String(result?.source || '').toLowerCase() !== 'review') {
+    return '\uC624\uB298';
+  }
+
+  const reviewLevel = String(result?.reviewLevel || '').trim().toUpperCase();
+  const reviewDay = String(result?.reviewDay || '').replace(/[^0-9]/g, '');
+  return `${reviewLevel || 'REVIEW'}${reviewDay ? ` Day ${reviewDay}` : ''}`;
+}
+
+function renderDishQuiz1WordflowResult(popup, summary) {
+  const rows = results.map(result => {
+    const isReview = String(result?.source || '').toLowerCase() === 'review';
+    return `
+      <tr class="${isReview ? 'is-review' : 'is-main'}">
+        <td>${escapeDishQuiz1ResultHtml(result.no)}</td>
+        <td><span class="wf-result-source">${escapeDishQuiz1ResultHtml(formatDishQuiz1ResultSource(result))}</span></td>
+        <td class="wf-result-word">${escapeDishQuiz1ResultHtml(result.word)}</td>
+        <td>${escapeDishQuiz1ResultHtml(result.selected)}</td>
+        <td><span class="wf-result-verdict ${result.correct ? 'is-correct' : 'is-wrong'}">${result.correct ? '\u2713' : '\u00D7'}</span></td>
+      </tr>
+    `;
+  }).join('');
+
+  popup.innerHTML = `
+    <div class="popup-content wf-result-content" id="result-content">
+      <div class="wf-result-header">
+        <span class="wf-result-kicker">WORD QUIZ \u00B7 RESULT</span>
+        <h2>\uC804\uCCB4 \uC2DC\uD5D8\uC9C0 \uACB0\uACFC</h2>
+      </div>
+      <div class="wf-result-score ${summary.canSubmit ? 'is-pass' : 'is-retry'}">
+        <div class="wf-result-score-number">
+          <strong>${summary.score}</strong>
+          <span>\uC810</span>
+        </div>
+        <div class="wf-result-score-copy">
+          <span>\uC815\uB2F5</span>
+          <strong>${summary.correctCount} / ${summary.totalQuestions}</strong>
+          <small>\uC624\uB298 \uBB38\uC81C \uAE30\uC900</small>
+        </div>
+      </div>
+      <div class="wf-result-status ${summary.canSubmit ? 'is-pass' : 'is-retry'}">
+        <span aria-hidden="true">${summary.canSubmit ? '\u2713' : '!'}</span>
+        <strong>${summary.canSubmit
+          ? '80\uC810 \uC774\uC0C1\uC785\uB2C8\uB2E4. \uC81C\uCD9C\uD558\uB7EC \uAC08 \uC218 \uC788\uC5B4\uC694.'
+          : '80\uC810 \uC774\uC0C1\uBD80\uD130 \uC81C\uCD9C\uD560 \uC218 \uC788\uC5B4\uC694.'}</strong>
+      </div>
+      <div class="wf-result-detail" id="result-detail">
+        <table class="wf-result-table">
+          <colgroup>
+            <col class="wf-col-number" />
+            <col class="wf-col-source" />
+            <col class="wf-col-word" />
+            <col class="wf-col-answer" />
+            <col class="wf-col-verdict" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>\uBC88\uD638</th>
+              <th>\uCD9C\uCC98</th>
+              <th>\uBB38\uC81C</th>
+              <th>\uB0B4 \uB2F5\uC548</th>
+              <th>\uACB0\uACFC</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div class="wf-result-actions">
+        ${summary.canSubmit
+          ? '<button class="quiz-btn secondary" type="button" onclick="restartQuiz()">\uC7AC\uC2DC\uD5D8</button>'
+          : '<button class="quiz-btn secondary" type="button" onclick="window.location.href=getDishLearnUrl()">MEM\uC73C\uB85C \uB3CC\uC544\uAC00\uAE30</button>'}
+        <button class="quiz-btn" id="submit-btn" type="button" ${summary.canSubmit ? '' : 'disabled'} onclick="returnToTray()">\uB2E4\uC74C \uB2E8\uACC4\uB85C</button>
+      </div>
+    </div>
+  `;
+  popup.style.display = 'flex';
 }
 
 function showResultPopup() {
@@ -565,6 +903,16 @@ function showResultPopup() {
   storeQuizResultWithMap(resultObject);
 
   const popup = document.getElementById('result-popup');
+
+  if (document.body.matches('.wordflow-25d[data-word-stage="quiz1"]')) {
+    renderDishQuiz1WordflowResult(popup, {
+      score,
+      correctCount,
+      totalQuestions,
+      canSubmit
+    });
+    return;
+  }
 
   const table = `
     <table style="width:100%; border-collapse: collapse; font-size: 13px;">
@@ -658,9 +1006,12 @@ function restartQuiz() {
 function returnToTray() {
   const params = new URLSearchParams(window.location.search);
   const userId = params.get('id') || '';
+  const nextPage = document.body.matches('.wordflow-25d[data-word-stage="quiz1"]')
+    ? 'dish-quiz2-25d.html'
+    : 'dish-quiz2.html';
 
   // ✅ quizKey(=quizTitle)를 같이 들고 트레이로 복귀
-  const url = `dish-quiz2.html?id=${encodeURIComponent(userId)}&key=${encodeURIComponent(quizTitle)}&level=${encodeURIComponent(level)}&day=${encodeURIComponent(day)}`;
+  const url = `${nextPage}?id=${encodeURIComponent(userId)}&key=${encodeURIComponent(quizTitle)}&level=${encodeURIComponent(level)}&day=${encodeURIComponent(day)}`;
 
   // ✅ 뒤로 가기로 다시 퀴즈로 못 돌아오게 history 교체
   window.location.replace(url);

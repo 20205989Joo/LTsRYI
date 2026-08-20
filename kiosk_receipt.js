@@ -168,7 +168,7 @@ function showReceiptAgain(text, options = {}) {
     overlay.style.position = 'absolute';
     overlay.style.inset = '0';
     overlay.style.background = 'rgba(0, 0, 0, 0.45)';
-    overlay.style.zIndex = '16';
+    overlay.style.zIndex = '1200';
     overlay.style.pointerEvents = 'auto';
     host.appendChild(overlay);
 
@@ -177,16 +177,18 @@ function showReceiptAgain(text, options = {}) {
     toast.style.position = 'absolute';
     toast.style.left = '50%';
     toast.style.top = '50%';
-    toast.style.transform = 'translate(-50%, -50%)';
+    toast.style.transform = 'translate(-50%, calc(-50% + 8px))';
     toast.style.background = 'rgba(20, 20, 20, 0.9)';
     toast.style.color = '#fff';
     toast.style.padding = '12px 20px';
     toast.style.borderRadius = '16px';
     toast.style.fontSize = '13px';
-    toast.style.zIndex = '18';
+    toast.style.zIndex = '1202';
     toast.style.textAlign = 'center';
     toast.style.border = '1px solid rgba(255, 220, 150, 0.4)';
     toast.style.boxShadow = '0 0 0 1px rgba(255, 220, 150, 0.22), 0 0 18px rgba(255, 200, 100, 0.28), 0 10px 24px rgba(0,0,0,0.45)';
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 180ms ease, transform 180ms ease';
     toast.innerHTML = `
       <div style="margin-bottom: 6px;">☕ 테이블로 이동합니다...</div>
       <div style="
@@ -201,23 +203,33 @@ function showReceiptAgain(text, options = {}) {
           width: 0%;
           height: 100%;
           background: #ffcc66;
-          transition: width 1.5s linear;
+          transition: width 1.4s linear;
         "></div>
       </div>
     `;
     host.appendChild(toast);
 
     // 진행바 애니메이션 시작
-    requestAnimationFrame(() => {
-      const bar = document.getElementById('redirect-progress-bar');
-      if (bar) bar.style.width = '100%';
-    });
+    const bar = document.getElementById('redirect-progress-bar');
+    void toast.offsetWidth;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translate(-50%, -50%)';
+    if (bar) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          bar.style.width = '100%';
+        });
+      });
+    }
 
     // 1.5초 후 테이블로 이동
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('id');
     redirectTimerId = setTimeout(() => {
-      const target = `homework-tray_v1.html${userId ? `?id=${encodeURIComponent(userId)}` : ''}`;
+      const trayPage = window.location.pathname.toLowerCase().includes('student-room-25d')
+        ? 'homework-tray_v1-25d.html'
+        : 'homework-tray_v1.html';
+      const target = `${trayPage}${userId ? `?id=${encodeURIComponent(userId)}` : ''}`;
       clearRedirectTimer();
       window.location.href = target;
     }, 1500);

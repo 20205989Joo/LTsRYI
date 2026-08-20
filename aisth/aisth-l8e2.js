@@ -1,7 +1,6 @@
 ﻿// aisth-l8e2.js
 // Independent runtime for Aisth Lesson 8 Exercise 2
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 8;
 const TARGET_EXERCISE = 2;
 const PAGE_LABEL = "Aisth L8-E2";
@@ -25,7 +24,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -49,6 +47,31 @@ let results = [];
 let isCurrentLocked = false;
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
+let l82WordTiles = [];
+let l82SelectedWordIds = [];
+
+const L82_PRE_INVERSION = {
+  1: "I have never seen such a thing.",
+  2: "He had hardly entered when it started to rain.",
+  3: "We seldom watch TV on weekdays.",
+  4: "He realized the truth only after the meeting.",
+  5: "She rarely goes out these days.",
+  6: "I did not realize the mistake until I arrived.",
+  7: "He knew little about the plan.",
+  8: "The keys could be found nowhere.",
+  9: "He is not only smart, but also kind.",
+  10: "I had no sooner sat down than the phone rang.",
+  31: "The scene was so beautiful that we cried.",
+  32: "The confusion was such that no one knew what to do.",
+  33: "I understood what he meant only then.",
+  34: "She hardly ever complains.",
+  35: "They did not admit their guilt at any time.",
+  36: "He was not involved in the case in any way.",
+  37: "You must not open the door under any circumstances.",
+  38: "It was by no means easy.",
+  39: "You should not touch that switch on any account.",
+  40: "I did not doubt his honesty for a moment.",
+};
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -60,16 +83,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -129,6 +154,7 @@ function injectRuntimeStyles() {
       margin-top: 8px;
       line-height: 1.65;
       font-size: 14px;
+      font-weight: 900;
       word-break: keep-all;
       white-space: pre-wrap;
     }
@@ -152,6 +178,18 @@ function injectRuntimeStyles() {
       color: #7e3106;
       font-weight: 900;
     }
+
+    .l82-source-card { font-weight:900; }
+    .l82-scramble { display:grid;gap:10px; }
+    .l82-answer-tray,.l82-word-bank { display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;min-height:66px;padding:11px;border-radius:14px;box-sizing:border-box; }
+    .l82-answer-tray { border:1.5px dashed rgba(86,49,154,.38);background:#fff; }
+    .l82-answer-tray.is-wrong { border-color:#d44a43;background:#fff0ef;animation:l82Shake .28s ease; }
+    .l82-word-bank { border:1px solid rgba(216,200,236,.9);background:#f7f3ff; }
+    .l82-word-chip,.l82-fixed-word { appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 10px;border:1px solid #7657b5;border-radius:11px;background:linear-gradient(180deg,#faf8ff,#e3d8fb);color:#44227d;font-size:13px;font-weight:900;line-height:1; }
+    .l82-word-chip { cursor:pointer;box-shadow:0 4px 8px rgba(68,34,125,.12); }
+    .l82-fixed-word { border-color:#f17b2a;background:linear-gradient(180deg,#fff7e9,#ffe0b7);color:#8a3b08;box-shadow:0 0 0 3px rgba(241,123,42,.1); }
+    .l82-empty { color:#9b8fa8;font-size:11px;font-weight:850; }
+    @keyframes l82Shake { 30%{transform:translateX(-5px)}65%{transform:translateX(5px)} }
     textarea,
     .short-input {
       width: 100%;
@@ -248,25 +286,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -416,8 +469,6 @@ function startQuiz() {
 function renderQuestion() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
-
-
   const q = questions[currentIndex];
   if (!q) {
     showResultPopup();
@@ -425,113 +476,112 @@ function renderQuestion() {
   }
 
   isCurrentLocked = false;
-
-  const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
-
-  const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
-    : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
-
-  const inputHtml = q.type === "blank"
-    ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
-    : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
+  const target = buildL82TargetSentence(q);
+  const targetWords = target.split(/\s+/).filter(Boolean);
+  const fixedWord = targetWords[0] || "";
+  l82WordTiles = buildL82WordTiles(targetWords.slice(1), q.qNumber);
+  l82SelectedWordIds = [];
+  q.l82Target = target;
+  q.l82FixedWord = fixedWord;
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
-
     <div class="box">
-      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
+      <div class="question-instruction">문장을 도치한 어순으로 다시 배열해보세요.</div>
+      <div class="sentence aisth-question-surface aisth-question-center l82-source-card">${escapeHtml(L82_PRE_INVERSION[q.qNumber] || target)}</div>
     </div>
-
     <div class="box" style="background:#fff;">
-      ${inputHtml}
+      <div class="l82-scramble">
+        <div id="l82-answer-tray" class="l82-answer-tray" aria-label="완성한 문장"></div>
+        <div id="l82-word-bank" class="l82-word-bank" aria-label="섞인 단어"></div>
+      </div>
       <div id="feedback" class="feedback"></div>
     </div>
-
     <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const input = document.getElementById("user-answer");
-  const slotInputControl = input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
-    : null;
-
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
-
-  if (input) {
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" && q.type === "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-      if (ev.key === "Enter" && ev.ctrlKey && q.type !== "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-    });
-  }
+  document.getElementById("next-btn")?.addEventListener("click", goNext);
+  renderL82ScrambleControls(q);
 }
 
-function submitCurrentAnswer() {
+function buildL82TargetSentence(q) {
+  return stripEmphasisMarkers(String(q.question || ""))
+    .replace(/_{2,}/, String(q.answer || "").trim())
+    .replace(/\s*\((?:X|have|touch|close|fright|complete|catch|amaze|wait)\)\s*$/i, "")
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,.?!])/g, "$1")
+    .trim();
+}
+
+function buildL82WordTiles(words, qNumber) {
+  const tiles = words.map((text, originalIndex) => ({ id:`l82-${qNumber}-${originalIndex}`,originalIndex,text }));
+  if (tiles.length < 2) return tiles;
+  const middle = Math.ceil(tiles.length / 2);
+  const mixed = tiles.slice(middle).reverse().concat(tiles.slice(0, middle).reverse());
+  return mixed.every((tile,index) => tile.originalIndex === index) ? tiles.slice(1).concat(tiles[0]) : mixed;
+}
+
+function renderL82ScrambleControls(q) {
+  const tray = document.getElementById("l82-answer-tray");
+  const bank = document.getElementById("l82-word-bank");
+  if (!tray || !bank) return;
+  const selectedSet = new Set(l82SelectedWordIds);
+  const selected = l82SelectedWordIds.map((id) => l82WordTiles.find((tile) => tile.id === id)).filter(Boolean);
+  const remaining = l82WordTiles.filter((tile) => !selectedSet.has(tile.id));
+  tray.innerHTML = `<span class="l82-fixed-word">${escapeHtml(q.l82FixedWord)}</span>${selected.map((tile,index) => `<button class="l82-word-chip" type="button" data-selected-index="${index}">${escapeHtml(tile.text)}</button>`).join("")}`;
+  bank.innerHTML = remaining.length
+    ? remaining.map((tile) => `<button class="l82-word-chip" type="button" data-word-id="${escapeHtmlAttr(tile.id)}">${escapeHtml(tile.text)}</button>`).join("")
+    : '<span class="l82-empty">어순을 확인하고 있어요.</span>';
+  tray.querySelectorAll("[data-selected-index]").forEach((button) => button.addEventListener("click", () => {
+    if (isCurrentLocked) return;
+    l82SelectedWordIds.splice(Number(button.dataset.selectedIndex),1);
+    tray.classList.remove("is-wrong");
+    renderL82ScrambleControls(q);
+  }));
+  bank.querySelectorAll("[data-word-id]").forEach((button) => button.addEventListener("click", () => {
+    if (isCurrentLocked) return;
+    l82SelectedWordIds.push(String(button.dataset.wordId || ""));
+    tray.classList.remove("is-wrong");
+    renderL82ScrambleControls(q);
+    if (l82SelectedWordIds.length === l82WordTiles.length) submitL82Scramble(q);
+  }));
+}
+
+function submitL82Scramble(q) {
   if (isCurrentLocked) return;
-
-  const q = questions[currentIndex];
-  const input = document.getElementById("user-answer");
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const feedback = document.getElementById("feedback");
-
-  if (!q || !input) return;
-
-  const userRaw = String(input.value || "").trim();
-  if (!userRaw) {
-    showToast("no", TEXT.INPUT_REQUIRED);
-    return;
-  }
-  const ok = isAnswerCorrect(q.type, userRaw, q.answer);
-
+  const selected = l82SelectedWordIds.map((id) => l82WordTiles.find((tile) => tile.id === id)).filter(Boolean);
+  const ok = selected.every((tile,index) => tile.originalIndex === index);
   if (!ok) {
-    if (feedback) {
-      feedback.className = "feedback";
-      feedback.innerHTML = "";
-    }
+    document.getElementById("l82-answer-tray")?.classList.add("is-wrong");
     showToast("no", TEXT.WRONG);
     return;
   }
 
   isCurrentLocked = true;
-  input.disabled = true;
-  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  const userRaw = q.l82Target;
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
     type: q.type,
     question: q.question,
     selected: userRaw,
-    answer: q.answer,
+    answer: q.l82Target,
     instruction: q.instruction,
     correct: true,
   });
 
-  if (feedback) {
-    feedback.className = "feedback";
-    feedback.innerHTML = "";
-  }
-
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -569,9 +619,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -640,11 +695,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -655,12 +715,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 
@@ -688,7 +748,7 @@ function showResultPopup() {
         <div><b>Q${idx + 1}</b> ${renderTextWithEmphasis(q.question)}</div>
         <div style="margin-top:4px;"><span class="${stateClass}">${state}</span></div>
         <div>${TEXT.MY_ANSWER}: ${escapeHtml(user)}</div>
-        <div>${TEXT.ANSWER}: ${formatMultilineText(q.answer)}</div>
+        <div>${TEXT.ANSWER}: ${formatMultilineText(row?.answer || q.answer)}</div>
       </div>
     `;
   }).join("");

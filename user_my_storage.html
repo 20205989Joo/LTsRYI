@@ -1,0 +1,5421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Notes</title>
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="styles-room.css" />
+  <link rel="stylesheet" href="styles-wordlist.css" />
+  <link rel="stylesheet" href="dish-wordflow-25d.css?v=20260731m" />
+  <link rel="stylesheet" href="tablet-desk-background.css?v=20260731" />
+  <style>
+    :root {
+      --shell-width: min(1120px, 96vw);
+      --shell-height: min(820px, 92vh);
+      --font-ui: "Aptos Display", "Trebuchet MS", "Segoe UI Variable Text", sans-serif;
+      --table-a: #d26e52;
+      --table-b: #b95741;
+      --ink: #182328;
+      --muted: #617078;
+      --line: rgba(26, 42, 48, 0.13);
+      --glass: rgba(248, 252, 249, 0.9);
+      --glass-strong: rgba(255, 255, 255, 0.96);
+      --green: #2d7869;
+      --green-deep: #174f56;
+      --green-soft: #dff4e9;
+      --sand: #f2d889;
+      --shadow: 0 30px 66px rgba(48, 25, 18, 0.34);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      overflow-x: hidden;
+      color: var(--ink);
+      font-family: var(--font-ui);
+      background:
+        radial-gradient(ellipse at 48% 42%, rgba(255, 198, 157, 0.36), transparent 48%),
+        radial-gradient(ellipse at 18% 10%, rgba(255, 232, 199, 0.18), transparent 32%),
+        linear-gradient(180deg, var(--table-a), var(--table-b));
+    }
+
+    .tablet-shell {
+      width: var(--shell-width);
+      height: var(--shell-height);
+      min-height: 700px;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .tablet-shell::before {
+      content: "";
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      bottom: -22px;
+      height: 92px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(55, 24, 15, 0.38), rgba(55, 24, 15, 0.16) 52%, transparent 74%);
+      filter: blur(10px);
+      z-index: -1;
+    }
+
+    .tablet-frame {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      overflow: hidden;
+      border: 13px solid #172126;
+      border-radius: 38px;
+      background: #10181d;
+      box-shadow: var(--shadow);
+    }
+
+    .tablet-frame::after {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 86px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateX(-50%);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 24px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 38%),
+        linear-gradient(145deg, #214553 0%, #397a80 38%, #8db7a7 72%, #eef0db 100%);
+    }
+
+    .status-bar {
+      position: relative;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) auto minmax(120px, 1fr);
+      align-items: center;
+      gap: 16px;
+      height: 52px;
+      padding: 0 24px;
+      color: rgba(255, 255, 255, 0.96);
+      font-size: 13px;
+      font-weight: 800;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+    }
+
+    .status-title {
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    .status-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .student-label {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .home-link {
+      min-height: 32px;
+      padding: 0 13px;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    .home-link:hover,
+    .home-link:focus-visible {
+      background: rgba(255, 255, 255, 0.25);
+      outline: none;
+    }
+
+    .workspace {
+      position: relative;
+      height: calc(100% - 52px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 375px;
+      gap: 14px;
+      padding: 4px 18px 5px;
+    }
+
+    .storage-window {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 56px minmax(0, 1fr) 31px;
+      border: 1px solid rgba(255, 255, 255, 0.66);
+      border-radius: 18px;
+      background: var(--glass);
+      box-shadow: 0 18px 34px rgba(16, 43, 49, 0.21);
+      backdrop-filter: blur(18px);
+    }
+
+    .window-bar {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 13px 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.52);
+    }
+
+    .window-title-block {
+      min-width: 0;
+    }
+
+    .window-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .window-subtitle {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750;
+      letter-spacing: 0.04em;
+    }
+
+    .source-chip {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border: 1px solid rgba(45, 120, 105, 0.25);
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--green-deep);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    .window-spacer {
+      flex: 1;
+      min-width: 4px;
+    }
+
+    .search-wrap {
+      position: relative;
+      width: min(180px, 31%);
+      min-width: 104px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 32px;
+      padding: 0 10px 0 29px;
+      border: 1px solid rgba(29, 59, 65, 0.16);
+      border-radius: 10px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .search-input:focus {
+      border-color: rgba(45, 120, 105, 0.55);
+      box-shadow: 0 0 0 3px rgba(45, 120, 105, 0.1);
+    }
+
+    .search-wrap::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 9px;
+      width: 9px;
+      height: 9px;
+      border: 2px solid #668078;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .search-wrap::after {
+      content: "";
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 6px;
+      height: 2px;
+      border-radius: 999px;
+      background: #668078;
+      transform: rotate(45deg);
+      transform-origin: left center;
+      pointer-events: none;
+    }
+
+    .refresh-btn {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(29, 59, 65, 0.16);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--green-deep);
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .refresh-btn:hover,
+    .refresh-btn:focus-visible {
+      border-color: rgba(45, 120, 105, 0.46);
+      background: #fff;
+      outline: none;
+    }
+
+    .refresh-btn:disabled {
+      cursor: wait;
+      opacity: 0.58;
+    }
+
+    .explorer-body {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 172px minmax(0, 1fr);
+    }
+
+    .folder-pane {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      padding: 12px 8px;
+      border-right: 1px solid var(--line);
+      background: rgba(225, 239, 232, 0.54);
+    }
+
+    .folder-heading {
+      padding: 0 9px 7px;
+      color: #718078;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .folder-list {
+      display: grid;
+      gap: 3px;
+    }
+
+    .folder-btn {
+      width: 100%;
+      min-height: 37px;
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: #35494b;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .folder-btn:hover {
+      background: rgba(255, 255, 255, 0.56);
+    }
+
+    .folder-btn.is-active {
+      border-color: rgba(45, 120, 105, 0.18);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--green-deep);
+      box-shadow: 0 5px 12px rgba(32, 73, 67, 0.08);
+    }
+
+    .folder-icon {
+      width: 22px;
+      height: 16px;
+      position: relative;
+      display: block;
+      border-radius: 3px 4px 5px 5px;
+      background: linear-gradient(180deg, #f7dd92, #e8bf5b);
+      box-shadow: inset 0 0 0 1px rgba(96, 74, 22, 0.13);
+    }
+
+    .folder-icon::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: -4px;
+      width: 10px;
+      height: 6px;
+      border-radius: 3px 3px 0 0;
+      background: #efd078;
+    }
+
+    .folder-count {
+      min-width: 22px;
+      padding: 2px 5px;
+      border-radius: 999px;
+      background: rgba(36, 85, 79, 0.08);
+      color: #658078;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 900;
+    }
+
+    .file-pane {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 38px minmax(0, 1fr);
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .path-bar {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      color: #60716f;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .path-root {
+      color: var(--green-deep);
+    }
+
+    .path-current {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-list {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      align-content: start;
+      gap: 7px;
+      padding: 10px;
+    }
+
+    .file-card {
+      width: 100%;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 9px;
+      border: 1px solid rgba(30, 55, 60, 0.11);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.76);
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(31, 63, 63, 0.05);
+    }
+
+    .file-card:hover {
+      border-color: rgba(45, 120, 105, 0.3);
+      background: rgba(255, 255, 255, 0.98);
+      transform: translateY(-1px);
+    }
+
+    .file-card.is-selected {
+      border-color: rgba(45, 120, 105, 0.58);
+      background: #effaf4;
+      box-shadow: inset 0 0 0 1px rgba(45, 120, 105, 0.08), 0 7px 14px rgba(31, 78, 69, 0.1);
+    }
+
+    .file-icon {
+      width: 34px;
+      height: 40px;
+      position: relative;
+      display: grid;
+      place-items: end center;
+      padding-bottom: 7px;
+      border: 1px solid rgba(54, 83, 76, 0.22);
+      border-radius: 5px 9px 5px 5px;
+      background: linear-gradient(180deg, #fffdf2, #f4ecd0);
+      color: #54736a;
+      font-size: 7px;
+      font-weight: 950;
+      letter-spacing: 0.05em;
+    }
+
+    .file-icon::before {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -1px;
+      width: 11px;
+      height: 11px;
+      border-left: 1px solid rgba(54, 83, 76, 0.18);
+      border-bottom: 1px solid rgba(54, 83, 76, 0.18);
+      border-radius: 0 7px 0 3px;
+      background: #e6f2e8;
+    }
+
+    .file-main {
+      min-width: 0;
+    }
+
+    .file-title {
+      overflow: hidden;
+      color: #273b3d;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-meta {
+      margin-top: 3px;
+      overflow: hidden;
+      color: #72807c;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-stat {
+      min-width: 55px;
+      text-align: right;
+    }
+
+    .word-count {
+      color: var(--green-deep);
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .file-state {
+      margin-top: 3px;
+      color: #82908c;
+      font-size: 8px;
+      font-weight: 800;
+    }
+
+    .file-state.is-error {
+      color: #b25549;
+    }
+
+    .empty-panel {
+      min-height: 170px;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 8px;
+      padding: 20px;
+      color: #71807c;
+      text-align: center;
+    }
+
+    .empty-panel[hidden] {
+      display: none;
+    }
+
+    .empty-folder {
+      width: 58px;
+      height: 42px;
+      position: relative;
+      border-radius: 8px 10px 12px 12px;
+      background: linear-gradient(180deg, #f5dd9a, #dfb953);
+      opacity: 0.72;
+    }
+
+    .empty-folder::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: -8px;
+      width: 25px;
+      height: 12px;
+      border-radius: 6px 6px 0 0;
+      background: #ebcd7b;
+    }
+
+    .empty-title {
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .empty-note {
+      max-width: 290px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.55;
+    }
+
+    .sentence-panel {
+      position: absolute;
+      inset: 0 0 31px;
+      z-index: 30;
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 56px minmax(0, 1fr);
+      overflow: hidden;
+      background: #d7d6d2;
+      animation: sentence-panel-in 180ms ease-out both;
+    }
+
+    .sentence-panel[hidden] {
+      display: none;
+    }
+
+    @keyframes sentence-panel-in {
+      from {
+        opacity: 0;
+        transform: translateY(7px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .sentence-panel-head {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 14px 0 17px;
+      border-bottom: 1px solid #c8c7c1;
+      background: #f5f4ef;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .sentence-panel-heading {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .sentence-panel-kicker {
+      display: block;
+      margin-bottom: 2px;
+      color: #817d73;
+      font-size: 7px;
+      font-weight: 950;
+      letter-spacing: 0.16em;
+    }
+
+    .sentence-panel-title-row {
+      min-width: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .sentence-panel-title {
+      margin: 0;
+      overflow: hidden;
+      color: #303a37;
+      font-size: 16px;
+      font-weight: 950;
+      letter-spacing: -0.025em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sentence-panel-date {
+      flex: 0 0 auto;
+      color: #787a75;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 8px;
+      font-weight: 850;
+      letter-spacing: 0.02em;
+    }
+
+    .sentence-panel-close {
+      width: 32px;
+      height: 32px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 1px solid #c8c6bf;
+      border-radius: 5px;
+      background: #fff;
+      color: #555b58;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(40, 43, 41, 0.08);
+    }
+
+    .sentence-panel-close:hover,
+    .sentence-panel-close:focus-visible {
+      border-color: rgba(45, 120, 105, 0.5);
+      background: #fff;
+      outline: none;
+    }
+
+    .sentence-panel-tabs {
+      min-width: max-content;
+      flex: 0 0 auto;
+      display: flex;
+      align-self: stretch;
+      align-items: flex-end;
+      gap: 0;
+    }
+
+    .sentence-panel-tab {
+      position: relative;
+      min-width: 72px;
+      min-height: 32px;
+      margin-bottom: -1px;
+      padding: 0 14px 1px;
+      border: 1px solid #bdbab2;
+      border-radius: 0;
+      clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 100%, 0 100%);
+      color: #666864;
+      background: #dfddd7;
+      font-size: 9px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62);
+    }
+
+    .sentence-panel-tab + .sentence-panel-tab {
+      margin-left: -5px;
+    }
+
+    .sentence-panel-tab:hover,
+    .sentence-panel-tab:focus-visible {
+      border-color: #c3c1bb;
+      background: #eceae5;
+      outline: none;
+    }
+
+    .sentence-panel-tab.is-active {
+      z-index: 2;
+      border-color: #aaa79f;
+      color: #414844;
+      background: #d2d1cd;
+      box-shadow: inset 0 2px 0 #5a6964;
+    }
+
+    .sentence-panel-tab.is-layout-active {
+      z-index: 3;
+      border-color: #47585d;
+      color: #fff;
+      background: #47585d;
+      box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.16);
+    }
+
+    .sentence-panel-status {
+      display: none;
+    }
+
+    .sentence-panel-list {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      grid-auto-rows: max-content;
+      align-content: start;
+      padding: 22px 34px 36px 20px;
+      overflow-anchor: none;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.16), transparent 14%, transparent 86%, rgba(0, 0, 0, 0.025)),
+        #d2d1cd;
+    }
+
+    .sentence-panel-content,
+    .sentence-panel-scrap-column,
+    .sentence-panel-sentence-column {
+      min-width: 0;
+      display: grid;
+      grid-auto-rows: max-content;
+      align-content: start;
+      gap: 22px;
+    }
+
+    .workspace.is-notes-landscape .storage-window {
+      position: static;
+      overflow: visible;
+      backdrop-filter: none;
+    }
+
+    .workspace.is-notes-landscape .sentence-panel {
+      inset: 0;
+      z-index: 80;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 18px;
+      box-shadow: 0 24px 48px rgba(28, 42, 43, 0.3);
+    }
+
+    .workspace.is-notes-landscape .sentence-panel-content {
+      height: 100%;
+      min-height: 0;
+      grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+      grid-template-rows: minmax(0, 1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .workspace.is-notes-landscape .sentence-panel-list {
+      display: block;
+      overflow: hidden;
+      padding-right: 20px;
+    }
+
+    .workspace.is-notes-landscape .sentence-panel-scrap-column,
+    .workspace.is-notes-landscape .sentence-panel-sentence-column {
+      height: 100%;
+      min-height: 0;
+      max-height: 100%;
+    }
+
+    .workspace.is-notes-landscape .sentence-panel-scrap-column {
+      overflow: hidden;
+    }
+
+    .workspace.is-notes-landscape .sentence-panel-sentence-column {
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-right: 8px;
+      overscroll-behavior: contain;
+      scrollbar-color: #858985 rgba(255, 255, 255, 0.22);
+      scrollbar-width: thin;
+    }
+
+    .workspace.is-notes-landscape .problem-scrap-canvas {
+      width: 95% !important;
+    }
+
+    .sentence-landscape-handle {
+      position: absolute;
+      top: 53%;
+      right: 3px;
+      z-index: 12;
+      width: 29px;
+      height: 94px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 8px 3px;
+      border: 1px solid #59686b;
+      border-right: 0;
+      border-radius: 10px 0 0 10px;
+      clip-path: polygon(7px 0, 100% 0, 100% 100%, 7px 100%, 0 calc(100% - 9px), 0 9px);
+      color: #f6f4ed;
+      background: linear-gradient(180deg, #65767a, #45565b);
+      box-shadow: -3px 4px 10px rgba(49, 57, 56, 0.2);
+      cursor: pointer;
+      transform: translateY(-50%);
+    }
+
+    .sentence-landscape-handle:hover,
+    .sentence-landscape-handle:focus-visible {
+      background: linear-gradient(180deg, #718589, #50646a);
+      outline: none;
+    }
+
+    .sentence-landscape-handle-label {
+      writing-mode: vertical-rl;
+      color: inherit;
+      font-size: 9px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+    }
+
+    .sentence-landscape-handle-arrow {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 17px;
+      font-weight: 900;
+      line-height: 1;
+      transition: transform 160ms ease;
+    }
+
+    .sentence-landscape-handle.is-layout-active {
+      border-color: #7a6350;
+      background: linear-gradient(180deg, #9b7a5f, #705440);
+    }
+
+    .sentence-landscape-handle.is-layout-active .sentence-landscape-handle-arrow {
+      transform: rotate(180deg);
+    }
+
+    .problem-scrap-card {
+      min-width: 0;
+      height: max-content;
+      overflow: visible;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .problem-scrap-head {
+      display: none;
+    }
+
+    .problem-scrap-title {
+      color: #3e4b47;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: -0.01em;
+    }
+
+    .problem-scrap-code {
+      flex: 0 0 auto;
+      color: #777b75;
+      font-size: 7px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+    }
+
+    .problem-scrap-stage {
+      position: relative;
+      min-height: 210px;
+      display: grid;
+      place-items: center;
+      overflow: visible;
+      padding: 20px 0 26px;
+      background: transparent;
+    }
+
+    .problem-scrap-stage::before {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: calc(5% + 13px);
+      z-index: 3;
+      width: 76px;
+      height: 18px;
+      transform: rotate(-9deg);
+      border: 1px solid rgba(184, 158, 98, 0.22);
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.24), transparent 22%, transparent 78%, rgba(255, 255, 255, 0.18)),
+        rgba(220, 195, 130, 0.7);
+      box-shadow: 0 1px 2px rgba(75, 64, 39, 0.12);
+      pointer-events: none;
+    }
+
+    .problem-scrap-canvas {
+      width: 90%;
+      height: auto;
+      display: block;
+      border: 1px solid #b9b5aa;
+      background: #fff;
+      box-shadow:
+        0 2px 3px rgba(0, 0, 0, 0.1),
+        0 11px 24px rgba(46, 47, 44, 0.25);
+    }
+
+    .problem-scrap-message {
+      max-width: 310px;
+      padding: 24px;
+      color: #8b8d87;
+      font-size: 10px;
+      font-weight: 750;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .problem-scrap-card.is-ready .problem-scrap-message {
+      display: none;
+    }
+
+    .problem-scrap-card.is-error .problem-scrap-stage {
+      background: #faf9f5;
+    }
+
+    .problem-scrap-note {
+      display: none;
+    }
+
+    .landscape-word-cluster {
+      display: none;
+    }
+
+    .workspace.is-notes-landscape .landscape-word-cluster {
+      display: block;
+      width: 95%;
+      margin: -14px auto 12px;
+      padding: 13px 15px 15px;
+      border: 1px solid #b9b5aa;
+      border-radius: 3px;
+      background:
+        linear-gradient(90deg, transparent 0 21px, rgba(184, 103, 78, 0.17) 21px 22px, transparent 22px),
+        repeating-linear-gradient(180deg, #fbfaf5 0 25px, #e5e2d8 25px 26px);
+      box-shadow:
+        0 2px 3px rgba(0, 0, 0, 0.08),
+        0 9px 20px rgba(46, 47, 44, 0.18);
+    }
+
+    .landscape-word-cluster-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 9px 13px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(108, 104, 94, 0.28);
+      color: #62645f;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 8px;
+      font-weight: 950;
+      letter-spacing: 0.14em;
+    }
+
+    .landscape-word-cluster-count {
+      color: #8b8174;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .landscape-word-cluster-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px 16px;
+      margin-left: 12px;
+    }
+
+    .landscape-word-cluster-row {
+      display: grid;
+      grid-template-columns: 7px minmax(58px, 0.82fr) minmax(70px, 1.18fr);
+      align-items: baseline;
+      gap: 5px;
+      min-width: 0;
+      padding: 5px 0 4px;
+      border-bottom: 1px dotted rgba(114, 111, 103, 0.24);
+      break-inside: avoid;
+    }
+
+    .landscape-word-cluster-bullet {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #8c6a4f;
+      box-shadow: 0 0 0 2px rgba(140, 106, 79, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .landscape-word-cluster-word {
+      min-width: 0;
+      color: #303835;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 10.5px;
+      font-weight: 900;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .landscape-word-cluster-meaning {
+      min-width: 0;
+      color: #6b6d68;
+      font-size: 9.5px;
+      font-weight: 700;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    .sentence-card {
+      position: relative;
+      padding: 16px 20px 18px;
+      border: 1px solid #bbb9b2;
+      border-radius: 3px;
+      background: #fff;
+      box-shadow:
+        0 8px 18px rgba(47, 48, 46, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.96);
+    }
+
+    .sentence-card::before {
+      display: none;
+    }
+
+    .sentence-index {
+      display: none;
+    }
+
+    .sentence-original-wrap {
+      padding: 4px 2px 13px;
+      border: 0;
+      border-bottom: 1px solid #d5d3cd;
+      border-radius: 0;
+      background: #fff;
+    }
+
+    .sentence-original-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+      color: #7a786f;
+      font-size: 8px;
+      font-weight: 950;
+      letter-spacing: 0.13em;
+    }
+
+    .sentence-original-number {
+      display: inline-flex;
+      align-items: center;
+      min-height: 16px;
+      padding: 0 5px;
+      border: 1px solid #d1cec5;
+      color: #626762;
+      background: #f2f0e9;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .sentence-original {
+      margin: 0;
+      color: #2e3532;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 14.5px;
+      font-weight: 700;
+      line-height: 1.62;
+      overflow-wrap: anywhere;
+    }
+
+    .sentence-translation-grid {
+      display: grid;
+      margin-top: 11px;
+    }
+
+    .sentence-translation-slot {
+      padding: 10px 11px 11px;
+      border: 1px solid #393d41;
+      border-radius: 3px;
+      background: linear-gradient(145deg, #4b4f54 0%, #414449 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .sentence-translation-slot.is-present {
+      border-color: #363a3e;
+      background: linear-gradient(145deg, #4b4f54 0%, #414449 100%);
+    }
+
+    .sentence-translation-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 9px;
+      margin-bottom: 8px;
+    }
+
+    .sentence-translation-label {
+      color: #e3e9e5;
+      font-size: 8px;
+      font-weight: 950;
+      letter-spacing: 0.11em;
+    }
+
+    .sentence-session-code {
+      flex: 0 0 auto;
+      padding: 2px 5px;
+      border: 1px solid rgba(78, 82, 75, 0.12);
+      border-radius: 5px;
+      color: #85857e;
+      background: rgba(255, 255, 255, 0.72);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 7px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    .sentence-translation {
+      margin: 0;
+      min-height: 34px;
+      color: #33413d;
+      font-size: 11.5px;
+      font-weight: 750;
+      line-height: 1.62;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .sentence-direct-body {
+      position: relative;
+      min-height: 32px;
+      overflow: hidden;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 27px,
+          rgba(255, 255, 255, 0.045) 28px
+        );
+    }
+
+    .sentence-direct-text {
+      position: relative;
+      z-index: 1;
+      min-height: 32px;
+      overflow: hidden;
+      padding: 5px 6px;
+      border: 0;
+      color: #fffdf8;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.45;
+    }
+
+    .sentence-direct-body > .sentence-translation.is-empty {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      padding: 5px 6px;
+    }
+
+    .sentence-translation.is-empty {
+      color: #9b9c96;
+      font-weight: 650;
+    }
+
+    .sentence-direct-body .sentence-translation.is-empty {
+      color: #c7cbc8;
+    }
+
+    .sentence-translation.is-linked {
+      color: #6f7d77;
+      font-style: italic;
+      font-weight: 700;
+    }
+
+    .sentence-ink-preview {
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      z-index: 2;
+      height: 122px;
+      overflow: hidden;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .sentence-ink-canvas {
+      width: 100%;
+      height: 122px;
+      display: block;
+    }
+
+    .wordflow-runtime .wf-stage {
+      padding: 0;
+      font: inherit;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 120ms ease, filter 120ms ease;
+    }
+
+    .wordflow-runtime .wf-stage:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .wordflow-runtime .wf-stage:focus-visible {
+      outline: 2px solid rgba(255, 248, 223, 0.92);
+      outline-offset: 2px;
+    }
+
+    .runtime-quiz-hint {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      z-index: 40;
+      width: max-content;
+      max-width: 226px;
+      padding: 8px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      border-radius: 9px;
+      color: #fffaf0;
+      background: linear-gradient(145deg, #4f5e59, #31433e);
+      box-shadow: 0 7px 16px rgba(36, 43, 39, 0.24);
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1.35;
+      text-align: center;
+      pointer-events: none;
+      transform: translateX(-50%);
+    }
+
+    .runtime-quiz-hint::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      width: 11px;
+      height: 11px;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      border-left: 1px solid rgba(255, 255, 255, 0.3);
+      background: #485852;
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .runtime-quiz-hint.is-showing {
+      animation: runtime-quiz-hint 4.2s ease both;
+    }
+
+    @keyframes runtime-quiz-hint {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -5px) scale(0.96);
+      }
+      12%,
+      78% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -3px) scale(0.98);
+      }
+    }
+
+    .sentence-panel-empty {
+      min-height: 190px;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 7px;
+      padding: 24px;
+      color: #76847f;
+      text-align: center;
+    }
+
+    .sentence-panel-empty strong {
+      color: #425d57;
+      font-size: 12px;
+    }
+
+    .sentence-panel-empty span {
+      max-width: 340px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.55;
+    }
+
+    .window-footer {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.48);
+      color: #667975;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .sync-dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #6d9f7f;
+      box-shadow: 0 0 0 3px rgba(109, 159, 127, 0.12);
+    }
+
+    .sync-dot.is-loading {
+      background: #d6a33d;
+      animation: pulse 0.85s ease-in-out infinite alternate;
+    }
+
+    .sync-dot.is-error {
+      background: #c65d4d;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.42; }
+      to { opacity: 1; }
+    }
+
+    .footer-spacer {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .android-shell {
+      width: 375px;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 36px minmax(0, 1fr) 30px;
+      align-self: center;
+      border-radius: 18px;
+      outline: 2px solid rgba(7, 17, 20, 0.72);
+      background: #101719;
+      box-shadow: 0 18px 32px rgba(8, 24, 28, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .android-topbar {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) 62px;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+      background: linear-gradient(180deg, #192427, #111a1c);
+      color: #eff8f3;
+      font-size: 9px;
+      font-weight: 850;
+      letter-spacing: 0.03em;
+    }
+
+    .android-title {
+      overflow: hidden;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .android-signals {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+    }
+
+    .signal-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 1px;
+      height: 10px;
+    }
+
+    .signal-bars i {
+      width: 2px;
+      border-radius: 1px;
+      background: #eff8f3;
+    }
+
+    .signal-bars i:nth-child(1) { height: 3px; }
+    .signal-bars i:nth-child(2) { height: 5px; }
+    .signal-bars i:nth-child(3) { height: 7px; }
+    .signal-bars i:nth-child(4) { height: 9px; }
+
+    .battery {
+      width: 16px;
+      height: 8px;
+      position: relative;
+      border: 1px solid rgba(239, 248, 243, 0.8);
+      border-radius: 2px;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      inset: 1px 3px 1px 1px;
+      border-radius: 1px;
+      background: #8bd6a4;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      right: -3px;
+      top: 2px;
+      width: 2px;
+      height: 4px;
+      border-radius: 0 1px 1px 0;
+      background: rgba(239, 248, 243, 0.8);
+    }
+
+    .android-stage {
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+      background:
+        radial-gradient(circle at 82% 3%, rgba(255, 255, 255, 0.76), transparent 24%),
+        linear-gradient(155deg, #f9f4df 0%, #eef7ec 54%, #d9eee3 100%);
+    }
+
+    .phone-empty,
+    .phone-loading {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 14px;
+      padding: 34px;
+      color: #587069;
+      text-align: center;
+    }
+
+    .phone-empty[hidden],
+    .phone-loading[hidden],
+    .phone-book[hidden] {
+      display: none;
+    }
+
+    .phone-logo {
+      width: 86px;
+      height: 86px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(45, 120, 105, 0.18);
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 14px 28px rgba(54, 100, 82, 0.15);
+    }
+
+    .phone-logo::before {
+      content: "";
+      width: 56px;
+      height: 40px;
+      border-radius: 7px 9px 11px 11px;
+      background: linear-gradient(180deg, #fff8d5, #e9c866);
+      box-shadow: inset 0 0 0 2px rgba(105, 82, 27, 0.12);
+    }
+
+    .phone-logo::after {
+      content: "MY";
+      position: absolute;
+      left: 27px;
+      top: 39px;
+      color: #496159;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.06em;
+    }
+
+    .phone-empty-title {
+      color: #31574f;
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .phone-empty-note {
+      max-width: 240px;
+      font-size: 11px;
+      font-weight: 720;
+      line-height: 1.6;
+    }
+
+    .phone-book {
+      position: absolute;
+      inset: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    .book-hero {
+      padding: 17px 17px 12px;
+      border-bottom: 1px solid rgba(37, 80, 72, 0.1);
+      background: rgba(255, 255, 255, 0.58);
+      backdrop-filter: blur(9px);
+    }
+
+    .book-kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 9px;
+      color: #6f817b;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .book-badge {
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #dff2e7;
+      color: #286a5d;
+      letter-spacing: 0.04em;
+    }
+
+    .book-title {
+      margin: 9px 0 4px;
+      overflow: hidden;
+      color: #263f3c;
+      font-size: 20px;
+      font-weight: 950;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .book-meta {
+      overflow: hidden;
+      color: #6a7c77;
+      font-size: 10px;
+      font-weight: 750;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .book-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(37, 80, 72, 0.1);
+      background: rgba(250, 253, 248, 0.82);
+    }
+
+    .book-action {
+      min-height: 42px;
+      padding: 5px 4px;
+      border: 1px solid rgba(45, 120, 105, 0.19);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.86);
+      color: #315e55;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .book-action:hover,
+    .book-action:focus-visible {
+      border-color: rgba(45, 120, 105, 0.45);
+      background: #fff;
+      outline: none;
+    }
+
+    .book-action.is-active {
+      border-color: #3c8878;
+      background: linear-gradient(180deg, #dff5e9, #cdebdc);
+      color: #1e5d51;
+    }
+
+    .book-action:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+    }
+
+    .phone-word-list {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      align-content: start;
+      gap: 7px;
+      padding: 11px 12px 18px;
+    }
+
+    .word-row {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 28px minmax(0, 0.9fr) minmax(0, 1.1fr);
+      align-items: center;
+      gap: 8px;
+      min-height: 45px;
+      padding: 7px 10px 7px 5px;
+      border: 1px solid rgba(33, 74, 68, 0.1);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 3px 8px rgba(34, 78, 70, 0.05);
+    }
+
+    .word-no {
+      color: #90a099;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 900;
+    }
+
+    .word-text {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: #254840;
+      font-family: "Arial", "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.28;
+    }
+
+    .word-meaning {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: #5f6e69;
+      font-size: 11px;
+      font-weight: 750;
+      line-height: 1.35;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+
+    .android-stage.is-masked .word-row {
+      cursor: pointer;
+    }
+
+    .android-stage.is-masked .word-meaning {
+      min-height: 21px;
+      border-radius: 6px;
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(65, 107, 97, 0.11) 0,
+          rgba(65, 107, 97, 0.11) 5px,
+          rgba(65, 107, 97, 0.04) 5px,
+          rgba(65, 107, 97, 0.04) 10px
+        );
+      color: transparent;
+      user-select: none;
+    }
+
+    .android-stage.is-masked .word-row.is-revealed .word-meaning {
+      background: transparent;
+      color: #5f6e69;
+      user-select: text;
+    }
+
+    .no-words-card {
+      margin: auto;
+      padding: 22px;
+      color: #687a74;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 750;
+      line-height: 1.6;
+    }
+
+    .android-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      background: #101719;
+    }
+
+    .nav-key {
+      height: 100%;
+      border: 0;
+      background: transparent;
+      color: rgba(235, 246, 240, 0.72);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .nav-key:hover,
+    .nav-key:focus-visible {
+      color: #fff;
+      outline: none;
+    }
+
+    .nav-pill {
+      display: block;
+      width: 26px;
+      height: 3px;
+      margin: auto;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    @media (max-width: 980px) {
+      .workspace {
+        grid-template-columns: minmax(0, 1fr) 375px;
+        gap: 9px;
+        padding-inline: 10px;
+      }
+
+      .explorer-body {
+        grid-template-columns: 146px minmax(0, 1fr);
+      }
+
+      .folder-btn {
+        padding-inline: 6px;
+      }
+
+      .window-subtitle,
+      .source-chip {
+        display: none;
+      }
+    }
+
+    @media (max-width: 830px) {
+      body {
+        place-items: start center;
+      }
+
+      .tablet-shell {
+        width: min(760px, 98vw);
+        height: auto;
+        min-height: 1180px;
+      }
+
+      .tablet-frame {
+        min-height: 1180px;
+      }
+
+      .screen {
+        overflow: auto;
+      }
+
+      .workspace {
+        height: auto;
+        grid-template-columns: minmax(0, 1fr);
+        padding: 8px 12px 18px;
+      }
+
+      .storage-window {
+        height: 600px;
+      }
+
+      .android-shell {
+        width: min(375px, 100%);
+        height: 733px;
+        justify-self: center;
+      }
+    }
+
+    @media (max-width: 540px) {
+      body {
+        padding: 5px;
+      }
+
+      .tablet-shell {
+        width: 100%;
+      }
+
+      .tablet-frame {
+        border-width: 7px;
+        border-radius: 26px;
+      }
+
+      .status-bar {
+        grid-template-columns: 1fr auto;
+        padding: 0 14px;
+      }
+
+      .status-title {
+        display: none;
+      }
+
+      .explorer-body {
+        grid-template-columns: 1fr;
+      }
+
+      .folder-pane {
+        min-height: 68px;
+        overflow-x: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .folder-heading {
+        display: none;
+      }
+
+      .folder-list {
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(132px, auto);
+        justify-content: start;
+      }
+
+      .file-pane {
+        min-height: 0;
+      }
+
+      .storage-window {
+        height: 670px;
+        grid-template-rows: 56px minmax(0, 1fr) 31px;
+      }
+
+      .window-title {
+        font-size: 15px;
+      }
+
+      .search-wrap {
+        display: none;
+      }
+    }
+
+    .wordflow-runtime {
+      position: relative;
+      width: 375px;
+      height: min(667px, 100%);
+      min-height: 0;
+      align-self: center;
+      justify-self: center;
+      overflow: visible;
+      border-radius: 25px;
+    }
+
+    .wordflow-runtime.wordflow-25d .main-page {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      transform: none;
+    }
+
+    .wordflow-runtime .storage-runtime-message {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 9px;
+      padding: 28px;
+      color: #66766b;
+      text-align: center;
+    }
+
+    .wordflow-runtime .storage-runtime-message[hidden] {
+      display: none;
+    }
+
+    .wordflow-runtime .storage-runtime-mark {
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      margin-bottom: 3px;
+      border: 1px solid rgba(61, 94, 72, 0.2);
+      border-radius: 18px;
+      color: #fff8df;
+      background:
+        radial-gradient(circle at 78% 18%, rgba(240, 209, 143, 0.32), transparent 30%),
+        linear-gradient(145deg, #477262, #21473b);
+      box-shadow: 0 7px 0 #17362f, 0 13px 24px rgba(31, 62, 54, 0.2);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .wordflow-runtime .storage-runtime-message strong {
+      color: #31594d;
+      font-size: 17px;
+      font-weight: 950;
+    }
+
+    .wordflow-runtime .storage-runtime-message span {
+      max-width: 250px;
+      font-size: 11px;
+      font-weight: 750;
+      line-height: 1.55;
+    }
+
+    .wordflow-runtime #learn-scroll[hidden],
+    .wordflow-runtime #quiz-area[hidden],
+    .wordflow-runtime .learn-actions[hidden] {
+      display: none;
+    }
+
+    .wordflow-runtime #learn-content .title-card .word-title {
+      overflow: hidden;
+      font-family: "Trebuchet MS", "Malgun Gothic", Arial, sans-serif;
+      font-size: 16px;
+      letter-spacing: -0.035em;
+      line-height: 1.25;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .wordflow-runtime #learn-content .card-top {
+      grid-template-columns: minmax(0, 1.15fr) minmax(112px, 0.85fr);
+      align-items: center;
+      gap: 10px;
+    }
+
+    .wordflow-runtime #learn-content .card-top .meaning {
+      cursor: pointer;
+    }
+
+    .wordflow-runtime #learn-content .card.hide-meaning-local .meaning {
+      color: transparent !important;
+      user-select: none;
+    }
+
+    .wordflow-runtime[data-word-stage="learn"] #learn-scroll {
+      padding: 15px 13px 26px;
+    }
+
+    .wordflow-runtime #learn-main {
+      display: grid;
+      gap: 13px;
+    }
+
+    .wordflow-runtime #learn-main .card {
+      min-height: 112px;
+      padding: 19px 16px 17px;
+    }
+
+    .wordflow-runtime #learn-main .card-top {
+      min-height: 60px;
+    }
+
+    .wordflow-runtime #learn-main .card-top .word-title {
+      font-size: 25px;
+      line-height: 1.13;
+      letter-spacing: -0.018em;
+    }
+
+    .wordflow-runtime #learn-main .card-top .word-title.is-long {
+      font-size: 23px;
+      line-height: 1.14;
+      letter-spacing: -0.025em;
+      overflow-wrap: anywhere;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .wordflow-runtime #learn-main .card-top .word-title.is-very-long {
+      font-size: 21px;
+      line-height: 1.16;
+      letter-spacing: -0.03em;
+    }
+
+    .wordflow-runtime #learn-main .card-top .meaning {
+      margin-top: 0;
+      font-size: 13.5px;
+      line-height: 1.48;
+    }
+
+    .wordflow-runtime #learn-main .pos {
+      margin-top: 8px;
+    }
+
+    .wordflow-runtime .storage-q1-intro-meta {
+      margin: 0 0 12px;
+      color: #6f746a;
+      font-size: 10px;
+      font-weight: 850;
+      text-align: center;
+    }
+
+    .wordflow-runtime .storage-result-actions {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 8px;
+    }
+
+    .wordflow-runtime .popup-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .wordflow-runtime .popup-content {
+      max-height: calc(100% - 28px);
+    }
+
+    .wordflow-runtime .wf-result-detail {
+      max-height: 230px;
+    }
+
+    @media (max-width: 830px) {
+      .wordflow-runtime {
+        width: min(375px, 100%);
+        height: 667px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="tablet-shell">
+    <div class="tablet-frame">
+      <main class="screen" aria-label="My notes">
+        <div class="status-bar">
+          <span id="clock-label">--:--</span>
+          <span class="status-title">MY NOTES</span>
+          <div class="status-actions">
+            <span id="student-id-label" class="student-label">Guest</span>
+            <button class="home-link" id="back-to-tablet" type="button">Tablet</button>
+          </div>
+        </div>
+
+        <div class="workspace">
+          <section class="storage-window" aria-labelledby="storage-title">
+            <header class="window-bar">
+              <div class="window-title-block">
+                <h1 class="window-title" id="storage-title">&#45236; &#45432;&#53944;&#46308;</h1>
+                <div class="window-subtitle">PERSONAL STUDY LIBRARY</div>
+              </div>
+              <span class="source-chip">LIVE STORAGE</span>
+              <div class="window-spacer"></div>
+              <label class="search-wrap">
+                <span hidden>&#54028;&#51068; &#44160;&#49353;</span>
+                <input
+                  id="file-search"
+                  class="search-input"
+                  type="search"
+                  placeholder="&#54028;&#51068; &#44160;&#49353;"
+                  autocomplete="off"
+                />
+              </label>
+              <button id="refresh-library" class="refresh-btn" type="button" aria-label="&#49352;&#47196;&#44256;&#52840;" title="&#49352;&#47196;&#44256;&#52840;">&#8635;</button>
+            </header>
+
+            <div class="explorer-body">
+              <nav class="folder-pane" aria-label="Wordbook folders">
+                <div class="folder-heading">Folders</div>
+                <div class="folder-list">
+                  <button class="folder-btn is-active" type="button" data-folder="mock">
+                    <span class="folder-icon" aria-hidden="true"></span>
+                    <span>&#47784;&#51032;&#44256;&#49324;</span>
+                    <span class="folder-count" data-folder-count="mock">0</span>
+                  </button>
+                  <button class="folder-btn" type="button" data-folder="ebs">
+                    <span class="folder-icon" aria-hidden="true"></span>
+                    <span>EBS</span>
+                    <span class="folder-count" data-folder-count="ebs">0</span>
+                  </button>
+                  <button class="folder-btn" type="button" data-folder="other">
+                    <span class="folder-icon" aria-hidden="true"></span>
+                    <span>&#44536;&#50808;</span>
+                    <span class="folder-count" data-folder-count="other">0</span>
+                  </button>
+                </div>
+              </nav>
+
+              <section class="file-pane" aria-label="Wordbook files">
+                <div class="path-bar">
+                  <span class="path-root">&#45236; &#51200;&#51109;&#49548;</span>
+                  <span aria-hidden="true">&#8250;</span>
+                  <span id="path-current" class="path-current">&#47784;&#51032;&#44256;&#49324;</span>
+                </div>
+                <div id="file-list" class="file-list"></div>
+              </section>
+            </div>
+
+            <section id="sentence-panel" class="sentence-panel" aria-labelledby="sentence-panel-title" hidden>
+              <header class="sentence-panel-head">
+                <div class="sentence-panel-heading">
+                  <span class="sentence-panel-kicker">ARCHIVED STUDY PDF</span>
+                  <div class="sentence-panel-title-row">
+                    <h2 id="sentence-panel-title" class="sentence-panel-title"></h2>
+                    <time id="sentence-panel-date" class="sentence-panel-date"></time>
+                  </div>
+                </div>
+                <nav class="sentence-panel-tabs" aria-label="PDF &#47785;&#52264;">
+                  <button class="sentence-panel-tab is-active" type="button" data-sentence-section="scrap">&#48376;&#47928; &#50676;&#44592;</button>
+                  <button class="sentence-panel-tab" type="button" data-sentence-section="sentences">&#54620;&#47928;&#51109;&#50473;</button>
+                </nav>
+                <div id="sentence-panel-status" class="sentence-panel-status"></div>
+                <button id="sentence-panel-close" class="sentence-panel-close" type="button" aria-label="&#47928;&#51109; &#52285; &#45803;&#44592;">&times;</button>
+              </header>
+              <div id="sentence-panel-list" class="sentence-panel-list"></div>
+              <button class="sentence-landscape-handle" type="button" data-sentence-layout="landscape" aria-pressed="false" aria-label="&#44032;&#47196;&#48372;&#44592;">
+                <span class="sentence-landscape-handle-label">&#44032;&#47196;</span>
+                <span class="sentence-landscape-handle-arrow" aria-hidden="true">&#8250;</span>
+              </button>
+            </section>
+
+            <footer class="window-footer">
+              <span id="sync-dot" class="sync-dot"></span>
+              <span id="sync-label">&#45824;&#44592; &#51473;</span>
+              <span class="footer-spacer"></span>
+              <span id="selection-label">0 files</span>
+            </footer>
+          </section>
+
+          <aside id="wordflow-runtime" class="wordflow-runtime wordflow-25d" data-word-stage="learn" aria-label="Dish word study">
+            <div class="main-page">
+              <header class="wordflow-topbar cafe25-topbar">
+                <button id="runtime-back" class="wf-header-back cafe25-back" type="button" aria-label="Back">&#8249;</button>
+                <div class="wf-heading cafe25-heading">
+                  <div class="wf-stage-track" aria-label="Study progress">
+                    <button id="runtime-stage-learn" class="wf-stage is-current" type="button" data-stage="learn" aria-label="Memorize">
+                      <span class="wf-stage-code">MEM</span>
+                      <span class="wf-stage-dialog" role="status">MEMORIZE</span>
+                    </button>
+                    <button id="runtime-stage-quiz1" class="wf-stage is-upcoming" type="button" data-stage="quiz1" aria-label="Quiz 1">
+                      <span class="wf-stage-code">Q1</span>
+                      <span class="wf-stage-dialog" role="status">MEANING QUIZ</span>
+                    </button>
+                    <button id="runtime-stage-quiz2" class="wf-stage is-upcoming" type="button" data-stage="quiz2" aria-label="Quiz 2">
+                      <span class="wf-stage-code">Q2</span>
+                      <span class="wf-stage-dialog" role="status">SPELLING QUIZ</span>
+                    </button>
+                  </div>
+                  <div id="runtime-quiz-hint" class="runtime-quiz-hint" role="status" hidden></div>
+                </div>
+                <div class="wf-header-mark cafe25-mark" aria-hidden="true">W</div>
+              </header>
+
+              <div id="cafe_int">
+                <div id="runtime-message" class="storage-runtime-message">
+                  <div class="storage-runtime-mark" aria-hidden="true">W</div>
+                  <strong id="runtime-message-title">&#45800;&#50612;&#51109;&#51012; &#49440;&#53469;&#54616;&#49464;&#50836;</strong>
+                  <span id="runtime-message-note">&#51340;&#52769;&#50640;&#49436; &#54028;&#51068;&#51012; &#45572;&#47476;&#47732; MEM &#45800;&#44228;&#44032; &#50676;&#47549;&#45768;&#45796;.</span>
+                </div>
+
+                <div id="learn-scroll" hidden>
+                  <div id="learn-content">
+                    <div class="card title-card">
+                      <div id="day-title" class="word-title">Wordbook</div>
+                    </div>
+                    <div class="vine-divider title-divider"></div>
+                    <div id="status">0 cards</div>
+                    <div id="learn-main"></div>
+                  </div>
+                </div>
+
+                <div id="learn-actions" class="learn-actions" hidden>
+                  <button id="mask-btn" class="learn-btn mask" type="button" aria-pressed="false">&#46907; &#44032;&#47532;&#44592;</button>
+                  <button id="quiz-btn" class="learn-btn quiz" type="button">&#49884;&#54744;&#48380;&#44172;&#50836;</button>
+                </div>
+
+                <div id="quiz-area" hidden></div>
+              </div>
+
+              <div id="runtime-result-popup" class="popup-overlay"></div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const LIVE_API_BASE = "https://port-0-ltryi-database-1ru12mlw3glz2u.sel5.cloudtype.app";
+      const LIVE_RECEIVE_URL = LIVE_API_BASE + "/api/LiveToAfterclass_receive";
+      const SUPABASE_BASE = "https://yslwgaephsnbfoiqnpuw.supabase.co/storage/v1/object/public";
+      const MOCK_BUCKET = "ksat-moi-sets";
+      const PDFJS_WORKER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+      const WORD_INDEX_SUFFIXES = ["_wordsx.json", ".wordsx.json", "_words.json", ".words.json"];
+      const RECEIVE_LIMIT = 300;
+      const LOAD_CONCURRENCY = 6;
+      const params = new URLSearchParams(location.search || "");
+      const userId = String(params.get("id") || "").trim();
+
+      const TEXT = {
+        mock: "\uBAA8\uC758\uACE0\uC0AC",
+        ebs: "EBS",
+        other: "\uADF8\uC678",
+        idle: "\uB300\uAE30 \uC911",
+        loadingList: "\uC800\uC7A5 \uBAA9\uB85D\uC744 \uBD88\uB7EC\uC624\uB294 \uC911",
+        loadingFiles: "\uB2E8\uC5B4 \uD30C\uC77C\uC744 \uBD88\uB7EC\uC624\uB294 \uC911",
+        loaded: "\uC11C\uBC84 \uBAA9\uB85D \uBD88\uB7EC\uC634",
+        loadFailed: "\uBAA9\uB85D\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4",
+        idRequired: "URL\uC5D0 id(UserId)\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4",
+        noFiles: "\uD45C\uC2DC\uD560 \uD30C\uC77C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4",
+        noFilesNote: "\uD574\uB2F9 \uD3F4\uB354\uC5D0 \uB2E8\uC5B4\uC7A5\uC73C\uB85C \uC77D\uC744 \uC218 \uC788\uB294 \uD30C\uC77C\uC774 \uC5C6\uC5B4\uC694.",
+        words: "\uB2E8\uC5B4",
+        loading: "\uBD88\uB7EC\uC624\uB294 \uC911",
+        empty: "\uB2E8\uC5B4 \uC5C6\uC74C",
+        error: "\uC77D\uAE30 \uC2E4\uD328",
+        reviewSource: "\uC218\uC5C5 \uD6C4 REVIEW",
+        fileFallback: "\uD559\uC2B5 \uD30C\uC77C",
+        mockExam: "\uBAA8\uC758\uACE0\uC0AC",
+        question: "\uBC88",
+        month: "\uC6D4",
+        guest: "Guest",
+        showMeanings: "\uB73B \uBCF4\uAE30",
+        hideMeanings: "\uB73B \uAC00\uB9AC\uAE30",
+        noWordData: "\uC774 \uD30C\uC77C\uC5D0\uC11C {word, meaning} \uB2E8\uC5B4 \uC30D\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.",
+        files: "files",
+        selectBook: "\uB2E8\uC5B4\uC7A5\uC744 \uC120\uD0DD\uD558\uC138\uC694",
+        selectBookNote: "\uC88C\uCE21\uC5D0\uC11C \uD30C\uC77C\uC744 \uB204\uB974\uBA74 MEM \uB2E8\uACC4\uAC00 \uC5F4\uB9BD\uB2C8\uB2E4.",
+        preparing: "\uB2E8\uC5B4\uC7A5\uC744 \uC900\uBE44\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.",
+        quizNeed: "\uC2DC\uD5D8\uC744 \uBCF4\uB824\uBA74 \uB73B\uC774 \uC788\uB294 \uB2E8\uC5B4\uAC00 2\uAC1C \uC774\uC0C1 \uD544\uC694\uD574\uC694.",
+        sentenceLoading: "\uC6D0\uBB38 \uBB38\uC7A5\uC744 \uBD88\uB7EC\uC624\uB294 \uC911",
+        sentenceReady: "\uBB38\uC7A5\uBCC4 \uC6D0\uBB38\uACFC \uB0B4 \uD574\uC11D",
+        sentenceUnavailable: "\uC774 \uBB38\uC81C\uC758 \uC6D0\uBB38 \uBB38\uC7A5\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.",
+        sentenceUnavailableNote: "\uBAA8\uC758\uACE0\uC0AC \uBB38\uC7A5 JSON\uC774 \uC5C6\uAC70\uB098 \uBB38\uC81C \uBC88\uD638\uAC00 \uC5F0\uACB0\uB418\uC9C0 \uC54A\uC558\uC5B4\uC694.",
+        translation99: "\uD14D\uC2A4\uD2B8 \uD574\uC11D",
+        translation992: "\uBB38\uC7A5 \uD544\uAE30",
+        translation993: "PDF \uD544\uAE30",
+        directTranslation: "\uC9C1\uC811 \uD574\uC11D",
+        translationEmpty: "\uC800\uC7A5\uB41C \uB2F5\uC548\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
+        translationSubmittedEmpty: "\uC800\uC7A5\uBB3C\uC740 \uC788\uC9C0\uB9CC \uBB38\uC7A5 \uD574\uC11D\uC740 \uBE44\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.",
+        translationLinked: "\uC800\uC7A5\uB41C \uD544\uAE30 \uC790\uB8CC\uAC00 \uC788\uC2B5\uB2C8\uB2E4.",
+        sentenceUnit: "\uBB38\uC7A5",
+        scrapbook: "\uBB38\uC81C \uC2A4\uD06C\uB7A9",
+        scrapbookLoading: "PDF\uC640 993 \uD544\uAE30\uB97C \uD569\uC131\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.",
+        scrapbookReady: "PDF \uC6D0\uBCF8\uACFC 993 \uD544\uAE30 \uD569\uC131\uBCF8",
+        scrapbookNoInk: "993 \uD544\uAE30\uAC00 \uC5C6\uC5B4 PDF \uC6D0\uBCF8\uB9CC \uD45C\uC2DC\uD569\uB2C8\uB2E4.",
+        scrapbookFailed: "\uBB38\uC81C \uC601\uC5ED\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.",
+        scrapbookLinked: "\uC704 \uBB38\uC81C \uC2A4\uD06C\uB7A9\uC5D0 993 PDF \uD544\uAE30\uB97C \uD568\uAED8 \uD45C\uC2DC\uD569\uB2C8\uB2E4.",
+        landscapeOpen: "\uAC00\uB85C\uBCF4\uAE30",
+        landscapeClose: "\uAE30\uBCF8\uBCF4\uAE30",
+        quizNavigationHint: "\uB20C\uB7EC\uC11C \uC6D0\uD558\uB294 \uD034\uC988\uB97C \uBCFC \uC218 \uC788\uC5B4\uC694!"
+      };
+
+      const TRANSLATION_SESSIONS = [
+        { no: 99, label: TEXT.translation99 },
+        { no: 992, label: TEXT.translation992 },
+        { no: 993, label: TEXT.translation993 }
+      ];
+
+      function isVisibleWordbookEntry(entry) {
+        return entry.words.length > 0;
+      }
+
+      const folderPredicates = {
+        mock: function (entry) { return entry.category === "mock" && isVisibleWordbookEntry(entry); },
+        ebs: function (entry) { return entry.category === "ebs" && isVisibleWordbookEntry(entry); },
+        other: function (entry) { return entry.category === "other" && isVisibleWordbookEntry(entry); }
+      };
+
+      const folderLabels = {
+        mock: TEXT.mock,
+        ebs: TEXT.ebs,
+        other: TEXT.other
+      };
+
+      const state = {
+        entries: [],
+        folder: "mock",
+        selectedId: "",
+        search: "",
+        loading: false,
+        meaningsHidden: false,
+        runtimeEntryId: "",
+        runtimeEntryState: "",
+        stage: "learn",
+        quiz1Passed: false,
+        quiz2Passed: false,
+        quizSet: [],
+        quizIndex: 0,
+        quizResults: [],
+        quizTimer: null,
+        stageAdvanceTimer: null,
+        quizHintTimer: null,
+        quizHintShown: false,
+        quizAnswered: false,
+        q2Puzzle: null,
+        sentencePanelOpen: false,
+        sentencePanelSection: "scrap",
+        sentencePanelLandscape: false,
+        sentencePanelRequestId: 0,
+        wordIndexCache: new Map(),
+        pdfDocumentCache: new Map()
+      };
+
+      const clockLabel = document.getElementById("clock-label");
+      const idLabel = document.getElementById("student-id-label");
+      const backToTabletBtn = document.getElementById("back-to-tablet");
+      const refreshBtn = document.getElementById("refresh-library");
+      const searchInput = document.getElementById("file-search");
+      const fileList = document.getElementById("file-list");
+      const pathCurrent = document.getElementById("path-current");
+      const syncDot = document.getElementById("sync-dot");
+      const syncLabel = document.getElementById("sync-label");
+      const selectionLabel = document.getElementById("selection-label");
+      const sentencePanel = document.getElementById("sentence-panel");
+      const sentencePanelTitle = document.getElementById("sentence-panel-title");
+      const sentencePanelDate = document.getElementById("sentence-panel-date");
+      const sentencePanelStatus = document.getElementById("sentence-panel-status");
+      const sentencePanelList = document.getElementById("sentence-panel-list");
+      const sentencePanelClose = document.getElementById("sentence-panel-close");
+      const sentencePanelTabs = Array.from(document.querySelectorAll("[data-sentence-section]"));
+      const sentencePanelLandscapeTab = document.querySelector("[data-sentence-layout='landscape']");
+      const workspace = document.querySelector(".workspace");
+      let landscapeScrapSyncRaf = 0;
+      const wordflowRuntime = document.getElementById("wordflow-runtime");
+      const runtimeBackBtn = document.getElementById("runtime-back");
+      const runtimeStages = {
+        learn: document.getElementById("runtime-stage-learn"),
+        quiz1: document.getElementById("runtime-stage-quiz1"),
+        quiz2: document.getElementById("runtime-stage-quiz2")
+      };
+      const runtimeMessage = document.getElementById("runtime-message");
+      const runtimeMessageTitle = document.getElementById("runtime-message-title");
+      const runtimeMessageNote = document.getElementById("runtime-message-note");
+      const runtimeQuizHint = document.getElementById("runtime-quiz-hint");
+      const learnScroll = document.getElementById("learn-scroll");
+      const learnContent = document.getElementById("learn-content");
+      const dayTitle = document.getElementById("day-title");
+      const statusEl = document.getElementById("status");
+      const learnMain = document.getElementById("learn-main");
+      const learnActions = document.getElementById("learn-actions");
+      const maskBtn = document.getElementById("mask-btn");
+      const quizBtn = document.getElementById("quiz-btn");
+      const quizArea = document.getElementById("quiz-area");
+      const resultPopup = document.getElementById("runtime-result-popup");
+
+      function safeText(value) {
+        if (value === null || value === undefined) return "";
+        if (typeof value === "string") return value;
+        if (typeof value === "number" || typeof value === "boolean") return String(value);
+        return "";
+      }
+
+      function normalizeKey(value) {
+        return safeText(value).replace(/[^a-z0-9]/gi, "").toLowerCase();
+      }
+
+      function findValue(source, aliases) {
+        if (!source || typeof source !== "object") return undefined;
+        const list = Array.isArray(aliases) ? aliases : [];
+        for (let i = 0; i < list.length; i += 1) {
+          if (Object.prototype.hasOwnProperty.call(source, list[i]) && source[list[i]] != null) {
+            return source[list[i]];
+          }
+        }
+        const normalized = list.map(normalizeKey);
+        const keys = Object.keys(source);
+        for (let i = 0; i < keys.length; i += 1) {
+          if (normalized.indexOf(normalizeKey(keys[i])) >= 0 && source[keys[i]] != null) {
+            return source[keys[i]];
+          }
+        }
+        return undefined;
+      }
+
+      function findRowValue(row, aliases) {
+        const direct = findValue(row, aliases);
+        if (direct !== undefined) return direct;
+        const containers = [
+          findValue(row, ["data", "Data", "row", "Row", "record", "Record"]),
+          findValue(row, ["result", "Result", "item", "Item"])
+        ];
+        for (let i = 0; i < containers.length; i += 1) {
+          const value = findValue(containers[i], aliases);
+          if (value !== undefined) return value;
+        }
+        return undefined;
+      }
+
+      function parseJsonObject(value) {
+        if (!value) return null;
+        if (typeof value === "object") return value;
+        const text = safeText(value).trim();
+        if (!text) return null;
+        try {
+          const parsed = JSON.parse(text);
+          return parsed && typeof parsed === "object" ? parsed : null;
+        } catch (_err) {
+          return null;
+        }
+      }
+
+      function getPayloadCandidate(source) {
+        if (!source || typeof source !== "object") return undefined;
+        return findValue(source, [
+          "PayloadJson",
+          "payloadJson",
+          "PayloadJSON",
+          "payload_json",
+          "payloadjson",
+          "Payload",
+          "payload"
+        ]);
+      }
+
+      function extractInlinePayload(row) {
+        const sources = [
+          row,
+          findValue(row, ["data", "Data", "row", "Row", "record", "Record"]),
+          findValue(row, ["result", "Result", "item", "Item"])
+        ];
+        for (let i = 0; i < sources.length; i += 1) {
+          const candidate = getPayloadCandidate(sources[i]);
+          const parsed = parseJsonObject(candidate);
+          if (!parsed) continue;
+          const nested = parseJsonObject(getPayloadCandidate(parsed));
+          return nested || parsed;
+        }
+        return null;
+      }
+
+      function parseReceiveRows(payload) {
+        if (Array.isArray(payload)) return payload;
+        if (payload && Array.isArray(payload.rows)) return payload.rows;
+        if (payload && Array.isArray(payload.data)) return payload.data;
+        if (payload && payload.result && Array.isArray(payload.result.rows)) return payload.result.rows;
+        return [];
+      }
+
+      function normalizeDate(value) {
+        const text = safeText(value).trim();
+        if (!text) return null;
+        const mariaDate = text.match(
+          /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?Z$/
+        );
+        if (mariaDate) {
+          const milliseconds = Number((mariaDate[7] || "").padEnd(3, "0")) || 0;
+          const localDate = new Date(
+            Number(mariaDate[1]),
+            Number(mariaDate[2]) - 1,
+            Number(mariaDate[3]),
+            Number(mariaDate[4]),
+            Number(mariaDate[5]),
+            Number(mariaDate[6]),
+            milliseconds
+          );
+          return Number.isNaN(localDate.getTime()) ? null : localDate;
+        }
+        const normalized = text.indexOf("T") >= 0 ? text : text.replace(" ", "T");
+        const date = new Date(normalized);
+        return Number.isNaN(date.getTime()) ? null : date;
+      }
+
+      function formatDate(value) {
+        const date = value instanceof Date ? value : normalizeDate(value);
+        if (!date) return "";
+        return date.toLocaleString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }
+
+      function getFileNameFromUrl(urlValue) {
+        const text = safeText(urlValue).trim();
+        if (!text) return "";
+        try {
+          const url = new URL(text, location.href);
+          const last = url.pathname.split("/").filter(Boolean).pop() || "";
+          return decodeURIComponent(last);
+        } catch (_err) {
+          return text.split("/").pop() || "";
+        }
+      }
+
+      function gradeLabel(value) {
+        const text = safeText(value).trim();
+        const match = text.match(/(?:high|\uACE0)\s*([1-3])/i);
+        return match ? "\uACE0" + match[1] : text;
+      }
+
+      function monthLabel(value) {
+        const text = safeText(value).trim();
+        if (!text) return "";
+        const map = {
+          march: "3\uC6D4",
+          april: "4\uC6D4",
+          june: "6\uC6D4",
+          july: "7\uC6D4",
+          september: "9\uC6D4",
+          october: "10\uC6D4",
+          november: "11\uC6D4"
+        };
+        const lower = text.toLowerCase();
+        if (map[lower]) return map[lower];
+        const number = Number(text);
+        return Number.isFinite(number) && number >= 1 && number <= 12
+          ? Math.trunc(number) + TEXT.month
+          : text;
+      }
+
+      function normalizeProblemNo(value) {
+        if (Array.isArray(value)) {
+          return value.map(normalizeProblemNo).filter(Boolean);
+        }
+        const text = safeText(value).trim();
+        if (!text) return [];
+        const matches = text.match(/\d{1,3}/g) || [];
+        return matches.map(Number).filter(function (number) {
+          return Number.isInteger(number) && number > 0 && number < 1000;
+        });
+      }
+
+      function collectProblemNumbers(row, payload) {
+        const numbers = [];
+        const seen = new Set();
+        const aliases = [
+          "QNo",
+          "qNo",
+          "questionNo",
+          "question_no",
+          "problem_no",
+          "problemNo",
+          "problemNumber"
+        ];
+
+        function add(value) {
+          const list = normalizeProblemNo(value);
+          for (let i = 0; i < list.length; i += 1) {
+            if (seen.has(list[i])) continue;
+            seen.add(list[i]);
+            numbers.push(list[i]);
+          }
+        }
+
+        function inspect(source) {
+          if (!source || typeof source !== "object") return;
+          for (let i = 0; i < aliases.length; i += 1) {
+            add(findValue(source, [aliases[i]]));
+          }
+          const meta = findValue(source, ["meta", "metadata"]);
+          if (meta && typeof meta === "object") {
+            for (let i = 0; i < aliases.length; i += 1) add(findValue(meta, [aliases[i]]));
+          }
+          const label = safeText(findValue(source, ["problemLabel", "questionLabel"]));
+          const labelMatches = label.matchAll(/(\d{1,3})\s*\uBC88/g);
+          for (const match of labelMatches) add(match[1]);
+        }
+
+        inspect(row);
+        inspect(payload);
+        const tabs = findValue(payload, ["tabs", "memoTabs"]);
+        if (Array.isArray(tabs)) {
+          tabs.forEach(function (tab) {
+            inspect(tab);
+            const twoThree = findValue(tab, ["twoThree", "two_three"]);
+            inspect(twoThree);
+            const rows = []
+              .concat(findValue(tab, ["pairs", "wordPairs", "word_pairs"]) || [])
+              .concat(findValue(tab, ["words", "vocabulary", "items"]) || [])
+              .concat(findValue(twoThree, ["pairs", "wordPairs", "word_pairs"]) || [])
+              .concat(findValue(twoThree, ["words", "vocabulary", "items"]) || []);
+            rows.forEach(inspect);
+          });
+        }
+
+        const source = findValue(payload, ["source"]);
+        inspect(source);
+        inspect(source && findValue(source, ["wordRow", "word_row"]));
+        const matched = findValue(payload, ["matched"]);
+        if (matched && typeof matched === "object") {
+          ["words", "tokens", "pageSentences", "sentenceCards", "problemContexts"].forEach(function (key) {
+            const rows = findValue(matched, [key]);
+            if (Array.isArray(rows)) rows.forEach(inspect);
+          });
+        }
+        return numbers.sort(function (a, b) { return a - b; });
+      }
+
+      function problemLabel(numbers) {
+        if (!numbers || !numbers.length) return "";
+        const visible = numbers.slice(0, 4).join("\u00B7");
+        return visible + (numbers.length > 4 ? "\u2026" : "") + TEXT.question;
+      }
+
+      function detectCategory(row, payload, servedUrl) {
+        const rowLevel = findRowValue(row, ["QLevel", "qLevel"]);
+        const rowYear = findRowValue(row, ["QYear", "qYear"]);
+        const rowMonth = findRowValue(row, ["QMonth", "qMonth"]);
+        const hints = [
+          servedUrl,
+          findRowValue(row, ["source", "Source", "type", "Type", "template", "Template"]),
+          payload && findValue(payload, ["template", "type", "kind"]),
+          payload && findValue(payload, ["book", "section", "source"]),
+          payload && findValue(payload, ["meta", "metadata"])
+        ];
+        let haystack = "";
+        for (let i = 0; i < hints.length; i += 1) {
+          const value = hints[i];
+          if (value && typeof value === "object") {
+            try {
+              haystack += " " + JSON.stringify(value);
+            } catch (_err) {
+              haystack += "";
+            }
+          } else {
+            haystack += " " + safeText(value);
+          }
+        }
+        const payloadSource = payload && findValue(payload, ["source"]);
+        const payloadMatched = payload && findValue(payload, ["matched"]);
+        const hasEbsShape = !!(
+          payloadSource &&
+          typeof payloadSource === "object" &&
+          findValue(payloadSource, ["wordRow", "word_row"]) &&
+          payloadMatched &&
+          typeof payloadMatched === "object"
+        );
+        if (hasEbsShape) return "ebs";
+        if (/\bebs\b|sootk|\uC218\uB2A5\uD2B9\uAC15|\uC218\uB2A5\uC644\uC131/i.test(haystack)) return "ebs";
+        if (
+          safeText(rowLevel).trim() ||
+          safeText(rowYear).trim() ||
+          safeText(rowMonth).trim() ||
+          /mock[-_ ]?exam|\uBAA8\uC758\uACE0\uC0AC|ksat[-_ ]?moi|high[1-3]/i.test(haystack)
+        ) return "mock";
+        return "other";
+      }
+
+      function extractBookTitle(payload) {
+        const book = payload && findValue(payload, ["book"]);
+        const section = payload && findValue(payload, ["section"]);
+        return safeText(
+          findValue(book, ["title", "name", "bookTitle"]) ||
+          findValue(section, ["bookTitle", "book", "title"])
+        ).trim();
+      }
+
+      function makeEntryTitle(row, index, servedUrl, payload, category, problemNumbers) {
+        const qLabel = problemLabel(problemNumbers || collectProblemNumbers(row, payload));
+        if (category === "mock") {
+          const grade = gradeLabel(
+            findRowValue(row, ["QLevel", "qLevel", "level"]) ||
+            findValue(payload, ["QLevel", "qLevel", "level"])
+          );
+          const year = safeText(
+            findRowValue(row, ["QYear", "qYear", "year"]) ||
+            findValue(payload, ["QYear", "qYear", "year"])
+          ).trim();
+          const month = monthLabel(
+            findRowValue(row, ["QMonth", "qMonth", "month"]) ||
+            findValue(payload, ["QMonth", "qMonth", "month"])
+          );
+          const parts = [grade, year, month, qLabel].filter(Boolean);
+          if (parts.length) return parts.join(" ");
+        }
+        if (category === "ebs") {
+          const ebsTitle = extractBookTitle(payload);
+          const parts = [ebsTitle || TEXT.ebs, qLabel].filter(Boolean);
+          if (parts.length) return parts.join(" ");
+        }
+        const rawName = getFileNameFromUrl(servedUrl).replace(/\.json(?:\?.*)?$/i, "");
+        const fallback = rawName || TEXT.fileFallback + " " + (index + 1);
+        if (!qLabel || fallback.indexOf(qLabel) >= 0) return fallback;
+        return fallback + " " + qLabel;
+      }
+
+      function refreshEntryIdentity(entry, payload) {
+        entry.problemNumbers = collectProblemNumbers(entry.row, payload);
+        entry.category = detectCategory(entry.row, payload, entry.servedUrl);
+        entry.title = makeEntryTitle(
+          entry.row,
+          entry.sourceIndex,
+          entry.servedUrl,
+          payload,
+          entry.category,
+          entry.problemNumbers
+        );
+      }
+
+      function addWordRows(target, seen, rows) {
+        if (!Array.isArray(rows)) return;
+        const wordAliases = ["word", "Word", "english", "English", "headword", "headWord", "term", "vocab", "vocabulary"];
+        const meaningAliases = [
+          "meaning",
+          "Meaning",
+          "koreanMeaning",
+          "KoreanMeaning",
+          "Korean Meaning",
+          "definition",
+          "korean",
+          "translation",
+          "memo",
+          "note"
+        ];
+        for (let i = 0; i < rows.length; i += 1) {
+          const row = rows[i];
+          if (!row || typeof row !== "object") continue;
+          let word = safeText(findValue(row, wordAliases)).trim();
+          const meaning = safeText(findValue(row, meaningAliases)).trim();
+          if (!word && meaning) word = safeText(findValue(row, ["text", "Text"])).trim();
+          if (!word) continue;
+          const key = word.toLocaleLowerCase() + "\u0000" + meaning;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          target.push({
+            word: word,
+            meaning: meaning,
+            page: safeText(findValue(row, ["page", "Page"])).trim(),
+            qNo: safeText(findValue(row, [
+              "QNo",
+              "qNo",
+              "questionNo",
+              "question_no",
+              "problem_no",
+              "problemNo",
+              "problemNumber"
+            ])).trim()
+          });
+        }
+      }
+
+      function extractWordPairs(payload) {
+        const words = [];
+        const seen = new Set();
+        const visited = new Set();
+
+        function visit(source, depth) {
+          if (!source || typeof source !== "object" || depth > 3 || visited.has(source)) return;
+          visited.add(source);
+
+          addWordRows(words, seen, findValue(source, ["pairs", "wordPairs", "word_pairs"]));
+          addWordRows(words, seen, findValue(source, ["words", "vocabulary", "vocab", "items"]));
+
+          const twoThree = findValue(source, ["twoThree", "two_three"]);
+          if (twoThree && typeof twoThree === "object") {
+            addWordRows(words, seen, findValue(twoThree, ["pairs", "wordPairs", "words", "items"]));
+          }
+
+          const tabs = findValue(source, ["tabs", "memoTabs"]);
+          if (Array.isArray(tabs)) {
+            for (let i = 0; i < tabs.length; i += 1) visit(tabs[i], depth + 1);
+          }
+
+          const nested = [
+            findValue(source, ["data", "Data"]),
+            findValue(source, ["result", "Result"]),
+            findValue(source, ["payload", "Payload"])
+          ];
+          for (let i = 0; i < nested.length; i += 1) {
+            const parsed = parseJsonObject(nested[i]);
+            if (parsed && parsed !== source) visit(parsed, depth + 1);
+          }
+        }
+
+        visit(payload, 0);
+        return words;
+      }
+
+      function buildEntry(row, index) {
+        const servedUrl = safeText(findRowValue(row, [
+          "ServedFileURL",
+          "servedFileURL",
+          "served_file_url",
+          "fileUrl",
+          "url"
+        ])).trim();
+        const inlinePayload = extractInlinePayload(row);
+        const scheduleRaw = findRowValue(row, ["LiveSchedule", "liveSchedule", "UpdatedAt", "updatedAt", "createdAt"]);
+        const date = normalizeDate(scheduleRaw);
+        const idRaw = findRowValue(row, ["LSASId", "lsasId", "id", "Id"]);
+        const sessionRaw = findRowValue(row, ["SessionNo", "sessionNo", "session_no"]);
+        const sessionNo = Number(sessionRaw);
+        const problemNumbers = collectProblemNumbers(row, inlinePayload);
+        const category = detectCategory(row, inlinePayload, servedUrl);
+        return {
+          id: idRaw != null && safeText(idRaw).trim()
+            ? "server:" + safeText(idRaw).trim() + ":" + index
+            : "server:row:" + index + ":" + safeText(scheduleRaw),
+          kind: "server",
+          row: row,
+          sourceIndex: index,
+          category: category,
+          problemNumbers: problemNumbers,
+          title: makeEntryTitle(row, index, servedUrl, inlinePayload, category, problemNumbers),
+          fileName: getFileNameFromUrl(servedUrl),
+          servedUrl: servedUrl,
+          inlinePayload: inlinePayload,
+          payload: null,
+          words: [],
+          sessionNo: Number.isFinite(sessionNo) ? Math.trunc(sessionNo) : null,
+          date: date,
+          dateLabel: formatDate(date),
+          state: "loading",
+          error: "",
+          sortValue: date ? date.getTime() : -index
+        };
+      }
+
+      function sourceLabel(entry) {
+        if (!entry) return TEXT.mock;
+        return folderLabels[entry.category] || TEXT.other;
+      }
+
+      function readEntryValue(entry, aliases) {
+        if (!entry) return undefined;
+        const rowValue = findRowValue(entry.row, aliases);
+        if (rowValue !== undefined) return rowValue;
+        const payloads = [entry.payload, entry.inlinePayload];
+        for (let i = 0; i < payloads.length; i += 1) {
+          const payload = payloads[i];
+          const direct = findValue(payload, aliases);
+          if (direct !== undefined) return direct;
+          const meta = findValue(payload, ["meta", "metadata"]);
+          const fromMeta = findValue(meta, aliases);
+          if (fromMeta !== undefined) return fromMeta;
+        }
+        return undefined;
+      }
+
+      function normalizeMockGrade(value) {
+        const match = safeText(value).trim().match(/(?:high|\uACE0)\s*([1-3])/i);
+        return match ? "High" + match[1] : "";
+      }
+
+      function normalizeMockYear(value) {
+        const text = safeText(value).trim();
+        const range = text.match(/(20\d{2})\s*(?:to|[-~])\s*(20\d{2})/i);
+        if (range) return range[1] + "to" + range[2];
+        const single = text.match(/20\d{2}/);
+        if (!single) return "";
+        const start = Number(single[0]);
+        return start + "to" + (start + 1);
+      }
+
+      function normalizeMockMonth(value) {
+        const text = safeText(value).trim().toLowerCase();
+        const names = ["march", "april", "june", "july", "september", "october", "november"];
+        for (let i = 0; i < names.length; i += 1) {
+          if (text.indexOf(names[i]) >= 0) return names[i];
+        }
+        const numberMatch = text.match(/\d{1,2}/);
+        const month = numberMatch ? Number(numberMatch[0]) : 0;
+        const map = {
+          3: "march",
+          4: "april",
+          6: "june",
+          7: "july",
+          9: "september",
+          10: "october",
+          11: "november"
+        };
+        return map[month] || "";
+      }
+
+      function getMockDescriptor(entry) {
+        const grade = normalizeMockGrade(readEntryValue(entry, ["QLevel", "qLevel", "level"]));
+        const year = normalizeMockYear(readEntryValue(entry, ["QYear", "qYear", "year"]));
+        const month = normalizeMockMonth(readEntryValue(entry, ["QMonth", "qMonth", "month"]));
+        if (!grade || !year || !month) return null;
+        const stem = grade + "_" + year + "_" + month;
+        return {
+          grade: grade,
+          year: year,
+          month: month,
+          stem: stem,
+          signature: grade + "|" + year + "|" + month
+        };
+      }
+
+      function mockWordIndexCandidates(entry) {
+        const descriptor = getMockDescriptor(entry);
+        if (!descriptor) return [];
+        const prefix = SUPABASE_BASE + "/" + MOCK_BUCKET + "/" + descriptor.grade + "/" + descriptor.stem;
+        return WORD_INDEX_SUFFIXES.map(function (suffix) {
+          return prefix + suffix;
+        });
+      }
+
+      async function fetchMockWordIndex(entry) {
+        const candidates = mockWordIndexCandidates(entry);
+        if (!candidates.length) throw new Error("Missing mock exam metadata");
+        const cacheKey = candidates[0];
+        if (state.wordIndexCache.has(cacheKey)) return state.wordIndexCache.get(cacheKey);
+        const promise = (async function () {
+          let lastError = null;
+          for (let i = 0; i < candidates.length; i += 1) {
+            try {
+              const response = await fetch(candidates[i], { cache: "force-cache" });
+              if (!response.ok) {
+                lastError = new Error("HTTP " + response.status);
+                continue;
+              }
+              const payload = await response.json();
+              if (payload && typeof payload === "object") return payload;
+              lastError = new Error("Invalid JSON");
+            } catch (error) {
+              lastError = error;
+            }
+          }
+          throw lastError || new Error("Word index unavailable");
+        })();
+        state.wordIndexCache.set(cacheKey, promise);
+        try {
+          return await promise;
+        } catch (error) {
+          state.wordIndexCache.delete(cacheKey);
+          throw error;
+        }
+      }
+
+      function mockPdfUrl(entry, raw) {
+        const descriptor = getMockDescriptor(entry);
+        if (!descriptor) return "";
+        let path = "";
+        wordIndexObjects(raw).some(function (source) {
+          path = safeText(findValue(source, ["pdf_path", "pdfPath"])).trim();
+          return !!path;
+        });
+        if (/^https?:\/\//i.test(path)) return path;
+        if (/^[a-z]:[\\/]/i.test(path) || path.indexOf("\\") >= 0) path = "";
+        path = path.replace(/^\/+/, "");
+        if (path) {
+          if (path.indexOf("/") < 0) path = descriptor.grade + "/" + path;
+          return SUPABASE_BASE + "/" + MOCK_BUCKET + "/" + path;
+        }
+        return SUPABASE_BASE + "/" + MOCK_BUCKET + "/" + descriptor.grade + "/" + descriptor.stem + ".pdf";
+      }
+
+      async function fetchMockPdfDocument(entry, raw) {
+        if (!window.pdfjsLib) throw new Error("PDF.js unavailable");
+        const url = mockPdfUrl(entry, raw);
+        if (!url) throw new Error("Missing PDF metadata");
+        if (state.pdfDocumentCache.has(url)) return state.pdfDocumentCache.get(url);
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC;
+        const promise = (async function () {
+          const response = await fetch(url, { cache: "force-cache" });
+          if (!response.ok) throw new Error("PDF HTTP " + response.status);
+          const bytes = await response.arrayBuffer();
+          return window.pdfjsLib.getDocument({ data: bytes }).promise;
+        })();
+        state.pdfDocumentCache.set(url, promise);
+        try {
+          return await promise;
+        } catch (error) {
+          state.pdfDocumentCache.delete(url);
+          throw error;
+        }
+      }
+
+      function normalizeScrapBBox(value) {
+        if (!Array.isArray(value) || value.length < 4) return null;
+        const bbox = value.slice(0, 4).map(Number);
+        return bbox.every(Number.isFinite) ? bbox : null;
+      }
+
+      function normalizeScrapPage(value) {
+        const page = Math.trunc(Number(value));
+        return Number.isFinite(page) && page > 0 ? page : 0;
+      }
+
+      function getWordIndexPageSize(raw, pageNumber) {
+        const pageKey = String(normalizeScrapPage(pageNumber));
+        let size = null;
+        wordIndexObjects(raw).some(function (source) {
+          const sizes = findValue(source, ["page_sizes", "pageSizes"]);
+          const value = sizes && typeof sizes === "object" ? sizes[pageKey] : null;
+          if (Array.isArray(value) && value.length >= 2) {
+            const width = Number(value[0]);
+            const height = Number(value[1]);
+            if (Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0) {
+              size = { width: width, height: height };
+              return true;
+            }
+          }
+          return false;
+        });
+        return size;
+      }
+
+      function getWordIndexPageRow(source, pageNumber, wordIndex) {
+        const page = normalizeScrapPage(pageNumber);
+        const idx = Math.trunc(Number(wordIndex));
+        if (!page || !Number.isFinite(idx) || idx < 0) return null;
+        const pageMap = findValue(source, ["page_words", "pageWords", "pages"]);
+        const rows = pageMap && typeof pageMap === "object" ? pageMap[String(page)] : null;
+        if (!Array.isArray(rows)) return null;
+        const direct = rows[idx];
+        if (direct && typeof direct === "object") {
+          const directIdx = Number(findValue(direct, ["idx", "word_index", "wordIndex", "index"]));
+          if (!Number.isFinite(directIdx) || Math.trunc(directIdx) === idx) return direct;
+        }
+        for (let i = 0; i < rows.length; i += 1) {
+          const rowIdx = Number(findValue(rows[i], ["idx", "word_index", "wordIndex", "index"]));
+          if (Number.isFinite(rowIdx) && Math.trunc(rowIdx) === idx) return rows[i];
+        }
+        return null;
+      }
+
+      function resolveProblemAnchorBBox(source, item) {
+        const direct = normalizeScrapBBox(findValue(item, ["anchor_bbox", "anchorBBox", "bbox"]));
+        if (direct) return direct;
+        const refs = findValue(item, ["anchor_word_refs", "anchorWordRefs"]);
+        const first = Array.isArray(refs) && refs.length ? refs[0] : null;
+        if (!Array.isArray(first) || first.length < 2) return null;
+        const row = getWordIndexPageRow(source, first[0], first[1]);
+        return normalizeScrapBBox(row && findValue(row, ["bbox"]));
+      }
+
+      function collectProblemAnchors(raw) {
+        const anchors = new Map();
+        wordIndexObjects(raw).forEach(function (source) {
+          const byId = new Map();
+          const rawAnchors = []
+            .concat(objectRows(findValue(source, ["problem_anchors"])))
+            .concat(objectRows(findValue(source, ["problemAnchors"])));
+
+          rawAnchors.forEach(function (entry) {
+            const item = entry.item;
+            const id = safeText(findValue(item, ["anchor_id", "anchorId", "id"]) || entry.key).trim();
+            if (id) byId.set(id, item);
+            const qNos = normalizeProblemNo(
+              findValue(item, ["number", "QNo", "qNo", "problem_no", "problemNo"]) || entry.key
+            );
+            const bbox = resolveProblemAnchorBBox(source, item);
+            const page = normalizeScrapPage(findValue(item, ["page", "page_no", "pageNo"]));
+            if (!qNos.length || !bbox || !page) return;
+            const pageSize = getWordIndexPageSize(raw, page);
+            const colValue = Number(findValue(item, ["col", "column"]));
+            const col = colValue === 0 || colValue === 1
+              ? colValue
+              : (colValue === 2 ? 1 : (pageSize && bbox[0] >= pageSize.width * 0.5 ? 1 : 0));
+            anchors.set(qNos[0], {
+              qNo: qNos[0],
+              page: page,
+              col: col,
+              y: bbox[1]
+            });
+          });
+
+          const contexts = []
+            .concat(objectRows(findValue(source, ["problem_contexts"])))
+            .concat(objectRows(findValue(source, ["problemContexts"])))
+            .concat(objectRows(findValue(source, ["problem_context_by_no"])))
+            .concat(objectRows(findValue(source, ["problemContextByNo"])));
+
+          contexts.forEach(function (entry) {
+            const context = entry.item;
+            const qNos = normalizeProblemNo(
+              findValue(context, ["number", "QNo", "qNo", "problem_no", "problemNo"]) || entry.key
+            );
+            if (!qNos.length) return;
+            const anchorId = safeText(findValue(context, ["anchor_id", "anchorId"])).trim();
+            const anchor = anchorId ? byId.get(anchorId) : null;
+            const bbox = resolveProblemAnchorBBox(source, context)
+              || resolveProblemAnchorBBox(source, anchor);
+            const page = normalizeScrapPage(
+              findValue(context, ["page", "page_no", "pageNo"])
+              || findValue(anchor, ["page", "page_no", "pageNo"])
+            );
+            if (!bbox || !page) return;
+            const pageSize = getWordIndexPageSize(raw, page);
+            const colValue = Number(
+              findValue(context, ["col", "column"]) != null
+                ? findValue(context, ["col", "column"])
+                : findValue(anchor, ["col", "column"])
+            );
+            const col = colValue === 0 || colValue === 1
+              ? colValue
+              : (colValue === 2 ? 1 : (pageSize && bbox[0] >= pageSize.width * 0.5 ? 1 : 0));
+            anchors.set(qNos[0], {
+              qNo: qNos[0],
+              page: page,
+              col: col,
+              y: bbox[1]
+            });
+          });
+
+          const pageMap = findValue(source, ["page_words", "pageWords", "pages"]);
+          if (!pageMap || typeof pageMap !== "object") return;
+          Object.keys(pageMap).forEach(function (pageKey) {
+            const page = normalizeScrapPage(pageKey);
+            const rows = Array.isArray(pageMap[pageKey]) ? pageMap[pageKey] : [];
+            const pageSize = getWordIndexPageSize(raw, page);
+            rows.forEach(function (row) {
+              const text = safeText(findValue(row, ["text", "word"])).trim();
+              const match = text.match(/^(\d{1,2})\s*[.)]$/);
+              const bbox = normalizeScrapBBox(findValue(row, ["bbox"]));
+              const qNo = match ? Number(match[1]) : 0;
+              if (!qNo || qNo > 45 || !bbox || anchors.has(qNo)) return;
+              anchors.set(qNo, {
+                qNo: qNo,
+                page: page,
+                col: pageSize && bbox[0] >= pageSize.width * 0.5 ? 1 : 0,
+                y: bbox[1]
+              });
+            });
+          });
+        });
+        return Array.from(anchors.values()).sort(function (a, b) {
+          return a.page - b.page || a.col - b.col || a.y - b.y || a.qNo - b.qNo;
+        });
+      }
+
+      function calculateProblemCrop(raw, qNo) {
+        const anchors = collectProblemAnchors(raw);
+        const current = anchors.find(function (anchor) {
+          return Number(anchor.qNo) === Number(qNo);
+        });
+        if (!current) return null;
+        const size = getWordIndexPageSize(raw, current.page);
+        if (!size) return null;
+        const next = anchors.find(function (anchor) {
+          return anchor.page === current.page
+            && anchor.col === current.col
+            && anchor.y > current.y + 8;
+        });
+        const topPad = Math.max(6, size.height * 0.008);
+        const bottomPad = Math.max(4, size.height * 0.005);
+        const top = Math.max(0, current.y - topPad);
+        let bottom = next ? next.y - bottomPad : size.height * 0.965;
+        if (!next && bottom <= top + size.height * 0.08) {
+          bottom = Math.min(size.height * 0.965, top + size.height * 0.18);
+        }
+        if (bottom <= top) return null;
+        return {
+          page: current.page,
+          qNo: Number(qNo),
+          col: current.col,
+          x: current.col === 1 ? 0.5 : 0,
+          y: top / size.height,
+          w: 0.5,
+          h: (bottom - top) / size.height
+        };
+      }
+
+      function getPageInkPayload(candidate) {
+        if (!candidate) return null;
+        const sources = [
+          candidate.payload,
+          candidate.inlinePayload,
+          candidate.payload && candidate.payload.data,
+          candidate.payload && candidate.payload.payload
+        ];
+        for (let i = 0; i < sources.length; i += 1) {
+          const value = findValue(sources[i], ["pageInk", "page_ink"]);
+          const parsed = typeof value === "string" ? parseJsonObject(value) : value;
+          if (parsed && typeof parsed === "object" && parsed.pages && typeof parsed.pages === "object") {
+            return parsed;
+          }
+        }
+        return null;
+      }
+
+      function findLatestPageInk(entry) {
+        const direct = getPageInkPayload(entry);
+        if (direct) return direct;
+        const descriptor = getMockDescriptor(entry);
+        if (!descriptor) return null;
+        const candidates = state.entries.slice().sort(function (a, b) {
+          return Number(b.sortValue || 0) - Number(a.sortValue || 0);
+        });
+        for (let i = 0; i < candidates.length; i += 1) {
+          const candidate = candidates[i];
+          const candidateDescriptor = getMockDescriptor(candidate);
+          if (!candidateDescriptor || candidateDescriptor.signature !== descriptor.signature) continue;
+          const sessionNo = Number(
+            candidate.sessionNo != null
+              ? candidate.sessionNo
+              : readEntryValue(candidate, ["SessionNo", "sessionNo", "session_no"])
+          );
+          if (sessionNo !== 993) continue;
+          const payload = getPageInkPayload(candidate);
+          if (payload) return payload;
+        }
+        return null;
+      }
+
+      function objectRows(value) {
+        if (Array.isArray(value)) {
+          return value.filter(function (item) {
+            return item && typeof item === "object" && !Array.isArray(item);
+          }).map(function (item) {
+            return { key: "", item: item };
+          });
+        }
+        if (!value || typeof value !== "object") return [];
+        return Object.keys(value).map(function (key) {
+          return { key: key, item: value[key] };
+        }).filter(function (entry) {
+          return entry.item && typeof entry.item === "object" && !Array.isArray(entry.item);
+        });
+      }
+
+      function objectIdMap(value, aliases) {
+        const map = new Map();
+        objectRows(value).forEach(function (entry) {
+          const id = safeText(findValue(entry.item, aliases) || entry.key).trim();
+          if (id) map.set(id, entry.item);
+        });
+        return map;
+      }
+
+      function objectIdList(source, aliases) {
+        const value = findValue(source, aliases);
+        const sourceList = Array.isArray(value) ? value : [value];
+        const output = [];
+        sourceList.forEach(function (item) {
+          if (Array.isArray(item)) {
+            item.forEach(function (nested) {
+              const id = safeText(nested).trim();
+              if (id && output.indexOf(id) < 0) output.push(id);
+            });
+            return;
+          }
+          const id = safeText(item).trim();
+          if (id && output.indexOf(id) < 0) output.push(id);
+        });
+        return output;
+      }
+
+      function wordIndexObjects(raw) {
+        const objects = [];
+        function add(value) {
+          if (!value || typeof value !== "object" || objects.indexOf(value) >= 0) return;
+          objects.push(value);
+        }
+        add(raw);
+        add(raw && raw.ix);
+        add(raw && raw.data);
+        add(raw && raw.payload);
+        add(raw && raw.index);
+        return objects;
+      }
+
+      function extractOriginalSentences(raw, problemNumbers) {
+        const wanted = new Set((problemNumbers || []).map(Number));
+        const output = [];
+        const seen = new Set();
+        wordIndexObjects(raw).forEach(function (source) {
+          const sentenceMap = objectIdMap(
+            findValue(source, ["sentence_cards", "sentenceCards"]),
+            ["sentence_id", "sentenceId", "id"]
+          );
+          const paragraphMap = objectIdMap(
+            findValue(source, ["paragraphs", "paragraph_cards", "paragraphCards"]),
+            ["paragraph_id", "paragraphId", "id"]
+          );
+          const contexts = []
+            .concat(objectRows(findValue(source, ["problem_contexts"])))
+            .concat(objectRows(findValue(source, ["problemContexts"])))
+            .concat(objectRows(findValue(source, ["problem_context_by_no"])))
+            .concat(objectRows(findValue(source, ["problemContextByNo"])));
+          contexts.forEach(function (entry) {
+            const qValues = normalizeProblemNo(
+              findValue(entry.item, ["QNo", "qNo", "question_no", "questionNo", "problem_no", "problemNo", "number"]) ||
+              entry.key
+            );
+            const qNo = qValues.length ? qValues[0] : 0;
+            if (!qNo || (wanted.size && !wanted.has(qNo))) return;
+            const primaryIds = objectIdList(entry.item, ["primary_paragraph_id", "primaryParagraphId"]);
+            const paragraphIds = primaryIds.length
+              ? [primaryIds[0]]
+              : objectIdList(entry.item, ["paragraph_ids", "paragraphIds"]).slice(0, 1);
+            paragraphIds.forEach(function (paragraphId) {
+              const paragraph = paragraphMap.get(paragraphId);
+              if (!paragraph) return;
+              const sentenceIds = objectIdList(paragraph, ["sentence_ids", "sentenceIds"]);
+              if (!sentenceIds.length) {
+                const paragraphText = safeText(findValue(paragraph, ["text", "sentence", "source_text", "sourceText"])).trim();
+                const paragraphKey = qNo + "|" + paragraphText;
+                if (paragraphText && !seen.has(paragraphKey)) {
+                  seen.add(paragraphKey);
+                  output.push({ qNo: qNo, no: output.length + 1, text: paragraphText });
+                }
+                return;
+              }
+              sentenceIds.forEach(function (sentenceId, index) {
+                const sentence = sentenceMap.get(sentenceId);
+                const text = safeText(findValue(sentence, ["text", "sentence", "source_text", "sourceText"])).trim();
+                const key = qNo + "|" + text;
+                if (!text || seen.has(key)) return;
+                seen.add(key);
+                output.push({ qNo: qNo, no: index + 1, text: text });
+              });
+            });
+          });
+        });
+        return output.sort(function (a, b) {
+          return a.qNo - b.qNo || a.no - b.no;
+        });
+      }
+
+      function sentenceMatchKey(value) {
+        let text = safeText(value).trim();
+        if (typeof text.normalize === "function") text = text.normalize("NFKC");
+        return text.replace(/[\u2018\u2019]/g, "'")
+          .replace(/[\u201C\u201D]/g, '"')
+          .replace(/\s+/g, " ")
+          .toLocaleLowerCase();
+      }
+
+      function addTranslationRows(target, rows, inheritedQNo) {
+        if (!Array.isArray(rows)) return;
+        rows.forEach(function (row, index) {
+          if (!row || typeof row !== "object") return;
+          const explicitTranslation = safeText(findValue(row, [
+            "answer",
+            "translation",
+            "response",
+            "blankText",
+            "userText",
+            "translatedText"
+          ])).trim();
+          const storedSentence = safeText(findValue(row, ["sentence"])).trim();
+          const translation = explicitTranslation || storedSentence;
+          if (!translation) return;
+          const original = safeText(findValue(row, [
+            "original",
+            "originalText",
+            "sourceText",
+            "source_text"
+          ])).trim();
+          const rowQNos = normalizeProblemNo(findValue(row, [
+            "QNo",
+            "qNo",
+            "questionNo",
+            "question_no",
+            "problemNo",
+            "problem_no",
+            "sourceQNo"
+          ]));
+          const noValue = Number(findValue(row, ["no", "index", "sentenceNo", "sentence_no"]));
+          target.push({
+            qNo: rowQNos.length ? rowQNos[0] : inheritedQNo,
+            no: Number.isFinite(noValue) && noValue > 0 ? Math.trunc(noValue) : index + 1,
+            original: original,
+            translation: translation
+          });
+        });
+      }
+
+      function extractTranslationRows(entry) {
+        const payload = entry && (entry.payload || entry.inlinePayload);
+        if (!payload || typeof payload !== "object") return [];
+        const target = [];
+        const problemNumbers = Array.isArray(entry.problemNumbers) ? entry.problemNumbers : [];
+        const fallbackQNo = problemNumbers.length === 1 ? problemNumbers[0] : 0;
+        const rootQNos = normalizeProblemNo(findValue(payload, [
+          "QNo",
+          "qNo",
+          "questionNo",
+          "question_no",
+          "problemNo",
+          "problem_no",
+          "sourceQNo"
+        ]));
+        const rootQNo = rootQNos.length ? rootQNos[0] : fallbackQNo;
+        addTranslationRows(target, findValue(payload, ["fragments"]), rootQNo);
+        addTranslationRows(target, findValue(payload, ["sentences"]), rootQNo);
+        const tabs = findValue(payload, ["tabs", "memoTabs"]);
+        if (Array.isArray(tabs)) {
+          tabs.forEach(function (tab) {
+            const tabQNos = normalizeProblemNo(findValue(tab, ["QNo", "qNo", "sourceQNo"]));
+            const tabQNo = tabQNos.length ? tabQNos[0] : rootQNo;
+            addTranslationRows(target, findValue(tab, ["fragments"]), tabQNo);
+            addTranslationRows(target, findValue(tab, ["sentences"]), tabQNo);
+            const fourT = findValue(tab, ["fourT", "four_t"]);
+            const fourQNos = normalizeProblemNo(findValue(fourT, ["QNo", "qNo", "sourceQNo"]));
+            addTranslationRows(target, findValue(fourT, ["fragments"]), fourQNos[0] || tabQNo);
+          });
+        }
+        return target;
+      }
+
+      function normalizeSentenceInkStrokes(value) {
+        if (!Array.isArray(value)) return [];
+        return value.filter(function (stroke) {
+          return !!(stroke && Array.isArray(stroke.points) && stroke.points.length);
+        });
+      }
+
+      function addSentenceInkRows(target, rows, inheritedQNo) {
+        if (!Array.isArray(rows)) return;
+        rows.forEach(function (row, index) {
+          if (!row || typeof row !== "object") return;
+          const strokes = normalizeSentenceInkStrokes(
+            findValue(row, ["ink", "penInk", "pen_ink", "strokes"])
+          );
+          if (!strokes.length) return;
+          const original = safeText(
+            findValue(row, ["text", "sentence", "sourceText", "source_text"])
+          ).trim();
+          const rowQNos = normalizeProblemNo(findValue(row, [
+            "QNo",
+            "qNo",
+            "questionNo",
+            "question_no",
+            "problemNo",
+            "problem_no",
+            "sourceQNo"
+          ]));
+          const noValue = Number(findValue(row, ["no", "index", "sentenceNo", "sentence_no"]));
+          target.push({
+            qNo: rowQNos.length ? rowQNos[0] : inheritedQNo,
+            no: Number.isFinite(noValue) && noValue > 0 ? Math.trunc(noValue) : index + 1,
+            original: original,
+            strokes: strokes
+          });
+        });
+      }
+
+      function extractSentenceInkRows(entry) {
+        const payload = entry && (entry.payload || entry.inlinePayload);
+        if (!payload || typeof payload !== "object") return [];
+        const target = [];
+        const problemNumbers = Array.isArray(entry.problemNumbers) ? entry.problemNumbers : [];
+        const fallbackQNo = problemNumbers.length === 1 ? problemNumbers[0] : 0;
+        const rootQNos = normalizeProblemNo(findValue(payload, [
+          "QNo",
+          "qNo",
+          "questionNo",
+          "question_no",
+          "problemNo",
+          "problem_no",
+          "sourceQNo"
+        ]));
+        const rootQNo = rootQNos.length ? rootQNos[0] : fallbackQNo;
+        const tabs = findValue(payload, ["tabs", "memoTabs"]);
+        let usedTabRows = false;
+        if (Array.isArray(tabs)) {
+          tabs.forEach(function (tab) {
+            const tabQNos = normalizeProblemNo(findValue(tab, ["QNo", "qNo", "sourceQNo"]));
+            const tabQNo = tabQNos.length ? tabQNos[0] : rootQNo;
+            const twoThree = findValue(tab, ["twoThree", "two_three"]);
+            const directRows = findValue(tab, ["sentences"]);
+            const nestedRows = findValue(twoThree, ["sentences"]);
+            const rows = Array.isArray(directRows)
+              ? directRows
+              : (Array.isArray(nestedRows) ? nestedRows : []);
+            if (!rows.length) return;
+            usedTabRows = true;
+            addSentenceInkRows(target, rows, tabQNo);
+          });
+        }
+        if (!usedTabRows) {
+          addSentenceInkRows(target, findValue(payload, ["sentences"]), rootQNo);
+        }
+        return target;
+      }
+
+      function buildTranslationLookup(entry) {
+        const descriptor = getMockDescriptor(entry);
+        const sessions = {};
+        TRANSLATION_SESSIONS.forEach(function (session) {
+          sessions[String(session.no)] = {
+            byText: new Map(),
+            byNumber: new Map(),
+            inkByText: new Map(),
+            inkByNumber: new Map(),
+            submittedQuestions: new Set()
+          };
+        });
+        if (!descriptor) return sessions;
+        const candidates = [entry].concat(
+          state.entries.filter(function (candidate) {
+            return candidate !== entry;
+          }).sort(function (a, b) {
+            return Number(b.sortValue || 0) - Number(a.sortValue || 0);
+          })
+        );
+        candidates.forEach(function (candidate) {
+          const candidateDescriptor = getMockDescriptor(candidate);
+          if (!candidateDescriptor || candidateDescriptor.signature !== descriptor.signature) return;
+          const sessionNo = Number(
+            candidate.sessionNo != null
+              ? candidate.sessionNo
+              : readEntryValue(candidate, ["SessionNo", "sessionNo", "session_no"])
+          );
+          const candidateQNos = Array.isArray(candidate.problemNumbers) ? candidate.problemNumbers : [];
+          extractTranslationRows(candidate).forEach(function (row) {
+            if (!row.qNo) return;
+            const bucket = sessions["99"];
+            bucket.submittedQuestions.add(Number(row.qNo));
+            const textKey = sentenceMatchKey(row.original);
+            if (textKey) {
+              const key = row.qNo + "|" + textKey;
+              if (!bucket.byText.has(key)) bucket.byText.set(key, row.translation);
+            }
+            const numberKey = row.qNo + "|" + row.no;
+            if (!bucket.byNumber.has(numberKey)) bucket.byNumber.set(numberKey, row.translation);
+          });
+          extractSentenceInkRows(candidate).forEach(function (row) {
+            if (!row.qNo || !row.strokes.length) return;
+            const bucket = sessions["992"];
+            bucket.submittedQuestions.add(Number(row.qNo));
+            const textKey = sentenceMatchKey(row.original);
+            if (textKey) {
+              const key = row.qNo + "|" + textKey;
+              if (!bucket.inkByText.has(key)) bucket.inkByText.set(key, row.strokes);
+            }
+            const numberKey = row.qNo + "|" + row.no;
+            if (!bucket.inkByNumber.has(numberKey)) bucket.inkByNumber.set(numberKey, row.strokes);
+          });
+          const pageInk = getPageInkPayload(candidate);
+          if (pageInk) {
+            candidateQNos.forEach(function (qNo) {
+              if (qNo) sessions["993"].submittedQuestions.add(Number(qNo));
+            });
+          }
+          if (sessionNo === 99 || sessionNo === 992) {
+            candidateQNos.forEach(function (qNo) {
+              if (qNo) sessions[String(sessionNo)].submittedQuestions.add(Number(qNo));
+            });
+          }
+        });
+        return sessions;
+      }
+
+      function sentenceInkColorOnDarkSurface(value) {
+        const color = safeText(value) || "#4f4a45";
+        const match = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+        if (!match) return "#e8e4dc";
+        const source = match[1].length === 3
+          ? match[1].split("").map(function (digit) { return digit + digit; }).join("")
+          : match[1];
+        const channels = [
+          parseInt(source.slice(0, 2), 16),
+          parseInt(source.slice(2, 4), 16),
+          parseInt(source.slice(4, 6), 16)
+        ];
+        const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+        if (luminance >= 168) return color;
+        const paper = [244, 240, 232];
+        const mixed = channels.map(function (channel, index) {
+          return Math.round(channel + (paper[index] - channel) * 0.82);
+        });
+        return "#" + mixed.map(function (channel) {
+          return channel.toString(16).padStart(2, "0");
+        }).join("");
+      }
+
+      function renderSentenceInkCanvas(canvas, strokes) {
+        if (!canvas || !Array.isArray(strokes)) return;
+        const rect = canvas.getBoundingClientRect();
+        const width = Math.max(1, Math.floor(rect.width || canvas.clientWidth || 420));
+        const height = Math.max(1, Math.floor(rect.height || canvas.clientHeight || 132));
+        const dpr = Math.max(1, Math.min(2, Number(window.devicePixelRatio) || 1));
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        strokes.forEach(function (stroke) {
+          const points = stroke && Array.isArray(stroke.points) ? stroke.points : [];
+          if (!points.length) return;
+          const color = sentenceInkColorOnDarkSurface(stroke.color);
+          const widthScale = Math.max(0.35, Math.min(4.8, (Number(stroke.width) || 4) / 4));
+          const normalizedPoints = points.map(function (point) {
+            return {
+              x: Math.max(0, Math.min(1, Number(point && point.x) || 0)),
+              y: Math.max(0, Math.min(1, Number(point && point.y) || 0)),
+              p: Math.max(0.05, Math.min(1, Number(point && point.p) || 0.5))
+            };
+          });
+          if (normalizedPoints.length === 1) {
+            const point = normalizedPoints[0];
+            const penWidth = (0.9 + (3.8 - 0.9) * point.p) * widthScale;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(point.x * width, point.y * height, Math.max(0.55, penWidth * 0.5), 0, Math.PI * 2);
+            ctx.fill();
+            return;
+          }
+          for (let i = 1; i < normalizedPoints.length; i += 1) {
+            const previous = normalizedPoints[i - 1];
+            const current = normalizedPoints[i];
+            const pressure = (previous.p + current.p) * 0.5;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = (0.9 + (3.8 - 0.9) * pressure) * widthScale;
+            ctx.beginPath();
+            ctx.moveTo(previous.x * width, previous.y * height);
+            ctx.lineTo(current.x * width, current.y * height);
+            ctx.stroke();
+          }
+        });
+      }
+
+      function sentenceInkVisibleHeight(strokes) {
+        if (!Array.isArray(strokes) || !strokes.length) return 0;
+        let maxY = 0;
+        strokes.forEach(function (stroke) {
+          const points = stroke && Array.isArray(stroke.points) ? stroke.points : [];
+          points.forEach(function (point) {
+            const y = Math.max(0, Math.min(1, Number(point && point.y) || 0));
+            if (y > maxY) maxY = y;
+          });
+        });
+        return maxY > 0 ? Math.ceil(maxY * 122 + 9) : 0;
+      }
+
+      function fitDirectTranslationSurface(body) {
+        if (!body) return;
+        body.style.height = "auto";
+        const text = body.querySelector(".sentence-direct-text, .sentence-translation.is-empty");
+        const textHeight = text ? Math.ceil(text.scrollHeight) : 0;
+        const inkHeight = sentenceInkVisibleHeight(body.__sentenceInkStrokes || []);
+        body.style.height = Math.min(180, Math.max(34, textHeight, inkHeight)) + "px";
+      }
+
+      function refreshDirectTranslationSurfaces() {
+        sentencePanelList.querySelectorAll(".sentence-direct-body").forEach(function (body) {
+          fitDirectTranslationSurface(body);
+        });
+        sentencePanelList.querySelectorAll(".sentence-ink-canvas").forEach(function (canvas) {
+          renderSentenceInkCanvas(canvas, canvas.__sentenceInkStrokes || []);
+        });
+      }
+
+      function scheduleDirectTranslationSurfaceRefresh() {
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(refreshDirectTranslationSurfaces);
+        });
+      }
+
+      function createProblemScrapCard(qNo) {
+        const card = document.createElement("section");
+        card.className = "problem-scrap-card";
+        card.dataset.qNo = String(qNo);
+        const head = document.createElement("div");
+        head.className = "problem-scrap-head";
+        const title = document.createElement("strong");
+        title.className = "problem-scrap-title";
+        title.textContent = qNo + TEXT.question + " " + TEXT.scrapbook;
+        const code = document.createElement("span");
+        code.className = "problem-scrap-code";
+        code.textContent = "PDF + SESSION 993";
+        head.append(title, code);
+        const stage = document.createElement("div");
+        stage.className = "problem-scrap-stage";
+        const canvas = document.createElement("canvas");
+        canvas.className = "problem-scrap-canvas";
+        canvas.hidden = true;
+        const message = document.createElement("p");
+        message.className = "problem-scrap-message";
+        message.textContent = TEXT.scrapbookLoading;
+        stage.append(canvas, message);
+        const note = document.createElement("div");
+        note.className = "problem-scrap-note";
+        note.textContent = TEXT.scrapbookLoading;
+        card.append(head, stage, note);
+        return card;
+      }
+
+      function createLandscapeWordCluster(entry) {
+        const items = eligibleWords(entry);
+        if (!items.length) return null;
+        const section = document.createElement("section");
+        section.className = "landscape-word-cluster";
+        const head = document.createElement("div");
+        head.className = "landscape-word-cluster-head";
+        const title = document.createElement("span");
+        title.textContent = "POCKET VOCAB";
+        const count = document.createElement("span");
+        count.className = "landscape-word-cluster-count";
+        count.textContent = items.length + " PAIRS";
+        head.append(title, count);
+
+        const list = document.createElement("div");
+        list.className = "landscape-word-cluster-list";
+        list.setAttribute("role", "list");
+        items.forEach(function (item) {
+          const row = document.createElement("div");
+          row.className = "landscape-word-cluster-row";
+          row.setAttribute("role", "listitem");
+          const bullet = document.createElement("span");
+          bullet.className = "landscape-word-cluster-bullet";
+          bullet.setAttribute("aria-hidden", "true");
+          const word = document.createElement("span");
+          word.className = "landscape-word-cluster-word notranslate";
+          word.setAttribute("translate", "no");
+          word.textContent = safeText(item.word).trim();
+          const meaning = document.createElement("span");
+          meaning.className = "landscape-word-cluster-meaning";
+          meaning.textContent = safeText(item.meaning).trim();
+          row.append(bullet, word, meaning);
+          list.appendChild(row);
+        });
+        section.append(head, list);
+        return section;
+      }
+
+      function localScrapPoint(point, crop, width, height) {
+        const source = point && typeof point === "object" ? point : {};
+        return {
+          x: ((Number(source.x) - crop.x) / crop.w) * width,
+          y: ((Number(source.y) - crop.y) / crop.h) * height,
+          p: Math.max(0.05, Math.min(1, Number(source.p) || 0.5))
+        };
+      }
+
+      function drawScrapStroke(ctx, item, crop, width, height, inkScale) {
+        const rawPoints = Array.isArray(item.points) ? item.points : [];
+        const points = rawPoints.map(function (point) {
+          return localScrapPoint(point, crop, width, height);
+        }).filter(function (point) {
+          return Number.isFinite(point.x) && Number.isFinite(point.y);
+        });
+        if (!points.length) return;
+        const baseWidth = Math.max(0.7, Math.min(32, (Number(item.width) || 4) * inkScale));
+        ctx.save();
+        ctx.globalAlpha = 0.96;
+        ctx.strokeStyle = safeText(item.color) || "#2f2a24";
+        ctx.fillStyle = safeText(item.color) || "#2f2a24";
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (points.length === 1) {
+          ctx.beginPath();
+          ctx.arc(points[0].x, points[0].y, baseWidth * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          return;
+        }
+        ctx.lineWidth = baseWidth;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i += 1) {
+          const point = points[i];
+          const next = points[i + 1] || point;
+          const endX = (point.x + next.x) * 0.5;
+          const endY = (point.y + next.y) * 0.5;
+          ctx.quadraticCurveTo(point.x, point.y, endX, endY);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawScrapHighlight(ctx, item, crop, width, height) {
+        const rect = item && item.rect && typeof item.rect === "object" ? item.rect : {};
+        const x = ((Number(rect.x) - crop.x) / crop.w) * width;
+        const y = ((Number(rect.y) - crop.y) / crop.h) * height;
+        const w = (Number(rect.w) / crop.w) * width;
+        const h = (Number(rect.h) / crop.h) * height;
+        if (![x, y, w, h].every(Number.isFinite)) return;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0.08, Math.min(0.78, Number(item.alpha) || 0.34));
+        ctx.fillStyle = safeText(item.color) || "#fff1a6";
+        ctx.fillRect(x, y, w, h);
+        ctx.restore();
+      }
+
+      function drawScrapMark(ctx, item, crop, width, height, inkScale) {
+        const x = ((Number(item.x) - crop.x) / crop.w) * width;
+        const y = ((Number(item.y) - crop.y) / crop.h) * height;
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+        const mark = safeText(item.mark);
+        const size = Math.max(10, Math.min(220, (Number(item.size) || 24) * inkScale));
+        const color = safeText(item.color) || "#d65d54";
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = Math.max(2, size * 0.12);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (mark === "check" || mark === "circle") {
+          const r = size * 0.42;
+          ctx.beginPath();
+          ctx.moveTo(x - r * 0.72, y - r * 0.02);
+          ctx.lineTo(x - r * 0.18, y + r * 0.56);
+          ctx.lineTo(x + r * 0.82, y - r * 0.58);
+          ctx.stroke();
+        } else if (mark === "x") {
+          const r = size * 0.42;
+          ctx.beginPath();
+          ctx.moveTo(x - r, y - r);
+          ctx.lineTo(x + r, y + r);
+          ctx.moveTo(x + r, y - r);
+          ctx.lineTo(x - r, y + r);
+          ctx.stroke();
+        } else if (mark === "o") {
+          ctx.beginPath();
+          ctx.arc(x, y, size * 0.46, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (mark === "score") {
+          ctx.font = "800 " + Math.max(14, size) + "px Arial, sans-serif";
+          ctx.textBaseline = "middle";
+          ctx.fillText(safeText(item.value) || "100", x, y);
+        }
+        ctx.restore();
+      }
+
+      function drawScrapPageInk(ctx, items, crop, width, height, basePageWidth) {
+        if (!Array.isArray(items) || !items.length) return;
+        const inkScale = Math.max(0.55, Math.min(2.5, width / Math.max(1, basePageWidth * crop.w)));
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, width, height);
+        ctx.clip();
+        items.forEach(function (item) {
+          if (!item || typeof item !== "object") return;
+          if (item.type === "stroke") {
+            drawScrapStroke(ctx, item, crop, width, height, inkScale);
+          } else if (item.type === "highlight") {
+            drawScrapHighlight(ctx, item, crop, width, height);
+          } else if (item.type === "mark") {
+            drawScrapMark(ctx, item, crop, width, height, inkScale);
+          }
+        });
+        ctx.restore();
+      }
+
+      async function renderProblemScrap(entry, raw, qNo, card, requestId) {
+        const canvas = card.querySelector(".problem-scrap-canvas");
+        const message = card.querySelector(".problem-scrap-message");
+        const stage = card.querySelector(".problem-scrap-stage");
+        const note = card.querySelector(".problem-scrap-note");
+        const keepPanelTop = sentencePanelList.scrollTop <= 4;
+        try {
+          const crop = calculateProblemCrop(raw, qNo);
+          if (!crop) throw new Error("Missing problem anchor");
+          const pdfDocument = await fetchMockPdfDocument(entry, raw);
+          if (!state.sentencePanelOpen || requestId !== state.sentencePanelRequestId || !card.isConnected) return;
+          if (crop.page > pdfDocument.numPages) throw new Error("PDF page unavailable");
+          const pdfPage = await pdfDocument.getPage(crop.page);
+          if (!state.sentencePanelOpen || requestId !== state.sentencePanelRequestId || !card.isConnected) return;
+          const baseViewport = pdfPage.getViewport({ scale: 1 });
+          const stageWidth = Math.max(280, Math.round(stage.clientWidth || 560));
+          const cssWidth = Math.max(252, Math.round(stageWidth * 0.9));
+          const scale = cssWidth / Math.max(1, baseViewport.width * crop.w);
+          const viewport = pdfPage.getViewport({ scale: scale });
+          const cssHeight = Math.max(1, Math.round(baseViewport.height * crop.h * scale));
+          const dpr = Math.max(1, Math.min(2, Number(window.devicePixelRatio) || 1));
+          canvas.width = Math.ceil(cssWidth * dpr);
+          canvas.height = Math.ceil(cssHeight * dpr);
+          canvas.style.width = "90%";
+          canvas.style.aspectRatio = cssWidth + " / " + cssHeight;
+          canvas.hidden = false;
+          const ctx = canvas.getContext("2d", { alpha: false });
+          if (!ctx) throw new Error("Canvas unavailable");
+          await pdfPage.render({
+            canvasContext: ctx,
+            viewport: viewport,
+            transform: [
+              dpr,
+              0,
+              0,
+              dpr,
+              -crop.x * viewport.width * dpr,
+              -crop.y * viewport.height * dpr
+            ]
+          }).promise;
+          if (!state.sentencePanelOpen || requestId !== state.sentencePanelRequestId || !card.isConnected) return;
+          const pageInk = findLatestPageInk(entry);
+          const items = pageInk && pageInk.pages && Array.isArray(pageInk.pages[String(crop.page)])
+            ? pageInk.pages[String(crop.page)]
+            : [];
+          if (items.length) {
+            ctx.save();
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawScrapPageInk(ctx, items, crop, cssWidth, cssHeight, baseViewport.width);
+            ctx.restore();
+          }
+          card.classList.add("is-ready");
+          message.textContent = "";
+          note.textContent = items.length ? TEXT.scrapbookReady : TEXT.scrapbookNoInk;
+          if (keepPanelTop && state.sentencePanelSection === "scrap") sentencePanelList.scrollTop = 0;
+          scheduleLandscapeScrapSync();
+        } catch (error) {
+          console.error("[MyStorage:Scrap]", error);
+          if (!state.sentencePanelOpen || requestId !== state.sentencePanelRequestId || !card.isConnected) return;
+          canvas.hidden = true;
+          card.classList.add("is-error");
+          message.textContent = TEXT.scrapbookFailed;
+          note.textContent = safeText(error && error.message ? error.message : error);
+          scheduleLandscapeScrapSync();
+        }
+      }
+
+      function makeSentencePanelEmpty(title, note) {
+        const panel = document.createElement("div");
+        panel.className = "sentence-panel-empty";
+        const strong = document.createElement("strong");
+        strong.textContent = title;
+        const span = document.createElement("span");
+        span.textContent = note;
+        panel.append(strong, span);
+        return panel;
+      }
+
+      function closeSentencePanel() {
+        state.sentencePanelOpen = false;
+        state.sentencePanelRequestId += 1;
+        setSentencePanelLandscape(false);
+        sentencePanel.hidden = true;
+      }
+
+      function syncLandscapeScrapScroll() {
+        landscapeScrapSyncRaf = 0;
+        const scrapColumn = sentencePanelList.querySelector(".sentence-panel-scrap-column");
+        const sentenceColumn = sentencePanelList.querySelector(".sentence-panel-sentence-column");
+        if (!scrapColumn) return;
+        if (!state.sentencePanelLandscape || !sentenceColumn) {
+          scrapColumn.scrollTop = 0;
+          return;
+        }
+        const scrapRange = Math.max(0, scrapColumn.scrollHeight - scrapColumn.clientHeight);
+        const sentenceRange = Math.max(0, sentenceColumn.scrollHeight - sentenceColumn.clientHeight);
+        if (scrapRange <= 0 || sentenceRange <= 0) {
+          scrapColumn.scrollTop = 0;
+          return;
+        }
+        const pairedOffset = Math.max(0, Math.min(scrapRange, sentenceColumn.scrollTop));
+        scrapColumn.scrollTop = Math.round(pairedOffset);
+      }
+
+      function scheduleLandscapeScrapSync() {
+        if (landscapeScrapSyncRaf) window.cancelAnimationFrame(landscapeScrapSyncRaf);
+        landscapeScrapSyncRaf = window.requestAnimationFrame(syncLandscapeScrapScroll);
+      }
+
+      function setSentencePanelLandscape(enabled) {
+        const next = !!enabled;
+        state.sentencePanelLandscape = next;
+        workspace.classList.toggle("is-notes-landscape", next);
+        sentencePanel.classList.toggle("is-landscape", next);
+        sentencePanelLandscapeTab.classList.toggle("is-layout-active", next);
+        sentencePanelLandscapeTab.setAttribute("aria-pressed", next ? "true" : "false");
+        sentencePanelLandscapeTab.setAttribute(
+          "aria-label",
+          next ? TEXT.landscapeClose : TEXT.landscapeOpen
+        );
+        sentencePanelLandscapeTab.title = next ? TEXT.landscapeClose : TEXT.landscapeOpen;
+        if (next) sentencePanelList.scrollTop = 0;
+        scheduleLandscapeScrapSync();
+        if (state.sentencePanelOpen) scheduleDirectTranslationSurfaceRefresh();
+      }
+
+      function setSentencePanelSection(section, shouldScroll) {
+        const normalized = section === "sentences" ? "sentences" : "scrap";
+        state.sentencePanelSection = normalized;
+        sentencePanelTabs.forEach(function (button) {
+          const isActive = button.dataset.sentenceSection === normalized;
+          button.classList.toggle("is-active", isActive);
+          button.setAttribute("aria-current", isActive ? "page" : "false");
+        });
+        if (!shouldScroll) return;
+        const target = sentencePanelList.querySelector(
+          normalized === "sentences" ? ".sentence-card" : ".problem-scrap-card"
+        );
+        if (!target) {
+          if (normalized === "scrap") {
+            sentencePanelList.scrollTo({ top: 0, behavior: "smooth" });
+          }
+          return;
+        }
+        const listRect = sentencePanelList.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const targetTop = Math.max(
+          0,
+          sentencePanelList.scrollTop + targetRect.top - listRect.top - 8
+        );
+        sentencePanelList.scrollTo({ top: targetTop, behavior: "smooth" });
+      }
+
+      async function renderSentencePanel(entry) {
+        if (!state.sentencePanelOpen || !entry || entry.category !== "mock") return;
+        const requestId = state.sentencePanelRequestId + 1;
+        state.sentencePanelRequestId = requestId;
+        sentencePanel.hidden = false;
+        sentencePanelTitle.textContent = entry.title;
+        sentencePanelDate.textContent = entry.dateLabel || "";
+        sentencePanelStatus.textContent = TEXT.sentenceLoading;
+        sentencePanelList.innerHTML = "";
+        sentencePanelList.scrollTop = 0;
+        setSentencePanelSection("scrap", false);
+        try {
+          const qNos = entry.problemNumbers.slice();
+          if (!qNos.length) {
+            sentencePanelStatus.textContent = TEXT.sentenceUnavailable;
+            sentencePanelList.appendChild(makeSentencePanelEmpty(
+              TEXT.sentenceUnavailable,
+              TEXT.sentenceUnavailableNote
+            ));
+            return;
+          }
+          const raw = await fetchMockWordIndex(entry);
+          if (!state.sentencePanelOpen || requestId !== state.sentencePanelRequestId) return;
+          const rows = extractOriginalSentences(raw, qNos);
+          if (!rows.length) {
+            sentencePanelStatus.textContent = problemLabel(qNos) || TEXT.sentenceUnavailable;
+            const fallbackContent = document.createElement("div");
+            fallbackContent.className = "sentence-panel-content";
+            const fallbackScrapColumn = document.createElement("div");
+            fallbackScrapColumn.className = "sentence-panel-scrap-column";
+            const fallbackSentenceColumn = document.createElement("div");
+            fallbackSentenceColumn.className = "sentence-panel-sentence-column";
+            const fallbackTargets = [];
+            Array.from(new Set(qNos.map(Number).filter(Boolean))).forEach(function (qNo) {
+              const scrapCard = createProblemScrapCard(qNo);
+              fallbackTargets.push({ qNo: qNo, card: scrapCard });
+              fallbackScrapColumn.appendChild(scrapCard);
+            });
+            const fallbackWordCluster = createLandscapeWordCluster(entry);
+            if (fallbackWordCluster) fallbackScrapColumn.appendChild(fallbackWordCluster);
+            fallbackSentenceColumn.appendChild(makeSentencePanelEmpty(
+              TEXT.sentenceUnavailable,
+              TEXT.sentenceUnavailableNote
+            ));
+            fallbackContent.append(fallbackScrapColumn, fallbackSentenceColumn);
+            sentencePanelList.appendChild(fallbackContent);
+            scheduleLandscapeScrapSync();
+            fallbackTargets.forEach(function (target) {
+              void renderProblemScrap(entry, raw, target.qNo, target.card, requestId);
+            });
+            return;
+          }
+          const translations = buildTranslationLookup(entry);
+          sentencePanelStatus.textContent = [
+            problemLabel(qNos),
+            rows.length + " " + TEXT.sentenceUnit
+          ].filter(Boolean).join(" \u00B7 ");
+          const content = document.createElement("div");
+          content.className = "sentence-panel-content";
+          const scrapColumn = document.createElement("div");
+          scrapColumn.className = "sentence-panel-scrap-column";
+          const sentenceColumn = document.createElement("div");
+          sentenceColumn.className = "sentence-panel-sentence-column";
+          const scrapTargets = [];
+          const sentenceInkTargets = [];
+          const directSurfaceTargets = [];
+          let activeScrapQNo = 0;
+          rows.forEach(function (row) {
+            if (Number(row.qNo) !== activeScrapQNo) {
+              activeScrapQNo = Number(row.qNo);
+              const scrapCard = createProblemScrapCard(activeScrapQNo);
+              scrapTargets.push({ qNo: activeScrapQNo, card: scrapCard });
+              scrapColumn.appendChild(scrapCard);
+            }
+            const card = document.createElement("article");
+            card.className = "sentence-card";
+            const originalWrap = document.createElement("div");
+            originalWrap.className = "sentence-original-wrap";
+            const originalLabel = document.createElement("span");
+            originalLabel.className = "sentence-original-label";
+            originalLabel.textContent = "ORIGINAL";
+            const originalNumber = document.createElement("span");
+            originalNumber.className = "sentence-original-number";
+            originalNumber.textContent = String(row.no).padStart(2, "0");
+            originalLabel.appendChild(originalNumber);
+            const original = document.createElement("p");
+            original.className = "sentence-original notranslate";
+            original.setAttribute("translate", "no");
+            original.textContent = row.text;
+            originalWrap.append(originalLabel, original);
+            const translationGrid = document.createElement("div");
+            translationGrid.className = "sentence-translation-grid";
+            const textBucket = translations["99"];
+            const inkBucket = translations["992"];
+            const textKey = row.qNo + "|" + sentenceMatchKey(row.text);
+            const numberKey = row.qNo + "|" + row.no;
+            const answer = textBucket
+              ? (textBucket.byText.get(textKey) || textBucket.byNumber.get(numberKey) || "")
+              : "";
+            const inkStrokes = inkBucket
+              ? (inkBucket.inkByText.get(textKey) || inkBucket.inkByNumber.get(numberKey) || [])
+              : [];
+            const hasSubmission = !!(
+              (textBucket && textBucket.submittedQuestions.has(Number(row.qNo))) ||
+              (inkBucket && inkBucket.submittedQuestions.has(Number(row.qNo)))
+            );
+            const slot = document.createElement("section");
+            slot.className = "sentence-translation-slot";
+            slot.classList.toggle("is-present", !!answer || inkStrokes.length > 0 || hasSubmission);
+            const head = document.createElement("div");
+            head.className = "sentence-translation-head";
+            const label = document.createElement("span");
+            label.className = "sentence-translation-label";
+            label.textContent = TEXT.directTranslation;
+            head.appendChild(label);
+            const directBody = document.createElement("div");
+            directBody.className = "sentence-direct-body";
+            directBody.__sentenceInkStrokes = inkStrokes;
+            if (answer) {
+              const translation = document.createElement("p");
+              translation.className = "sentence-translation sentence-direct-text";
+              translation.textContent = answer;
+              directBody.appendChild(translation);
+            }
+            if (inkStrokes.length) {
+              const inkPreview = document.createElement("div");
+              inkPreview.className = "sentence-ink-preview";
+              inkPreview.setAttribute("aria-label", TEXT.directTranslation);
+              const inkCanvas = document.createElement("canvas");
+              inkCanvas.className = "sentence-ink-canvas";
+              inkCanvas.__sentenceInkStrokes = inkStrokes;
+              inkPreview.appendChild(inkCanvas);
+              directBody.appendChild(inkPreview);
+              sentenceInkTargets.push({ canvas: inkCanvas, strokes: inkStrokes });
+            }
+            if (!answer && !inkStrokes.length) {
+              const empty = document.createElement("p");
+              empty.className = "sentence-translation is-empty";
+              empty.textContent = hasSubmission
+                ? TEXT.translationSubmittedEmpty
+                : TEXT.translationEmpty;
+              directBody.appendChild(empty);
+            }
+            slot.append(head, directBody);
+            translationGrid.appendChild(slot);
+            card.append(originalWrap, translationGrid);
+            sentenceColumn.appendChild(card);
+            directSurfaceTargets.push(directBody);
+          });
+          const wordCluster = createLandscapeWordCluster(entry);
+          if (wordCluster) scrapColumn.appendChild(wordCluster);
+          content.append(scrapColumn, sentenceColumn);
+          sentencePanelList.appendChild(content);
+          scheduleLandscapeScrapSync();
+          directSurfaceTargets.forEach(fitDirectTranslationSurface);
+          scrapTargets.forEach(function (target) {
+            void renderProblemScrap(entry, raw, target.qNo, target.card, requestId);
+          });
+          sentenceInkTargets.forEach(function (target) {
+            renderSentenceInkCanvas(target.canvas, target.strokes);
+          });
+        } catch (error) {
+          if (!state.sentencePanelOpen || requestId !== state.sentencePanelRequestId) return;
+          console.error("[MyStorage:Sentences]", error);
+          sentencePanelStatus.textContent = TEXT.sentenceUnavailable;
+          sentencePanelList.appendChild(makeSentencePanelEmpty(
+            TEXT.sentenceUnavailable,
+            TEXT.sentenceUnavailableNote
+          ));
+        }
+      }
+
+      function openSentencePanel(entry) {
+        if (!entry || entry.category !== "mock") {
+          closeSentencePanel();
+          return;
+        }
+        state.sentencePanelOpen = true;
+        sentencePanel.hidden = false;
+        void renderSentencePanel(entry);
+      }
+
+      async function fetchPayloadFromUrl(url, cache) {
+        if (!url) return null;
+        if (cache.has(url)) return cache.get(url);
+        const promise = (async function () {
+          const response = await fetch(url, { cache: "no-store" });
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          const text = await response.text();
+          const payload = parseJsonObject(text);
+          if (!payload) throw new Error("Invalid JSON");
+          return payload;
+        })();
+        cache.set(url, promise);
+        return promise;
+      }
+
+      async function hydrateEntry(entry, urlCache) {
+        let payload = entry.inlinePayload;
+        let words = extractWordPairs(payload);
+        if (!words.length && entry.servedUrl) {
+          payload = await fetchPayloadFromUrl(entry.servedUrl, urlCache);
+          words = extractWordPairs(payload);
+        }
+        entry.payload = payload;
+        entry.words = words;
+        refreshEntryIdentity(entry, payload);
+        entry.state = words.length ? "ready" : "empty";
+        entry.error = "";
+      }
+
+      async function hydrateEntries(entries) {
+        const urlCache = new Map();
+        let cursor = 0;
+        let completed = 0;
+
+        async function worker() {
+          while (cursor < entries.length) {
+            const index = cursor;
+            cursor += 1;
+            const entry = entries[index];
+            try {
+              await hydrateEntry(entry, urlCache);
+            } catch (error) {
+              entry.state = "error";
+              entry.error = safeText(error && error.message ? error.message : error);
+            }
+            completed += 1;
+            setSyncState(
+              "loading",
+              TEXT.loadingFiles + " " + completed + "/" + entries.length
+            );
+            if (completed === 1 || completed % 8 === 0 || completed === entries.length) {
+              renderFolderCounts();
+              renderFileList();
+              syncRuntimeSelection();
+              if (state.sentencePanelOpen) {
+                void renderSentencePanel(getSelectedEntry());
+              }
+            }
+          }
+        }
+
+        const workerCount = Math.min(LOAD_CONCURRENCY, Math.max(1, entries.length));
+        const jobs = [];
+        for (let i = 0; i < workerCount; i += 1) jobs.push(worker());
+        await Promise.all(jobs);
+      }
+
+      function setSyncState(mode, label) {
+        syncDot.classList.toggle("is-loading", mode === "loading");
+        syncDot.classList.toggle("is-error", mode === "error");
+        syncLabel.textContent = label || TEXT.idle;
+      }
+
+      function filteredEntries() {
+        const predicate = folderPredicates[state.folder] || folderPredicates.mock;
+        const query = state.search.toLocaleLowerCase();
+        return state.entries.filter(function (entry) {
+          if (!predicate(entry)) return false;
+          if (!query) return true;
+          return [
+            entry.title,
+            entry.fileName,
+            entry.dateLabel,
+            sourceLabel(entry)
+          ].join(" ").toLocaleLowerCase().indexOf(query) >= 0;
+        });
+      }
+
+      function getSelectedEntry() {
+        return state.entries.find(function (entry) {
+          return entry.id === state.selectedId;
+        }) || null;
+      }
+
+      function renderFolderCounts() {
+        Object.keys(folderPredicates).forEach(function (folder) {
+          const count = state.entries.filter(folderPredicates[folder]).length;
+          const label = document.querySelector('[data-folder-count="' + folder + '"]');
+          if (label) label.textContent = String(count);
+        });
+      }
+
+      function makeEmptyPanel() {
+        const panel = document.createElement("div");
+        panel.className = "empty-panel";
+        const icon = document.createElement("div");
+        icon.className = "empty-folder";
+        icon.setAttribute("aria-hidden", "true");
+        const title = document.createElement("div");
+        title.className = "empty-title";
+        title.textContent = TEXT.noFiles;
+        const note = document.createElement("div");
+        note.className = "empty-note";
+        note.textContent = userId ? TEXT.noFilesNote : TEXT.idRequired;
+        panel.append(icon, title, note);
+        return panel;
+      }
+
+      function renderFileList() {
+        const entries = filteredEntries();
+        fileList.innerHTML = "";
+        pathCurrent.textContent = folderLabels[state.folder] || TEXT.mock;
+        selectionLabel.textContent = entries.length + " " + TEXT.files;
+
+        if (!entries.length) {
+          fileList.appendChild(makeEmptyPanel());
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        entries.forEach(function (entry) {
+          const card = document.createElement("button");
+          card.type = "button";
+          card.className = "file-card" + (entry.id === state.selectedId ? " is-selected" : "");
+          card.dataset.entryId = entry.id;
+
+          const icon = document.createElement("span");
+          icon.className = "file-icon";
+          icon.textContent = "JSON";
+
+          const main = document.createElement("span");
+          main.className = "file-main";
+          const title = document.createElement("span");
+          title.className = "file-title";
+          title.textContent = entry.title;
+          const meta = document.createElement("span");
+          meta.className = "file-meta";
+          meta.textContent = [sourceLabel(entry), entry.dateLabel].filter(Boolean).join(" \u00B7 ");
+          main.append(title, meta);
+
+          const stat = document.createElement("span");
+          stat.className = "file-stat";
+          const count = document.createElement("span");
+          count.className = "word-count";
+          count.textContent = entry.state === "loading" ? "..." : entry.words.length + " W";
+          const status = document.createElement("span");
+          status.className = "file-state" + (entry.state === "error" ? " is-error" : "");
+          if (entry.state === "loading") status.textContent = TEXT.loading;
+          else if (entry.state === "error") status.textContent = TEXT.error;
+          else if (entry.words.length) status.textContent = TEXT.words;
+          else status.textContent = TEXT.empty;
+          stat.append(count, status);
+
+          card.append(icon, main, stat);
+          card.addEventListener("click", function () {
+            selectEntry(entry.id, false, true);
+          });
+          card.addEventListener("dblclick", function () {
+            selectEntry(entry.id, true, true);
+          });
+          fragment.appendChild(card);
+        });
+        fileList.appendChild(fragment);
+      }
+
+      function shuffle(list) {
+        const copy = list.slice();
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const value = copy[i];
+          copy[i] = copy[j];
+          copy[j] = value;
+        }
+        return copy;
+      }
+
+      function clearStudyTimers() {
+        if (state.quizTimer) window.clearTimeout(state.quizTimer);
+        if (state.stageAdvanceTimer) window.clearTimeout(state.stageAdvanceTimer);
+        state.quizTimer = null;
+        state.stageAdvanceTimer = null;
+      }
+
+      function hideRuntimeViews() {
+        runtimeMessage.hidden = true;
+        learnScroll.hidden = true;
+        learnActions.hidden = true;
+        quizArea.hidden = true;
+        resultPopup.style.display = "none";
+        resultPopup.innerHTML = "";
+      }
+
+      function showRuntimeMessage(title, note) {
+        clearStudyTimers();
+        hideRuntimeViews();
+        runtimeMessageTitle.textContent = title;
+        runtimeMessageNote.textContent = note;
+        runtimeMessage.hidden = false;
+      }
+
+      function updateStageTrack() {
+        const order = ["learn", "quiz1", "quiz2"];
+        const current = order.indexOf(state.stage);
+        order.forEach(function (stage, index) {
+          const node = runtimeStages[stage];
+          node.classList.toggle("is-current", index === current);
+          node.classList.toggle("is-done", index < current || (stage === "quiz1" && state.quiz1Passed) || (stage === "quiz2" && state.quiz2Passed));
+          node.classList.toggle("is-upcoming", index > current);
+          node.classList.toggle("is-timed", stage === "quiz1" && index === current);
+        });
+        wordflowRuntime.dataset.wordStage = state.stage;
+      }
+
+      function eligibleWords(entry) {
+        return entry.words.filter(function (item) {
+          return safeText(item.word).trim() && safeText(item.meaning).trim();
+        });
+      }
+
+      function showQuizNavigationHint() {
+        if (state.quizHintShown || !runtimeQuizHint) return;
+        state.quizHintShown = true;
+        runtimeQuizHint.textContent = TEXT.quizNavigationHint;
+        runtimeQuizHint.hidden = false;
+        runtimeQuizHint.classList.remove("is-showing");
+        void runtimeQuizHint.offsetWidth;
+        runtimeQuizHint.classList.add("is-showing");
+        if (state.quizHintTimer) window.clearTimeout(state.quizHintTimer);
+        state.quizHintTimer = window.setTimeout(function () {
+          runtimeQuizHint.classList.remove("is-showing");
+          runtimeQuizHint.hidden = true;
+          state.quizHintTimer = null;
+        }, 4300);
+      }
+
+      function resetRuntimeForEntry(entry) {
+        clearStudyTimers();
+        state.runtimeEntryId = entry ? entry.id : "";
+        state.runtimeEntryState = entry ? entry.state : "";
+        state.stage = "learn";
+        state.meaningsHidden = false;
+        state.quiz1Passed = false;
+        state.quiz2Passed = false;
+        state.quizSet = [];
+        state.quizIndex = 0;
+        state.quizResults = [];
+        state.quizAnswered = false;
+        state.q2Puzzle = null;
+        if (entry) showQuizNavigationHint();
+      }
+
+      function makeLearnCard(item, index) {
+        const card = document.createElement("article");
+        card.className = "card";
+        const watermark = document.createElement("div");
+        watermark.className = "card-watermark";
+        watermark.textContent = String(index + 1);
+        const top = document.createElement("div");
+        top.className = "card-top";
+        const wrap = document.createElement("div");
+        wrap.className = "word-wrap";
+        const word = document.createElement("div");
+        const wordLength = safeText(item.word).replace(/[^a-z]/gi, "").length;
+        word.className = "word-title notranslate" + (
+          wordLength >= 13 ? " is-long is-very-long" : wordLength >= 10 ? " is-long" : ""
+        );
+        word.setAttribute("translate", "no");
+        word.textContent = item.word;
+        const meaning = document.createElement("div");
+        meaning.className = "meaning";
+        meaning.tabIndex = 0;
+        meaning.textContent = item.meaning || "\u2014";
+        wrap.appendChild(word);
+        top.append(wrap, meaning);
+        const pos = document.createElement("div");
+        pos.className = "pos";
+        if (item.qNo) {
+          pos.textContent = "(" + item.qNo + TEXT.question + ")";
+          card.append(watermark, top, pos);
+        } else {
+          card.append(watermark, top);
+        }
+
+        function toggleLocal() {
+          card.classList.toggle("hide-meaning-local");
+        }
+        meaning.addEventListener("click", toggleLocal);
+        meaning.addEventListener("keydown", function (event) {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleLocal();
+          }
+        });
+        return card;
+      }
+
+      function renderLearn(entry) {
+        hideRuntimeViews();
+        updateStageTrack();
+        dayTitle.textContent = entry.title;
+        statusEl.textContent = sourceLabel(entry) + " \u00B7 " + entry.words.length + " cards";
+        learnMain.innerHTML = "";
+        const fragment = document.createDocumentFragment();
+        entry.words.forEach(function (item, index) {
+          fragment.appendChild(makeLearnCard(item, index));
+        });
+        learnMain.appendChild(fragment);
+        learnContent.classList.toggle("hide-all", state.meaningsHidden);
+        maskBtn.classList.toggle("is-active", state.meaningsHidden);
+        maskBtn.setAttribute("aria-pressed", state.meaningsHidden ? "true" : "false");
+        maskBtn.textContent = state.meaningsHidden ? TEXT.showMeanings : TEXT.hideMeanings;
+        learnScroll.hidden = false;
+        learnActions.hidden = false;
+        learnScroll.scrollTop = 0;
+      }
+
+      function prepareQuizSet(entry) {
+        state.quizSet = shuffle(eligibleWords(entry)).slice(0, 20);
+        state.quizIndex = 0;
+        state.quizResults = [];
+        state.quizAnswered = false;
+        state.q2Puzzle = null;
+      }
+
+      function renderRuntimeQuiz1TitleDemo() {
+        return [
+          '<div class="wf-q1-title-demo" aria-hidden="true">',
+          '<div class="wf-q1-demo-head"><span>QUESTION DEMO</span><strong>3 SEC</strong></div>',
+          '<div class="wf-q1-demo-timer"><i></i></div>',
+          '<div class="wf-q1-demo-word">bloom</div>',
+          '<div class="wf-q1-demo-choices">',
+          '<span data-choice="A">\uB2EC\uB9AC\uB2E4</span>',
+          '<span data-choice="B" class="is-answer">\uAF43\uD53C\uB2E4</span>',
+          '<span data-choice="C">\uC7A0\uB4E4\uB2E4</span>',
+          '</div>',
+          '<div class="wf-q1-demo-instruction">CHOOSE THE RIGHT MEANING</div>',
+          '<div class="wf-q1-demo-complete">CORRECT!</div>',
+          '</div>'
+        ].join("");
+      }
+
+      function startRuntimeQuiz1TitleDemo() {
+        const demo = quizArea.querySelector(".wf-q1-title-demo");
+        if (!demo) return;
+        const timer = demo.querySelector(".wf-q1-demo-timer > i");
+        const word = demo.querySelector(".wf-q1-demo-word");
+        const answer = demo.querySelector(".wf-q1-demo-choices > .is-answer");
+        const instruction = demo.querySelector(".wf-q1-demo-instruction");
+        const complete = demo.querySelector(".wf-q1-demo-complete");
+
+        const run = function () {
+          if (!demo.isConnected || quizArea.hidden) return;
+          let remaining = 100;
+          if (word) word.classList.remove("is-correct");
+          if (answer) answer.classList.remove("is-demo-pressing", "is-selected");
+          if (instruction) instruction.classList.remove("is-hidden");
+          if (complete) complete.classList.remove("is-visible");
+          if (timer) timer.style.width = "100%";
+
+          const timerInterval = window.setInterval(function () {
+            if (!demo.isConnected || quizArea.hidden) {
+              window.clearInterval(timerInterval);
+              return;
+            }
+            remaining = Math.max(18, remaining - 3);
+            if (timer) timer.style.width = remaining + "%";
+          }, 45);
+
+          window.setTimeout(function () {
+            if (!demo.isConnected || quizArea.hidden) return;
+            if (answer) answer.classList.add("is-demo-pressing");
+          }, 1260);
+
+          window.setTimeout(function () {
+            if (!demo.isConnected || quizArea.hidden) return;
+            window.clearInterval(timerInterval);
+            if (answer) {
+              answer.classList.remove("is-demo-pressing");
+              answer.classList.add("is-selected");
+            }
+            if (word) word.classList.add("is-correct");
+            if (instruction) instruction.classList.add("is-hidden");
+            if (complete) complete.classList.add("is-visible");
+          }, 1420);
+
+          window.setTimeout(run, 2850);
+        };
+
+        run();
+      }
+
+      function renderRuntimeQuiz2TitleDemo() {
+        return [
+          '<div class="wf-q2-title-demo" aria-hidden="true">',
+          '<div class="wf-q2-demo-prompt"><span>MEANING</span><strong>\uB2E8\uC5B4</strong></div>',
+          '<div class="wf-q2-demo-slots"><span>W</span><span>O</span><span>R</span><span>D</span></div>',
+          '<div class="wf-q2-demo-bank">',
+          '<span class="is-r">R</span><span class="is-w">W</span>',
+          '<span class="is-d">D</span><span class="is-o">O</span>',
+          '</div>',
+          '<div class="wf-q2-demo-instruction">CLICK LETTERS TO BUILD THE WORD</div>',
+          '<div class="wf-q2-demo-complete">WORD COMPLETE!</div>',
+          '</div>'
+        ].join("");
+      }
+
+      function startRuntimeQuiz2TitleDemo() {
+        const demo = quizArea.querySelector(".wf-q2-title-demo");
+        if (!demo) return;
+        const slots = Array.from(demo.querySelectorAll(".wf-q2-demo-slots > span"));
+        const bank = {
+          W: demo.querySelector(".wf-q2-demo-bank > .is-w"),
+          O: demo.querySelector(".wf-q2-demo-bank > .is-o"),
+          R: demo.querySelector(".wf-q2-demo-bank > .is-r"),
+          D: demo.querySelector(".wf-q2-demo-bank > .is-d")
+        };
+        const instruction = demo.querySelector(".wf-q2-demo-instruction");
+        const complete = demo.querySelector(".wf-q2-demo-complete");
+        const sequence = ["W", "O", "R", "D"];
+
+        const reset = function () {
+          slots.forEach(function (slot) { slot.classList.remove("is-filled"); });
+          Object.values(bank).forEach(function (tile) {
+            if (tile) tile.classList.remove("is-demo-pressing", "is-used");
+          });
+          if (instruction) instruction.classList.remove("is-hidden");
+          if (complete) complete.classList.remove("is-visible");
+        };
+
+        const run = function () {
+          if (!demo.isConnected || quizArea.hidden) return;
+          reset();
+          sequence.forEach(function (letter, index) {
+            const pressAt = 580 + (index * 610);
+            window.setTimeout(function () {
+              if (!demo.isConnected || quizArea.hidden) return;
+              if (bank[letter]) bank[letter].classList.add("is-demo-pressing");
+            }, pressAt);
+            window.setTimeout(function () {
+              if (!demo.isConnected || quizArea.hidden) return;
+              if (bank[letter]) {
+                bank[letter].classList.remove("is-demo-pressing");
+                bank[letter].classList.add("is-used");
+              }
+              if (slots[index]) slots[index].classList.add("is-filled");
+            }, pressAt + 155);
+          });
+          window.setTimeout(function () {
+            if (!demo.isConnected || quizArea.hidden) return;
+            if (instruction) instruction.classList.add("is-hidden");
+            if (complete) complete.classList.add("is-visible");
+          }, 3100);
+          window.setTimeout(run, 4400);
+        };
+
+        run();
+      }
+
+      function renderQuiz1Intro(entry) {
+        hideRuntimeViews();
+        updateStageTrack();
+        const total = Math.min(20, eligibleWords(entry).length);
+        quizArea.dataset.wfView = "intro";
+        quizArea.innerHTML = [
+          '<div class="wf-q1-start">',
+          '<div class="wf-q1-start-title">MEANING MATCH</div>',
+          renderRuntimeQuiz1TitleDemo(),
+          '<ul class="wf-q1-rules">',
+          '<li><span class="wf-q1-rule-accent">' + total + '</span> QUESTIONS</li>',
+          '<li><span class="wf-q1-rule-accent">3 SEC</span> PER WORD</li>',
+          '<li><span class="wf-q1-rule-accent">PERSONAL</span> STUDY MODE</li>',
+          '</ul>',
+          '<div class="wf-q1-meta">' + entry.title + '</div>',
+          '<button id="runtime-q1-start" class="wf-q1-start-button quiz-btn" type="button">PRESS START</button>',
+          '</div>'
+        ].join("");
+        quizArea.hidden = false;
+        startRuntimeQuiz1TitleDemo();
+        document.getElementById("runtime-q1-start").addEventListener("click", function () {
+          if (eligibleWords(entry).length < 2) {
+            showRuntimeMessage(TEXT.quizNeed, TEXT.noWordData);
+            return;
+          }
+          prepareQuizSet(entry);
+          renderQuiz1Question();
+        });
+      }
+
+      function buildMeaningOptions(question) {
+        const allMeanings = eligibleWords(getSelectedEntry()).map(function (item) {
+          return item.meaning;
+        }).filter(function (meaning, index, list) {
+          return list.indexOf(meaning) === index && meaning !== question.meaning;
+        });
+        return shuffle([question.meaning].concat(shuffle(allMeanings).slice(0, 3)));
+      }
+
+      function questionProgressMarkup(current, total) {
+        return [
+          '<div class="wf-question-progress" aria-label="Current question ' + current + ' of ' + total + '">',
+          '<span class="is-current-count"><small>CURRENT</small><strong>' + String(current).padStart(2, "0") + '</strong></span>',
+          '<i aria-hidden="true">/</i>',
+          '<span><small>TOTAL</small><strong>' + String(total).padStart(2, "0") + '</strong></span>',
+          '</div>'
+        ].join("");
+      }
+
+      function showDirectQuiz1Toast(correct, timedOut) {
+        const oldToast = wordflowRuntime.querySelector(".dish-q1-direct-toast");
+        if (oldToast) oldToast.remove();
+        const toast = document.createElement("div");
+        const positive = correct === true;
+        toast.className = "dish-q1-direct-toast " + (positive ? "correct" : "wrong");
+        toast.setAttribute("role", "status");
+        toast.setAttribute("aria-live", "assertive");
+        toast.style.cssText = [
+          "position:absolute",
+          "top:50%",
+          "left:50%",
+          "z-index:30000",
+          "width:min(226px, calc(100% - 48px))",
+          "min-height:82px",
+          "padding:12px 16px",
+          "border:2px solid rgba(255,248,224,0.9)",
+          "border-radius:17px",
+          "display:flex",
+          "align-items:center",
+          "justify-content:flex-start",
+          "gap:12px",
+          "box-sizing:border-box",
+          "color:#fff",
+          "background:" + (positive
+            ? "linear-gradient(145deg, #65a77d 0%, #2e7555 100%)"
+            : "linear-gradient(145deg, #df786a 0%, #ad4842 100%)"),
+          "box-shadow:0 6px 0 " + (positive ? "#245f46" : "#873934") +
+            ",0 17px 34px " + (positive ? "rgba(29,92,60,0.3)" : "rgba(128,47,43,0.3)") +
+            ",inset 0 1px 0 rgba(255,255,255,0.32),inset 0 -4px 9px rgba(45,25,18,0.12)",
+          "opacity:1",
+          "overflow:hidden",
+          "pointer-events:none",
+          "transform:translate(-50%, -50%)"
+        ].join(";");
+        toast.innerHTML = [
+          '<strong style="position:relative;z-index:2;width:44px;height:44px;flex:0 0 44px;border:2px solid rgba(255,250,230,.82);border-radius:50%;display:grid;place-items:center;color:',
+          positive ? "#2d7654" : "#b14943",
+          ';background:#fff8e8;box-shadow:inset 0 1px 0 #fff,0 3px 7px rgba(38,42,31,.16);font:700 30px/1 Arial,sans-serif;">',
+          positive ? "\u2713" : "\u00D7",
+          '</strong>',
+          '<span style="position:relative;z-index:2;min-width:0;text-align:left;">',
+          '<small style="display:block;margin-bottom:3px;color:rgba(255,249,229,.76);font-size:8px;font-weight:900;letter-spacing:.16em;">ANSWER CHECK</small>',
+          '<b style="display:block;color:#fffaf0;font-size:17px;font-weight:950;line-height:1;letter-spacing:.04em;text-shadow:0 1px 2px rgba(25,45,32,.2);">',
+          positive ? "CORRECT" : (timedOut ? "TIME OUT" : "WRONG"),
+          '</b></span>',
+          '<i aria-hidden="true" style="position:absolute;right:-8px;bottom:-12px;width:62px;height:62px;border:10px solid rgba(255,249,225,.08);border-radius:50%;transform:rotate(-18deg);"></i>',
+          '<i aria-hidden="true" style="position:absolute;top:9px;right:12px;width:8px;height:14px;border:1px solid rgba(255,245,210,.28);border-radius:100% 0 100% 0;transform:rotate(28deg);"></i>'
+        ].join("");
+        const toastHost = wordflowRuntime.querySelector(".main-page") || wordflowRuntime;
+        toastHost.appendChild(toast);
+        if (typeof toast.animate === "function") {
+          toast.animate([
+            { opacity: 0, transform: "translate(-50%, -46%) scale(.82)" },
+            { opacity: 1, transform: "translate(-50%, -52%) scale(1.04)", offset: 0.18 },
+            { opacity: 1, transform: "translate(-50%, -50%) scale(1)", offset: 0.76 },
+            { opacity: 0, transform: "translate(-50%, -55%) scale(.97)" }
+          ], {
+            duration: 760,
+            easing: "cubic-bezier(.2,.86,.24,1)",
+            fill: "forwards"
+          });
+        }
+        window.setTimeout(function () { toast.remove(); }, 790);
+      }
+
+      function renderQuiz1Question() {
+        clearStudyTimers();
+        if (state.quizIndex >= state.quizSet.length) {
+          showQuizResult("quiz1");
+          return;
+        }
+        state.quizAnswered = false;
+        const question = state.quizSet[state.quizIndex];
+        quizArea.classList.remove("is-correct", "is-wrong");
+        quizArea.dataset.wfView = "question";
+        quizArea.innerHTML = [
+          '<div class="wf-q1-word-card">',
+          '<span class="wf-q1-word-index">WORD</span>',
+          questionProgressMarkup(state.quizIndex + 1, state.quizSet.length),
+          '<div class="wf-q1-word notranslate" translate="no"></div>',
+          '<div class="wf-q1-timer-shell">',
+          '<div class="wf-q1-timer-caption"><span>TIME</span><strong>3 SEC</strong></div>',
+          '<div class="wf-q1-timer-track"><div id="timer-bar"></div></div>',
+          '</div>',
+          '</div>',
+          '<div class="wf-q1-options"></div>',
+          '<div class="wf-q1-feedback"></div>'
+        ].join("");
+        quizArea.hidden = false;
+        quizArea.querySelector(".wf-q1-word").textContent = question.word;
+        const options = quizArea.querySelector(".wf-q1-options");
+        buildMeaningOptions(question).forEach(function (option, index) {
+          const button = document.createElement("button");
+          button.className = "quiz-btn";
+          button.type = "button";
+          button.dataset.choice = String.fromCharCode(65 + index);
+          button.textContent = option;
+          const cancelPress = function () {
+            button.classList.remove("is-pressing");
+          };
+          button.addEventListener("pointerdown", function () {
+            button.classList.add("is-pressing");
+          });
+          button.addEventListener("pointercancel", cancelPress);
+          button.addEventListener("pointerleave", cancelPress);
+          button.addEventListener("click", function () {
+            options.querySelectorAll(".quiz-btn.is-selected").forEach(function (item) {
+              item.classList.remove("is-selected");
+            });
+            button.classList.remove("is-pressing");
+            button.classList.add("is-selected");
+            answerQuiz1(option, button);
+          });
+          options.appendChild(button);
+        });
+        state.quizTimer = window.setTimeout(function () {
+          answerQuiz1(null, null);
+        }, 3000);
+      }
+
+      function answerQuiz1(selected, selectedButton) {
+        if (state.quizAnswered) return;
+        state.quizAnswered = true;
+        if (state.quizTimer) window.clearTimeout(state.quizTimer);
+        state.quizTimer = null;
+        const question = state.quizSet[state.quizIndex];
+        const correct = selected === question.meaning;
+        state.quizResults.push({
+          word: question.word,
+          meaning: question.meaning,
+          selected: selected || "\uC2DC\uAC04 \uCD08\uACFC",
+          answer: question.meaning,
+          correct: correct
+        });
+        quizArea.classList.add(correct ? "is-correct" : "is-wrong");
+        quizArea.querySelectorAll(".wf-q1-options .quiz-btn").forEach(function (button) {
+          button.disabled = true;
+          if (button.textContent === question.meaning) button.classList.add("is-answer-choice");
+          if (button === selectedButton) button.classList.add(correct ? "is-correct-choice" : "is-wrong-choice");
+        });
+        showDirectQuiz1Toast(correct, selected == null);
+        state.stageAdvanceTimer = window.setTimeout(function () {
+          state.quizIndex += 1;
+          renderQuiz1Question();
+        }, 850);
+      }
+
+      function renderQuiz2Intro(entry) {
+        hideRuntimeViews();
+        updateStageTrack();
+        const total = Math.min(20, eligibleWords(entry).length);
+        quizArea.dataset.wfView = "intro";
+        quizArea.innerHTML = [
+          '<div class="start-card">',
+          '<div class="start-title">Spelling Scramble Quiz</div>',
+          '<div class="start-subtitle">\uB73B\uC744 \uBCF4\uACE0 \uC601\uC5B4 \uB2E8\uC5B4\uB97C \uAE00\uC790 \uB2E8\uC704\uB85C \uC870\uB9BD\uD569\uB2C8\uB2E4.</div>',
+          renderRuntimeQuiz2TitleDemo(),
+          '<div class="start-guide">',
+          '<div class="start-guide-item"><span class="start-guide-number">1</span><span>\uC11E\uC778 \uAE00\uC790\uB97C \uB20C\uB7EC \uBE48\uCE78\uC744 \uCC44\uC6B0\uC138\uC694.</span></div>',
+          '<div class="start-guide-item"><span class="start-guide-number">2</span><span>\uCC44\uC6B4 \uCE78\uC744 \uB2E4\uC2DC \uB204\uB974\uBA74 \uAE00\uC790\uAC00 \uB3CC\uC544\uAC11\uB2C8\uB2E4.</span></div>',
+          '</div>',
+          '<div class="setup-status">' + total + ' WORDS \u00B7 PERSONAL STUDY</div>',
+          '<button id="runtime-q2-start" class="quiz-btn" style="width:100%;" type="button">Start Quiz</button>',
+          '</div>'
+        ].join("");
+        quizArea.hidden = false;
+        startRuntimeQuiz2TitleDemo();
+        document.getElementById("runtime-q2-start").addEventListener("click", function () {
+          if (eligibleWords(entry).length < 2) {
+            showRuntimeMessage(TEXT.quizNeed, TEXT.noWordData);
+            return;
+          }
+          prepareQuizSet(entry);
+          renderQuiz2Question();
+        });
+      }
+
+      function createPuzzle(word) {
+        const items = [];
+        const layout = [];
+        let slotIndex = 0;
+        Array.from(word).forEach(function (char) {
+          if (/[a-z0-9]/i.test(char)) {
+            items.push({ id: items.length, char: char.toUpperCase() });
+            layout.push({ type: "slot", slotIndex: slotIndex });
+            slotIndex += 1;
+          } else if (/\s/.test(char)) {
+            layout.push({ type: "separator", char: "\u00A0" });
+          } else {
+            layout.push({ type: "fixed", char: char });
+          }
+        });
+        return {
+          items: shuffle(items),
+          layout: layout,
+          slotValues: new Array(slotIndex).fill(null),
+          activeSlotIndex: slotIndex ? 0 : -1
+        };
+      }
+
+      function nextEmptySlot(puzzle, start) {
+        for (let i = Math.max(0, start); i < puzzle.slotValues.length; i += 1) {
+          if (puzzle.slotValues[i] === null) return i;
+        }
+        for (let i = 0; i < Math.max(0, start); i += 1) {
+          if (puzzle.slotValues[i] === null) return i;
+        }
+        return -1;
+      }
+
+      function puzzleItem(puzzle, id) {
+        return puzzle.items.find(function (item) { return item.id === id; }) || null;
+      }
+
+      function updateAnswerChipScale(answerEl, puzzle) {
+        const itemCount = Math.max(1, puzzle.layout.length);
+        const styles = getComputedStyle(answerEl);
+        const padding = parseFloat(styles.paddingLeft || "0") + parseFloat(styles.paddingRight || "0");
+        const measuredWidth = answerEl.clientWidth || (answerEl.parentElement ? answerEl.parentElement.clientWidth : 0);
+        const innerWidth = Math.max(0, measuredWidth - padding - 2);
+        const gap = itemCount > 10 ? 2 : (itemCount > 7 ? 3 : 7);
+        const chipWidth = Math.max(
+          14,
+          Math.min(42, Math.floor((innerWidth - gap * (itemCount - 1)) / itemCount))
+        );
+        const chipHeight = Math.max(28, Math.min(52, Math.round(chipWidth * 1.24)));
+        const lengthFontCap = itemCount >= 12 ? 14 : (itemCount >= 10 ? 17 : (itemCount >= 8 ? 20 : 25));
+        const fontSize = Math.max(11, Math.min(lengthFontCap, Math.round(chipWidth * 0.6)));
+        answerEl.dataset.answerLength = String(itemCount);
+        answerEl.style.setProperty("--answer-chip-gap", gap + "px");
+        answerEl.style.setProperty("--answer-chip-width", chipWidth + "px");
+        answerEl.style.setProperty("--answer-chip-height", chipHeight + "px");
+        answerEl.style.setProperty("--answer-chip-font", fontSize + "px");
+        answerEl.style.setProperty("--answer-separator-font", Math.max(10, Math.min(20, fontSize)) + "px");
+      }
+
+      function renderPuzzleState() {
+        const puzzle = state.q2Puzzle;
+        const answer = document.getElementById("scramble-answer");
+        const bank = document.getElementById("scramble-bank");
+        if (!puzzle || !answer || !bank) return;
+        if (
+          puzzle.activeSlotIndex < 0 ||
+          puzzle.slotValues[puzzle.activeSlotIndex] !== null
+        ) {
+          puzzle.activeSlotIndex = nextEmptySlot(puzzle, 0);
+        }
+        updateAnswerChipScale(answer, puzzle);
+        answer.innerHTML = "";
+        bank.innerHTML = "";
+        puzzle.layout.forEach(function (part) {
+          const chip = document.createElement(part.type === "slot" ? "button" : "span");
+          chip.className = "slot-chip notranslate " + (part.type === "slot" ? "" : part.type);
+          chip.setAttribute("translate", "no");
+          if (part.type === "slot") {
+            chip.type = "button";
+            chip.dataset.slotIndex = String(part.slotIndex);
+            const item = puzzleItem(puzzle, puzzle.slotValues[part.slotIndex]);
+            const isFilled = !!item;
+            chip.textContent = isFilled ? item.char : "\u00A0";
+            chip.classList.toggle("empty", !isFilled);
+            chip.classList.toggle("active", !isFilled && part.slotIndex === puzzle.activeSlotIndex);
+            chip.addEventListener("click", function () {
+              if (state.quizAnswered) return;
+              puzzle.slotValues[part.slotIndex] = null;
+              puzzle.activeSlotIndex = part.slotIndex;
+              renderPuzzleState();
+            });
+          } else {
+            chip.textContent = safeText(part.char).toUpperCase();
+          }
+          answer.appendChild(chip);
+        });
+        puzzle.items.forEach(function (item) {
+          const button = document.createElement("button");
+          button.type = "button";
+          const used = puzzle.slotValues.indexOf(item.id) >= 0;
+          button.className = "bank-letter notranslate" + (used ? " used" : "");
+          button.setAttribute("translate", "no");
+          button.dataset.bankId = String(item.id);
+          button.textContent = item.char;
+          button.disabled = used || state.quizAnswered;
+          button.addEventListener("click", function () {
+            if (state.quizAnswered || button.disabled) return;
+            const slot = puzzle.activeSlotIndex >= 0
+              ? puzzle.activeSlotIndex
+              : nextEmptySlot(puzzle, 0);
+            if (slot < 0) return;
+            puzzle.slotValues[slot] = item.id;
+            puzzle.activeSlotIndex = nextEmptySlot(puzzle, slot + 1);
+            renderPuzzleState();
+          });
+          bank.appendChild(button);
+        });
+      }
+
+      function getPuzzleAttempt(puzzle, emptyPlaceholder) {
+        let slot = 0;
+        return puzzle.layout.map(function (part) {
+          if (part.type === "slot") {
+            const item = puzzleItem(puzzle, puzzle.slotValues[slot]);
+            slot += 1;
+            return item ? item.char : (emptyPlaceholder || "");
+          }
+          return part.type === "separator" ? " " : part.char;
+        }).join("");
+      }
+
+      function renderQuiz2Question() {
+        if (state.quizIndex >= state.quizSet.length) {
+          showQuizResult("quiz2");
+          return;
+        }
+        state.quizAnswered = false;
+        const question = state.quizSet[state.quizIndex];
+        state.q2Puzzle = createPuzzle(question.word);
+        quizArea.dataset.wfView = "question";
+        quizArea.innerHTML = [
+          '<div class="quiz-question-screen notranslate" translate="no">',
+          '<div class="question-top"><div class="wf-question-context">PERSONAL SET</div>' + questionProgressMarkup(state.quizIndex + 1, state.quizSet.length) + '</div>',
+          '<div class="meaning-card"><div class="question-wording"></div></div>',
+          '<div id="scramble-answer" class="scramble-wrap notranslate" translate="no"></div>',
+          '<div class="bank-label notranslate" translate="no">Scrambled letters</div>',
+          '<div id="scramble-bank" class="bank-grid notranslate" translate="no"></div>',
+          '<div id="feedback"></div>',
+          '<button class="quiz-btn check-btn notranslate" id="runtime-check-btn" type="button">Check</button>',
+          '<div id="answer-toast" class="answer-toast notranslate" translate="no"></div>',
+          '</div>'
+        ].join("");
+        quizArea.hidden = false;
+        quizArea.querySelector(".question-wording").textContent = question.meaning;
+        document.getElementById("runtime-check-btn").addEventListener("click", submitPuzzle);
+        renderPuzzleState();
+      }
+
+      function submitPuzzle() {
+        if (state.quizAnswered || !state.q2Puzzle) return;
+        const question = state.quizSet[state.quizIndex];
+        const attempt = getPuzzleAttempt(state.q2Puzzle, "_");
+        const attemptValue = getPuzzleAttempt(state.q2Puzzle, "");
+        const fullyFilled = state.q2Puzzle.slotValues.every(function (value) { return value !== null; });
+        state.quizAnswered = true;
+        const normalize = function (value) {
+          return safeText(value).replace(/\s+/g, " ").trim().toLocaleLowerCase();
+        };
+        const correct = fullyFilled && normalize(attemptValue) === normalize(question.word);
+        state.quizResults.push({
+          word: question.word,
+          meaning: question.meaning,
+          selected: attempt,
+          answer: question.word,
+          correct: correct
+        });
+        renderPuzzleState();
+        quizArea.querySelectorAll("button").forEach(function (button) {
+          button.disabled = true;
+        });
+        const answer = document.getElementById("scramble-answer");
+        if (answer) answer.classList.add(correct ? "correct-glow" : "incorrect-glow");
+        const toast = document.getElementById("answer-toast");
+        toast.className = "wf-q1-answer-toast wf-q2-answer-toast " + (correct ? "correct" : "wrong");
+        toast.setAttribute("role", "status");
+        toast.setAttribute("aria-live", "assertive");
+        toast.innerHTML = '<strong>' + (correct ? "\u2713" : "\u00D7") + '</strong><span>' + (correct ? "CORRECT!" : "WRONG!") + '</span>';
+        void toast.offsetWidth;
+        toast.classList.add("show");
+        window.setTimeout(function () {
+          if (toast.isConnected) toast.remove();
+        }, 780);
+        state.stageAdvanceTimer = window.setTimeout(function () {
+          state.quizIndex += 1;
+          renderQuiz2Question();
+        }, correct ? 1150 : 900);
+      }
+
+      function makeResultTable(stage) {
+        const table = document.createElement("table");
+        table.className = "wf-result-table" + (stage === "quiz2" ? " is-q2 storage-q2-result-table" : "");
+        if (stage === "quiz2") {
+          const colgroup = document.createElement("colgroup");
+          ["number", "source", "meaning", "attempt", "answer", "verdict"].forEach(function (name) {
+            const col = document.createElement("col");
+            col.className = "wf-col-" + name;
+            colgroup.appendChild(col);
+          });
+          table.appendChild(colgroup);
+        }
+        const head = document.createElement("thead");
+        const headRow = document.createElement("tr");
+        const labels = stage === "quiz2"
+          ? ["#", "\uCD9C\uCC98", TEXT.hideMeanings, "\uB0B4 \uB2F5\uC548", "\uC815\uB2F5", "\uACB0\uACFC"]
+          : ["#", TEXT.words, "\uB0B4 \uB2F5\uC548", "\uC815\uB2F5", "\uACB0\uACFC"];
+        labels.forEach(function (label) {
+          const th = document.createElement("th");
+          th.textContent = label;
+          headRow.appendChild(th);
+        });
+        head.appendChild(headRow);
+        const body = document.createElement("tbody");
+        state.quizResults.forEach(function (result, index) {
+          const row = document.createElement("tr");
+          row.className = "is-main";
+          const values = stage === "quiz2"
+            ? [index + 1, sourceLabel(getSelectedEntry()), result.meaning, result.selected, result.answer]
+            : [index + 1, result.word, result.selected, result.answer];
+          values.forEach(function (value) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+          });
+          const verdict = document.createElement("td");
+          const mark = document.createElement("span");
+          mark.className = "wf-result-verdict " + (result.correct ? "is-correct" : "is-wrong");
+          mark.textContent = result.correct ? "\u2713" : "\u00D7";
+          verdict.appendChild(mark);
+          row.appendChild(verdict);
+          body.appendChild(row);
+        });
+        table.append(head, body);
+        return table;
+      }
+
+      function showQuizResult(stage) {
+        clearStudyTimers();
+        const total = state.quizResults.length;
+        const correct = state.quizResults.filter(function (result) { return result.correct; }).length;
+        const score = total ? Math.round((correct / total) * 100) : 0;
+        if (stage === "quiz1") state.quiz1Passed = true;
+        if (stage === "quiz2") state.quiz2Passed = true;
+        updateStageTrack();
+        resultPopup.innerHTML = [
+          '<div class="popup-content wf-result-content">',
+          '<div class="wf-result-header"><span class="wf-result-kicker">' + (stage === "quiz1" ? "WORD QUIZ" : "SPELLING QUIZ") + ' \u00B7 RESULT</span><h2>' + (stage === "quiz1" ? "\uB73B \uACE0\uB974\uAE30 \uACB0\uACFC" : "\uB2E8\uC5B4 \uC870\uB9BD \uACB0\uACFC") + '</h2></div>',
+          '<div class="wf-result-score is-pass">',
+          '<div class="wf-result-score-number"><strong>' + score + '</strong><span>\uC810</span></div>',
+          '<div class="wf-result-score-copy"><span>\uC815\uB2F5</span><strong>' + correct + ' / ' + total + '</strong><small>PERSONAL STUDY</small></div>',
+          '</div>',
+          '<div class="wf-result-status is-pass"><span aria-hidden="true">\u2713</span><strong>\uD559\uC2B5 \uAE30\uB85D\uC774 \uC800\uC7A5\uB418\uC5C8\uC2B5\uB2C8\uB2E4.</strong></div>',
+          '<div class="wf-result-detail" id="storage-result-detail"></div>',
+          '<div class="wf-result-actions"><button class="quiz-btn secondary" id="runtime-result-back" type="button">\uB2E4\uC2DC \uD480\uAE30</button><button class="quiz-btn" id="runtime-result-next" type="button">' + (stage === "quiz1" ? "\uB2E4\uC74C \uB2E8\uACC4\uB85C" : "MEM") + '</button></div>',
+          '</div>'
+        ].join("");
+        document.getElementById("storage-result-detail").appendChild(makeResultTable(stage));
+        resultPopup.style.display = "flex";
+        document.getElementById("runtime-result-back").addEventListener("click", function () {
+          setStage(stage);
+        });
+        const next = document.getElementById("runtime-result-next");
+        next.addEventListener("click", function () {
+          setStage(stage === "quiz1" ? "quiz2" : "learn");
+        });
+      }
+
+      function setStage(stage) {
+        clearStudyTimers();
+        state.stage = stage;
+        state.quizIndex = 0;
+        state.quizResults = [];
+        state.quizAnswered = false;
+        state.q2Puzzle = null;
+        const entry = getSelectedEntry();
+        if (!entry) {
+          showRuntimeMessage(TEXT.selectBook, TEXT.selectBookNote);
+          updateStageTrack();
+          return;
+        }
+        if (stage === "learn") renderLearn(entry);
+        else if (stage === "quiz1") renderQuiz1Intro(entry);
+        else renderQuiz2Intro(entry);
+      }
+
+      function renderRuntime() {
+        const entry = getSelectedEntry();
+        if (!entry) {
+          showRuntimeMessage(TEXT.selectBook, TEXT.selectBookNote);
+          updateStageTrack();
+          return;
+        }
+        if (entry.state === "loading") {
+          showRuntimeMessage(entry.title, TEXT.preparing);
+          updateStageTrack();
+          return;
+        }
+        if (entry.state === "error" || !entry.words.length) {
+          const note = entry.state === "error"
+            ? TEXT.loadFailed + (entry.error ? " (" + entry.error + ")" : "")
+            : TEXT.noWordData;
+          showRuntimeMessage(entry.title, note);
+          updateStageTrack();
+          return;
+        }
+        if (state.stage === "quiz1") renderQuiz1Intro(entry);
+        else if (state.stage === "quiz2") renderQuiz2Intro(entry);
+        else renderLearn(entry);
+      }
+
+      function syncRuntimeSelection(force) {
+        const entry = getSelectedEntry();
+        const entryId = entry ? entry.id : "";
+        const entryState = entry ? entry.state : "";
+        if (force || state.runtimeEntryId !== entryId || state.runtimeEntryState !== entryState) {
+          resetRuntimeForEntry(entry);
+          renderRuntime();
+        }
+      }
+
+      function clearRuntimeSelection() {
+        closeSentencePanel();
+        state.selectedId = "";
+        resetRuntimeForEntry(null);
+        renderFileList();
+        renderRuntime();
+      }
+
+      function selectEntry(entryId, focusRuntime, showSentences) {
+        state.selectedId = entryId;
+        const entry = getSelectedEntry();
+        resetRuntimeForEntry(entry);
+        renderFileList();
+        renderRuntime();
+        if (showSentences) openSentencePanel(entry);
+        if (focusRuntime && window.innerWidth <= 830) {
+          wordflowRuntime.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
+      function renderAll() {
+        document.querySelectorAll("[data-folder]").forEach(function (button) {
+          button.classList.toggle("is-active", button.dataset.folder === state.folder);
+        });
+        renderFolderCounts();
+        renderFileList();
+        syncRuntimeSelection();
+      }
+
+      async function refreshLibrary() {
+        if (state.loading) return;
+        state.loading = true;
+        refreshBtn.disabled = true;
+        state.selectedId = "";
+        closeSentencePanel();
+        state.entries = [];
+        setSyncState("loading", TEXT.loadingList);
+        renderAll();
+
+        if (!userId) {
+          state.loading = false;
+          refreshBtn.disabled = false;
+          setSyncState("error", TEXT.idRequired);
+          renderAll();
+          return;
+        }
+
+        try {
+          const url = new URL(LIVE_RECEIVE_URL);
+          url.searchParams.set("userId", userId);
+          url.searchParams.set("limit", String(RECEIVE_LIMIT));
+          const response = await fetch(url.toString(), { cache: "no-store" });
+          const rawText = await response.text();
+          const payload = rawText ? JSON.parse(rawText) : [];
+          if (!response.ok) {
+            const message = payload && payload.message ? payload.message : "HTTP " + response.status;
+            throw new Error(message);
+          }
+
+          const rows = parseReceiveRows(payload);
+          const entries = rows.map(buildEntry);
+          entries.sort(function (a, b) { return b.sortValue - a.sortValue; });
+          state.entries = entries;
+          renderAll();
+
+          const serverEntries = entries.filter(function (entry) { return entry.kind === "server"; });
+          await hydrateEntries(serverEntries);
+          state.entries.sort(function (a, b) { return b.sortValue - a.sortValue; });
+
+          const firstWithWords = state.entries.find(function (entry) {
+            return entry.category === state.folder && entry.words.length > 0;
+          });
+          const fallbackWithWords = state.entries.find(function (entry) {
+            return entry.words.length > 0;
+          });
+          const initialEntry = firstWithWords || fallbackWithWords;
+          if (!getSelectedEntry() && initialEntry) {
+            state.selectedId = initialEntry.id;
+            state.folder = initialEntry.category;
+          }
+          setSyncState("ready", TEXT.loaded + " \u00B7 " + rows.length + " " + TEXT.files);
+        } catch (error) {
+          console.error("[MyStorage]", error);
+          state.entries = [];
+          setSyncState("error", TEXT.loadFailed);
+        } finally {
+          state.loading = false;
+          refreshBtn.disabled = false;
+          renderAll();
+        }
+      }
+
+      function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        clockLabel.textContent = time;
+      }
+
+      function buildTabletUrl() {
+        const target = new URL("tablet_screen.html", location.href);
+        if (userId) target.searchParams.set("id", userId);
+        return target.toString();
+      }
+
+      idLabel.textContent = userId ? "ID " + userId : TEXT.guest;
+      updateClock();
+      setInterval(updateClock, 15000);
+
+      document.querySelectorAll("[data-folder]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          closeSentencePanel();
+          state.folder = button.dataset.folder || "mock";
+          const visible = filteredEntries();
+          const selected = getSelectedEntry();
+          if (!selected || selected.category !== state.folder) {
+            const first = visible.find(function (entry) { return entry.words.length > 0; }) || visible[0] || null;
+            state.selectedId = first ? first.id : "";
+            resetRuntimeForEntry(first);
+          }
+          renderAll();
+        });
+      });
+
+      searchInput.addEventListener("input", function () {
+        state.search = String(searchInput.value || "").trim();
+        renderFileList();
+      });
+
+      refreshBtn.addEventListener("click", function () {
+        void refreshLibrary();
+      });
+
+      backToTabletBtn.addEventListener("click", function () {
+        location.href = buildTabletUrl();
+      });
+
+      maskBtn.addEventListener("click", function () {
+        if (!getSelectedEntry() || state.stage !== "learn") return;
+        state.meaningsHidden = !state.meaningsHidden;
+        renderLearn(getSelectedEntry());
+      });
+
+      quizBtn.addEventListener("click", function () {
+        if (!getSelectedEntry()) return;
+        setStage("quiz1");
+      });
+
+      runtimeBackBtn.addEventListener("click", clearRuntimeSelection);
+
+      runtimeStages.learn.addEventListener("click", function () {
+        if (getSelectedEntry()) setStage("learn");
+      });
+      runtimeStages.quiz1.addEventListener("click", function () {
+        if (getSelectedEntry()) setStage("quiz1");
+      });
+      runtimeStages.quiz2.addEventListener("click", function () {
+        if (getSelectedEntry()) setStage("quiz2");
+      });
+
+      sentencePanelClose.addEventListener("click", closeSentencePanel);
+      sentencePanelTabs.forEach(function (button) {
+        button.addEventListener("click", function () {
+          setSentencePanelSection(button.dataset.sentenceSection, true);
+        });
+      });
+      sentencePanelLandscapeTab.addEventListener("click", function () {
+        setSentencePanelLandscape(!state.sentencePanelLandscape);
+      });
+      sentencePanelList.addEventListener("scroll", function (event) {
+        const target = event.target;
+        if (
+          state.sentencePanelLandscape &&
+          target instanceof Element &&
+          target.classList.contains("sentence-panel-sentence-column")
+        ) {
+          scheduleLandscapeScrapSync();
+        }
+      }, true);
+      window.addEventListener("resize", function () {
+        if (state.sentencePanelOpen) {
+          scheduleDirectTranslationSurfaceRefresh();
+          scheduleLandscapeScrapSync();
+        }
+      });
+
+      void refreshLibrary();
+    })();
+  </script>
+</body>
+</html>

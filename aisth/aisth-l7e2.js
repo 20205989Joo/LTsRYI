@@ -1,7 +1,6 @@
 ﻿// aisth-l7e2.js
 // Independent runtime for Aisth Lesson 7 Exercise 2
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 7;
 const TARGET_EXERCISE = 2;
 const PAGE_LABEL = "Aisth L7-E2";
@@ -25,7 +24,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -36,9 +34,35 @@ const TEXT = {
   UNANSWERED: "(미응답)",
 };
 
+const L72_ROLE_ORDER = ["S", "V", "T", "D"];
+const L72_ROLE_LABELS = {
+  S: "누가",
+  V: "어떤 행동",
+  T: "무엇을·누구에게",
+  D: "언제·어디서·어떻게",
+};
+
+const L72_TOKEN_ROWS = [
+  { sentence: "She cleaned the room.", roles: { S: "She", V: "cleaned", T: "the room" } },
+  { sentence: "He runs every morning.", roles: { S: "He", V: "runs", D: "every morning" } },
+  { sentence: "She gave me a book.", roles: { S: "She", V: "gave", T: "me", D: "a book" } },
+  { sentence: "She cleaned the room and he rested quietly.", parts: [{ text: "She", role: "S" }, { text: "cleaned", role: "V" }, { text: "the room", role: "T" }, { text: "and", fixed: "connector" }, { text: "he", role: "S" }, { text: "rested", role: "V" }, { text: "quietly", role: "D" }] },
+  { sentence: "They arrived early and we opened the gate.", parts: [{ text: "They", role: "S" }, { text: "arrived", role: "V" }, { text: "early", role: "D" }, { text: "and", fixed: "connector" }, { text: "we", role: "S" }, { text: "opened", role: "V" }, { text: "the gate", role: "T" }] },
+  { sentence: "I think that she finished the work yesterday.", parts: [{ text: "I", role: "S" }, { text: "think", role: "V" }, { text: "that", fixed: "that" }, { text: "she", role: "S" }, { text: "finished", role: "V" }, { text: "the work", role: "T" }, { text: "yesterday", role: "D" }] },
+  { sentence: "He fixed the bike and she smiled brightly.", parts: [{ text: "He", role: "S" }, { text: "fixed", role: "V" }, { text: "the bike", role: "T" }, { text: "and", fixed: "connector" }, { text: "she", role: "S" }, { text: "smiled", role: "V" }, { text: "brightly", role: "D" }] },
+  { sentence: "We met at the station and they brought the documents.", parts: [{ text: "We", role: "S" }, { text: "met", role: "V" }, { text: "at the station", role: "D" }, { text: "and", fixed: "connector" }, { text: "they", role: "S" }, { text: "brought", role: "V" }, { text: "the documents", role: "T" }] },
+  { sentence: "She said that he sent me the file yesterday.", parts: [{ text: "She", role: "S" }, { text: "said", role: "V" }, { text: "that", fixed: "that" }, { text: "he", role: "S" }, { text: "sent", role: "V" }, { text: "me", role: "T" }, { text: "the file yesterday", role: "D" }] },
+  { sentence: "They cooked dinner and we ate outside.", parts: [{ text: "They", role: "S" }, { text: "cooked", role: "V" }, { text: "dinner", role: "T" }, { text: "and", fixed: "connector" }, { text: "we", role: "S" }, { text: "ate", role: "V" }, { text: "outside", role: "D" }] },
+  { sentence: "The baby slept peacefully and his mother closed the door.", parts: [{ text: "The baby", role: "S" }, { text: "slept", role: "V" }, { text: "peacefully", role: "D" }, { text: "and", fixed: "connector" }, { text: "his mother", role: "S" }, { text: "closed", role: "V" }, { text: "the door", role: "T" }] },
+  { sentence: "I know that they elected him president yesterday.", parts: [{ text: "I", role: "S" }, { text: "know", role: "V" }, { text: "that", fixed: "that" }, { text: "they", role: "S" }, { text: "elected", role: "V" }, { text: "him", role: "T" }, { text: "president yesterday", role: "D" }] },
+  { sentence: "We opened the box and she found a letter inside.", parts: [{ text: "We", role: "S" }, { text: "opened", role: "V" }, { text: "the box", role: "T" }, { text: "and", fixed: "connector" }, { text: "she", role: "S" }, { text: "found", role: "V" }, { text: "a letter", role: "T" }, { text: "inside", role: "D" }] },
+  { sentence: "He arrived late and I gave him the key.", parts: [{ text: "He", role: "S" }, { text: "arrived", role: "V" }, { text: "late", role: "D" }, { text: "and", fixed: "connector" }, { text: "I", role: "S" }, { text: "gave", role: "V" }, { text: "him", role: "T" }, { text: "the key", role: "D" }] },
+  { sentence: "She believes that we made the plan better today.", parts: [{ text: "She", role: "S" }, { text: "believes", role: "V" }, { text: "that", fixed: "that" }, { text: "we", role: "S" }, { text: "made", role: "V" }, { text: "the plan", role: "T" }, { text: "better today", role: "D" }] },
+];
+
 let subcategory = "Grammar";
 let level = "aisth";
-let day = "026";
+let day = "027";
 let quizTitle = "quiz_Grammar_aisth_l7e2";
 let userId = "";
 
@@ -49,6 +73,16 @@ let results = [];
 let isCurrentLocked = false;
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
+let selectedTokenId = "";
+let aimedWordId = "";
+let tokenAssignments = {};
+let tokenWrongRoles = new Set();
+let l72ViewportScrollLeft = 0;
+let l72DidDrag = false;
+let l72IsZoomed = false;
+let l72ShouldCenterAim = false;
+let l72ZoomTransitioning = false;
+let autoNextTimer = 0;
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -60,16 +94,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
-  try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
-  } catch (err) {
-    console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
-    return;
-  }
-
-  buildQuestionsFromRows();
+  questions = buildL72TokenQuestions();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -212,6 +240,399 @@ function injectRuntimeStyles() {
 
     .result-ok { color: #2e7d32; font-weight: 900; }
     .result-bad { color: #c62828; font-weight: 900; }
+
+    .l72-shell {
+      --l72-s:#2f8f55; --l72-s-bg:#e2f7e8;
+      --l72-v:#9a6300; --l72-v-bg:#fff2bd;
+      --l72-t:#bd2c32; --l72-t-bg:#ffe1e1;
+      --l72-d:#202020; --l72-d-bg:#ececec;
+      display:grid;
+      gap:8px;
+      min-height:390px;
+    }
+
+    .l72-overview-stage {
+      min-height:286px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      padding:24px 18px;
+      box-sizing:border-box;
+      border:2px solid rgba(44,41,38,.78);
+      border-radius:19px;
+      background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(247,240,229,.94));
+      box-shadow:inset 0 0 34px rgba(35,30,26,.08),0 10px 22px rgba(70,45,25,.12);
+    }
+
+    .l72-overview-kicker,
+    .l72-original-kicker {
+      color:#8b7766;
+      font-size:9px;
+      line-height:1;
+      font-weight:950;
+      letter-spacing:.16em;
+    }
+
+    .l72-overview-sentence {
+      appearance:none;
+      width:100%;
+      padding:14px 4px;
+      border:0;
+      background:transparent;
+      color:#201c18;
+      font-size:clamp(15px,4.7vw,19px);
+      font-family:inherit;
+      line-height:1.5;
+      font-weight:950;
+      letter-spacing:-.025em;
+      white-space:normal;
+      text-align:center;
+      cursor:pointer;
+    }
+
+    .l72-overview-copy {
+      display:block;
+      width:100%;
+      white-space:normal;
+      overflow-wrap:normal;
+      word-break:keep-all;
+      transform-origin:0 50%;
+      will-change:transform,opacity;
+    }
+
+    .l72-overview-stage.is-zooming .l72-overview-kicker,
+    .l72-overview-stage.is-zooming .l72-zoom-btn {
+      opacity:0;
+      transition:opacity .18s ease;
+    }
+
+    .l72-overview-stage.is-zooming .l72-overview-sentence {
+      pointer-events:none;
+    }
+
+    .l72-overview-stage.is-zooming .l72-overview-copy {
+      animation:l72-sentence-zoom-in .52s cubic-bezier(.16,.84,.18,1) both;
+    }
+
+    @keyframes l72-sentence-zoom-in {
+      0% { transform:translateX(0) scale(1); opacity:1; }
+      18% { transform:translateX(calc(var(--l72-zoom-x,0px) * .08)) scale(1.08); opacity:1; }
+      76% { transform:translateX(calc(var(--l72-zoom-x,0px) * .72)) scale(1.78); opacity:1; }
+      100% { transform:translateX(var(--l72-zoom-x,0px)) scale(2.12); opacity:.16; }
+    }
+
+    .l72-zoom-btn {
+      min-width:94px;
+      padding:8px 18px;
+      border:1px solid rgba(126,49,6,.30);
+      border-radius:999px;
+      background:#2c2926;
+      color:#fff7ef;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.08em;
+      cursor:pointer;
+      box-shadow:0 6px 13px rgba(35,29,24,.18);
+    }
+
+    .l72-original-line {
+      min-height:42px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      padding:5px 10px 7px;
+      color:#fff6df;
+      font-size:13px;
+      line-height:1.25;
+      font-weight:900;
+      text-align:center;
+      text-shadow:0 1px 2px rgba(0,0,0,.70);
+      background:linear-gradient(90deg,transparent 0%,rgba(32,23,17,.58) 18%,rgba(32,23,17,.76) 50%,rgba(32,23,17,.58) 82%,transparent 100%);
+    }
+
+    .l72-original-line .l72-original-kicker {
+      color:#ffd778;
+      text-shadow:0 0 9px rgba(255,198,62,.28);
+    }
+
+    .is-role-s { --role-color:var(--l72-s); --role-bg:var(--l72-s-bg); }
+    .is-role-v { --role-color:var(--l72-v); --role-bg:var(--l72-v-bg); }
+    .is-role-t { --role-color:var(--l72-t); --role-bg:var(--l72-t-bg); }
+    .is-role-d { --role-color:var(--l72-d); --role-bg:var(--l72-d-bg); }
+
+    .l72-fps-frame {
+      position:relative;
+      height:286px;
+      overflow:hidden;
+      border:2px solid #2c2926;
+      border-radius:19px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.94),rgba(246,238,224,.92)),
+        repeating-linear-gradient(90deg,transparent 0 46px,rgba(66,55,45,.035) 47px 48px);
+      box-shadow:inset 0 0 38px rgba(35,30,26,.13),0 10px 22px rgba(70,45,25,.13);
+      isolation:isolate;
+    }
+
+    .l72-fps-viewport {
+      position:absolute;
+      inset:0;
+      z-index:1;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-width:none;
+      cursor:grab;
+      touch-action:pan-x;
+      user-select:none;
+    }
+    .l72-fps-viewport::-webkit-scrollbar { display:none; }
+    .l72-fps-viewport.is-dragging { cursor:grabbing; }
+
+    .l72-sentence-track {
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      width:max-content;
+      min-width:max-content;
+      height:100%;
+      padding:44px 160px 112px;
+      box-sizing:border-box;
+      white-space:nowrap;
+      font-family:inherit;
+    }
+
+    .l72-word-target {
+      appearance:none;
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      isolation:isolate;
+      min-height:58px;
+      padding:8px 2px;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      color:var(--role-color,#171411);
+      box-shadow:none;
+      font-size:32px;
+      font-family:inherit;
+      line-height:1.1;
+      font-weight:950;
+      letter-spacing:-.025em;
+      white-space:nowrap;
+      cursor:crosshair;
+      transform:scale(1);
+      transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+    }
+    .l72-word-target.is-aimed {
+      transform:scale(1.10);
+      text-shadow:0 0 12px rgba(241,123,42,.28),0 2px 0 rgba(255,255,255,.9);
+      z-index:2;
+    }
+    .l72-word-target.has-role {
+      color:var(--role-color);
+      background:transparent;
+      text-shadow:0 0 5px var(--role-color),0 0 17px var(--role-bg);
+    }
+    .l72-word-target.has-role::before {
+      content:"";
+      position:absolute;
+      z-index:-1;
+      inset:-11px -15px;
+      border-radius:50%;
+      background:radial-gradient(ellipse,var(--role-bg) 0 34%,transparent 74%);
+      filter:blur(4px);
+      opacity:.96;
+      pointer-events:none;
+    }
+    .l72-word-target.is-wrong { animation:l72-word-shake .32s ease; color:#c42832; text-decoration:underline wavy rgba(196,40,50,.72); }
+    .l72-word-target.is-correct { text-shadow:0 0 11px rgba(47,143,85,.24); }
+
+    .l72-fixed-word {
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      min-height:58px;
+      padding:8px 2px;
+      font-size:32px;
+      line-height:1.1;
+      font-weight:950;
+      letter-spacing:-.025em;
+      white-space:nowrap;
+    }
+    .l72-fixed-word.is-connector {
+      color:#b46500;
+      text-shadow:0 0 6px #ffe8b8,0 0 18px rgba(231,193,135,.78);
+    }
+    .l72-fixed-word.is-that {
+      background:linear-gradient(90deg,#f17b2a 0%,#ffd84a 52%,#f5a400 100%);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 5px rgba(255,205,54,.54)) drop-shadow(0 1px 0 rgba(126,49,6,.16));
+    }
+
+    @keyframes l72-word-shake {
+      25%{transform:translateX(-4px)} 50%{transform:translateX(4px)} 75%{transform:translateX(-2px)}
+    }
+
+    .l72-spray-rack {
+      position:absolute;
+      z-index:9;
+      left:0;
+      right:0;
+      bottom:-7px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      gap:2px;
+      height:112px;
+      padding:0 7px;
+      pointer-events:none;
+    }
+
+    .l72-role-spray {
+      appearance:none;
+      position:relative;
+      width:60px;
+      height:104px;
+      padding:0;
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      pointer-events:auto;
+      filter:drop-shadow(0 7px 6px rgba(0,0,0,.22));
+      transition:transform .16s ease,filter .16s ease;
+    }
+
+    .l72-spray-can {
+      position:absolute;
+      left:50%;
+      bottom:0;
+      width:44px;
+      height:72px;
+      overflow:hidden;
+      border:2px solid #2d2925;
+      border-radius:13px 13px 8px 8px;
+      background:linear-gradient(90deg,#77716b 0%,#eee9df 17%,#b9b2aa 43%,#f8f4ec 63%,#827b74 100%);
+      box-shadow:inset 0 2px 0 rgba(255,255,255,.72),inset 0 -8px 13px rgba(39,34,30,.16),0 0 13px var(--role-bg);
+      transform:translateX(-50%);
+    }
+
+    .l72-spray-can::before {
+      content:"";
+      position:absolute;
+      inset:25px 0 11px;
+      background:linear-gradient(180deg,var(--role-bg,#ddd),var(--role-color,#555));
+      border-top:2px solid rgba(255,255,255,.55);
+      border-bottom:2px solid rgba(34,29,25,.20);
+    }
+
+    .l72-spray-can::after {
+      content:"SPRAY";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:12px;
+      color:rgba(31,27,24,.72);
+      font:950 6px/1 sans-serif;
+      letter-spacing:.08em;
+      text-align:center;
+    }
+
+    .l72-spray-nozzle {
+      position:absolute;
+      top:10px;
+      left:50%;
+      width:28px;
+      height:20px;
+      border:2px solid #2d2925;
+      border-radius:9px 9px 5px 5px;
+      background:linear-gradient(90deg,#4d4945,#ece7dd 34%,#817b75 72%,#3c3936);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.65);
+      transform:translateX(-50%);
+    }
+
+    .l72-spray-nozzle::before {
+      content:"";
+      position:absolute;
+      top:-5px;
+      left:50%;
+      width:12px;
+      height:7px;
+      border:2px solid #282522;
+      border-radius:5px 5px 2px 2px;
+      background:var(--role-color,#555);
+      box-shadow:0 0 10px var(--role-bg,#ddd);
+      transform:translateX(-50%);
+    }
+
+    .l72-spray-mist {
+      position:absolute;
+      left:50%;
+      top:-26px;
+      width:68px;
+      height:68px;
+      opacity:.24;
+      background:radial-gradient(ellipse at 50% 100%,var(--role-color,#777) 0%,var(--role-bg,#ddd) 30%,transparent 72%);
+      filter:blur(2px);
+      transform:translateX(-50%);
+      pointer-events:none;
+    }
+
+    .l72-spray-role {
+      position:absolute;
+      z-index:3;
+      left:50%;
+      bottom:34px;
+      color:#211d19;
+      font-size:20px;
+      line-height:1;
+      font-weight:1000;
+      text-shadow:0 0 7px rgba(255,255,255,.92),0 0 12px var(--role-bg);
+      transform:translateX(-50%);
+      pointer-events:none;
+    }
+
+    .l72-role-spray:hover { transform:translateY(-4px);filter:drop-shadow(0 7px 9px var(--role-bg)); }
+    .l72-role-spray:active { transform:translateY(3px) scale(.96); }
+    .l72-role-spray:active .l72-spray-mist { opacity:.92;filter:blur(4px); }
+
+    .l72-crosshair {
+      position:absolute;
+      z-index:7;
+      top:42%;
+      left:50%;
+      width:32px;
+      height:32px;
+      border:2px solid rgba(191,31,38,.78);
+      border-radius:50%;
+      box-shadow:0 0 0 1px rgba(255,255,255,.86),0 0 11px rgba(191,31,38,.23);
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+    }
+    .l72-crosshair::before,.l72-crosshair::after { content:"";position:absolute;left:50%;top:50%;background:#bf1f26;transform:translate(-50%,-50%); }
+    .l72-crosshair::before { width:46px;height:2px; }
+    .l72-crosshair::after { width:2px;height:46px; }
+
+    .l72-guide {
+      margin:2px 0 0;
+      color:#cbb9a8;
+      font-size:10px;
+      font-weight:850;
+      text-align:center;
+    }
+
+    @media (max-width:420px) {
+      .l72-fps-frame { height:270px; }
+      .l72-word-target,.l72-fixed-word { min-height:54px;padding:7px 2px;font-size:28px; }
+      .l72-sentence-track { padding-inline:150px; }
+      .l72-role-spray { width:57px; }
+    }
   `;
   document.head.appendChild(style);
 }
@@ -248,25 +669,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "inline",
+    title: "aisth-l7e2.js · token questions",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -309,6 +745,36 @@ function buildQuestionsFromRows() {
       instruction,
       title,
       type,
+    };
+  });
+}
+
+function buildL72TokenQuestions() {
+  return L72_TOKEN_ROWS.map((row, index) => {
+    const sourceParts = Array.isArray(row.parts)
+      ? row.parts
+      : L72_ROLE_ORDER.filter((role) => row.roles?.[role]).map((role) => ({ role, text:row.roles[role] }));
+    let wordIndex = 0;
+    const parts = sourceParts.map((part, partIndex) => {
+      const text = String(part.text || "").trim();
+      if (part.fixed) return { id:`l72-${index + 1}-f${partIndex + 1}`, text, fixed:String(part.fixed) };
+      wordIndex += 1;
+      return { id:`l72-${index + 1}-p${wordIndex}`, text, role:String(part.role || "") };
+    });
+    const words = parts.filter((part) => part.role);
+    const range = L72_ROLE_ORDER.filter((role) => words.some((word) => word.role === role));
+    return {
+      no: index + 1,
+      qNumber: index + 1,
+      question: row.sentence,
+      answer: words.map((word) => `${word.text}: ${word.role}`).join(" · "),
+      instruction: "문장 토큰을 S·V·T·D 자리에 분류해보세요.",
+      title: "S·V·T·D 토큰 분류",
+      type: "token",
+      range,
+      roles: { ...(row.roles || {}) },
+      parts,
+      words,
     };
   });
 }
@@ -410,14 +876,25 @@ function startQuiz() {
 
   currentIndex = 0;
   results = [];
+  selectedTokenId = "";
+  aimedWordId = "";
+  tokenAssignments = {};
+  tokenWrongRoles = new Set();
+  l72ViewportScrollLeft = 0;
+  l72DidDrag = false;
+  l72IsZoomed = false;
+  l72ShouldCenterAim = false;
+  l72ZoomTransitioning = false;
+  if (autoNextTimer) {
+    window.clearTimeout(autoNextTimer);
+    autoNextTimer = 0;
+  }
   renderQuestion();
 }
 
 function renderQuestion() {
   const area = document.getElementById("quiz-area");
   if (!area) return;
-
-
   const q = questions[currentIndex];
   if (!q) {
     showResultPopup();
@@ -425,116 +902,297 @@ function renderQuestion() {
   }
 
   isCurrentLocked = false;
+  selectedTokenId = q.range[0] || "";
+  aimedWordId = q.words[0]?.id || "";
+  tokenAssignments = {};
+  tokenWrongRoles = new Set();
+  l72ViewportScrollLeft = 0;
+  l72IsZoomed = false;
+  l72ShouldCenterAim = true;
+  l72ZoomTransitioning = false;
+  renderL72TokenExercise(area, q);
+}
 
-  const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
+function renderL72TokenExercise(area, q) {
+  if (!l72IsZoomed) {
+    renderL72Overview(area, q);
+    return;
+  }
 
-  const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
-    : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
-
-  const inputHtml = q.type === "blank"
-    ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
-    : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
+  const displayParts = Array.isArray(q.parts) && q.parts.length ? q.parts : q.words;
+  const wordHtml = displayParts.map((word, index) => {
+    const punctuation = index === displayParts.length - 1 ? "." : "";
+    if (word.fixed) {
+      return `<span class="l72-fixed-word is-${escapeHtmlAttr(word.fixed)}">${escapeHtml(word.text)}${punctuation}</span>`;
+    }
+    const assignedRole = tokenAssignments[word.id] || "";
+    const stateClasses = [
+      assignedRole ? `is-role-${assignedRole.toLowerCase()} has-role` : "",
+      tokenWrongRoles.has(word.id) ? "is-wrong" : "",
+      isCurrentLocked ? "is-correct" : "",
+      aimedWordId === word.id ? "is-aimed" : "",
+    ].filter(Boolean).join(" ");
+    return `<span class="l72-word-target ${stateClasses}" data-word-id="${word.id}">${escapeHtml(word.text)}${punctuation}</span>`;
+  }).join("");
+  const spraysHtml = q.range.map((role) => `
+    <button class="l72-role-spray is-role-${role.toLowerCase()}" type="button" data-role="${role}" title="${escapeHtmlAttr(L72_ROLE_LABELS[role])}" aria-label="${role} ${escapeHtmlAttr(L72_ROLE_LABELS[role])}">
+      <span class="l72-spray-mist" aria-hidden="true"></span>
+      <span class="l72-spray-nozzle" aria-hidden="true"></span>
+      <span class="l72-spray-can" aria-hidden="true"></span>
+      <span class="l72-spray-role" aria-hidden="true">${role}</span>
+    </button>
+  `).join("");
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
-
-    <div class="box">
-      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
-    </div>
-
-    <div class="box" style="background:#fff;">
-      ${inputHtml}
-      <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
-    </div>
+    <section class="l72-shell">
+      <div class="l72-original-line">
+        <span class="l72-original-kicker">ORIGINAL</span>
+        <span>${escapeHtml(q.question)}</span>
+      </div>
+        <div class="l72-fps-frame">
+          <div class="l72-fps-viewport" id="l72-fps-viewport"><div class="l72-sentence-track">${wordHtml}</div></div>
+          <div class="l72-crosshair" aria-hidden="true"></div>
+          <div class="l72-spray-rack">${spraysHtml}</div>
+        </div>
+        <div class="l72-guide">문장을 좌우로 끌어 조준하고, 아래의 역할 스프레이를 바로 눌러보세요.</div>
+    </section>
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const input = document.getElementById("user-answer");
-  const slotInputControl = input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
-    : null;
-
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
-
-  if (input) {
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" && q.type === "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-      if (ev.key === "Enter" && ev.ctrlKey && q.type !== "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-    });
-  }
+  wireL72TokenInteractions(area, q);
+  restoreL72Viewport(area);
 }
 
-function submitCurrentAnswer() {
-  if (isCurrentLocked) return;
+function renderL72Overview(area, q) {
+  area.innerHTML = `
+    <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
+    <section class="l72-shell">
+      <div class="l72-overview-stage">
+        <span class="l72-overview-kicker">FULL SENTENCE</span>
+        <button class="l72-overview-sentence" id="l72-overview-sentence" type="button"><span class="l72-overview-copy">${escapeHtml(q.question)}</span></button>
+        <button class="l72-zoom-btn" id="l72-zoom-btn" type="button">ZOOM</button>
+      </div>
+    </section>
+  `;
 
-  const q = questions[currentIndex];
-  const input = document.getElementById("user-answer");
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const feedback = document.getElementById("feedback");
+  const openZoom = () => {
+    if (l72ZoomTransitioning) return;
+    l72ZoomTransitioning = true;
+    const stage = area.querySelector(".l72-overview-stage");
+    const sentence = area.querySelector("#l72-overview-sentence");
+    const copy = sentence?.querySelector(".l72-overview-copy");
+    if (stage && copy?.firstChild) {
+      const copyRect = copy.getBoundingClientRect();
+      const stageRect = stage.getBoundingClientRect();
+      const firstBreak = q.question.search(/\s/);
+      const firstEnd = firstBreak > 0 ? firstBreak : q.question.length;
+      const firstRange = document.createRange();
+      firstRange.setStart(copy.firstChild, 0);
+      firstRange.setEnd(copy.firstChild, firstEnd);
+      const firstRect = firstRange.getBoundingClientRect();
+      const firstCenterFromCopy = firstRect.left + firstRect.width / 2 - copyRect.left;
+      const targetCenter = stageRect.left + stageRect.width / 2;
+      const zoomX = targetCenter - (copyRect.left + firstCenterFromCopy * 2.12);
+      copy.style.setProperty("--l72-zoom-x", `${Math.round(zoomX)}px`);
+    }
+    let didFinish = false;
+    let fallbackTimer = 0;
+    const finishZoom = () => {
+      if (didFinish) return;
+      didFinish = true;
+      if (fallbackTimer) window.clearTimeout(fallbackTimer);
+      l72IsZoomed = true;
+      l72ShouldCenterAim = true;
+      l72ViewportScrollLeft = 0;
+      renderL72TokenExercise(area, q);
+      window.requestAnimationFrame(() => { l72ZoomTransitioning = false; });
+    };
+    copy?.addEventListener("animationend", finishZoom, { once:true });
+    stage?.classList.add("is-zooming");
+    fallbackTimer = window.setTimeout(finishZoom, 620);
+  };
+  area.querySelector("#l72-overview-sentence")?.addEventListener("click", openZoom);
+  area.querySelector("#l72-zoom-btn")?.addEventListener("click", openZoom);
+}
 
-  if (!q || !input) return;
+function wireL72TokenInteractions(area, q) {
+  wireL72HorizontalDrag(area);
+  area.querySelectorAll(".l72-role-spray").forEach((button) => {
+    const role = button.dataset.role || "";
+    button.addEventListener("click", () => {
+      if (isCurrentLocked) return;
+      selectedTokenId = role;
+      rememberL72Viewport(area);
+      assignL72RoleToWord(area, q, aimedWordId, role);
+    });
+  });
+}
 
-  const userRaw = String(input.value || "").trim();
-  if (!userRaw) {
-    showToast("no", TEXT.INPUT_REQUIRED);
+function rememberL72Viewport(area) {
+  const viewport = area?.querySelector("#l72-fps-viewport");
+  if (viewport) l72ViewportScrollLeft = viewport.scrollLeft;
+}
+
+function restoreL72Viewport(area) {
+  const viewport = area?.querySelector("#l72-fps-viewport");
+  if (!viewport) return;
+  viewport.scrollLeft = l72ViewportScrollLeft;
+  window.requestAnimationFrame(() => {
+    const aimed = area.querySelector(`.l72-word-target[data-word-id="${aimedWordId}"]`);
+    if (!aimed) return;
+    if (l72ShouldCenterAim) {
+      const viewportRect = viewport.getBoundingClientRect();
+      const aimedRect = aimed.getBoundingClientRect();
+      const targetCenter = aimedRect.left + aimedRect.width / 2;
+      const crosshairCenter = viewportRect.left + viewportRect.width / 2;
+      viewport.scrollLeft = Math.max(0, viewport.scrollLeft + Math.round(targetCenter - crosshairCenter));
+      l72ViewportScrollLeft = viewport.scrollLeft;
+      l72ShouldCenterAim = false;
+      syncL72AimFromCrosshair(area);
+      return;
+    }
+    viewport.scrollLeft = l72ViewportScrollLeft;
+    const left = aimed.offsetLeft;
+    const right = left + aimed.offsetWidth;
+    const visibleLeft = viewport.scrollLeft + 20;
+    const visibleRight = viewport.scrollLeft + viewport.clientWidth - 20;
+    if (left < visibleLeft || right > visibleRight) {
+      viewport.scrollLeft = Math.max(0, left - Math.round(viewport.clientWidth * .28));
+      l72ViewportScrollLeft = viewport.scrollLeft;
+    }
+    syncL72AimFromCrosshair(area);
+  });
+}
+
+function syncL72AimFromCrosshair(area) {
+  const viewport = area?.querySelector("#l72-fps-viewport");
+  const crosshair = area?.querySelector(".l72-crosshair");
+  if (!viewport || !crosshair) return;
+  const crosshairRect = crosshair.getBoundingClientRect();
+  const crosshairX = crosshairRect.left + crosshairRect.width / 2;
+  const targets = Array.from(viewport.querySelectorAll(".l72-word-target"));
+  const aimed = targets.find((target) => {
+    const rect = target.getBoundingClientRect();
+    return crosshairX >= rect.left - 4 && crosshairX <= rect.right + 4;
+  });
+  aimedWordId = String(aimed?.dataset.wordId || "");
+  targets.forEach((target) => target.classList.toggle("is-aimed", target === aimed));
+}
+
+function wireL72HorizontalDrag(area) {
+  const viewport = area?.querySelector("#l72-fps-viewport");
+  if (!viewport) return;
+  let pointerId = null;
+  let startX = 0;
+  let startScroll = 0;
+  let moved = false;
+
+  viewport.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    pointerId = event.pointerId;
+    startX = event.clientX;
+    startScroll = viewport.scrollLeft;
+    moved = false;
+    viewport.classList.add("is-dragging");
+    viewport.setPointerCapture?.(pointerId);
+  });
+  viewport.addEventListener("pointermove", (event) => {
+    if (pointerId !== event.pointerId) return;
+    const delta = event.clientX - startX;
+    if (Math.abs(delta) > 5) moved = true;
+    if (!moved) return;
+    l72DidDrag = true;
+    viewport.scrollLeft = startScroll - delta;
+    l72ViewportScrollLeft = viewport.scrollLeft;
+    syncL72AimFromCrosshair(area);
+  });
+  const finishDrag = (event) => {
+    if (pointerId !== event.pointerId) return;
+    viewport.classList.remove("is-dragging");
+    viewport.releasePointerCapture?.(pointerId);
+    pointerId = null;
+    l72ViewportScrollLeft = viewport.scrollLeft;
+    syncL72AimFromCrosshair(area);
+    window.setTimeout(() => { l72DidDrag = false; }, 0);
+  };
+  viewport.addEventListener("pointerup", finishDrag);
+  viewport.addEventListener("pointercancel", finishDrag);
+  viewport.addEventListener("wheel", (event) => {
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+    event.preventDefault();
+    viewport.scrollLeft += event.deltaY;
+    l72ViewportScrollLeft = viewport.scrollLeft;
+    syncL72AimFromCrosshair(area);
+  }, { passive: false });
+  viewport.addEventListener("scroll", () => {
+    l72ViewportScrollLeft = viewport.scrollLeft;
+    syncL72AimFromCrosshair(area);
+  }, { passive: true });
+}
+
+function assignL72RoleToWord(area, q, wordId, role) {
+  if (isCurrentLocked || !q.words.some((word) => word.id === wordId)) return;
+  if (!L72_ROLE_ORDER.includes(role)) {
+    if (!tokenAssignments[wordId]) return;
+    delete tokenAssignments[wordId];
+    tokenWrongRoles.delete(wordId);
+    renderL72TokenExercise(area, q);
     return;
   }
-  const ok = isAnswerCorrect(q.type, userRaw, q.answer);
+  tokenAssignments[wordId] = role;
+  tokenWrongRoles.delete(wordId);
 
-  if (!ok) {
-    if (feedback) {
-      feedback.className = "feedback";
-      feedback.innerHTML = "";
-    }
+  if (q.words.every((word) => tokenAssignments[word.id])) {
+    evaluateL72TokenAssignments(area, q);
+    return;
+  }
+  renderL72TokenExercise(area, q);
+}
+
+function evaluateL72TokenAssignments(area, q) {
+  const wrongWords = q.words.filter((word) => tokenAssignments[word.id] !== word.role);
+  tokenWrongRoles = new Set(wrongWords.map((word) => word.id));
+  if (wrongWords.length) {
     showToast("no", TEXT.WRONG);
+    renderL72TokenExercise(area, q);
     return;
   }
 
   isCurrentLocked = true;
-  input.disabled = true;
-  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
-  results.push({
+  const selected = q.words.map((word) => `${word.text}:${tokenAssignments[word.id]}`).join(" · ");
+  const nextResult = {
     no: currentIndex + 1,
     qNumber: q.qNumber,
     type: q.type,
     question: q.question,
-    selected: userRaw,
+    selected,
     answer: q.answer,
     instruction: q.instruction,
     correct: true,
-  });
-
-  if (feedback) {
-    feedback.className = "feedback";
-    feedback.innerHTML = "";
-  }
-
+  };
+  const existingIndex = results.findIndex((item) => item.qNumber === q.qNumber);
+  if (existingIndex >= 0) results.splice(existingIndex, 1, nextResult);
+  else results.push(nextResult);
+  renderL72TokenExercise(area, q);
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+  scheduleAutoNext();
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  if (autoNextTimer) window.clearTimeout(autoNextTimer);
+  autoNextTimer = window.setTimeout(() => {
+    autoNextTimer = 0;
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
+  if (autoNextTimer) {
+    window.clearTimeout(autoNextTimer);
+    autoNextTimer = 0;
+  }
   currentIndex += 1;
   if (currentIndex >= questions.length) {
     showResultPopup();
@@ -569,9 +1227,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -640,11 +1303,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -655,12 +1323,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

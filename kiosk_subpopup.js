@@ -60,6 +60,12 @@ function sortLevelsForDisplay(subcategory, levels) {
   });
 }
 
+function isTesterLockedGrammarLevel(subcategory, level) {
+  const tester = typeof isKioskTesterUser === 'function' && isKioskTesterUser();
+  const visual = getLevelVisual(subcategory, level);
+  return tester && visual && visual.variant !== 'basic';
+}
+
 function setAddButtonEnabled(enabled) {
   const addBtn = document.getElementById('subPopupAddBtn');
   if (!addBtn) return;
@@ -354,6 +360,12 @@ function renderLevelOptions(temp) {
 
     const visual = getLevelVisual(sub, level);
     if (visual?.variant) btn.classList.add(`level-${visual.variant}`);
+    const isTesterLocked = isTesterLockedGrammarLevel(sub, level);
+    if (isTesterLocked) {
+      btn.disabled = true;
+      btn.classList.add('is-preview-locked');
+      btn.setAttribute('aria-disabled', 'true');
+    }
 
     if (visual?.rank) {
       btn.classList.add('has-rank');
@@ -368,12 +380,14 @@ function renderLevelOptions(temp) {
     levelName.textContent = getLevelDisplayName(level);
     btn.appendChild(levelName);
 
-    btn.onclick = () => {
-      temp.Level = level;
-      document.querySelectorAll('#levelSection .menu-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderLessonOptions(temp);
-    };
+    if (!isTesterLocked) {
+      btn.onclick = () => {
+        temp.Level = level;
+        document.querySelectorAll('#levelSection .menu-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderLessonOptions(temp);
+      };
+    }
     grid.appendChild(btn);
   });
 }

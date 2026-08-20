@@ -1,11 +1,43 @@
 ﻿// aisth-l2e3.js
 // Independent runtime for Aisth Lesson 2 Exercise 3
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 2;
 const TARGET_EXERCISE = 3;
 const PAGE_LABEL = "Aisth L2-E3";
 const MAX_QUESTIONS = 0; // 0 = unlimited
+
+const L23_DIRECT_QUESTION_ROWS = [
+  ["I ____ __ eat pizza.\n나는 피자를 **먹고 싶어.**", "want to"],
+  ["I ____ __ finish this today.\n나는 이것을 오늘 **끝내야 해.**", "have to"],
+  ["She ___ __ leave early.\n그녀는 일찍 **떠나야 해.**", "has to"],
+  ["We ____ __ wear uniforms.\n우리는 교복을 **입어야 해.**", "have to"],
+  ["You ____ __ check the answer.\n너는 정답을 확인**할 필요가 있어.**", "need to"],
+  ["He _____ __ find a new job.\n그는 새 직업을 구**할 필요가 있어.**", "needs to"],
+  ["They ____ __ practice more.\n그들은 더 연습**할 필요가 있어.**", "need to"],
+  ["You _____ ____ __ come today.\n너는 오늘 **안 와도 돼.**", "don't have to"],
+  ["She _______ ____ __ hurry.\n그녀는 서두르지 **않아도 돼.**", "doesn't have to"],
+  ["We _____ ____ __ bring food.\n우리는 음식을 가져오지 **않아도 돼.**", "don't have to"],
+  ["I ____ __ play outside every day.\n나는 예전에 매일 밖에서 놀**곤 했어.**", "used to"],
+  ["He ____ __ live in Busan.\n그는 예전에 부산에 살**곤 했어.**", "used to"],
+  ["I __ ____ __ solve it now.\n나는 이제 그것을 해결**할 수 있어.**", "am able to"],
+  ["She __ ____ __ swim well.\n그녀는 수영을 잘 **할 수 있어.**", "is able to"],
+  ["They ___ ____ __ join us.\n그들은 우리와 함께**할 수 있어.**", "are able to"],
+  ["I __ _____ __ call him tonight.\n나는 오늘 밤 그에게 전화**할 예정이야.**", "am going to"],
+  ["He __ _____ __ study abroad.\n그는 유학을 **갈 예정이야.**", "is going to"],
+  ["We ___ _____ __ start soon.\n우리는 곧 시작**할 예정이야.**", "are going to"],
+  ["I _____ ____ __ order this.\n저는 이것을 주문**하고 싶습니다.**", "would like to"],
+  ["She _____ ____ __ ask a question.\n그녀는 질문을 하나 **하고 싶어 합니다.**", "would like to"],
+].map(([Question, Answer], index) => ({
+  Lesson: TARGET_LESSON,
+  Exercise: TARGET_EXERCISE,
+  Title: "여러 단어 유사조동사",
+  Question,
+  QNumber: index + 1,
+  Answer,
+  Instruction: "빈칸에 알맞은 유사조동사를 넣어보세요.",
+  KoreanHint: "",
+  ClauseRole: "",
+}));
 
 const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
 const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요.";
@@ -25,7 +57,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -60,16 +91,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -152,6 +185,41 @@ function injectRuntimeStyles() {
       color: #7e3106;
       font-weight: 900;
     }
+
+    #quiz-area .l23-prompt-surface {
+      display: block !important;
+      text-align: center !important;
+      white-space: normal !important;
+    }
+
+    .l23-prompt-lines {
+      display: flex;
+      width: 100%;
+      min-height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      text-align: center;
+      white-space: normal;
+    }
+
+    .l23-en-line {
+      color: #203736;
+      font-size: 18px;
+      line-height: 1.45;
+      font-weight: 950;
+      word-break: keep-all;
+    }
+
+    .l23-ko-line {
+      color: #6d5b50;
+      font-size: 12.5px;
+      line-height: 1.45;
+      font-weight: 850;
+      word-break: keep-all;
+    }
+
     textarea,
     .short-input {
       width: 100%;
@@ -248,25 +316,37 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  return L23_DIRECT_QUESTION_ROWS.map((row) => ({ ...row }));
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "direct-js",
+    title: "aisth-l2e3.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -426,14 +506,14 @@ function renderQuestion() {
 
   isCurrentLocked = false;
 
-  const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
+  const qBody = renderQuestionPrompt(q);
 
   const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
+    ? ""
     : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
 
   const inputHtml = q.type === "blank"
-    ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
+    ? `<input id="user-answer" class="short-input l23-slot-source-input" type="text" autocomplete="off" inputmode="latin" lang="en" autocapitalize="none" spellcheck="false" placeholder="${escapeHtmlAttr(placeholder)}" />`
     : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
 
   area.innerHTML = `
@@ -441,38 +521,53 @@ function renderQuestion() {
 
     <div class="box">
       <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
+      <div class="sentence aisth-question-surface aisth-question-center l23-prompt-surface">${qBody}</div>
     </div>
 
-    <div class="box" style="background:#fff;">
+    <div class="box${q.type === "blank" ? " aisth-letter-answer-box" : ""}" style="background:#fff;">
+      <div class="aisth-answer-tool-row">
+        <span aria-hidden="true"></span>
+        <span class="aisth-type-pill">type!</span>
+        <span class="aisth-answer-tool-end">${q.type === "blank" && q.no > 1 ? `<button class="aisth-hint-tool" id="hint-btn" type="button" aria-label="hint"><span class="aisth-hint-bulb" aria-hidden="true">!</span><span>hint</span></button>` : ""}</span>
+      </div>
       ${inputHtml}
       <div id="feedback" class="feedback"></div>
     </div>
 
     <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
+  const hintBtn = document.getElementById("hint-btn");
   const nextBtn = document.getElementById("next-btn");
   const input = document.getElementById("user-answer");
+  const initialPlaceholderText = q.type === "blank" && q.no === 1 ? pickSlotModelText(q.answer) : "";
   const slotInputControl = input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
+    ? window.AisthInputSlots.enhance(input, {
+      modelText: q.answer,
+      placeholderText: initialPlaceholderText,
+      onEnter: () => updateSlotAnswerState(q, input, slotInputControl?.control),
+    })
     : null;
 
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
+  if (hintBtn) {
+    hintBtn.addEventListener("click", () => {
+      revealFirstSlotPlaceholder(slotInputControl?.control, buildSlotPlaceholderText(q));
+      hintBtn.disabled = true;
+    });
+  }
   if (nextBtn) nextBtn.addEventListener("click", goNext);
 
   if (input) {
-    if (slotInputControl) slotInputControl.focus();
+    if (slotInputControl) {
+      applyPlaceholderAnimationDelays(slotInputControl.control);
+      input.addEventListener("input", () => updateSlotAnswerState(q, input, slotInputControl.control));
+      updateSlotAnswerState(q, input, slotInputControl.control);
+      slotInputControl.focus();
+    }
     else input.focus();
     input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" && q.type === "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
       if (ev.key === "Enter" && ev.ctrlKey && q.type !== "blank") {
         ev.preventDefault();
         submitCurrentAnswer();
@@ -512,8 +607,7 @@ function submitCurrentAnswer() {
   input.disabled = true;
   if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
@@ -532,6 +626,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -569,9 +670,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -640,11 +746,137 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function renderQuestionPrompt(q) {
+  const parts = splitQuestionPrompt(q?.question || "");
+  const enHtml = parts.en
+    ? `<div class="l23-en-line"><span class="aisth-sentence-flow">${renderPromptLine(parts.en)}</span></div>`
+    : "";
+  const koHtml = parts.ko
+    ? `<div class="l23-ko-line">${renderTextWithEmphasis(parts.ko)}</div>`
+    : "";
+
+  return `
+    <div class="l23-prompt-lines">
+      ${enHtml}
+      ${koHtml}
+    </div>
+  `;
+}
+
+function splitQuestionPrompt(raw) {
+  const lines = normalizeEscapedBreaks(String(raw ?? ""))
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => stripEnglishWrapper(line));
+
+  if (lines.length >= 2) {
+    const enIndex = lines.findIndex((line) => /[A-Za-z]/.test(line) || line.includes("___"));
+    if (enIndex >= 0) {
+      return {
+        en: lines[enIndex],
+        ko: lines.filter((_, idx) => idx !== enIndex).join(" "),
+      };
+    }
+  }
+
+  const only = lines[0] || "";
+  if (/[A-Za-z]/.test(only) || only.includes("___")) return { en: only, ko: "" };
+  return { en: "", ko: only };
+}
+
+function stripEnglishWrapper(line) {
+  return String(line ?? "").replace(/^\((.*)\)$/s, "$1").trim();
+}
+
+function renderPromptLine(line) {
+  return renderTextWithEmphasis(line).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
+}
+
+function buildSlotPlaceholderText(q) {
+  const modelText = pickSlotModelText(q?.answer);
+  if (!modelText) return "";
+  return Array.from(modelText.replace(/\s+/g, ""))[0] || "";
+}
+
+function revealFirstSlotPlaceholder(control, placeholderText) {
+  if (!control || !placeholderText) return;
+  control.classList.remove("is-full-hint");
+  control.classList.add("has-revealed-hint");
+  control.dataset.placeholderChars = String(placeholderText);
+  const flowInput = control.querySelector(".aisth-slot-input");
+  if (flowInput) flowInput.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function applyPlaceholderAnimationDelays(control) {
+  if (!control) return;
+  Array.from(control.querySelectorAll(".aisth-slot-cell")).forEach((cell, idx) => {
+    cell.style.setProperty("--aisth-placeholder-delay", `${(idx * 0.16).toFixed(2)}s`);
+  });
+}
+
+function updateSlotAnswerState(q, sourceInput, control) {
+  if (!q || !sourceInput || !control || isCurrentLocked || q.type !== "blank") return;
+
+  const modelText = pickSlotModelText(q.answer);
+  const modelChars = getAnswerChars(modelText);
+  const userChars = getAnswerChars(sourceInput.value);
+  const cells = Array.from(control.querySelectorAll(".aisth-slot-cell"));
+  const thirdPersonSIndices = getQuasiModalThirdPersonSIndices(modelText);
+  let allCorrect = modelChars.length > 0 && userChars.length >= modelChars.length;
+
+  cells.forEach((cell, idx) => {
+    const userChar = userChars[idx] || "";
+    const modelChar = modelChars[idx] || "";
+    const isFilled = Boolean(userChar);
+    const ok = isFilled && compareSlotChar(userChar, modelChar);
+
+    cell.classList.toggle("is-slot-correct", ok);
+    cell.classList.toggle("is-slot-wrong", isFilled && !ok);
+    cell.classList.toggle("is-suffix-highlight", thirdPersonSIndices.has(idx));
+    if (!ok) allCorrect = false;
+  });
+
+  if (allCorrect) submitCurrentAnswer();
+}
+
+function compareSlotChar(userChar, modelChar) {
+  return String(userChar || "").toLowerCase() === String(modelChar || "").toLowerCase();
+}
+
+function getAnswerChars(value) {
+  return Array.from(String(value ?? "").replace(/\s+/g, ""));
+}
+
+function getQuasiModalThirdPersonSIndices(modelText) {
+  const firstWord = String(modelText || "").trim().split(/\s+/)[0]?.toLowerCase() || "";
+  if (!["needs", "has", "doesn't", "doesnt"].includes(firstWord)) return new Set();
+  const sIndex = Array.from(firstWord).lastIndexOf("s");
+  return sIndex >= 0 ? new Set([sIndex]) : new Set();
+}
+
+function pickSlotModelText(modelRaw) {
+  const raw = stripEmphasisMarkers(normalizeEscapedBreaks(String(modelRaw ?? ""))).trim();
+  if (!raw) return "";
+
+  let line = raw.split(/\r?\n/).map((x) => x.trim()).filter(Boolean)[0] || raw;
+  line = line.split("||").map((x) => x.trim()).filter(Boolean)[0] || line;
+  if (/\bor\b/i.test(line)) line = line.split(/\bor\b/i).map((x) => x.trim()).filter(Boolean)[0] || line;
+  if (line.includes("/")) line = line.split("/").map((x) => x.trim()).filter(Boolean)[0] || line;
+  if (line.includes(",")) line = line.split(",").map((x) => x.trim()).filter(Boolean)[0] || line;
+  return line.replace(/[.?!~]+$/g, "").trim();
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -655,12 +887,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

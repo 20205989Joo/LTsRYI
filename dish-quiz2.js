@@ -18,6 +18,7 @@ let quizTitle = '';
 let userId = '';
 let debugAutoCompleting = false;
 let assistWheelMode = false;
+let answerToastTimer = null;
 let currentConfig = {
   level: 'A1',
   day: '',
@@ -83,6 +84,7 @@ function storeQuizResultWithMap(resultObject) {
   const map = readQuizResultsMap();
   map[quizKey] = resultObject;
   localStorage.setItem('QuizResultsMap', JSON.stringify(map));
+  window.dispatchEvent(new CustomEvent('dish:result-saved'));
 }
 
 function escapeHtml(value) {
@@ -104,6 +106,7 @@ function getScoredResults(resultRows) {
 }
 
 function renderAssistWheelButton() {
+  if (!isTesterUser()) return;
   if (document.getElementById('assist-wheel-toggle')) return;
 
   if (!document.getElementById('assist-wheel-style')) {
@@ -410,8 +413,10 @@ function updateAnswerChipScale(answerEl, puzzle) {
     Math.min(42, Math.floor((innerWidth - gap * (itemCount - 1)) / itemCount))
   );
   const chipHeight = Math.max(28, Math.min(52, Math.round(chipWidth * 1.24)));
-  const fontSize = Math.max(11, Math.min(25, Math.round(chipWidth * 0.6)));
+  const lengthFontCap = itemCount >= 12 ? 14 : itemCount >= 10 ? 17 : itemCount >= 8 ? 20 : 25;
+  const fontSize = Math.max(11, Math.min(lengthFontCap, Math.round(chipWidth * 0.6)));
 
+  answerEl.dataset.answerLength = String(itemCount);
   answerEl.style.setProperty('--answer-chip-gap', `${gap}px`);
   answerEl.style.setProperty('--answer-chip-width', `${chipWidth}px`);
   answerEl.style.setProperty('--answer-chip-height', `${chipHeight}px`);
@@ -437,11 +442,91 @@ function hasAllSlotsFilled(puzzle) {
   return puzzle.slotValues.every(value => value != null);
 }
 
+function renderWordflowTitleDemo() {
+  if (!document.body.matches('.wordflow-25d[data-word-stage="quiz2"]')) return '';
+
+  return `
+    <div class="wf-q2-title-demo" aria-hidden="true">
+      <div class="wf-q2-demo-prompt">
+        <span>MEANING</span>
+        <strong>\uB2E8\uC5B4</strong>
+      </div>
+      <div class="wf-q2-demo-slots">
+        <span>W</span>
+        <span>O</span>
+        <span>R</span>
+        <span>D</span>
+      </div>
+      <div class="wf-q2-demo-bank">
+        <span class="is-r">R</span>
+        <span class="is-w">W</span>
+        <span class="is-d">D</span>
+        <span class="is-o">O</span>
+      </div>
+      <div class="wf-q2-demo-instruction">CLICK LETTERS TO BUILD THE WORD</div>
+      <div class="wf-q2-demo-complete">WORD COMPLETE!</div>
+    </div>
+  `;
+}
+
+function startWordflowTitleDemo() {
+  const demo = quizArea?.querySelector('.wf-q2-title-demo');
+  if (!demo) return;
+
+  const slots = Array.from(demo.querySelectorAll('.wf-q2-demo-slots > span'));
+  const bank = {
+    W: demo.querySelector('.wf-q2-demo-bank > .is-w'),
+    O: demo.querySelector('.wf-q2-demo-bank > .is-o'),
+    R: demo.querySelector('.wf-q2-demo-bank > .is-r'),
+    D: demo.querySelector('.wf-q2-demo-bank > .is-d')
+  };
+  const instruction = demo.querySelector('.wf-q2-demo-instruction');
+  const complete = demo.querySelector('.wf-q2-demo-complete');
+  const sequence = ['W', 'O', 'R', 'D'];
+
+  const reset = () => {
+    slots.forEach(slot => slot.classList.remove('is-filled'));
+    Object.values(bank).forEach(tile => tile?.classList.remove('is-demo-pressing', 'is-used'));
+    instruction?.classList.remove('is-hidden');
+    complete?.classList.remove('is-visible');
+  };
+
+  const run = () => {
+    if (!demo.isConnected) return;
+    reset();
+
+    sequence.forEach((letter, index) => {
+      const pressAt = 580 + (index * 610);
+      window.setTimeout(() => {
+        if (!demo.isConnected) return;
+        bank[letter]?.classList.add('is-demo-pressing');
+      }, pressAt);
+      window.setTimeout(() => {
+        if (!demo.isConnected) return;
+        bank[letter]?.classList.remove('is-demo-pressing');
+        bank[letter]?.classList.add('is-used');
+        slots[index]?.classList.add('is-filled');
+      }, pressAt + 155);
+    });
+
+    window.setTimeout(() => {
+      if (!demo.isConnected) return;
+      instruction?.classList.add('is-hidden');
+      complete?.classList.add('is-visible');
+    }, 3100);
+
+    window.setTimeout(run, 4400);
+  };
+
+  run();
+}
+
 function renderSetupShell() {
   quizArea.innerHTML = `
     <div class="start-card">
       <div class="start-title">Spelling Scramble Quiz</div>
       <div class="start-subtitle">뜻을 보고 알맞은 영어 단어를 글자 단위로 조립합니다.</div>
+      ${renderWordflowTitleDemo()}
       <div class="start-guide">
         <div class="start-guide-item">
           <span class="start-guide-number">1</span>
@@ -467,6 +552,7 @@ function renderSetupShell() {
     </div>
   `;
 
+  startWordflowTitleDemo();
   const levelSelect = document.getElementById('level-select');
   levelSelect.innerHTML = LEVELS
     .map(level => `<option value="${level}">${level}</option>`)
@@ -479,6 +565,7 @@ function renderDirectStartShell() {
     <div class="start-card">
       <div class="start-title">Spelling Scramble Quiz</div>
       <div class="start-subtitle">뜻을 보고 알맞은 영어 단어를 글자 단위로 조립합니다.</div>
+      ${renderWordflowTitleDemo()}
       <div class="start-summary-card">
         <div class="start-badge-row">
           <span class="start-badge">Level ${escapeHtml(currentConfig.level)}</span>
@@ -513,6 +600,7 @@ function renderDirectStartShell() {
     </div>
   `;
 
+  startWordflowTitleDemo();
   document.getElementById('direct-start-btn')?.addEventListener('click', () => {
     startQuiz().catch(error => {
       console.error(error);
@@ -821,8 +909,31 @@ function showAnswerToast(message, tone = 'success') {
   const toast = document.getElementById('answer-toast');
   if (!toast) return;
 
+  if (answerToastTimer) {
+    window.clearTimeout(answerToastTimer);
+    answerToastTimer = null;
+  }
+
+  if (document.body.matches('.wordflow-25d[data-word-stage="quiz2"]')) {
+    const correct = tone !== 'error';
+    toast.className = `wf-q1-answer-toast wf-q2-answer-toast ${correct ? 'correct' : 'wrong'}`;
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.innerHTML = `
+      <strong>${correct ? '✓' : '×'}</strong>
+      <span>${correct ? 'CORRECT!' : 'WRONG!'}</span>
+    `;
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    answerToastTimer = window.setTimeout(() => {
+      toast.remove();
+      answerToastTimer = null;
+    }, 780);
+    return;
+  }
+
   toast.textContent = message;
-  toast.classList.remove('show', 'error');
+  toast.classList.remove('show', 'hide', 'error');
   if (tone === 'error') {
     toast.classList.add('error');
   }
@@ -910,6 +1021,87 @@ function buildResultsTable() {
   `;
 }
 
+function formatDishQuiz2ResultSource(result) {
+  if (String(result?.source || '').toLowerCase() !== 'review') {
+    return '\uC624\uB298';
+  }
+
+  const reviewLevel = String(result?.reviewLevel || '').trim().toUpperCase();
+  const reviewDay = String(result?.reviewDay || '').replace(/[^0-9]/g, '');
+  return `${reviewLevel || 'REVIEW'}${reviewDay ? ` Day ${reviewDay}` : ''}`;
+}
+
+function renderDishQuiz2WordflowResult(summary) {
+  const rows = currentResults.map(result => {
+    const isReview = String(result?.source || '').toLowerCase() === 'review';
+    return `
+      <tr class="${isReview ? 'is-review' : 'is-main'}">
+        <td>${escapeHtml(result.no)}</td>
+        <td><span class="wf-result-source">${escapeHtml(formatDishQuiz2ResultSource(result))}</span></td>
+        <td class="wf-result-meaning">${escapeHtml(result.meaning)}</td>
+        <td class="wf-result-answer">${escapeHtml(result.selected || '\u2014')}</td>
+        <td class="wf-result-word">${escapeHtml(result.answer)}</td>
+        <td><span class="wf-result-verdict ${result.correct ? 'is-correct' : 'is-wrong'}">${result.correct ? '\u2713' : '\u00D7'}</span></td>
+      </tr>
+    `;
+  }).join('');
+
+  resultPopup.innerHTML = `
+    <div class="popup-content wf-result-content" id="result-content">
+      <div class="wf-result-header">
+        <span class="wf-result-kicker">SPELLING QUIZ \u00B7 RESULT</span>
+        <h2>\uB2E8\uC5B4 \uC870\uB9BD \uACB0\uACFC</h2>
+      </div>
+      <div class="wf-result-score ${summary.canSubmit ? 'is-pass' : 'is-retry'}">
+        <div class="wf-result-score-number">
+          <strong>${summary.score}</strong>
+          <span>\uC810</span>
+        </div>
+        <div class="wf-result-score-copy">
+          <span>\uC815\uB2F5</span>
+          <strong>${summary.correctCount} / ${summary.total}</strong>
+          <small>\uC624\uB298 \uBB38\uC81C \uAE30\uC900</small>
+        </div>
+      </div>
+      <div class="wf-result-status ${summary.canSubmit ? 'is-pass' : 'is-retry'}">
+        <span aria-hidden="true">${summary.canSubmit ? '\u2713' : '!'}</span>
+        <strong>${summary.canSubmit
+          ? '80\uC810 \uC774\uC0C1\uC785\uB2C8\uB2E4. \uC81C\uCD9C\uD558\uB7EC \uAC08 \uC218 \uC788\uC5B4\uC694.'
+          : '80\uC810 \uC774\uC0C1\uBD80\uD130 \uC81C\uCD9C\uD560 \uC218 \uC788\uC5B4\uC694.'}</strong>
+      </div>
+      <div class="wf-result-detail" id="result-detail">
+        <table class="wf-result-table is-q2">
+          <colgroup>
+            <col class="wf-col-number" />
+            <col class="wf-col-source" />
+            <col class="wf-col-meaning" />
+            <col class="wf-col-attempt" />
+            <col class="wf-col-answer" />
+            <col class="wf-col-verdict" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>\uBC88\uD638</th>
+              <th>\uCD9C\uCC98</th>
+              <th>\uB73B</th>
+              <th>\uB0B4 \uB2F5\uC548</th>
+              <th>\uC815\uB2F5</th>
+              <th>\uACB0\uACFC</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div class="wf-result-actions">
+        <button class="quiz-btn secondary" id="retry-btn" type="button">\uC7AC\uB3C4\uC804</button>
+        ${directMode
+          ? `<button class="quiz-btn" id="submit-btn" type="button" ${summary.canSubmit && quizTitle ? '' : 'disabled'}>\uC81C\uCD9C\uD558\uB7EC \uAC00\uAE30</button>`
+          : '<button class="quiz-btn" id="setup-btn" type="button">Change Set</button>'}
+      </div>
+    </div>
+  `;
+}
+
 function showResults() {
   isAnswered = true;
 
@@ -959,7 +1151,10 @@ function showResults() {
     });
   }
 
-  resultPopup.innerHTML = `
+  if (document.body.matches('.wordflow-25d[data-word-stage="quiz2"]')) {
+    renderDishQuiz2WordflowResult({ score, correctCount, total, canSubmit });
+  } else {
+    resultPopup.innerHTML = `
     <div class="popup-content">
       <div style="font-weight: bold; font-size:16px; margin-bottom: 8px;">📄 단어 조립 결과</div>
       <div style="margin-bottom: 8px; font-size: 14px;">
@@ -981,6 +1176,7 @@ function showResults() {
       </div>
     </div>
   `;
+  }
 
   resultPopup.style.display = 'flex';
 
@@ -1012,7 +1208,10 @@ function showResults() {
 }
 
 function returnToTray() {
-  const url = `homework-tray_v1.html?id=${encodeURIComponent(userId)}&quizKey=${encodeURIComponent(quizTitle)}`;
+  const trayPage = document.body.matches('.wordflow-25d[data-word-stage="quiz2"]')
+    ? 'homework-tray_v1-25d.html'
+    : 'homework-tray_v1.html';
+  const url = `${trayPage}?id=${encodeURIComponent(userId)}&quizKey=${encodeURIComponent(quizTitle)}`;
   window.location.replace(url);
 }
 

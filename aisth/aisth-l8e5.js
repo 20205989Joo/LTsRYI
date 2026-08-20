@@ -1,7 +1,6 @@
 ﻿// aisth-l8e5.js
 // Independent runtime for Aisth Lesson 8 Exercise 5
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 8;
 const TARGET_EXERCISE = 5;
 const PAGE_LABEL = "Aisth L8-E5";
@@ -28,7 +27,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -52,6 +50,28 @@ let results = [];
 let isCurrentLocked = false;
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
+const L85_TRANSLATED_CHOICES = {
+  1:["수영하는 것","수영할","수영하기 위해"],
+  2:["가수가 되는 것","가수가 될","가수가 되기 위해"],
+  3:["세계를 여행하는 것","세계를 여행할","세계를 여행하기 위해"],
+  4:["숙제를 하는 것","해야 할 숙제","숙제를 하기 위해"],
+  5:["쉬는 것","쉴 장소","쉬기 위해"],
+  6:["이야기하는 것","이야기할 사람","이야기하기 위해"],
+  7:["버스를 타는 것","탈 버스","버스를 타기 위해"],
+  8:["공부하는 것","공부할 자료","공부하기 위해"],
+  9:["시험에 합격하는 것","합격할 시험","시험에 합격하기 위해"],
+  10:["너를 다시 보는 것","다시 볼 사람","너를 다시 봐서"],
+  11:["정직한 것","정직할 사람","정직하기 위해"],
+  12:["너에게 말하는 것","너에게 말할 것","너에게 말하기 위해"],
+  13:["기차를 타는 것","탈 기차","기차를 타기 위해"],
+  14:["새 언어를 배우는 것","배울 새 언어","새 언어를 배우기 위해"],
+  15:["앉는 것","앉을 의자","앉기 위해"],
+  16:["소식을 듣는 것","들을 소식","소식을 들어서"],
+  17:["친절한 것","친절할 사람","친절하기 위해"],
+  18:["걷는 것","걸을 길","걷기에는"],
+  19:["읽는 것","읽을 책","읽기 위해"],
+  20:["너를 만나는 것","만날 사람","너를 만나서"],
+};
 let selectedOptionIndex = -1;
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -64,16 +84,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -133,6 +155,7 @@ function injectRuntimeStyles() {
       margin-top: 8px;
       line-height: 1.65;
       font-size: 14px;
+      font-weight: 900;
       word-break: keep-all;
       white-space: pre-wrap;
     }
@@ -144,6 +167,10 @@ function injectRuntimeStyles() {
       color: #7e3106;
       font-weight: 900;
     }
+
+    .l85-choice .aisth-choice-text { display:grid;gap:4px; }
+    .l85-choice-kind { color:#4a3324;font-size:14px;font-weight:950; }
+    .l85-choice-translation { color:#7c6c61;font-size:12px;font-weight:800; }
 
     .to-inf-token {
       background: rgba(255, 208, 90, 0.32);
@@ -224,25 +251,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -407,12 +449,16 @@ function renderQuestion() {
   selectedOptionIndex = -1;
 
   const optionsHtml = (q.options || [])
-    .map((opt, idx) => `
-      <div class="aisth-choice-item" data-opt-index="${idx}" role="button" tabindex="0">
+    .map((opt, idx) => {
+      const usageIndex = ["명사적", "형용사적", "부사적"].indexOf(String(opt.text || ""));
+      const translated = (L85_TRANSLATED_CHOICES[q.qNumber] || ["~하는 것", "~할", "~하기 위해"])[usageIndex] || "";
+      return `
+      <div class="aisth-choice-item l85-choice" data-opt-index="${idx}" role="button" tabindex="0">
         <span class="aisth-choice-label">${escapeHtml(opt.label)}</span>
-        <span class="aisth-choice-text">${renderTextWithEmphasis(opt.text)}</span>
+        <span class="aisth-choice-text"><b class="l85-choice-kind">${renderTextWithEmphasis(opt.text)} 용법</b><span class="l85-choice-translation">${escapeHtml(translated)}</span></span>
       </div>
-    `)
+    `;
+    })
     .join("");
 
   area.innerHTML = `
@@ -426,8 +472,8 @@ function renderQuestion() {
     </div>
 
     <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn" id="submit-btn" type="button" style="display:none;" aria-hidden="true" tabindex="-1">제출</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
@@ -467,7 +513,7 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
+  scheduleAutoNext();
   document.querySelectorAll(".aisth-choice-item").forEach((el) => {
     el.style.pointerEvents = "none";
   });
@@ -501,6 +547,7 @@ function wireChoiceEvents() {
       if (!Number.isInteger(idx) || idx < 0) return;
       selectedOptionIndex = idx;
       refreshChoiceSelection();
+      submitCurrentAnswer();
     };
 
     el.addEventListener("click", activate);
@@ -518,6 +565,13 @@ function refreshChoiceSelection() {
     const idx = Number(el.dataset.optIndex ?? -1);
     el.classList.toggle("selected", idx === selectedOptionIndex);
   });
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -555,9 +609,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -626,11 +685,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -641,12 +705,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

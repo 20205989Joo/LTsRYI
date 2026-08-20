@@ -1,12 +1,34 @@
 ﻿// aisth-l6e1.js
 // Independent runtime for Aisth Lesson 6 Exercise 1
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 6;
 const TARGET_EXERCISE = 1;
 const PAGE_LABEL = "Aisth L6-E1";
 const MAX_QUESTIONS = 0; // 0 = unlimited
 const GROUP_SIZE = 3;
+
+const L61_VERB_MEANING_HINTS = {
+  running: { base: "run", meaning: "달리다" },
+  caught: { base: "catch", meaning: "잡다" },
+  written: { base: "write", meaning: "쓰다" },
+  broken: { base: "break", meaning: "깨다" },
+  cooked: { base: "cook", meaning: "요리하다" },
+  fallen: { base: "fall", meaning: "떨어지다" },
+  read: { base: "read", meaning: "읽다" },
+  laughing: { base: "laugh", meaning: "웃다" },
+  injured: { base: "injure", meaning: "다치게 하다" },
+  invited: { base: "invite", meaning: "초대하다" },
+  growing: { base: "grow", meaning: "자라다" },
+  shining: { base: "shine", meaning: "빛나다" },
+  swimming: { base: "swim", meaning: "수영하다" },
+  boiled: { base: "boil", meaning: "끓이다" },
+  sung: { base: "sing", meaning: "노래하다" },
+  painted: { base: "paint", meaning: "칠하다" },
+  drawn: { base: "draw", meaning: "그리다" },
+  forgotten: { base: "forget", meaning: "잊다" },
+  smiling: { base: "smile", meaning: "미소 짓다" },
+  cleaned: { base: "clean", meaning: "청소하다" },
+};
 
 const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
 const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요.";
@@ -26,7 +48,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -62,16 +83,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -211,6 +234,94 @@ function injectRuntimeStyles() {
       outline: none;
       margin: 0 2px;
     }
+
+    #quiz-area .l61-slot-control {
+      display: inline-flex;
+      width: auto;
+      max-width: 100%;
+      flex-wrap: nowrap;
+      gap: 4px 3px;
+      padding: 2px 3px;
+      vertical-align: middle;
+    }
+
+    #quiz-area .l61-slot-control .aisth-slot-shell {
+      min-height: 34px;
+      gap: 2px;
+    }
+
+    #quiz-area .l61-slot-control .aisth-slot-cell {
+      width: 27px;
+      height: 34px;
+      border-color: rgba(216,162,27,.54);
+      border-bottom-color: var(--aisth-role-v-border, #c88a12);
+      background: var(--aisth-role-v-bg, #fff4cc);
+      color: var(--aisth-role-v-text, #7a4a00);
+      font-size: 16px;
+    }
+
+    #quiz-area .l61-slot-control .aisth-slot-cell.is-slot-correct {
+      border-color: #3f9a68;
+      border-bottom-color: #28764c;
+      background: linear-gradient(180deg,#f1fff6 0%,#d8f4e3 100%);
+      color: #17643c;
+    }
+
+    #quiz-area .l61-slot-control .aisth-slot-cell.is-slot-wrong {
+      border-color: #dc3f3f;
+      border-bottom-color: #b62d2d;
+      background: linear-gradient(180deg,#fff5f5 0%,#ffdede 100%);
+      color: #a91f1f;
+    }
+
+    .l61-meaning-hint {
+      position: absolute;
+      z-index: 50;
+      top: 46px;
+      right: 10px;
+      display: none;
+      width: fit-content;
+      max-width: calc(100% - 18px);
+      margin: 0;
+      padding: 8px 13px;
+      border: 1px solid rgba(201,154,24,.72);
+      border-radius: 14px;
+      background: linear-gradient(180deg,#fff9bf 0%,#ffe67a 100%);
+      color: #684900;
+      box-shadow: 0 9px 20px rgba(140,101,4,.22);
+      font-size: 13px;
+      font-weight: 850;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .l61-answer-stage { position: relative; isolation: isolate; }
+
+    .l61-meaning-hint.is-visible {
+      display: block;
+      animation: l61HintPop .3s cubic-bezier(.2,1.35,.4,1) both;
+    }
+
+    .l61-meaning-hint::before {
+      content: "";
+      position: absolute;
+      top: -7px;
+      right: 20px;
+      width: 12px;
+      height: 12px;
+      border-left: 1px solid rgba(201,154,24,.72);
+      border-top: 1px solid rgba(201,154,24,.72);
+      background: #fff9bf;
+      transform: rotate(45deg);
+    }
+
+    .l61-hint-base { color: #5c3b00; font-weight: 950; }
+    .l61-hint-equals { padding: 0 5px; color: #a47600; }
+
+    @keyframes l61HintPop {
+      from { opacity: 0; transform: translateY(-5px) scale(.94); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
     input::placeholder,
     textarea::placeholder {
       color: #b9b2aa;
@@ -287,25 +398,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -491,34 +617,70 @@ function renderQuestion() {
       <div class="question-instruction">${escapeHtml(instruction)}</div>
     </div>
 
-    <div class="box" style="background:#fff;">
+    <div class="box l61-answer-stage" style="background:#fff;">
+      <div class="aisth-answer-tool-row">
+        <span aria-hidden="true"></span>
+        <span class="aisth-type-pill">type!</span>
+        <span class="aisth-answer-tool-end"><button class="aisth-hint-tool" id="hint-btn" type="button" aria-label="hint"><span class="aisth-hint-bulb" aria-hidden="true">!</span><span>hint</span></button></span>
+      </div>
+      <div class="l61-meaning-hint" id="l61-meaning-hint" role="status" aria-live="polite"></div>
       ${itemsHtml}
       <div id="feedback" class="feedback"></div>
     </div>
 
     <div class="btn-row">
       <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
   const submitBtn = document.getElementById("submit-btn");
   const nextBtn = document.getElementById("next-btn");
+  const hintBtn = document.getElementById("hint-btn");
   const inputs = Array.from(document.querySelectorAll(".inline-blank-input"));
+  let syncingInlineSlots = false;
+  const slotItems = inputs.map((input) => {
+    const qIndex = Number(input.getAttribute("data-q-index") ?? -1);
+    const model = group[qIndex]?.answer || "";
+    const api = model && window.AisthInputSlots
+      ? window.AisthInputSlots.enhance(input, { modelText: model, onEnter: submitCurrentAnswer })
+      : null;
+    if (api?.control) {
+      api.control.classList.add("l61-slot-control");
+      applyL61HintAnimationDelays(api.control);
+    }
+    return { input, qIndex, model, api };
+  });
 
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
   if (nextBtn) nextBtn.addEventListener("click", goNext);
+  if (hintBtn) {
+    hintBtn.addEventListener("click", () => {
+      revealL61MeaningHint(group);
+      hintBtn.disabled = true;
+    });
+  }
 
   if (inputs.length) {
-    inputs[0].focus();
-    inputs.forEach((input) => {
+    const firstSlot = slotItems.find((item) => item.api)?.api;
+    if (firstSlot) firstSlot.focus();
+    else inputs[0].focus();
+    slotItems.forEach((item) => {
+      const { input } = item;
       input.addEventListener("input", () => {
         const qIndex = input.getAttribute("data-q-index");
         if (qIndex == null) return;
-        const peers = Array.from(document.querySelectorAll(`.inline-blank-input[data-q-index="${qIndex}"]`));
-        peers.forEach((peer) => {
-          if (peer !== input) peer.value = input.value;
+        updateL61SlotState(item);
+        if (syncingInlineSlots) return;
+        syncingInlineSlots = true;
+        slotItems.filter((peer) => peer.qIndex === item.qIndex && peer.input !== input).forEach((peer) => {
+          const flowInput = peer.api?.control?.querySelector(".aisth-slot-input");
+          if (!flowInput || flowInput.value === input.value) return;
+          flowInput.value = input.value;
+          flowInput.dispatchEvent(new Event("input", { bubbles: true }));
+          updateL61SlotState(peer);
         });
+        syncingInlineSlots = false;
       });
 
       input.addEventListener("keydown", (ev) => {
@@ -527,8 +689,53 @@ function renderQuestion() {
           submitCurrentAnswer();
         }
       });
+      updateL61SlotState(item);
     });
   }
+}
+
+function updateL61SlotState(item) {
+  const sourceInput = item?.input;
+  const control = item?.api?.control;
+  const modelText = String(item?.model || "");
+  if (!sourceInput || !control || !modelText) return false;
+  const modelChars = getL61AnswerChars(modelText);
+  const userChars = getL61AnswerChars(sourceInput.value);
+  const cells = Array.from(control.querySelectorAll(".aisth-slot-cell"));
+  let allCorrect = modelChars.length > 0 && userChars.length >= modelChars.length;
+  cells.forEach((cell, index) => {
+    const userChar = userChars[index] || "";
+    const modelChar = modelChars[index] || "";
+    const filled = Boolean(userChar);
+    const correct = filled && userChar === modelChar;
+    cell.classList.toggle("is-slot-correct", correct);
+    cell.classList.toggle("is-slot-wrong", filled && !correct);
+    if (!correct) allCorrect = false;
+  });
+  return allCorrect;
+}
+
+function revealL61MeaningHint(group) {
+  const bubble = document.getElementById("l61-meaning-hint");
+  const firstQuestion = Array.isArray(group) ? group[0] : null;
+  if (!bubble || !firstQuestion) return;
+  const firstLine = normalizeEscapedBreaks(String(firstQuestion.question || "")).split(/\r?\n/)[0] || "";
+  const form = String(firstLine.trim().split(/\s+/)[0] || "").toLowerCase().replace(/[^a-z]/g, "");
+  const hint = L61_VERB_MEANING_HINTS[form];
+  if (!hint) return;
+  bubble.innerHTML = `<span class="l61-hint-base">${escapeHtml(hint.base)}</span><span class="l61-hint-equals">=</span><span>${escapeHtml(hint.meaning)}</span>`;
+  bubble.classList.add("is-visible");
+}
+
+function applyL61HintAnimationDelays(control) {
+  if (!control) return;
+  Array.from(control.querySelectorAll(".aisth-slot-cell")).forEach((cell, index) => {
+    cell.style.setProperty("--aisth-placeholder-delay", `${(index * 0.16).toFixed(2)}s`);
+  });
+}
+
+function getL61AnswerChars(value) {
+  return Array.from(String(value || "").replace(/\s+/g, ""));
 }
 
 function submitCurrentAnswer() {
@@ -567,11 +774,13 @@ function submitCurrentAnswer() {
 
   isCurrentLocked = true;
   attempts.forEach((a) => {
-    a.inputs.forEach((el) => { el.disabled = true; });
+    a.inputs.forEach((el) => {
+      el.disabled = true;
+      if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(el, true);
+    });
   });
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   attempts.forEach((a) => {
     results.push({
       no: a.q.no,
@@ -591,6 +800,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -628,9 +844,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -699,11 +920,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -714,12 +940,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

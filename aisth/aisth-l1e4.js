@@ -2,7 +2,6 @@
 // Independent runtime for Aisth Lesson 1 Exercise 4
 // Flow: click correct word in sentence -> highlight -> show translation box
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 1;
 const TARGET_EXERCISE = 4;
 const PAGE_LABEL = "Aisth L1-E4";
@@ -21,7 +20,6 @@ const TEXT = {
   CORRECT: "정답!",
   WRONG: "오답",
   QTYPE: "단어 찾기 + 번역",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -31,9 +29,83 @@ const TEXT = {
   CLOSE: "닫기",
   UNANSWERED: "(미응답)",
   SUBMIT: "제출",
+  HINT: "힌트",
   NEXT: "다음",
   TRANSLATE_HINT: "선택한 단어를 번역해보세요.",
   TRANSLATE_HINT_FREE: "선택한 단어의 뜻을 자유롭게 적어보세요. (채점 X)",
+};
+
+const L14_TRANSLATE_PROMPT_BY_QNUMBER = {
+  1: "그는 달린다, 어떻게?",
+  2: "그녀는 노래한다, 어떻게?",
+  3: "그들은 도착한다, 언제?",
+  4: "나는 체육관에 간다, 얼마나 자주?",
+  5: "우리는 만난다, 언제?",
+  6: "태양은 빛난다, 어떻게?",
+  7: "그는 질문에 대답한다, 어떻게?",
+  8: "그녀는 타자를 친다, 어떻게?",
+  9: "나는 그를 본다, 언제?",
+  10: "그들은 산다, 어디에?",
+  11: "기차는 도착한다, 언제?",
+  12: "그녀는 춤춘다, 어떻게?",
+  13: "그는 말한다, 어떻게?",
+  14: "아이들은 논다, 어디에서?",
+  15: "나는 일을 끝낸다, 언제?",
+  16: "그녀는 나를 본다, 어떻게?",
+  17: "그는 방으로 걸어 들어간다, 어떻게?",
+  18: "새들은 노래한다, 어떻게?",
+  19: "우리는 웃는다, 어떻게?",
+  20: "그는 전화를 받는다, 언제?",
+  21: "나는 조부모님을 방문한다, 얼마나 자주?",
+  22: "그들은 외식한다, 얼마나 자주?",
+  23: "아기는 잔다, 어떻게?",
+  24: "그는 시를 쓴다, 어떻게?",
+  25: "너는 운전해야 한다, 어떻게?",
+  26: "그는 조깅한다, 얼마나 자주?",
+  27: "나는 그녀를 만난다, 언제?",
+  28: "소년은 웃는다, 어떻게?",
+  29: "우리는 도착한다, 언제?",
+  30: "그녀는 프랑스어를 말한다, 어떻게?",
+};
+
+const L14_S_SUFFIX_VERBS = new Set([
+  "is", "has", "does",
+  "runs", "sings", "shines", "answers", "arrives", "dances",
+  "speaks", "looks", "walks", "sleeps", "writes", "jogs", "smiles",
+  "works", "drives",
+]);
+
+const L14_VERB_WORD_BY_QNUMBER = {
+  1: "runs",
+  2: "sings",
+  3: "arrive",
+  4: "go",
+  5: "meet",
+  6: "shines",
+  7: "answers",
+  8: "type",
+  9: "see",
+  10: "live",
+  11: "arrives",
+  12: "dances",
+  13: "speaks",
+  14: "play",
+  15: "finish",
+  16: "looks",
+  17: "walks",
+  18: "sing",
+  19: "laugh",
+  20: "answers",
+  21: "visit",
+  22: "eat",
+  23: "sleeps",
+  24: "writes",
+  25: "drive",
+  26: "jogs",
+  27: "meet",
+  28: "smiles",
+  29: "arrive",
+  30: "speaks",
 };
 
 let subcategory = "Grammar";
@@ -62,16 +134,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -135,20 +209,64 @@ function injectRuntimeStyles() {
       white-space: pre-wrap;
     }
 
+    #clickable-sentence {
+      column-gap: 0.42em !important;
+      row-gap: 0.12em !important;
+    }
+
     .word-token {
       cursor: pointer;
       border-radius: 6px;
       transition: background-color 0.15s ease;
     }
-
     .word-token:hover {
       background: rgba(241,123,42,0.15);
     }
 
     .word-token.hit {
-      background: rgba(255, 208, 90, 0.45);
-      box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
+      padding: 2px 5px;
+      border: 2px dotted #1e8a9a;
+      border-radius: 5px;
+      background: transparent;
+      color: #126f7e;
+      box-shadow: none;
       font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .word-token .focus-token {
+      display: inline-block;
+      background: rgba(136, 84, 208, 0.16);
+      border-radius: 6px;
+      padding: 0 3px;
+      box-shadow: inset 0 0 0 1px rgba(136, 84, 208, 0.24);
+      color: #6c3ac7;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    #clickable-sentence.is-step-2 .word-token.is-verb,
+    .l14-verb-highlight {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--aisth-role-v-border, #c88a12);
+      border-radius: 7px;
+      background: var(--aisth-role-v-bg, #fff4cc);
+      color: var(--aisth-role-v-text, #7a4a00);
+      box-shadow:
+        inset 0 0 0 1px rgba(200, 138, 18, 0.20),
+        0 0 10px var(--aisth-role-v-glow, rgba(216,162,27,.24));
+      font-weight: 950;
+      line-height: 1.1;
+    }
+
+    #clickable-sentence.is-step-2 .word-token.is-verb {
+      padding: 2px 6px;
+    }
+
+    .l14-verb-highlight {
+      padding: 1px 5px;
+      margin: 0 1px;
     }
 
     .word-token.miss {
@@ -175,6 +293,46 @@ function injectRuntimeStyles() {
       opacity: 1;
     }
 
+    .l14-translate-answer-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .l14-translate-prefix {
+      flex: 0 1 auto;
+      max-width: 100%;
+      color: #3c2d22;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .l14-translate-colon {
+      color: #7e3106;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.45;
+    }
+
+    .l14-translate-input {
+      flex: 1 1 128px;
+      min-width: 118px;
+    }
+
+    .l14-translate-input textarea {
+      min-height: 40px;
+      resize: none;
+    }
+
+    .l14-translate-input .aisth-slot-control {
+      width: auto;
+      min-width: 118px;
+      padding: 0 2px 4px;
+    }
 
     .btn-row {
       display: flex;
@@ -230,13 +388,13 @@ function injectRuntimeStyles() {
     }
 
     .l14-kind-label.is-adj {
-      background: rgba(255, 247, 228, 0.98);
-      color: #7e5a06;
+      background: transparent;
+      color: #92364c;
     }
 
     .l14-kind-label.is-adv {
-      background: rgba(235, 243, 255, 0.98);
-      color: #2b67c7;
+      background: transparent;
+      color: #126f7e;
     }
 
     .l14-chip {
@@ -259,16 +417,26 @@ function injectRuntimeStyles() {
       color: #7e3106;
     }
 
+    .l14-chip.is-adv,
+    .l14-chip.is-adj {
+      min-height: 0;
+      padding: 2px 5px;
+      border-width: 2px;
+      border-style: dotted;
+      border-radius: 5px;
+      background: transparent;
+      box-shadow: none;
+      line-height: 1;
+    }
+
     .l14-chip.is-adv {
-      border-color: rgba(43, 103, 199, 0.24);
-      background: rgba(235, 243, 255, 0.98);
-      color: #2b67c7;
+      border-color: #1e8a9a;
+      color: #126f7e;
     }
 
     .l14-chip.is-adj {
-      border-color: rgba(255, 187, 74, 0.26);
-      background: rgba(255, 247, 228, 0.98);
-      color: #7e5a06;
+      border-color: #b84a62;
+      color: #92364c;
     }
 
     .l14-do-chip {
@@ -301,37 +469,40 @@ function injectRuntimeStyles() {
       word-break: keep-all;
     }
 
-    .l14-focus-adj {
-      background: rgba(255, 208, 90, 0.38);
-      border-radius: 6px;
-      padding: 0 3px;
-      box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
-      color: #7e5a06;
+    .l14-focus-adj,
+    .l14-focus-adv {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 5px;
+      border-width: 2px;
+      border-style: dotted;
+      border-radius: 5px;
+      background: transparent;
+      box-shadow: none;
       font-weight: 900;
+      line-height: 1;
+    }
+
+    .l14-focus-adj {
+      border-color: #b84a62;
+      color: #92364c;
     }
 
     .l14-focus-adv {
-      background: rgba(43, 103, 199, 0.12);
-      border-radius: 6px;
-      padding: 0 3px;
-      box-shadow: inset 0 0 0 1px rgba(43, 103, 199, 0.18);
-      color: #2b67c7;
-      font-weight: 900;
+      border-color: #1e8a9a;
+      color: #126f7e;
     }
 
     .l14-ly {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 1.5em;
-      margin-left: 1px;
-      border-radius: 999px;
-      background: rgba(43, 103, 199, 0.14);
-      box-shadow: inset 0 0 0 1px rgba(43, 103, 199, 0.18);
-      color: #2b67c7;
-      padding: 0 0.22em;
-    }
-  `;
+      display: inline;
+      min-width: 0;
+      margin-left: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: inherit;
+      padding: 0;
+    }  `;
   document.head.appendChild(style);
 }
 
@@ -367,25 +538,40 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -399,10 +585,11 @@ function buildQuestionsFromRows() {
     const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
     const answerRaw = normalizeEscapedBreaks(String(row["Answer"] ?? "").trim());
     const parsed = parseAnswer(answerRaw);
+    const qNumber = Number(row["QNumber"]) || idx + 1;
 
     return {
       no: idx + 1,
-      qNumber: Number(row["QNumber"]) || idx + 1,
+      qNumber,
       title: normalizeEscapedBreaks(String(row["Title"] ?? "").trim()),
       question,
       instruction: FIXED_INSTRUCTION,
@@ -410,6 +597,8 @@ function buildQuestionsFromRows() {
       answerWordNorm: normalizeToken(parsed.word),
       answerKo: parsed.ko,
       answerKoNorm: normalizeKorean(parsed.ko),
+      translatePrompt: getTranslatePrompt(qNumber),
+      verbWordNorm: normalizeToken(L14_VERB_WORD_BY_QNUMBER[qNumber] || ""),
     };
   });
 }
@@ -608,45 +797,98 @@ function renderQuestion() {
   const translatePlaceholder = q.answerKo
     ? `번역 입력 (ex. ${clipExample(q.answerKo) || "뜻"})`
     : "번역 입력 (자유 입력)";
+  const translateAnswerHtml = q.answerKo
+    ? `
+      <div class="l14-translate-answer-line">
+        <span class="l14-translate-prefix">${renderTranslatePromptWithVerbHighlight(q.translatePrompt)}</span>
+        <span class="l14-translate-colon">:</span>
+        <span class="l14-translate-input">
+          <textarea id="user-ko" rows="2" lang="ko" placeholder="${escapeHtmlAttr(translatePlaceholder)}"></textarea>
+        </span>
+      </div>
+    `
+    : `<textarea id="user-ko" rows="2" lang="ko" placeholder="${escapeHtmlAttr(translatePlaceholder)}"></textarea>`;
 
   area.innerHTML = `
-    <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
+      <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
       <div class="question-instruction">${escapeHtml(FIXED_INSTRUCTION)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center" id="clickable-sentence">${renderClickableSentence(q.question)}</div>
+      <div class="sentence aisth-question-surface aisth-question-center" id="clickable-sentence">${renderClickableSentence(q.question, q)}</div>
     </div>
 
-    <div class="box" id="translate-wrap" style="background:#fff; display:none;">
+    <div class="box aisth-hint-host" id="translate-wrap" style="background:#fff; display:none;">
+      ${q.no > 1 && q.answerKo ? `<button class="aisth-hint-tool" id="hint-btn" type="button" aria-label="hint"><span class="aisth-hint-bulb" aria-hidden="true">!</span><span>hint</span></button>` : ""}
       <div style="font-size:13px; color:#7e3106; font-weight:900; margin-bottom:6px;">${escapeHtml(translateHint)}</div>
-      <textarea id="user-ko" rows="2" placeholder="${escapeHtmlAttr(translatePlaceholder)}"></textarea>
+      ${translateAnswerHtml}
       <div id="feedback" class="feedback"></div>
     </div>
 
-    <div class="btn-row">
+    <div class="btn-row" id="actions-wrap" style="display:none;">
       <button class="quiz-btn" id="submit-btn" type="button">${escapeHtml(TEXT.SUBMIT)}</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>${escapeHtml(TEXT.NEXT)}</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
   wireWordClicks();
 
   const submitBtn = document.getElementById("submit-btn");
+  const hintBtn = document.getElementById("hint-btn");
   const nextBtn = document.getElementById("next-btn");
   if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
+  if (hintBtn) {
+    hintBtn.addEventListener("click", () => {
+      const slotInputControl = ensureKoreanSlotInput(q);
+      revealFirstSlotPlaceholder(slotInputControl?.control, q.answerKo);
+      hintBtn.disabled = true;
+    });
+  }
   if (nextBtn) nextBtn.addEventListener("click", goNext);
 }
 
-function renderClickableSentence(text) {
-  const parts = stripEmphasisMarkers(normalizeEscapedBreaks(String(text || ""))).split(/(\s+)/);
+function renderClickableSentence(text, q) {
+  const parts = stripEmphasisMarkers(normalizeEscapedBreaks(String(text || "")))
+    .split(/\s+/)
+    .filter(Boolean);
   let tokenIndex = 0;
 
   return parts.map((part) => {
-    if (/^\s+$/.test(part)) return part;
-    const html = `<span class="word-token" data-token-index="${tokenIndex}">${escapeHtml(part)}</span>`;
+    const isVerb = q?.verbWordNorm && normalizeToken(part) === q.verbWordNorm;
+    const html = `<span class="word-token${isVerb ? " is-verb" : ""}" data-token-index="${tokenIndex}">${renderTokenWithVerbSuffixHighlight(part)}</span>`;
     tokenIndex += 1;
     return html;
   }).join("");
+}
+
+function renderTokenWithVerbSuffixHighlight(part) {
+  const raw = String(part ?? "");
+  const m = raw.match(/^([^A-Za-z]*)([A-Za-z]+)([^A-Za-z]*)$/);
+  if (!m) return escapeHtml(raw);
+
+  const lead = m[1] || "";
+  const word = m[2] || "";
+  const trail = m[3] || "";
+  if (!shouldHighlightVerbSuffix(word)) return escapeHtml(raw);
+
+  return `${escapeHtml(lead)}${escapeHtml(word.slice(0, -1))}<span class="focus-token">${escapeHtml(word.slice(-1))}</span>${escapeHtml(trail)}`;
+}
+
+function shouldHighlightVerbSuffix(word) {
+  return L14_S_SUFFIX_VERBS.has(String(word || "").toLowerCase());
+}
+
+function getTranslatePrompt(qNumber) {
+  return L14_TRANSLATE_PROMPT_BY_QNUMBER[qNumber] || "선택한 단어의 뜻";
+}
+
+function renderTranslatePromptWithVerbHighlight(prompt) {
+  const raw = String(prompt || "");
+  const commaIndex = raw.indexOf(",");
+  const before = commaIndex >= 0 ? raw.slice(0, commaIndex) : raw;
+  const after = commaIndex >= 0 ? raw.slice(commaIndex) : "";
+  const m = before.match(/^(.*\s)(\S+)$/);
+  if (!m) return `<span class="l14-verb-highlight">${escapeHtml(before)}</span>${escapeHtml(after)}`;
+  return `${escapeHtml(m[1])}<span class="l14-verb-highlight">${escapeHtml(m[2])}</span>${escapeHtml(after)}`;
 }
 
 function wireWordClicks() {
@@ -668,6 +910,10 @@ function wireWordClicks() {
 
         const wrap = document.getElementById("translate-wrap");
         if (wrap) wrap.style.display = "block";
+        const sentence = document.getElementById("clickable-sentence");
+        if (sentence) sentence.classList.add("is-step-2");
+        const actionsWrap = document.getElementById("actions-wrap");
+        if (actionsWrap) actionsWrap.style.display = "flex";
 
         const input = document.getElementById("user-ko");
         const slotInputControl = ensureKoreanSlotInput(q);
@@ -689,8 +935,20 @@ function ensureKoreanSlotInput(q) {
   if (!input || !window.AisthInputSlots) return null;
   return window.AisthInputSlots.enhance(input, {
     modelText: q?.answerKo || "",
+    placeholderText: q?.no === 1 ? q?.answerKo || "" : "",
     onEnter: submitCurrentAnswer,
   });
+}
+
+function revealFirstSlotPlaceholder(control, modelText) {
+  if (!control) return;
+  const firstChar = Array.from(String(modelText || "").replace(/\s+/g, ""))[0] || "";
+  if (!firstChar) return;
+  control.classList.remove("is-full-hint");
+  control.classList.add("has-revealed-hint");
+  control.dataset.placeholderChars = firstChar;
+  const flowInput = control.querySelector(".aisth-slot-input");
+  if (flowInput) flowInput.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function refreshWordHighlight() {
@@ -739,8 +997,7 @@ function submitCurrentAnswer() {
   if (input) input.disabled = true;
   if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   if (feedback) {
     feedback.className = "feedback";
     feedback.innerHTML = "";
@@ -763,6 +1020,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -797,7 +1061,8 @@ function normalizeEscapedBreaks(value) {
   return String(value ?? "")
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
-    .replaceAll("\\r", "\n");
+    .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n");
 }
 
 function stripEmphasisMarkers(value) {

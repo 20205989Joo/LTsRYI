@@ -1,10 +1,10 @@
 ﻿// aisth-l6e2.js
 // Independent runtime for Aisth Lesson 6 Exercise 2
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
-const TARGET_LESSON = 6;
-const TARGET_EXERCISE = 2;
-const PAGE_LABEL = "Aisth L6-E2";
+const L6_RUNTIME_CONFIG = window.AisthL6RuntimeConfig || {};
+const TARGET_LESSON = Number(L6_RUNTIME_CONFIG.lesson) || 6;
+const TARGET_EXERCISE = Number(L6_RUNTIME_CONFIG.exercise) || 2;
+const PAGE_LABEL = String(L6_RUNTIME_CONFIG.pageLabel || "Aisth L6-E2");
 const MAX_QUESTIONS = 0; // 0 = unlimited
 
 const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
@@ -25,7 +25,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -38,8 +37,8 @@ const TEXT = {
 
 let subcategory = "Grammar";
 let level = "aisth";
-let day = "021";
-let quizTitle = "quiz_Grammar_aisth_l6e2";
+let day = String(L6_RUNTIME_CONFIG.day || "021");
+let quizTitle = String(L6_RUNTIME_CONFIG.quizTitle || "quiz_Grammar_aisth_l6e2");
 let userId = "";
 
 let rawRows = [];
@@ -60,16 +59,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -172,6 +173,155 @@ function injectRuntimeStyles() {
       text-align: center;
       letter-spacing: 0.3px;
     }
+
+    #quiz-area .l6-participle-question-surface {
+      position: relative;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-wrap: nowrap !important;
+      padding: 12px 14px 31px !important;
+    }
+
+    #quiz-area .l6-participle-question-surface .l6-participle-question-text {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .l6-participle-verb-tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: 4px;
+      isolation: isolate;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 76%;
+      min-height: 23px;
+      padding: 3px 30px;
+      box-sizing: border-box;
+      transform: translateX(-50%);
+      border: 0;
+      border-radius: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255,245,168,0) 0%,
+        rgba(255,245,168,.16) 13%,
+        rgba(255,229,91,.40) 32%,
+        rgba(255,214,75,.66) 50%,
+        rgba(255,229,91,.40) 68%,
+        rgba(255,245,168,.16) 87%,
+        rgba(255,245,168,0) 100%
+      );
+      color: #765000;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 950;
+      letter-spacing: .12px;
+      text-shadow: 0 1px 0 rgba(255,255,255,.90), 0 0 7px rgba(255,214,75,.40);
+    }
+
+    .l6-participle-verb-tooltip::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        linear-gradient(90deg, transparent 0%, rgba(201,151,26,.18) 17%, rgba(201,151,26,.60) 50%, rgba(201,151,26,.18) 83%, transparent 100%) top / 100% 1px no-repeat,
+        linear-gradient(90deg, transparent 0%, rgba(201,151,26,.13) 17%, rgba(201,151,26,.46) 50%, rgba(201,151,26,.13) 83%, transparent 100%) bottom / 100% 1px no-repeat;
+      pointer-events: none;
+    }
+
+    .l6-participle-verb-tooltip::after {
+      content: "";
+      position: absolute;
+      top: -35%;
+      bottom: -35%;
+      left: -42%;
+      z-index: 0;
+      width: 30%;
+      transform: skewX(-22deg);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.58), transparent);
+      animation: l6-participle-tooltip-shine 3.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .l6-participle-verb-copy {
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes l6-participle-tooltip-shine {
+      0%, 54% { left: -42%; opacity: 0; }
+      62% { opacity: .78; }
+      82%, 100% { left: 116%; opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .l6-participle-verb-tooltip::after { animation: none; }
+    }
+
+    .l6-participle-expression {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 10px;
+      border: 2px solid rgba(126,49,6,.28);
+      border-radius: 12px;
+      background: #fff;
+      color: #203736;
+      font-size: 18px;
+      font-weight: 950;
+      box-sizing: border-box;
+    }
+
+    .l6-participle-given {
+      white-space: pre-wrap;
+    }
+
+    .l6-participle-given.is-punctuation {
+      margin-left: -7px;
+    }
+
+    .l6-participle-expression .short-input {
+      width: 132px;
+      flex: 0 1 132px;
+    }
+
+    .l6-participle-expression .aisth-slot-control {
+      width: auto;
+      max-width: 230px;
+      flex: 0 1 auto;
+      margin: 0;
+    }
+
+    .l6-participle-expression.is-sentence-completion {
+      flex-wrap: nowrap;
+      gap: 5px;
+      padding-inline: 7px;
+    }
+
+    .l6-participle-expression.is-sentence-completion .aisth-slot-control {
+      max-width: 195px;
+      gap: 5px;
+    }
+
+    .l6-participle-expression.is-sentence-completion .aisth-slot-shell {
+      gap: 2px;
+    }
+
+    .l6-participle-expression.is-sentence-completion .aisth-slot-cell {
+      width: 19px;
+      font-size: 15px;
+    }
+
     input::placeholder,
     textarea::placeholder {
       color: #b9b2aa;
@@ -248,25 +398,41 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (Array.isArray(L6_RUNTIME_CONFIG.rows)) return L6_RUNTIME_CONFIG.rows.map((row) => ({ ...row }));
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, TARGET_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
@@ -289,7 +455,13 @@ function buildQuestionsFromRows() {
     const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
     const answer = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
     const title = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Title"] ?? "").trim()));
-    const type = detectType(question);
+    const givenBefore = normalizeEscapedBreaks(String(row["GivenBefore"] ?? "").trim());
+    const givenAfter = normalizeEscapedBreaks(String(row["GivenAfter"] ?? "").trim());
+    const baseVerb = normalizeEscapedBreaks(String(row["BaseVerb"] ?? "").trim());
+    const baseMeaning = normalizeEscapedBreaks(String(L6_RUNTIME_CONFIG.baseVerbMeanings?.[baseVerb] ?? "").trim());
+    const fullAnswer = normalizeEscapedBreaks(String(row["FullAnswer"] ?? "").trim());
+    const hasScaffold = Boolean(givenBefore || givenAfter || baseVerb);
+    const type = hasScaffold ? "blank" : detectType(question);
 
     const fallbackInst = type === "blank" ? DEFAULT_BLANK_INSTRUCTION : DEFAULT_REWRITE_INSTRUCTION;
     const modeInst = modeByType[type] || fallbackInst;
@@ -298,7 +470,7 @@ function buildQuestionsFromRows() {
     const rawInstruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
 
     let instruction = rawInstruction || modeInst;
-    if (qNumber === 1 && modeInst) instruction = modeInst;
+    if (qNumber === 1 && modeInst && !hasScaffold) instruction = modeInst;
     if (isInstructionLeakingAnswer(instruction, answer, type)) instruction = modeInst;
 
     return {
@@ -309,6 +481,12 @@ function buildQuestionsFromRows() {
       instruction,
       title,
       type,
+      givenBefore,
+      givenAfter,
+      baseVerb,
+      baseMeaning,
+      fullAnswer,
+      hasScaffold,
     };
   });
 }
@@ -435,23 +613,35 @@ function renderQuestion() {
   const inputHtml = q.type === "blank"
     ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
     : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
+  const answerInputHtml = q.hasScaffold ? renderL6ParticipleScaffold(q, inputHtml) : inputHtml;
+  const questionSurfaceClass = q.hasScaffold ? " l6-participle-question-surface" : "";
+  const questionTextClass = q.hasScaffold ? " l6-participle-question-text" : "";
+  const baseVerbTooltip = q.hasScaffold ? renderL6BaseVerbTooltip(q) : "";
+  const answerBoxClass = q.hasScaffold ? " aisth-letter-answer-box l6-participle-answer-box" : "";
+  const answerToolRow = q.hasScaffold
+    ? `<div class="aisth-answer-tool-row"><span aria-hidden="true"></span><span class="aisth-type-pill">type!</span><span aria-hidden="true"></span></div>`
+    : "";
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
     <div class="box">
       <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
+      <div class="sentence aisth-question-surface aisth-question-center${questionSurfaceClass}">
+        <div class="aisth-sentence-flow${questionTextClass}">${qBody}</div>
+        ${baseVerbTooltip}
+      </div>
     </div>
 
-    <div class="box" style="background:#fff;">
-      ${inputHtml}
+    <div class="box${answerBoxClass}" style="background:#fff;">
+      ${answerToolRow}
+      ${answerInputHtml}
       <div id="feedback" class="feedback"></div>
     </div>
 
     <div class="btn-row">
       <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
+      <button class="quiz-btn" id="next-btn" type="button">Skip</button>
     </div>
   `;
 
@@ -479,6 +669,23 @@ function renderQuestion() {
       }
     });
   }
+}
+
+function renderL6ParticipleScaffold(q, inputHtml) {
+  const afterClass = /^[.,!?;:]$/.test(q.givenAfter) ? " is-punctuation" : "";
+  const expressionClass = /\s/.test(q.answer) ? " is-sentence-completion" : "";
+  return `
+    <div class="l6-participle-expression${expressionClass}">
+      ${q.givenBefore ? `<span class="l6-participle-given">${escapeHtml(q.givenBefore)}</span>` : ""}
+      ${inputHtml}
+      ${q.givenAfter ? `<span class="l6-participle-given${afterClass}">${escapeHtml(q.givenAfter)}</span>` : ""}
+    </div>
+  `;
+}
+
+function renderL6BaseVerbTooltip(q) {
+  if (!q.baseVerb || !q.baseMeaning) return "";
+  return `<div class="l6-participle-verb-tooltip"><span class="l6-participle-verb-copy">${escapeHtml(q.baseVerb.toUpperCase())} = ${escapeHtml(q.baseMeaning)}</span></div>`;
 }
 
 function submitCurrentAnswer() {
@@ -512,8 +719,7 @@ function submitCurrentAnswer() {
   input.disabled = true;
   if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
   if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
+  scheduleAutoNext();
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
@@ -532,6 +738,13 @@ function submitCurrentAnswer() {
 
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
 }
 
 function goNext() {
@@ -569,9 +782,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -640,11 +858,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -655,12 +878,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 
@@ -688,7 +911,7 @@ function showResultPopup() {
         <div><b>Q${idx + 1}</b> ${renderTextWithEmphasis(q.question)}</div>
         <div style="margin-top:4px;"><span class="${stateClass}">${state}</span></div>
         <div>${TEXT.MY_ANSWER}: ${escapeHtml(user)}</div>
-        <div>${TEXT.ANSWER}: ${formatMultilineText(q.answer)}</div>
+        <div>${TEXT.ANSWER}: ${formatMultilineText(q.fullAnswer || q.answer)}</div>
       </div>
     `;
   }).join("");

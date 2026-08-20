@@ -1232,6 +1232,7 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
@@ -1255,6 +1256,10 @@ function normalizeLoose(value) {
     .replace(/[\s'"`.,!?~:;()\[\]{}_-]+/g, "");
 }
 
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
+}
+
 function renderTextWithEmphasis(value) {
   const text = normalizeEscapedBreaks(String(value ?? ""));
   const re = /\*\*(.*?)\*\*/gs;
@@ -1263,12 +1268,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

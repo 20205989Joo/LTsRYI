@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Herma Frame</title>
+
+  <link rel="stylesheet" href="styles-frame.css" />
+  <link rel="stylesheet" href="styles-room.css" />
+  <link rel="stylesheet" href="herma-frame.css" />
+</head>
+
+<body>
+  <div class="main-page" data-herma-page>
+    <main id="cafe_int" data-herma-stage>
+      <section id="quiz-area" data-herma-quiz-area aria-live="polite"></section>
+    </main>
+
+    <div class="herma-frame-jump" data-herma-frame-jump>
+      <label class="herma-frame-jump-label" for="herma-frame-lesson-select">Jump</label>
+      <select id="herma-frame-lesson-select" class="herma-frame-lesson-select" aria-label="Herma lesson jump"></select>
+    </div>
+
+    <button id="back-btn" type="button" data-herma-action="back">돌아가기</button>
+  </div>
+
+  <aside class="herma-palette-panel" aria-label="Herma interaction palette">
+    <div class="herma-panel-kicker">HERMA PLAY GUIDE</div>
+    <div class="herma-panel-title">게임 신호 색</div>
+    <div class="herma-panel-note">각 레슨 JS에서 반복되는 조작 색을 튜토리얼에도 그대로 연결했습니다.</div>
+
+    <div class="herma-palette-row" style="--row-color:#d5a22a; --row-soft:#fff2c9;">
+      <span class="herma-palette-chip">LINK</span>
+      <span class="herma-palette-copy"><strong>금빛 연결</strong><small>관계를 고르고 이어 붙이기</small></span>
+    </div>
+
+    <div class="herma-palette-row" style="--row-color:#d57919; --row-soft:#ffead8;">
+      <span class="herma-palette-chip">CUT</span>
+      <span class="herma-palette-copy"><strong>주황 약분</strong><small>반복 성분 누르고 압축하기</small></span>
+    </div>
+
+    <div class="herma-palette-row" style="--row-color:#2f62c8; --row-soft:#e7efff;">
+      <span class="herma-palette-chip">MOVE</span>
+      <span class="herma-palette-copy"><strong>파란 이동</strong><small>슬롯 찾고 조각 옮기기</small></span>
+    </div>
+
+    <div class="herma-palette-row" style="--row-color:#2e7d32; --row-soft:#e7f5e9;">
+      <span class="herma-palette-chip">CLEAR</span>
+      <span class="herma-palette-copy"><strong>초록 완료</strong><small>조립과 해석이 맞은 상태</small></span>
+    </div>
+  </aside>
+
+  <aside class="herma-dev-panel" id="herma-dev-question-list" data-herma-dev-panel aria-live="polite">
+    <div class="herma-dev-panel-head">
+      <div>
+        <div class="herma-dev-panel-title">튜토리얼 / 문제 - 답</div>
+        <div class="herma-panel-note">선택한 레슨 점검용</div>
+      </div>
+      <div class="herma-dev-panel-meta" data-herma-dev-meta>dev</div>
+    </div>
+    <div class="herma-dev-panel-body" data-herma-dev-body>
+      <div class="herma-dev-empty">문제 로드 대기 중</div>
+    </div>
+  </aside>
+
+  <div class="popup-overlay" id="result-popup" aria-hidden="true" data-herma-result-popup>
+    <div class="popup-content" id="result-content" data-herma-result-content></div>
+  </div>
+
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="../lesson-intro-player.js"></script>
+  <script src="herma-intro-fronts.js"></script>
+  <script src="herma-toastfx.js"></script>
+  <script src="herma-KRscramble.js"></script>
+  <script src="herma-finalstage.js"></script>
+  <script src="dishquiz_resultstable.js"></script>
+  <script src="herma-style-packs.js"></script>
+  <script src="herma-stage-templates.js"></script>
+  <script src="herma-frame-loader.js"></script>
+  <script src="imsi_questions_compressor.js"></script>
+  <script src="Imsi_resultstable_bridge.js"></script>
+  <script src="Alpha_tester.js"></script>
+</body>
+</html>

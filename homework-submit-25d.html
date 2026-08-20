@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>숙제 반납함 — 2.5D</title>
+  <link rel="stylesheet" href="styles-submit.css" />
+  <link rel="stylesheet" href="cafe-25d-pages.css" />
+</head>
+<body class="page-submit">
+  <div class="main-page">
+    <header class="cafe25-topbar">
+      <button
+        id="back-to-room-btn"
+        class="cafe25-back"
+        type="button"
+        data-nav-mainhall="student-room-25d.html"
+        data-nav-replace="true"
+        aria-label="학생 카페로 돌아가기"
+      >‹</button>
+      <div class="cafe25-heading">
+        <strong>숙제 반납함</strong>
+        <span>return station</span>
+      </div>
+      <div class="cafe25-mark" aria-hidden="true">LT</div>
+    </header>
+
+    <main id="cafe_int">
+      <div class="return-stage-shadow" aria-hidden="true"></div>
+      <img src="return-ham-front2.png" id="return-box" alt="" aria-hidden="true" />
+
+      <section class="submit-ui">
+        <div class="upload-title-block">RETURN</div>
+        <div id="submissionStatus">로딩 중...</div>
+        <div id="pendingListTitle">📦 제출 대기 숙제들</div>
+        <div id="pendingList" class="pending-list"></div>
+        <div id="hwSubmitbutton" role="button" tabindex="0">눌러서 모두 전송!</div>
+      </section>
+    </main>
+  </div>
+
+  <script src="nav-buttons.js"></script>
+  <script src="day_manager.js" defer></script>
+  <script src="script-homework-submit1.js" defer></script>
+  <script>
+    document.getElementById("hwSubmitbutton")?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.currentTarget.click();
+      }
+    });
+  </script>
+</body>
+</html>

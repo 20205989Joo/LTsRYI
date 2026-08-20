@@ -4,6 +4,35 @@ function getDayManager() {
   return window.DayManager || null;
 }
 
+function getHomeworkSubmitPage() {
+  return window.location.pathname.toLowerCase().includes("homework-tray_v1-25d")
+    ? "homework-submit-25d.html"
+    : "homework-submit.html";
+}
+
+function isHomeworkTray25D() {
+  return window.location.pathname.toLowerCase().includes("homework-tray_v1-25d");
+}
+
+function getWordflow25DPath(path) {
+  if (!isHomeworkTray25D()) return path;
+  const page = String(path || "").trim().toLowerCase();
+  if (page === "dish-learn.html") return "dish-learn-25d.html";
+  if (page === "dish-quiz.html") return "dish-quiz-25d.html";
+  if (page === "dish-quiz2.html") return "dish-quiz2-25d.html";
+  return path;
+}
+
+function getWordflow25DUrl(url) {
+  if (!isHomeworkTray25D()) return url;
+  const target = new URL(url, window.location.href);
+  target.pathname = target.pathname
+    .replace(/\/dish-learn\.html$/i, "/dish-learn-25d.html")
+    .replace(/\/dish-quiz\.html$/i, "/dish-quiz-25d.html")
+    .replace(/\/dish-quiz2\.html$/i, "/dish-quiz2-25d.html");
+  return target.toString();
+}
+
 function resolveSubcategory(subcategory) {
   const dm = getDayManager();
   if (!subcategory) return subcategory;
@@ -227,12 +256,21 @@ function clearDishRedirectToastTimer() {
   window.__dishRedirectToastTimerId = null;
 }
 
+function clearDishRedirectToastRevealTimer() {
+  const timerId = window.__dishRedirectToastRevealTimerId;
+  if (!timerId) return;
+  clearTimeout(timerId);
+  window.__dishRedirectToastRevealTimerId = null;
+}
+
 function cleanupDishRedirectToastUI() {
   document.getElementById("redirect-toast")?.remove();
+  document.getElementById("redirect-overlay")?.remove();
 }
 
 function cleanupDishRedirectToastAndTimer() {
   clearDishRedirectToastTimer();
+  clearDishRedirectToastRevealTimer();
   cleanupDishRedirectToastUI();
 }
 
@@ -629,14 +667,35 @@ window.showDishPopup = function (item) {
   `;
 
   popup.innerHTML = content;
+  const redundantRouteNote = Array.from(popup.querySelectorAll("div")).find(
+    node => node.textContent.trim() === "\uC804\uC6A9 \uD559\uC2B5 \uD398\uC774\uC9C0\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4."
+  );
+  redundantRouteNote?.remove();
 
   function showRedirectToast() {
-    cleanupDishRedirectToastAndTimer();
+    cleanupDishRedirectToastUI();
+
+    const host = document.querySelector(".main-page") || document.body;
+    const receipt = document.getElementById("temp-receipt");
+    if (receipt) receipt.style.zIndex = "3200";
+
+    const overlay = document.createElement("div");
+    overlay.id = "redirect-overlay";
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.style = `
+      position: absolute;
+      inset: 0;
+      z-index: 2800;
+      background: rgba(9, 12, 11, 0.58);
+      backdrop-filter: blur(1.5px);
+      pointer-events: auto;
+    `;
+    host.appendChild(overlay);
 
     const toast = document.createElement("div");
     toast.id = "redirect-toast";
     toast.style = `
-      position: fixed;
+      position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -668,12 +727,23 @@ window.showDishPopup = function (item) {
       </div>
     `;
 
-    document.body.appendChild(toast);
+    host.appendChild(toast);
 
     const bar = toast.querySelector(".redirect-toast-bar");
     requestAnimationFrame(() => {
-      bar.style.width = "100%";
+      requestAnimationFrame(() => {
+        bar.style.width = "100%";
+      });
     });
+  }
+
+  function scheduleRedirectToast() {
+    clearDishRedirectToastRevealTimer();
+    cleanupDishRedirectToastUI();
+    window.__dishRedirectToastRevealTimerId = setTimeout(() => {
+      window.__dishRedirectToastRevealTimerId = null;
+      showRedirectToast();
+    }, 140);
   }
 
   popup.querySelector("#close-popup")?.addEventListener("click", () => popupContainer.remove());
@@ -693,8 +763,8 @@ window.showDishPopup = function (item) {
     const routeLevel = inferLevelIfNeeded(item.Subcategory, item.Level, item.LessonNo) || item.Level || "";
     const routeDay = fallbackDay ?? "";
     const targetUrl = shouldResumeStage2
-      ? `dish-quiz2.html?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(quizKey)}&level=${encodeURIComponent(routeLevel)}&day=${encodeURIComponent(routeDay)}`
-      : `dish-quiz.html?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(quizKey)}`;
+      ? `${getWordflow25DPath("dish-quiz2.html")}?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(quizKey)}&level=${encodeURIComponent(routeLevel)}&day=${encodeURIComponent(routeDay)}`
+      : `${getWordflow25DPath("dish-quiz.html")}?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(quizKey)}`;
 
     if (
       !shouldResumeStage2 &&
@@ -702,7 +772,9 @@ window.showDishPopup = function (item) {
         quizKey,
         onStudy: () => {
           if (window.DishRetakeLock?.buildStudyUrlFromQuizKey) {
-            window.location.href = window.DishRetakeLock.buildStudyUrlFromQuizKey(quizKey, userId || "");
+            window.location.href = getWordflow25DUrl(
+              window.DishRetakeLock.buildStudyUrlFromQuizKey(quizKey, userId || "")
+            );
           }
         }
       })
@@ -725,11 +797,11 @@ window.showDishPopup = function (item) {
       const routeLevel = lessonRouteInfo?.level || inferLevelIfNeeded(item.Subcategory, item.Level, item.LessonNo) || item.Level || "";
       const routeDay = lessonRouteInfo?.day ?? fallbackDay ?? "";
       window.location.href =
-        `dish-quiz2.html?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(stage1ReadyQuizKey)}&level=${encodeURIComponent(routeLevel)}&day=${encodeURIComponent(routeDay)}`;
+        `${getWordflow25DPath("dish-quiz2.html")}?id=${encodeURIComponent(userId || "")}&key=${encodeURIComponent(stage1ReadyQuizKey)}&level=${encodeURIComponent(routeLevel)}&day=${encodeURIComponent(routeDay)}`;
       return;
     }
 
-    const targetUrl = buildTargetUrl(lessonRouteInfo.path, {
+    const targetUrl = buildTargetUrl(getWordflow25DPath(lessonRouteInfo.path), {
       id: userId || "",
       key: lessonRouteInfo.quizKey || "",
       dishQuizKey,
@@ -774,14 +846,14 @@ window.showDishPopup = function (item) {
     popupContainer.remove();
     window.showReceiptFromQordered(item.Subcategory);
 
-    showRedirectToast();
+    scheduleRedirectToast();
 
     window.__dishRedirectToastTimerId = setTimeout(() => {
       window.__dishRedirectToastTimerId = null;
       cleanupDishRedirectToastUI();
       window.location.href =
-        `homework-submit.html?id=${encodeURIComponent(userId || "")}`;
-    }, 2000);
+        `${getHomeworkSubmitPage()}?id=${encodeURIComponent(userId || "")}`;
+    }, 2200);
   });
 
   popup.querySelector("#custom-complete-btn")?.addEventListener("click", () => {
@@ -807,14 +879,14 @@ window.showDishPopup = function (item) {
     popupContainer.remove();
     window.showReceiptFromQordered(item.Subcategory);
 
-    showRedirectToast();
+    scheduleRedirectToast();
 
     window.__dishRedirectToastTimerId = setTimeout(() => {
       window.__dishRedirectToastTimerId = null;
       cleanupDishRedirectToastUI();
       window.location.href =
-        `homework-submit.html?id=${encodeURIComponent(userId || "")}`;
-    }, 2000);
+        `${getHomeworkSubmitPage()}?id=${encodeURIComponent(userId || "")}`;
+    }, 2200);
   });
 
   popupContainer.appendChild(popup);

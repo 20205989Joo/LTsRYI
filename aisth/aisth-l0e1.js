@@ -156,9 +156,9 @@ function injectRuntimeStyles() {
       display: inline-block;
       padding: 1px 8px;
       border-radius: 7px;
-      border: 1px dashed #d5a22a;
-      background: #fff8e4;
-      color: #7e3106;
+      border: 1px dashed var(--aisth-role-v-border, #c88a12);
+      background: var(--aisth-role-v-bg, #fff4cc);
+      color: var(--aisth-role-v-text, #7a4a00);
       font-weight: 900;
       margin: 0 2px;
     }
@@ -759,6 +759,7 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
@@ -773,6 +774,10 @@ function normalizeLoose(value) {
     .replace(/[\s'"`.,!?~:;()\[\]{}_*+-]+/g, "");
 }
 
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
+}
+
 function renderTextWithEmphasis(value) {
   const text = normalizeEscapedBreaks(String(value ?? ""));
   const re = /\*\*(.*?)\*\*/gs;
@@ -781,12 +786,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

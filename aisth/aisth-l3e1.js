@@ -1,11 +1,29 @@
 ﻿// aisth-l3e1.js
 // Independent runtime for Aisth Lesson 3 Exercise 1
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 3;
 const TARGET_EXERCISE = 1;
 const PAGE_LABEL = "Aisth L3-E1";
 const MAX_QUESTIONS = 0; // 0 = unlimited
+
+const L31_DIRECT_QUESTION_ROWS = [
+  { subject: "you", verb: "like", baseVerb: "like", auxiliary: "do", rest: "animals", pullMode: "split", translation: "동물을 좋아해요.", questionTranslation: "동물을 좋아하나요?" },
+  { subject: "she", verb: "plays", baseVerb: "play", auxiliary: "does", rest: "the piano", pullMode: "split", translation: "그녀는 피아노를 연주해요.", questionTranslation: "그녀는 피아노를 연주하나요?" },
+  { subject: "they", verb: "visit", baseVerb: "visit", auxiliary: "do", rest: "the museum", pullMode: "split", translation: "그들은 박물관을 방문해요.", questionTranslation: "그들은 박물관을 방문하나요?" },
+  { subject: "he", verb: "likes", baseVerb: "like", auxiliary: "does", rest: "pizza", pullMode: "split", translation: "그는 피자를 좋아해요.", questionTranslation: "그는 피자를 좋아하나요?" },
+  { subject: "we", verb: "need", baseVerb: "need", auxiliary: "do", rest: "more time", pullMode: "split", translation: "우리는 시간이 더 필요해요.", questionTranslation: "우리는 시간이 더 필요한가요?" },
+  { subject: "Tom", verb: "watches", baseVerb: "watch", auxiliary: "does", rest: "TV after dinner", pullMode: "split", translation: "톰은 저녁 식사 후에 TV를 봐요.", questionTranslation: "톰은 저녁 식사 후에 TV를 보나요?" },
+  { subject: "she", verb: "is", baseVerb: "", auxiliary: "is", rest: "at home now", pullMode: "lift", translation: "그녀는 지금 집에 있어요.", questionTranslation: "그녀는 지금 집에 있나요?" },
+  { subject: "they", verb: "are", baseVerb: "", auxiliary: "are", rest: "ready", pullMode: "lift", translation: "그들은 준비됐어요.", questionTranslation: "그들은 준비됐나요?" },
+  { subject: "he", verb: "can", baseVerb: "", auxiliary: "can", rest: "swim well", pullMode: "lift", translation: "그는 수영을 잘할 수 있어요.", questionTranslation: "그는 수영을 잘할 수 있나요?" },
+  { subject: "we", verb: "will", baseVerb: "", auxiliary: "will", rest: "meet tomorrow", pullMode: "lift", translation: "우리는 내일 만날 거예요.", questionTranslation: "우리는 내일 만날 건가요?" },
+  { subject: "you", verb: "must", baseVerb: "", auxiliary: "must", rest: "leave now", pullMode: "lift", translation: "당신은 지금 떠나야 해요.", questionTranslation: "당신은 지금 떠나야 하나요?" },
+  { subject: "she", verb: "should", baseVerb: "", auxiliary: "should", rest: "get some rest", pullMode: "lift", translation: "그녀는 좀 쉬어야 해요.", questionTranslation: "그녀는 좀 쉬어야 하나요?" },
+  { subject: "I", verb: "am", baseVerb: "", auxiliary: "am", rest: "late", pullMode: "lift", translation: "나는 늦었어요.", questionTranslation: "내가 늦었나요?" },
+  { subject: "the dog", verb: "runs", baseVerb: "run", auxiliary: "does", rest: "very fast", pullMode: "split", translation: "그 개는 아주 빨리 달려요.", questionTranslation: "그 개는 아주 빨리 달리나요?" },
+  { subject: "your sister", verb: "speaks", baseVerb: "speak", auxiliary: "does", rest: "Chinese", pullMode: "split", translation: "당신의 자매는 중국어를 해요.", questionTranslation: "당신의 자매는 중국어를 하나요?" },
+  { subject: "they", verb: "played", baseVerb: "play", auxiliary: "did", rest: "soccer yesterday", pullMode: "split", translation: "그들은 어제 축구를 했어요.", questionTranslation: "그들은 어제 축구를 했나요?" },
+];
 
 const DEFAULT_REWRITE_INSTRUCTION = "영어스러운 표현을 자연스럽게 바꿔보세요.";
 const DEFAULT_BLANK_INSTRUCTION = "빈칸에 알맞은 단어를 넣어보세요.";
@@ -25,7 +43,6 @@ const TEXT = {
   PLACE_BLANK_PREFIX: "정답 입력 (ex. ",
   PLACE_REWRITE_1: "자연스럽게 고쳐 쓰세요.",
   PLACE_EX_PREFIX: "(ex. ",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -49,6 +66,8 @@ let results = [];
 let isCurrentLocked = false;
 let rewritePlaceholderExample = "";
 let blankPlaceholderExample = "";
+let interactionStage = 0;
+let autoNextTimer = 0;
 
 window.addEventListener("DOMContentLoaded", async () => {
   injectRuntimeStyles();
@@ -60,16 +79,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -197,6 +218,380 @@ function injectRuntimeStyles() {
       line-height: 1.6;
     }
 
+    .l31-workspace {
+      padding: 18px 14px 20px;
+      overflow: visible;
+      background: #fff;
+    }
+
+    .l31-stage-guide {
+      min-height: 46px;
+      color: #6f3b18;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .l31-stage-number {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      margin-right: 5px;
+      border-radius: 999px;
+      background: #f17b2a;
+      color: #fff;
+      font-size: 11px;
+      letter-spacing: .02em;
+      vertical-align: 1px;
+    }
+
+    .l31-board {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 170px;
+      margin-top: 10px;
+      padding: 58px 12px 24px;
+      border: 1px solid #ecd8c1;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(103,63,22,.08);
+      overflow: visible;
+    }
+
+    .l31-sentence-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 100%;
+      color: #34261d;
+      font-size: clamp(16px, 3.9vw, 20px);
+      font-weight: 850;
+      line-height: 1.4;
+    }
+
+    .l31-sentence-stage {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+    }
+
+    .l31-sentence-core {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 0;
+      max-width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .l31-punctuation {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 10px;
+      flex: 0 0 10px;
+    }
+
+    .l31-token {
+      min-height: 36px;
+      box-sizing: border-box;
+      border-radius: 11px;
+    }
+
+    .l31-token {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 7px;
+    }
+
+    .l31-verb-token {
+      appearance: none;
+      border: 1px solid #e4ad76;
+      background: #fff4e6;
+      color: #74380c;
+      font: inherit;
+      box-shadow: 0 3px 0 #d6a16d, 0 6px 12px rgba(111,59,24,.12);
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease;
+    }
+
+    .l31-suffix-token {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1px;
+      padding: 0 3px;
+      border-radius: 7px;
+      background: rgba(138,89,218,.18);
+      color: #6c3ac7;
+      box-shadow: inset 0 0 0 1px rgba(122,70,214,.24);
+      font-weight: 950;
+    }
+
+    button.l31-verb-token { cursor: pointer; }
+
+    button.l31-verb-token:hover,
+    button.l31-verb-token:focus-visible {
+      transform: none;
+      background: #fff9f0;
+      box-shadow: 0 5px 0 #d6a16d, 0 9px 16px rgba(111,59,24,.14);
+      outline: 3px solid rgba(241,123,42,.18);
+      outline-offset: 2px;
+    }
+
+    .l31-source-stack {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      min-height: 36px;
+      padding: 0;
+    }
+
+    .l31-source-gap {
+      color: transparent;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .l31-aux-chip {
+      position: absolute;
+      bottom: calc(100% + 9px);
+      left: 50%;
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      padding: 4px 7px;
+      border: 1px solid #df9b54;
+      border-radius: 13px 13px 11px 11px;
+      background: linear-gradient(180deg, #fff8df, #ffd889);
+      color: #6e350c;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 950;
+      line-height: 1.1;
+      box-shadow: 0 3px 0 #d9a558, 0 7px 13px rgba(105,60,18,.16);
+      white-space: nowrap;
+      cursor: grab;
+      animation: l31AuxFragmentPop .54s cubic-bezier(.18,1.52,.36,1) both;
+      touch-action: none;
+    }
+
+    .l31-aux-chip::after {
+      content: "";
+      position: absolute;
+      bottom: -7px;
+      left: 50%;
+      width: 7px;
+      height: 10px;
+      border-radius: 40% 40% 55% 55%;
+      background: #ffd889;
+      box-shadow: 0 1px 0 #d9a558;
+      transform: translateX(-50%);
+    }
+
+    .l31-aux-chip.is-do-fragment {
+      left: calc(50% - 20px);
+    }
+
+    .l31-aux-chip.is-es-fragment {
+      left: calc(50% + 20px);
+      border-color: #6c3ac7;
+      background: rgba(136,84,208,.16);
+      color: #6c3ac7;
+      box-shadow: 0 3px 0 rgba(108,58,199,.56), 0 0 12px rgba(136,84,208,.24);
+    }
+
+    .l31-aux-chip.is-es-fragment::after {
+      background: rgba(136,84,208,.30);
+      box-shadow: 0 1px 0 rgba(108,58,199,.56);
+    }
+
+    .l31-aux-chip.is-waiting {
+      opacity: .52;
+      cursor: not-allowed;
+      filter: saturate(.65);
+    }
+
+    .l31-aux-chip:active { cursor: grabbing; }
+
+    .l31-aux-chip.is-coaching {
+      animation: l31AuxDragCoach 1.25s cubic-bezier(.45,.02,.25,1) both;
+    }
+
+    .l31-aux-chip.is-coach-stopped {
+      animation: none;
+      transform: translateX(-50%);
+    }
+
+    .l31-aux-chip.is-touch-dragging {
+      position: fixed;
+      z-index: 9999;
+      bottom: auto;
+      margin: 0;
+      pointer-events: none;
+      animation: none;
+    }
+
+    .l31-base-token {
+      cursor: default;
+    }
+
+    .l31-front-slot {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      min-height: 28px;
+      box-sizing: border-box;
+      padding: 3px 7px;
+      border: 1px solid rgba(224,139,61,.42);
+      border-radius: 10px;
+      background: rgba(255,245,231,.72);
+      color: rgba(165,92,29,.48);
+      font-size: 13px;
+      font-weight: 900;
+      flex: 0 0 auto;
+      transition: transform .16s ease, background .16s ease, box-shadow .16s ease, color .16s ease;
+      animation: l31GhostBreathe 1.7s ease-in-out infinite;
+    }
+
+    .l31-front-slot.is-reserved {
+      visibility: hidden;
+      animation: none;
+      pointer-events: none;
+    }
+
+    .l31-front-slot.is-over {
+      transform: scale(1.07);
+      background: #ffe4b6;
+      color: #8b4514;
+      box-shadow: 0 0 0 5px rgba(241,123,42,.14);
+    }
+
+    .l31-front-slot.is-filled {
+      border-style: solid;
+      border-color: #df9b54;
+      background: linear-gradient(180deg, #fff8df, #ffd889);
+      color: #6e350c;
+      font-size: inherit;
+      box-shadow: 0 4px 0 #d9a558;
+      transform: none;
+      animation: l31SlotLand .35s cubic-bezier(.2,1.4,.4,1) both;
+    }
+
+    .l31-front-composite {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      flex: 0 0 auto;
+    }
+
+    .l31-front-slot.l31-front-suffix {
+      min-width: 28px;
+      border-color: rgba(108,58,199,.46);
+      background: rgba(136,84,208,.12);
+      color: rgba(108,58,199,.62);
+      box-shadow: inset 0 0 0 1px rgba(136,84,208,.08);
+    }
+
+    .l31-front-slot.l31-front-suffix.is-over {
+      border-color: #6c3ac7;
+      background: rgba(136,84,208,.24);
+      color: #6c3ac7;
+      box-shadow: 0 0 0 5px rgba(136,84,208,.14);
+    }
+
+    .l31-front-slot.l31-front-suffix.is-filled {
+      border-color: #6c3ac7;
+      background: rgba(136,84,208,.16);
+      color: #6c3ac7;
+      box-shadow: 0 4px 0 rgba(108,58,199,.56), 0 0 10px rgba(136,84,208,.24);
+    }
+
+    .l31-translation-line {
+      position: relative;
+      width: 100%;
+      min-height: 23px;
+      margin-top: 14px;
+      color: #75685e;
+      font-size: 12.5px;
+      font-weight: 750;
+      line-height: 1.55;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .l31-translation-old,
+    .l31-translation-new {
+      display: block;
+      width: 100%;
+    }
+
+    .l31-translation-line.is-changing .l31-translation-old {
+      animation: l31TranslationWipeOut .28s ease-in both;
+    }
+
+    .l31-translation-line.is-changing .l31-translation-new {
+      position: absolute;
+      inset: 0;
+      animation: l31TranslationWipeIn .36s .3s ease-out both;
+    }
+
+    @keyframes l31AuxFragmentPop {
+      0% { opacity: 0; transform: translate(-50%, 25px) scale(.18,.58) rotate(7deg); }
+      44% { opacity: 1; transform: translate(-50%, -8px) scale(.72,1.22) rotate(-4deg); }
+      72% { transform: translate(-50%, 3px) scale(1.1,.9) rotate(2deg); }
+      100% { opacity: 1; transform: translate(-50%, 0) scale(1) rotate(0); }
+    }
+
+    @keyframes l31GhostBreathe {
+      0%, 100% { opacity: .55; }
+      50% { opacity: .9; }
+    }
+
+    @keyframes l31AuxDragCoach {
+      0%, 16%, 100% { transform: translate(-50%, 0) scale(1); }
+      52%, 68% {
+        transform: translate(calc(-50% + var(--l31-coach-x, 0px)), var(--l31-coach-y, 0px)) scale(.94);
+      }
+    }
+
+    @keyframes l31TranslationWipeOut {
+      from { opacity: 1; clip-path: inset(0 0 0 0); }
+      to { opacity: 0; clip-path: inset(0 0 0 100%); }
+    }
+
+    @keyframes l31TranslationWipeIn {
+      from { opacity: 0; clip-path: inset(0 100% 0 0); }
+      to { opacity: 1; clip-path: inset(0 0 0 0); }
+    }
+
+    @keyframes l31SlotLand {
+      from { transform: translateY(-16px) scale(1.08); opacity: .35; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 480px) {
+      .l31-board { padding: 56px 8px 22px; }
+      .l31-sentence-core { gap: 5px; }
+      .l31-front-slot { min-width: 30px; padding: 3px 6px; font-size: 12px; }
+      .l31-aux-chip { min-width: 30px; padding: 4px 6px; font-size: 12px; }
+    }
+
     .ok { color: #2e7d32; }
     .bad { color: #c62828; }
 
@@ -248,67 +643,55 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  return L31_DIRECT_QUESTION_ROWS.map((row) => ({ ...row }));
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "direct-js",
+    title: "aisth-l3e1.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
-  let filtered = rawRows
-    .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === TARGET_EXERCISE)
-    .sort((a, b) => Number(a["QNumber"]) - Number(b["QNumber"]));
-
-  if (MAX_QUESTIONS > 0) filtered = filtered.slice(0, MAX_QUESTIONS);
-
-  const modeByType = deriveInstructionModeByType(filtered);
-
-  const firstRowAnswer = normalizeEscapedBreaks(String(filtered[0]?.["Answer"] ?? "").trim());
-  const firstRewriteAnswer = normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "rewrite")?.["Answer"] ?? "").trim());
-  const firstBlankAnswer = normalizeEscapedBreaks(String(filtered.find((r) => detectType(normalizeEscapedBreaks(String(r["Question"] ?? "").trim())) === "blank")?.["Answer"] ?? "").trim());
-
-  rewritePlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstRewriteAnswer || "example"));
-  blankPlaceholderExample = clipExample(stripEmphasisMarkers(firstRowAnswer || firstBlankAnswer || "answer"));
-
-  questions = filtered.map((row, idx) => {
-    const question = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
-    const answer = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
-    const title = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Title"] ?? "").trim()));
-    const type = detectType(question);
-
-    const fallbackInst = type === "blank" ? DEFAULT_BLANK_INSTRUCTION : DEFAULT_REWRITE_INSTRUCTION;
-    const modeInst = modeByType[type] || fallbackInst;
-
-    const qNumber = Number(row["QNumber"]) || idx + 1;
-    const rawInstruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
-
-    let instruction = rawInstruction || modeInst;
-    if (qNumber === 1 && modeInst) instruction = modeInst;
-    if (isInstructionLeakingAnswer(instruction, answer, type)) instruction = modeInst;
+  const source = MAX_QUESTIONS > 0 ? rawRows.slice(0, MAX_QUESTIONS) : rawRows;
+  questions = source.map((row, idx) => {
+    const statement = `${capitalizeSentenceStart(row.subject)} ${row.verb} ${row.rest}.`;
+    const remainingVerb = row.baseVerb ? `${row.baseVerb} ` : "";
+    const question = `${capitalizeSentenceStart(row.auxiliary)} ${questionSubject(row.subject)} ${remainingVerb}${row.rest}?`;
 
     return {
+      ...row,
       no: idx + 1,
-      qNumber,
-      question,
-      answer,
-      instruction,
-      title,
-      type,
+      qNumber: idx + 1,
+      question: statement,
+      answer: question,
+      instruction: "평서문을 의문문으로 바꿔봅시다.",
+      title: "의문문 만들기",
+      type: "transform",
     };
   });
 }
@@ -413,10 +796,9 @@ function startQuiz() {
   renderQuestion();
 }
 
-function renderQuestion() {
+function renderQuestion(resetStage = true) {
   const area = document.getElementById("quiz-area");
   if (!area) return;
-
 
   const q = questions[currentIndex];
   if (!q) {
@@ -424,123 +806,340 @@ function renderQuestion() {
     return;
   }
 
-  isCurrentLocked = false;
+  if (resetStage) {
+    isCurrentLocked = false;
+    interactionStage = 0;
+  }
 
-  const qBody = renderTextWithEmphasis(q.question).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
-
-  const placeholder = q.type === "blank"
-    ? `${TEXT.PLACE_BLANK_PREFIX}${blankPlaceholderExample || "answer"})`
-    : `${TEXT.PLACE_REWRITE_1} ${TEXT.PLACE_EX_PREFIX}${rewritePlaceholderExample || "example"})`;
-
-  const inputHtml = q.type === "blank"
-    ? `<input id="user-answer" class="short-input" type="text" autocomplete="off" placeholder="${escapeHtmlAttr(placeholder)}" />`
-    : `<textarea id="user-answer" rows="3" placeholder="${escapeHtmlAttr(placeholder)}"></textarea>`;
+  const isComplete = isTransformationComplete(q);
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
-
-    <div class="box">
-      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || TEXT.INPUT_HINT_FALLBACK)}</div>
-      <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
+    <div class="box l31-workspace">
+      <div class="l31-stage-guide">${buildStageGuide(q)}</div>
+      <div class="l31-board" aria-live="polite">
+        ${buildTransformationSentence(q)}
+        ${buildTranslationLine(q)}
+      </div>
     </div>
-
-    <div class="box" style="background:#fff;">
-      ${inputHtml}
-      <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
-    </div>
+    ${isComplete ? '<div class="btn-row"><button class="quiz-btn" id="l31-next-btn" type="button">다음</button></div>' : ""}
   `;
 
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const input = document.getElementById("user-answer");
-  const slotInputControl = input && window.AisthInputSlots
-    ? window.AisthInputSlots.enhance(input, { modelText: q.answer, onEnter: submitCurrentAnswer })
-    : null;
-
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
-
-  if (input) {
-    if (slotInputControl) slotInputControl.focus();
-    else input.focus();
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" && q.type === "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-      if (ev.key === "Enter" && ev.ctrlKey && q.type !== "blank") {
-        ev.preventDefault();
-        submitCurrentAnswer();
-      }
-    });
+  if (interactionStage === 0) {
+    const pullTarget = document.getElementById("l31-pull-target");
+    if (pullTarget) {
+      pullTarget.addEventListener("click", revealAuxiliary);
+      pullTarget.focus();
+    }
+  } else if (!isComplete) {
+    wireAuxiliaryDrag(q);
+  } else {
+    const nextBtn = document.getElementById("l31-next-btn");
+    if (nextBtn) nextBtn.addEventListener("click", goNext);
   }
 }
 
-function submitCurrentAnswer() {
-  if (isCurrentLocked) return;
-
-  const q = questions[currentIndex];
-  const input = document.getElementById("user-answer");
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  const feedback = document.getElementById("feedback");
-
-  if (!q || !input) return;
-
-  const userRaw = String(input.value || "").trim();
-  if (!userRaw) {
-    showToast("no", TEXT.INPUT_REQUIRED);
-    return;
+function buildTranslationLine(q) {
+  const statementText = escapeHtml(q?.translation || "");
+  if (!isTransformationComplete(q)) {
+    return `<div class="l31-translation-line"><span>${statementText}</span></div>`;
   }
-  const ok = isAnswerCorrect(q.type, userRaw, q.answer);
+  return `
+    <div class="l31-translation-line is-changing">
+      <span class="l31-translation-old">${statementText}</span>
+      <span class="l31-translation-new">${escapeHtml(q?.questionTranslation || q?.translation || "")}</span>
+    </div>
+  `;
+}
 
-  if (!ok) {
-    if (feedback) {
-      feedback.className = "feedback";
-      feedback.innerHTML = "";
+function buildStageGuide(q) {
+  if (interactionStage === 0) {
+    return '<span class="l31-stage-number">1단계</span> 의문문으로 만들어봅시다 · 앞으로 뽑을 성분을 클릭해봅시다.';
+  }
+  if (interactionStage === 1) {
+    if (usesSplitDoes(q)) {
+      return '<span class="l31-stage-number">2단계</span> 먼저 <b>do</b>를 문장 맨 앞으로 드래그해봅시다.';
     }
-    showToast("no", TEXT.WRONG);
-    return;
+    return `<span class="l31-stage-number">2단계</span> 위로 나온 <b>${escapeHtml(q.auxiliary)}</b>를 문장 맨 앞으로 드래그해봅시다.`;
+  }
+  if (usesSplitDoes(q) && interactionStage === 2) {
+    return '<span class="l31-stage-number">3단계</span> 이제 <b>es</b>를 do 뒤에 붙여봅시다.';
+  }
+  return '<span class="l31-stage-number">완성</span> 조동사가 앞으로 오면 의문문이 됩니다.';
+}
+
+function usesSplitDoes(q) {
+  return String(q?.auxiliary || "").toLowerCase() === "does";
+}
+
+function isTransformationComplete(q) {
+  return usesSplitDoes(q) ? interactionStage === 3 : interactionStage === 2;
+}
+
+function buildTransformationSentence(q) {
+  const initialSubject = escapeHtml(capitalizeSentenceStart(q.subject));
+  const movedSubject = escapeHtml(questionSubject(q.subject));
+  const verb = renderL31VerbWithSuffix(q);
+  const baseVerb = escapeHtml(q.baseVerb);
+  const rest = escapeHtml(q.rest);
+  const auxiliary = escapeHtml(q.auxiliary);
+  const splitDoes = usesSplitDoes(q);
+
+  if (interactionStage === 0) {
+    return `
+      <div class="l31-sentence-line">
+        <div class="l31-sentence-stage">
+          <div class="l31-sentence-core">
+            <span class="l31-front-slot is-reserved" aria-hidden="true">${escapeHtml(capitalizeSentenceStart(q.auxiliary))}</span>
+            <span class="l31-token l31-subject-token">${initialSubject}</span>
+            <button class="l31-token l31-verb-token" id="l31-pull-target" type="button" aria-label="${escapeHtmlAttr(q.verb)} 성분 뽑기">${verb}</button>
+            <span class="l31-token l31-rest-token">${rest}<span class="l31-punctuation">.</span></span>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
-  isCurrentLocked = true;
-  input.disabled = true;
-  if (window.AisthInputSlots) window.AisthInputSlots.setDisabled(input, true);
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
+  if (interactionStage === 1) {
+    const sourceVerbHtml = baseVerb
+      ? `<span class="l31-token l31-verb-token">${baseVerb}</span>`
+      : `<span class="l31-token l31-verb-token l31-source-gap" aria-label="옮겨진 동사의 빈 자리">${verb}</span>`;
+    const fragmentChips = splitDoes
+      ? `
+              <button class="l31-aux-chip is-do-fragment" id="l31-aux-chip" type="button" draggable="true" aria-label="do, 문장 첫 자리로 드래그">do</button>
+              <button class="l31-aux-chip is-es-fragment is-waiting" type="button" disabled aria-label="do를 먼저 옮긴 뒤 사용할 es">es</button>
+            `
+      : `<button class="l31-aux-chip" id="l31-aux-chip" type="button" draggable="true" aria-label="${auxiliary}, 문장 첫 자리로 드래그">${auxiliary}</button>`;
+    return `
+      <div class="l31-sentence-line">
+        <div class="l31-sentence-stage">
+          <div class="l31-sentence-core">
+            <span class="l31-front-slot" id="l31-front-slot" role="button" tabindex="0" aria-label="조동사를 놓을 문장 첫 자리">${escapeHtml(capitalizeSentenceStart(splitDoes ? "do" : q.auxiliary))}</span>
+            <span class="l31-token l31-subject-token">${initialSubject}</span>
+            <span class="l31-source-stack">
+              ${sourceVerbHtml}
+              ${fragmentChips}
+            </span>
+            <span class="l31-token l31-rest-token">${rest}<span class="l31-punctuation">.</span></span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
+  if (splitDoes && interactionStage === 2) {
+    return `
+      <div class="l31-sentence-line">
+        <div class="l31-sentence-stage">
+          <div class="l31-sentence-core">
+            <span class="l31-front-composite">
+              <span class="l31-front-slot is-filled">Do</span>
+              <span class="l31-front-slot l31-front-suffix" id="l31-suffix-slot" role="button" tabindex="0" aria-label="es를 놓을 자리">es</span>
+            </span>
+            <span class="l31-token l31-subject-token">${movedSubject}</span>
+            <span class="l31-source-stack">
+              <span class="l31-token l31-verb-token l31-base-token">${baseVerb}</span>
+              <button class="l31-aux-chip is-es-fragment" id="l31-aux-chip" type="button" draggable="true" aria-label="es, do 뒤로 드래그">es</button>
+            </span>
+            <span class="l31-token l31-rest-token">${rest}<span class="l31-punctuation">.</span></span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const completedAuxiliary = splitDoes
+    ? '<span class="l31-front-composite"><span class="l31-front-slot is-filled">Do</span><span class="l31-front-slot l31-front-suffix is-filled">es</span></span>'
+    : `<span class="l31-front-slot is-filled">${escapeHtml(capitalizeSentenceStart(q.auxiliary))}</span>`;
+
+  return `
+    <div class="l31-sentence-line">
+      <div class="l31-sentence-stage">
+        <div class="l31-sentence-core">
+          ${completedAuxiliary}
+          <span class="l31-token l31-subject-token">${movedSubject}</span>
+          ${baseVerb ? `<span class="l31-token l31-verb-token l31-base-token">${baseVerb}</span>` : `<span class="l31-token l31-verb-token l31-source-gap" aria-hidden="true">${verb}</span>`}
+          <span class="l31-token l31-rest-token">${rest}<span class="l31-punctuation">?</span></span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderL31VerbWithSuffix(q) {
+  const verb = String(q?.verb || "");
+  const baseVerb = String(q?.baseVerb || "");
+  if (!baseVerb || !verb.toLowerCase().startsWith(baseVerb.toLowerCase())) {
+    return escapeHtml(verb);
+  }
+
+  const suffix = verb.slice(baseVerb.length);
+  if (!/^(?:s|es)$/i.test(suffix)) return escapeHtml(verb);
+  return `${escapeHtml(baseVerb)}<span class="l31-suffix-token">${escapeHtml(suffix)}</span>`;
+}
+
+function revealAuxiliary() {
+  if (isCurrentLocked || interactionStage !== 0) return;
+  interactionStage = 1;
+  renderQuestion(false);
+  const chip = document.getElementById("l31-aux-chip");
+  if (chip) chip.focus();
+}
+
+function wireAuxiliaryDrag(q) {
+  const chip = document.getElementById("l31-aux-chip");
+  const splitDoes = usesSplitDoes(q);
+  const isSuffixStep = splitDoes && interactionStage === 2;
+  const slot = document.getElementById(isSuffixStep ? "l31-suffix-slot" : "l31-front-slot");
+  if (!chip || !slot) return;
+
+  const fragmentText = isSuffixStep ? "es" : splitDoes ? "do" : q.auxiliary;
+  const placeFragment = () => {
+    if (splitDoes && interactionStage === 1) {
+      interactionStage = 2;
+      renderQuestion(false);
+      const nextChip = document.getElementById("l31-aux-chip");
+      if (nextChip) nextChip.focus();
+      return;
+    }
+    completeTransformation();
+  };
+
+  const chipRect = chip.getBoundingClientRect();
+  const slotRect = slot.getBoundingClientRect();
+  chip.style.setProperty("--l31-coach-x", `${slotRect.left + slotRect.width / 2 - (chipRect.left + chipRect.width / 2)}px`);
+  chip.style.setProperty("--l31-coach-y", `${slotRect.top + slotRect.height / 2 - (chipRect.top + chipRect.height / 2)}px`);
+  let coachTimer = window.setTimeout(() => {
+    coachTimer = 0;
+    if (chip.isConnected) chip.classList.add("is-coaching");
+  }, 650);
+  const stopCoach = () => {
+    if (coachTimer) {
+      window.clearTimeout(coachTimer);
+      coachTimer = 0;
+    }
+    chip.classList.remove("is-coaching");
+    chip.classList.add("is-coach-stopped");
+  };
+
+  chip.addEventListener("dragstart", (ev) => {
+    stopCoach();
+    if (!ev.dataTransfer) return;
+    ev.dataTransfer.effectAllowed = "move";
+    ev.dataTransfer.setData("text/plain", fragmentText);
+    slot.classList.add("is-over");
+  });
+  chip.addEventListener("dragend", () => slot.classList.remove("is-over"));
+
+  slot.addEventListener("dragover", (ev) => {
+    ev.preventDefault();
+    if (ev.dataTransfer) ev.dataTransfer.dropEffect = "move";
+    slot.classList.add("is-over");
+  });
+  slot.addEventListener("dragleave", () => slot.classList.remove("is-over"));
+  slot.addEventListener("drop", (ev) => {
+    ev.preventDefault();
+    slot.classList.remove("is-over");
+    placeFragment();
+  });
+  slot.addEventListener("keydown", (ev) => {
+    if (ev.key !== "Enter" && ev.key !== " ") return;
+    ev.preventDefault();
+    placeFragment();
+  });
+
+  let touchPointerId = null;
+  const moveTouchChip = (ev) => {
+    if (touchPointerId !== ev.pointerId) return;
+    chip.style.left = `${ev.clientX}px`;
+    chip.style.top = `${ev.clientY - chip.offsetHeight / 2}px`;
+    const rect = slot.getBoundingClientRect();
+    const isInside = ev.clientX >= rect.left && ev.clientX <= rect.right
+      && ev.clientY >= rect.top && ev.clientY <= rect.bottom;
+    slot.classList.toggle("is-over", isInside);
+  };
+  const finishTouchDrag = (ev, cancelled = false) => {
+    if (touchPointerId !== ev.pointerId) return;
+    const rect = slot.getBoundingClientRect();
+    const isInside = !cancelled
+      && ev.clientX >= rect.left && ev.clientX <= rect.right
+      && ev.clientY >= rect.top && ev.clientY <= rect.bottom;
+    touchPointerId = null;
+    slot.classList.remove("is-over");
+    chip.classList.remove("is-touch-dragging");
+    chip.style.left = "";
+    chip.style.top = "";
+    if (isInside) placeFragment();
+  };
+
+  chip.addEventListener("pointerdown", (ev) => {
+    stopCoach();
+    if (ev.pointerType === "mouse") return;
+    ev.preventDefault();
+    touchPointerId = ev.pointerId;
+    chip.setPointerCapture(ev.pointerId);
+    chip.classList.add("is-touch-dragging");
+    moveTouchChip(ev);
+  });
+  chip.addEventListener("pointermove", moveTouchChip);
+  chip.addEventListener("pointerup", (ev) => finishTouchDrag(ev));
+  chip.addEventListener("pointercancel", (ev) => finishTouchDrag(ev, true));
+}
+
+function completeTransformation() {
+  if (isCurrentLocked) return;
+  const q = questions[currentIndex];
+  if (!q) return;
+  const expectedStage = usesSplitDoes(q) ? 2 : 1;
+  if (interactionStage !== expectedStage) return;
+  isCurrentLocked = true;
+  interactionStage = usesSplitDoes(q) ? 3 : 2;
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
     type: q.type,
     question: q.question,
-    selected: userRaw,
+    selected: q.answer,
     answer: q.answer,
     instruction: q.instruction,
     correct: true,
   });
-
-  if (feedback) {
-    feedback.className = "feedback";
-    feedback.innerHTML = "";
-  }
-
+  renderQuestion(false);
   storeLatestResultSnapshot();
   showToast("ok", TEXT.CORRECT);
 }
 
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  if (autoNextTimer) window.clearTimeout(autoNextTimer);
+  autoNextTimer = window.setTimeout(() => {
+    autoNextTimer = 0;
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
+}
+
 function goNext() {
+  if (autoNextTimer) {
+    window.clearTimeout(autoNextTimer);
+    autoNextTimer = 0;
+  }
   currentIndex += 1;
   if (currentIndex >= questions.length) {
     showResultPopup();
     return;
   }
   renderQuestion();
+}
+
+function capitalizeSentenceStart(value) {
+  const text = String(value || "");
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
+}
+
+function questionSubject(value) {
+  const text = String(value || "");
+  if (text === "I" || /^[A-Z]/.test(text)) return text;
+  return text.toLowerCase();
 }
 
 function isAnswerCorrect(type, userRaw, modelRaw) {
@@ -569,9 +1168,14 @@ function buildModelCandidates(modelRaw) {
     if (!t) continue;
     set.add(t);
 
-    for (const part of t.split("||")) {
+    for (const part of t.split(/\|{1,2}/)) {
       const p = part.trim();
       if (p) set.add(p);
+    }
+
+    if (t.includes("|")) {
+      const withoutPipes = t.replace(/\|+/g, " ").replace(/\s+/g, " ").trim();
+      if (withoutPipes) set.add(withoutPipes);
     }
 
     if (/\bor\b/i.test(t)) {
@@ -640,11 +1244,16 @@ function normalizeEscapedBreaks(value) {
     .replaceAll("\\r\\n", "\n")
     .replaceAll("\\n", "\n")
     .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 }
 
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -655,12 +1264,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 

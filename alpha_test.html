@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alpha Redirect</title>
+  <link rel="stylesheet" href="tablet-desk-background.css?v=20260731" />
   <style>
     body {
       margin: 0;
@@ -52,6 +53,7 @@
       const BITNALEE_REDIRECT_TARGET = "imsi_bitnalee_hw_3.html";
       const IMSI_HW_4_REDIRECT_TARGET = "imsi_hw_4.html";
       const JIWOO_1_2_REDIRECT_TARGET = "jiwoo_1-2.html";
+      const BHN_2026_AUG_20_REDIRECT_TARGET = "bhn_2026aug20_24.html";
 
       const currentUrl = new URL(window.location.href);
       const userId = (currentUrl.searchParams.get("id") || "").trim().toLowerCase();
@@ -62,7 +64,7 @@
       } else if (userId === "aison94") {
         redirectTarget = JIWOO_1_2_REDIRECT_TARGET;
       } else if (userId === "080530hn") {
-        redirectTarget = IMSI_HW_4_REDIRECT_TARGET;
+        redirectTarget = BHN_2026_AUG_20_REDIRECT_TARGET;
       } else if (userId === "kil030328") {
         redirectTarget = BEFORECLASS_REDIRECT_TARGET;
       } else if (userId === "tester") {

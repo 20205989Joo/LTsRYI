@@ -88,46 +88,33 @@
       ],
     },
     "2-3": {
-      title: "조동사",
+      title: "여러 단어 유사조동사",
+      maxSteps: 5,
       steps: [
         {
-          title: "2-2에서는 can, must, want to처럼 행동 앞에 붙는 말을 배웠습니다.",
+          title: "2-2 마지막에서 여러 단어짜리 표현을 살짝 맛봤습니다.",
           body: "",
-          rows: [
-            ["can"],
-            ["must"],
-          ],
+          exampleHtml: buildModalPhraseBridgeHtml(),
         },
         {
-          title: "have to는 “해야 한다”입니다.",
-          body: "I have to study. = 나는 공부해야 한다.",
-          rows: [
-            ["해야 한다"],
-            ["I have to study.", "나는 공부해야 한다."],
-          ],
+          title: "have to와 need to는 의무와 필요를 나타냅니다.",
+          body: "",
+          exampleHtml: buildModalObligationPhraseHtml(),
         },
         {
-          title: "need to는 “할 필요가 있다”입니다.",
-          body: "He needs to find a job. = 그는 직업을 구할 필요가 있다.",
-          rows: [
-            ["할 필요가 있다"],
-            ["He needs to find a job.", "그는 직업을 구할 필요가 있다."],
-          ],
+          title: "don't have to는 '하지 마'가 아니라 '안 해도 돼'입니다.",
+          body: "",
+          exampleHtml: buildModalNoNeedPhraseHtml(),
         },
         {
-          title: "don’t have to는 “안 해도 된다”입니다.",
-          body: "“하지 말아야 한다”가 아니라 “할 필요가 없다”입니다.",
-          rows: [
-            ["안 해도 된다"],
-            ["하지 말아야 한다", "할 필요가 없다"],
-          ],
+          title: "used to와 be able to도 한 덩어리처럼 기억하세요.",
+          body: "",
+          exampleHtml: buildModalHabitAbilityPhraseHtml(),
         },
         {
-          title: "used to는 “예전에는 ~하곤 했다”입니다.",
-          body: "지금은 아닐 수도 있다는 느낌이 있습니다.",
-          rows: [
-            ["예전에는 ~하곤 했다"],
-          ],
+          title: "길어도 앞 덩어리 + 본동사 구조는 똑같습니다.",
+          body: "",
+          exampleHtml: buildModalPhrasePracticeHtml(),
         },
       ],
     },
@@ -157,7 +144,7 @@
         },
       ],
     },
-    "3-2": {
+    "retired-3-2": {
       title: "의문문",
       steps: [
         {
@@ -206,7 +193,7 @@
         },
       ],
     },
-    "3-3": {
+    "3-2": {
       title: "부정문",
       maxSteps: 4,
       steps: [
@@ -232,7 +219,7 @@
         },
       ],
     },
-    "3-4": {
+    "3-3": {
       title: "비교급 / 최상급",
       maxSteps: 4,
       steps: [
@@ -258,7 +245,7 @@
         },
       ],
     },
-    "3-5": {
+    "3-4": {
       title: "There is / Here is",
       maxSteps: 4,
       steps: [
@@ -489,7 +476,28 @@
       ],
     },
     "6-3": {
-      title: "-ing / -ed 3. 진행형 vs 수동태",
+      title: "-ing / -ed 3. 수동태",
+      maxSteps: 3,
+      steps: [
+        {
+          title: "이번에는 ed를 응용해봅시다.",
+          body: "",
+          exampleHtml: buildPassiveApplicationStartHtml(),
+        },
+        {
+          title: "ed는 명사 앞에서 '~된'이라는 뜻으로 꾸밉니다.",
+          body: "",
+          exampleHtml: buildEdBeforeNounHtml(),
+        },
+        {
+          title: "be 뒤에 놓으면 '~되어 있다'라는 문장이 됩니다.",
+          body: "",
+          exampleHtml: buildEdAfterBeHtml(),
+        },
+      ],
+    },
+    "6-4": {
+      title: "-ing / -ed 4. 진행형 vs 수동태",
       maxSteps: 4,
       steps: [
         {
@@ -511,54 +519,6 @@
           title: "몸에 익기 전까진 차근차근 생각해봅시다.",
           body: "",
           exampleHtml: buildIngEdThinkSlowHtml(),
-        },
-      ],
-    },
-    "6-4": {
-      title: "-ing / -ed 3. 진행형 vs 수동태",
-      steps: [
-        {
-          title: "boring / bored, exciting / excited, annoying / annoyed는 같은 뿌리지만 방향이 다릅니다.",
-          body: "",
-          rows: [
-            ["boring"],
-            ["bored"],
-            ["exciting"],
-            ["excited"],
-          ],
-        },
-        {
-          title: "boring은 “지루하게 만드는” 쪽입니다.",
-          body: "The class is boring. = 수업이 지루하다.",
-          rows: [
-            ["지루하게 만드는"],
-            ["The class is boring.", "수업이 지루하다."],
-          ],
-        },
-        {
-          title: "bored는 “지루함을 느끼는” 쪽입니다.",
-          body: "I am bored. = 나는 지루하다.",
-          rows: [
-            ["지루함을 느끼는"],
-            ["I am bored.", "나는 지루하다."],
-          ],
-        },
-        {
-          title: "주어가 사람이어도 남을 짜증나게 만드는 사람이면 annoying이 될 수 있습니다.",
-          body: "You are annoying. = 너는 짜증나게 해.",
-          rows: [
-            ["You are annoying."],
-            ["너는 짜증나게 해."],
-          ],
-        },
-        {
-          title: "이제 문맥을 보고 주어가 감정의 원인인지, 감정을 느끼는 대상인지 골라봅니다.",
-          body: "",
-          rows: [
-            ["S"],
-            ["V"],
-            ["Point"],
-          ],
         },
       ],
     },
@@ -640,45 +600,41 @@
       title: "S-V-T-D : 하나로 끝.",
       steps: [
         {
-          title: "이번에는 이미 완성된 영어 문장을 네 칸으로 뜯어봅니다.",
-          body: "",
+          title: "문장의 각 단어 아래에는 원 하나가 있습니다.",
+          body: "단어 하나마다 역할 글자 하나를 놓습니다.",
           rows: [
-            ["S"],
-            ["V"],
-            ["Point"],
+            ["She  cleaned  the  room"],
           ],
         },
         {
-          title: "먼저 S, 즉 문장의 주인공을 찾습니다.",
-          body: "She cleaned the room.에서 She",
+          title: "아래의 S·V·T·D 원을 단어로 끌어갑니다.",
+          body: "S   V   T   D",
           rows: [
-            ["She"],
-            ["cleaned the"],
-            ["room"],
-            ["She"],
+            ["S", "V", "T", "D"],
           ],
         },
         {
-          title: "그다음 V, 즉 행동을 찾습니다.",
-          body: "cleaned",
+          title: "주인공 단어에는 S, 행동 단어에는 V를 놓습니다.",
+          body: "She → S / cleaned → V",
           rows: [
-            ["cleaned"],
+            ["She → S"],
+            ["cleaned → V"],
           ],
         },
         {
-          title: "그 행동을 받는 대상이 있으면 T입니다.",
-          body: "the room",
+          title: "한 역할이 여러 단어에 이어져도 하나씩 놓습니다.",
+          body: "the → T / room → T",
           rows: [
-            ["the room"],
+            ["the → T"],
+            ["room → T"],
           ],
         },
         {
-          title: "남은 시간, 장소, 방법 정보가 있으면 D에 넣습니다.",
-          body: "없으면 비워둡니다.",
+          title: "시간·장소·방법을 나타내는 각 단어에는 D를 놓습니다.",
+          body: "every → D / morning → D",
           rows: [
-            ["S"],
-            ["V"],
-            ["Point"],
+            ["every → D"],
+            ["morning → D"],
           ],
         },
       ],
@@ -1070,6 +1026,8 @@
     },
   };
 
+  INTRO_MAP["7-2"] = INTRO_MAP["7-1"];
+
   function escapeHtml(value) {
     return String(value ?? "")
       .replaceAll("&", "&amp;")
@@ -1104,7 +1062,7 @@
       return ["border-color:#2f8f55", "background:#e2f7e8", "color:#17643c"];
     }
     if (role === "verb") {
-      return ["border-color:#d5aa00", "background:#fff1a6", "color:#5d4a00"];
+      return ["border-color:var(--aisth-role-v-border, #c88a12)", "background:var(--aisth-role-v-bg, #fff4cc)", "color:var(--aisth-role-v-text, #7a4a00)"];
     }
     if (role === "target") {
       return ["border-color:#dc3f3f", "background:#ffe1e1", "color:#a91f1f"];
@@ -1332,7 +1290,7 @@
 
   function buildTenseChip(text, variant, size) {
     const variants = {
-      verb: ["border-color:#f1c18e", "background:#fff", "color:#7e3106"],
+      verb: ["border-color:var(--aisth-role-v-border, #c88a12)", "background:var(--aisth-role-v-bg, #fff4cc)", "color:var(--aisth-role-v-text, #7a4a00)", "box-shadow:0 0 12px var(--aisth-role-v-glow, rgba(216,162,27,.30))"],
       adv: ["border-color:rgba(43,103,199,0.24)", "background:rgba(235,243,255,0.98)", "color:#2b67c7"],
       adj: ["border-color:rgba(255,187,74,0.26)", "background:rgba(255,247,228,0.98)", "color:#7e5a06"],
     };
@@ -2347,16 +2305,28 @@
   }
 
   function buildPerfectEmphasisHtml() {
-    const items = ["해버렸잖아!", "해왔어.", "지금 막 끝났다구!"];
+    const items = [
+      ["해버렸잖아!", "버렸잖"],
+      ["해왔어.", "왔"],
+      ["지금 막 끝났다구!", "지금 막"],
+    ];
     return `
       <div class="lip-example-stack">
-        ${items.map((item) => `
+        ${items.map(([item, target]) => `
           <div class="lip-example-row" style="justify-content:center;gap:6px;margin-bottom:0;">
-            ${buildPerfectKoMarker(item)}
+            ${buildPerfectKoEmphasisLine(item, target)}
           </div>
         `).join("")}
       </div>
     `;
+  }
+
+  function buildPerfectKoEmphasisLine(text, target) {
+    const value = String(text || "");
+    const needle = String(target || "");
+    const index = needle ? value.indexOf(needle) : -1;
+    if (index < 0) return `<span style="color:#111;font-size:15px;line-height:1;font-weight:900;white-space:nowrap;">${escapeHtml(value)}</span>`;
+    return `<span style="display:inline-flex;align-items:center;justify-content:center;color:#111;font-size:15px;line-height:1;font-weight:900;white-space:nowrap;">${escapeHtml(value.slice(0, index))}${buildPerfectKoMarker(needle)}${escapeHtml(value.slice(index + needle.length))}</span>`;
   }
 
   function buildPerfectFormulaHtml() {
@@ -2404,7 +2374,7 @@
   }
 
   function buildPerfectKoMarker(text) {
-    return `<span style="display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 10px;border-radius:8px;background:#eaf7f3;color:#155348;border:1px solid #2c7d70;font-size:13px;line-height:1;font-weight:950;white-space:nowrap;">${escapeHtml(text)}</span>`;
+    return `<span class="aisth-perfect-chrome-text" style="display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:2px 1px;background:linear-gradient(180deg,#050505 0%,#1c1c1c 26%,#f7f7f7 38%,#4b4b4b 48%,#080808 64%,#b9b9b9 77%,#111 100%);background-size:100% 140%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;-webkit-text-stroke:.25px rgba(0,0,0,.48);font-size:15px;line-height:1;font-weight:1000;letter-spacing:-.02em;white-space:nowrap;filter:drop-shadow(0 1px 0 rgba(0,0,0,.34));">${escapeHtml(text)}</span>`;
   }
 
   function buildPerfectKoSmallMarker(text) {
@@ -2480,7 +2450,7 @@
         </div>
         ${rows.map(([connector, sentence]) => `
           <div class="lip-example-row" style="justify-content:center;gap:8px;margin-bottom:0;">
-            ${buildConjunctionPlainWord(connector)}
+            ${buildConjunctionEnChip(connector)}
             ${buildTenseText(sentence)}
           </div>
         `).join("")}
@@ -2501,9 +2471,9 @@
         ${rows.map(([word, meaning], index) => `
           <div style="display:grid;grid-template-columns:1fr;gap:3px;min-width:0;padding:6px 0;${index ? "border-top:1px solid rgba(231,193,135,0.7);" : ""}">
             <div class="lip-example-row" style="justify-content:center;gap:8px;margin-bottom:0;">
-              ${buildConjunctionPlainWord(word)}
+              ${buildConjunctionEnChip(word)}
               ${buildTenseSymbol("→")}
-              ${buildConjunctionPlainMeaning(meaning)}
+              ${buildConjunctionKoChip(meaning)}
             </div>
           </div>
         `).join("")}
@@ -2512,11 +2482,11 @@
   }
 
   function buildConjunctionKoChip(text) {
-    return `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:58px;min-height:26px;padding:4px 9px;border-radius:8px;background:#ffe8b8;color:#7e3106;border:1px solid #e7c187;font-size:12px;line-height:1;font-weight:950;white-space:nowrap;">${escapeHtml(text)}</span>`;
+    return `<span class="aisth-conjunction-chip is-ko" style="display:inline-flex;align-items:center;justify-content:center;min-width:58px;min-height:26px;padding:4px 9px;border-radius:8px;background:#ffe8b8;color:#7e3106;border:1px solid #e7c187;font-size:12px;line-height:1;font-weight:950;white-space:nowrap;">${escapeHtml(text)}</span>`;
   }
 
   function buildConjunctionEnChip(text) {
-    return `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:26px;padding:4px 9px;border-radius:999px;background:#ffe8b8;color:#7e3106;border:1px solid #e7c187;font-size:12px;line-height:1;font-weight:950;white-space:nowrap;">${escapeHtml(text)}</span>`;
+    return `<span class="aisth-conjunction-chip is-en" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:26px;padding:4px 9px;border-radius:999px;background:#ffe8b8;color:#7e3106;border:1px solid #e7c187;font-size:12px;line-height:1;font-weight:950;white-space:nowrap;">${escapeHtml(text)}</span>`;
   }
 
   function buildConjunctionSentence(text) {
@@ -2751,6 +2721,102 @@
     `;
   }
 
+  function buildPassiveApplicationStartHtml() {
+    return `
+      <div class="lip-example-stack">
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;">
+          <span style="font-size:12px;line-height:1;font-weight:900;color:#7e3106;white-space:nowrap;">6-1 마지막 단계</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr;gap:2px;justify-items:center;min-width:0;">
+          ${buildCuteArrowFan("ed")}
+          ${buildEdWord("closed")}
+        </div>
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;">
+          ${buildEdMeaningLine("당하는 상태")}
+        </div>
+      </div>
+    `;
+  }
+
+  function buildPassiveBeFormHtml() {
+    return `
+      <div class="lip-example-stack" style="gap:10px;">
+        <div class="lip-example-row" style="justify-content:center;gap:7px;margin-bottom:0;flex-wrap:wrap;">
+          ${buildIngEdPlainText("The door")}
+          <span style="font-size:20px;line-height:1;font-weight:950;color:#7e3106;">+</span>
+          <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:9px;background:#fff7e8;border:2px solid #f17b2a;color:#c25a00;font-size:17px;line-height:1;font-weight:950;box-shadow:0 0 8px rgba(241,123,42,.2);">is</span>
+          <span style="font-size:20px;line-height:1;font-weight:950;color:#7e3106;">+</span>
+          ${buildEdWord("closed")}
+        </div>
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;">
+          <span style="font-size:14px;line-height:1.35;font-weight:950;color:#3c2d22;text-align:center;">문은 <span style="color:#075fc9;text-shadow:0 0 5px rgba(0,103,255,.2);">닫힘을 당한 상태</span>이다.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildPassiveByAgentHtml() {
+    return `
+      <div class="lip-example-stack" style="gap:8px;">
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;">
+          <span style="font-size:14px;line-height:1.35;font-weight:900;color:#67584d;text-align:center;">Mina closed the door.</span>
+        </div>
+        <div style="font-size:22px;line-height:1;font-weight:950;color:#f17b2a;text-align:center;">↓</div>
+        <div class="lip-example-row" style="justify-content:center;gap:5px;margin-bottom:0;flex-wrap:wrap;">
+          ${buildIngEdPlainText("The door was")}
+          ${buildEdWord("closed")}
+          <span style="display:inline-flex;align-items:center;padding:5px 8px;border-radius:8px;background:rgba(47,157,87,.1);border:1px solid rgba(47,157,87,.28);color:#237b44;font-size:15px;line-height:1;font-weight:950;box-shadow:0 0 7px rgba(47,157,87,.14);">by Mina</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildEdBeforeNounHtml() {
+    return `
+      <div class="lip-example-stack" style="gap:9px;">
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;">
+          <span style="font-size:14px;line-height:1.35;font-weight:950;color:#3c2d22;">닫혀진 문</span>
+        </div>
+        <div style="font-size:21px;line-height:1;font-weight:950;color:#f17b2a;text-align:center;">↓</div>
+        <div class="lip-example-row" style="justify-content:center;gap:5px;margin-bottom:0;">
+          ${buildEdWord("closed")}
+          ${buildIngEdPlainText("door")}
+        </div>
+      </div>
+    `;
+  }
+
+  function buildEdAfterBeHtml() {
+    return `
+      <div class="lip-example-stack" style="gap:9px;">
+        <div class="lip-example-row" style="justify-content:center;margin-bottom:0;">
+          <span style="font-size:14px;line-height:1.35;font-weight:950;color:#3c2d22;">문은 닫혀 있다.</span>
+        </div>
+        <div style="font-size:21px;line-height:1;font-weight:950;color:#f17b2a;text-align:center;">↓</div>
+        <div class="lip-example-row" style="justify-content:center;gap:5px;margin-bottom:0;">
+          ${buildIngEdPlainText("The door is")}
+          ${buildEdWord("closed")}
+          ${buildIngEdPlainText(".")}
+        </div>
+      </div>
+    `;
+  }
+
+  function buildEdPositionCompareHtml() {
+    return `
+      <div style="display:grid;grid-template-columns:1fr;gap:11px;min-width:0;">
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;padding:9px;border-radius:12px;background:#fff;border:1px solid rgba(7,95,201,.16);">
+          <span style="font-size:11px;line-height:1;font-weight:950;color:#075fc9;white-space:nowrap;">명사 앞</span>
+          <span style="display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;">${buildEdWord("closed")}${buildIngEdPlainText("door")}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;padding:9px;border-radius:12px;background:#fff;border:1px solid rgba(7,95,201,.16);">
+          <span style="font-size:11px;line-height:1;font-weight:950;color:#075fc9;white-space:nowrap;">be 뒤</span>
+          <span style="display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;">${buildIngEdPlainText("The door is")}${buildEdWord("closed")}</span>
+        </div>
+      </div>
+    `;
+  }
+
   function buildIngStateApplyHtml() {
     const rows = [
       { lead: "나는 ", core: "수영하는 상태", tail: "이다" },
@@ -2947,11 +3013,11 @@
           max-width: 100%;
         }
         .aisth-polish-old {
-          animation: aisth-polish-old-erase 4.6s ease-in-out infinite;
+          animation: aisth-polish-old-erase 6.4s ease-in-out infinite;
         }
         .aisth-polish-new {
           opacity: 0;
-          animation: aisth-polish-new-write 4.6s ease-in-out infinite;
+          animation: aisth-polish-new-write 6.4s ease-in-out infinite;
         }
         .aisth-polish-eraser {
           position: absolute;
@@ -2963,7 +3029,7 @@
           background: repeating-linear-gradient(-45deg, rgba(255,255,255,0.95) 0 4px, rgba(199,0,31,0.16) 4px 8px);
           box-shadow: 0 0 6px rgba(199,0,31,0.26);
           opacity: 0;
-          animation: aisth-polish-eraser-sweep 4.6s ease-in-out infinite;
+          animation: aisth-polish-eraser-sweep 6.4s ease-in-out infinite;
           z-index: 3;
         }
         .aisth-polish-variant {
@@ -2972,10 +3038,19 @@
           transform: rotateX(90deg);
         }
         .aisth-polish-variant.is-first {
-          animation: aisth-polish-variant-first 4.6s ease-in-out infinite;
+          animation: aisth-polish-variant-first 6.4s ease-in-out infinite;
         }
         .aisth-polish-variant.is-second {
-          animation: aisth-polish-variant-second 4.6s ease-in-out infinite;
+          animation: aisth-polish-variant-second 6.4s ease-in-out infinite;
+        }
+        .aisth-polish-focus {
+          display: inline-block;
+          padding: 1px 5px;
+          border-radius: 7px;
+          background: rgba(255,20,58,.1);
+          color: #c7001f;
+          box-shadow: 0 0 8px rgba(255,20,58,.18);
+          text-shadow: 0 0 5px rgba(255,20,58,.18);
         }
         @keyframes aisth-state-old-out {
           0%, 34% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
@@ -2992,30 +3067,32 @@
           60%, 100% { opacity: 0; transform: translateX(108px) rotate(6deg); }
         }
         @keyframes aisth-polish-old-erase {
-          0%, 28% { opacity: 1; clip-path: inset(0 0 0 0); filter: blur(0); }
-          56% { opacity: 1; clip-path: inset(0 0 0 100%); filter: blur(0.6px); }
-          58%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); }
+          0%, 22% { opacity: 1; clip-path: inset(0 0 0 0); filter: blur(0); }
+          40% { opacity: 1; clip-path: inset(0 0 0 100%); filter: blur(0.6px); }
+          42%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); }
         }
         @keyframes aisth-polish-new-write {
-          0%, 57% { opacity: 0; clip-path: inset(0 100% 0 0); }
-          64% { opacity: 1; clip-path: inset(0 100% 0 0); }
-          88%, 100% { opacity: 1; clip-path: inset(0 0 0 0); }
+          0%, 41% { opacity: 0; clip-path: inset(0 100% 0 0); }
+          46% { opacity: 1; clip-path: inset(0 100% 0 0); }
+          58%, 89% { opacity: 1; clip-path: inset(0 0 0 0); }
+          92%, 100% { opacity: 0; clip-path: inset(0 0 0 0); }
         }
         @keyframes aisth-polish-eraser-sweep {
-          0%, 28% { opacity: 0; left: 0; transform: translateX(-14px) rotate(-7deg); }
-          34% { opacity: 1; left: 0; transform: translateX(0) rotate(-7deg); }
-          45% { opacity: 1; left: calc(55% - 7px); transform: rotate(7deg); }
-          56% { opacity: 1; left: calc(100% - 14px); transform: rotate(7deg); }
-          64%, 100% { opacity: 0; left: calc(100% - 14px); transform: rotate(7deg); }
+          0%, 22% { opacity: 0; left: 0; transform: translateX(-14px) rotate(-7deg); }
+          27% { opacity: 1; left: 0; transform: translateX(0) rotate(-7deg); }
+          34% { opacity: 1; left: calc(55% - 7px); transform: rotate(7deg); }
+          40% { opacity: 1; left: calc(100% - 14px); transform: rotate(7deg); }
+          44%, 100% { opacity: 0; left: calc(100% - 14px); transform: rotate(7deg); }
         }
         @keyframes aisth-polish-variant-first {
-          0%, 62% { opacity: 0; transform: rotateX(90deg); }
-          66%, 86% { opacity: 1; transform: rotateX(0deg); }
-          91%, 100% { opacity: 0; transform: rotateX(-90deg); }
+          0%, 45% { opacity: 0; transform: rotateX(90deg); }
+          50%, 67% { opacity: 1; transform: rotateX(0deg); }
+          71%, 100% { opacity: 0; transform: rotateX(-90deg); }
         }
         @keyframes aisth-polish-variant-second {
-          0%, 89% { opacity: 0; transform: rotateX(90deg); }
-          95%, 100% { opacity: 1; transform: rotateX(0deg); }
+          0%, 68% { opacity: 0; transform: rotateX(90deg); }
+          73%, 88% { opacity: 1; transform: rotateX(0deg); }
+          92%, 100% { opacity: 0; transform: rotateX(-90deg); }
         }
       </style>
     `;
@@ -3095,9 +3172,17 @@
     const items = Array.isArray(variants) ? variants : [];
     return `
       <span style="display:grid;grid-template-columns:1fr;align-items:center;justify-items:center;min-width:0;perspective:200px;">
-        ${items.map((text, index) => `<span class="aisth-polish-variant ${index === 0 ? "is-first" : "is-second"}">${buildIngPolishedLine(text, false)}</span>`).join("")}
+        ${items.map((text, index) => `<span class="aisth-polish-variant ${index === 0 ? "is-first" : "is-second"}">${buildIngPolishedVariantLine(text, index)}</span>`).join("")}
       </span>
     `;
+  }
+
+  function buildIngPolishedVariantLine(text, index) {
+    const source = String(text ?? "");
+    const target = index === 0 ? "수영하는 중" : "";
+    const at = target ? source.indexOf(target) : -1;
+    if (at < 0) return buildIngPolishedLine(source, false);
+    return `<span style="display:block;min-width:0;font-size:14.5px;line-height:1.35;font-weight:950;color:#3c2d22;word-break:keep-all;text-align:center;">${escapeHtml(source.slice(0, at))}<span class="aisth-polish-focus">${escapeHtml(target)}</span>${escapeHtml(source.slice(at + target.length))}</span>`;
   }
 
   function buildIngMarker(text) {
@@ -3262,6 +3347,44 @@
       ["have to", ["study", "clean", "leave"], "해야 한다", "must"],
     ];
     return buildModalListHtml(rows);
+  }
+
+  function buildModalPhraseBridgeHtml() {
+    return buildModalRotatorHtml([
+      ["want to", "eat", "먹고 싶다", "want"],
+      ["have to", "study", "공부해야 한다", "must"],
+      ["need to", "check", "확인할 필요가 있다", "need"],
+    ]);
+  }
+
+  function buildModalObligationPhraseHtml() {
+    return buildModalListHtml([
+      ["have to", ["study", "leave", "wear"], "해야 한다", "must"],
+      ["need to", ["check", "practice", "find"], "할 필요가 있다", "need"],
+    ]);
+  }
+
+  function buildModalNoNeedPhraseHtml() {
+    return buildModalListHtml([
+      ["don't have to", ["come", "hurry", "bring"], "안 해도 된다", "negative"],
+      ["doesn't have to", ["wait", "leave", "pay"], "안 해도 된다", "negative"],
+    ]);
+  }
+
+  function buildModalHabitAbilityPhraseHtml() {
+    return buildModalListHtml([
+      ["used to", ["play", "live", "walk"], "예전에는 하곤 했다", "future"],
+      ["be able to", ["solve", "swim", "join"], "할 수 있다", "can"],
+    ]);
+  }
+
+  function buildModalPhrasePracticeHtml() {
+    return buildModalRotatorHtml([
+      ["am going to", "call", "전화할 예정이다", "future"],
+      ["would like to", "order", "주문하고 싶습니다", "want"],
+      ["are able to", "join", "함께할 수 있다", "can"],
+      ["used to", "play", "예전에 놀곤 했다", "future"],
+    ]);
   }
 
   function buildModalPracticeHtml() {
@@ -3487,7 +3610,7 @@
           ${buildSvtdNextFocusArrow()}
           ${buildSvtdNextFocusToken("V", "했다", "verb")}
           ${buildSvtdNextFocusArrow()}
-          ${buildSvtdNextFocusToken("?", "다음은?", "pending")}
+          ${buildSvtdNextFocusToken("?", "다음은?", "pending", "is-pending")}
         </div>
       </div>
     `;

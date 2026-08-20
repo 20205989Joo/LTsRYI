@@ -6,6 +6,7 @@
   <title>모의고사 전용도구</title>
   <link rel="stylesheet" href="styles-frame.css" />
   <link rel="stylesheet" href="nav-buttons.css" />
+  <link rel="stylesheet" href="tablet-desk-background.css?v=20260731" />
   <style>
     [hidden] {
       display: none !important;
@@ -109,6 +110,42 @@
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
     }
 
+    #mock-topbar-memo-btn {
+      position: relative;
+      overflow: visible;
+      font-size: 0;
+    }
+
+    #mock-topbar-memo-btn::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 7px;
+      width: 25px;
+      height: 28px;
+      border: 2px solid currentColor;
+      border-radius: 3px;
+      background:
+        linear-gradient(90deg, transparent 0 31%, currentColor 31% 35%, transparent 35% 100%),
+        repeating-linear-gradient(180deg, transparent 0 6px, currentColor 6px 7px, transparent 7px 9px);
+      box-shadow: inset 0 0 0 2px var(--topbar-bg);
+    }
+
+    #mock-topbar-memo-btn::after {
+      content: "";
+      position: absolute;
+      right: 7px;
+      bottom: 7px;
+      width: 6px;
+      height: 25px;
+      border: 2px solid var(--topbar-bg);
+      border-radius: 4px 4px 2px 2px;
+      background: currentColor;
+      transform: rotate(42deg);
+      transform-origin: 50% 82%;
+      box-shadow: 0 0 0 1px currentColor;
+    }
+
     .topbar-save-btn {
       width: auto;
       min-width: 58px;
@@ -167,17 +204,20 @@
       cursor: default;
     }
 
-    .topbar-save-btn.is-busy {
+    .topbar-save-btn.is-busy,
+    .overlay-save-btn.is-busy {
       background: rgba(255, 236, 191, 0.5);
       color: #5a4621;
     }
 
-    .topbar-save-btn.is-ok {
+    .topbar-save-btn.is-ok,
+    .overlay-save-btn.is-ok {
       background: rgba(191, 255, 211, 0.52);
       color: #1f5a38;
     }
 
-    .topbar-save-btn.is-error {
+    .topbar-save-btn.is-error,
+    .overlay-save-btn.is-error {
       background: rgba(255, 189, 189, 0.52);
       color: #6a2323;
     }
@@ -929,6 +969,8 @@
       padding: 8px 10px;
       box-sizing: border-box;
       flex: 0 0 auto;
+      position: relative;
+      isolation: isolate;
     }
 
     .overlay-memo-title {
@@ -978,6 +1020,115 @@
       background-color: #5c574e;
     }
 
+    .overlay-save-btn {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 2;
+      min-width: 126px;
+      height: 40px;
+      border: 1px solid rgba(255, 239, 173, 0.92);
+      border-radius: 999px;
+      padding: 0 18px;
+      overflow: hidden;
+      background:
+        linear-gradient(115deg, #fff2ad 0%, #f4c858 34%, #f39b35 62%, #ffe28a 100%);
+      background-size: 220% 100%;
+      color: #36220c;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.52);
+      box-shadow:
+        0 0 0 2px rgba(129, 82, 30, 0.42),
+        0 0 18px rgba(255, 191, 69, 0.46),
+        0 7px 14px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.76);
+      transform: translate(-50%, -50%);
+      animation: overlay-save-wonder 3.2s ease-in-out infinite;
+      transition: filter 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .overlay-save-btn:hover {
+      background:
+        linear-gradient(115deg, #fff7c7 0%, #ffd86c 34%, #ffac3f 62%, #ffebb0 100%);
+      background-size: 220% 100%;
+      filter: saturate(1.08) brightness(1.05);
+      box-shadow:
+        0 0 0 2px rgba(157, 96, 27, 0.5),
+        0 0 25px rgba(255, 196, 72, 0.72),
+        0 9px 18px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.82);
+      animation: none;
+      transform: translate(-50%, -50%) scale(1.055);
+    }
+
+    .overlay-save-btn:active {
+      filter: saturate(1.02) brightness(0.98);
+      transform: translate(-50%, -50%) scale(0.98);
+    }
+
+    .overlay-save-btn:focus-visible {
+      outline: 3px solid rgba(255, 244, 183, 0.92);
+      outline-offset: 3px;
+    }
+
+    .overlay-save-btn::before {
+      content: "\2726";
+      display: inline-block;
+      margin-right: 7px;
+      color: #7d4217;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.84);
+    }
+
+    .overlay-save-btn::after {
+      content: "";
+      position: absolute;
+      top: -45%;
+      left: -34%;
+      width: 24%;
+      height: 190%;
+      pointer-events: none;
+      background: rgba(255, 255, 255, 0.6);
+      filter: blur(2px);
+      transform: rotate(18deg);
+      animation: overlay-save-shine 3.2s ease-in-out infinite;
+    }
+
+    .overlay-save-btn.is-busy,
+    .overlay-save-btn.is-ok,
+    .overlay-save-btn.is-error {
+      animation: none;
+    }
+
+    @keyframes overlay-save-wonder {
+      0%,
+      100% {
+        background-position: 0% 50%;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        background-position: 100% 50%;
+        transform: translate(-50%, -50%) scale(1.025);
+      }
+    }
+
+    @keyframes overlay-save-shine {
+      0%,
+      44% {
+        left: -34%;
+        opacity: 0;
+      }
+      52% {
+        opacity: 0.72;
+      }
+      67%,
+      100% {
+        left: 118%;
+        opacity: 0;
+      }
+    }
+
     .overlay-mini-popup {
       position: absolute;
       top: 76px;
@@ -991,6 +1142,11 @@
       align-items: center;
       gap: 6px;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
+    }
+
+    #mock-overlay-font-open,
+    #mock-overlay-font-popup {
+      display: none !important;
     }
 
     .overlay-mini-popup[hidden] {
@@ -2191,6 +2347,10 @@
       flex: 0 0 auto;
     }
 
+    .overlay-memo-tabbar[hidden] {
+      display: none !important;
+    }
+
     .overlay-tab-list {
       display: flex;
       align-items: center;
@@ -2641,19 +2801,6 @@
       <div class="exam-topbar">
         <button id="mock-topbar-picker-btn" class="topbar-icon-btn" type="button" title="PDF 불러오기">📂</button>
         <button id="mock-topbar-memo-btn" class="topbar-icon-btn" type="button" title="오버레이 메모">📝</button>
-        <div class="topbar-submit-wrap">
-          <button id="mock-topbar-submit-btn" class="topbar-icon-btn topbar-save-btn" type="button" title="제출 메뉴">제출</button>
-          <div id="mock-topbar-submit-popup" class="topbar-submit-menu" hidden>
-            <button id="mock-topbar-submit-active-btn" class="topbar-submit-option" type="button">현재 페이지 보내기</button>
-            <button id="mock-topbar-submit-all-btn" class="topbar-submit-option" type="button">전체 페이지 보내기</button>
-          </div>
-        </div>
-        <div class="topbar-submit-wrap">
-          <button id="mock-topbar-print-btn" class="topbar-icon-btn topbar-save-btn topbar-print-btn" type="button" title="출력 메뉴">🖨</button>
-          <div id="mock-topbar-print-popup" class="topbar-submit-menu" hidden>
-            <button id="mock-topbar-print-ready-btn" class="topbar-submit-option" type="button">출력</button>
-          </div>
-        </div>
         <div class="topbar-spacer"></div>
         <button id="mock-topbar-status" class="topbar-status" type="button">학년 · 연도 선택</button>
         <button class="topbar-power-btn" type="button" title="전원">⏻</button>
@@ -2674,10 +2821,10 @@
       <div id="mock-tab-close-confirm-backdrop" class="mini-confirm-backdrop" hidden></div>
       <div id="mock-tab-close-confirm-popup" class="mini-confirm-popup" hidden>
         <div class="mini-confirm-card" role="dialog" aria-modal="true" aria-labelledby="mock-tab-close-confirm-text">
-          <div id="mock-tab-close-confirm-text" class="mini-confirm-text">탭을 닫을까요?</div>
+          <div id="mock-tab-close-confirm-text" class="mini-confirm-text"></div>
           <div class="mini-confirm-actions">
-            <button id="mock-tab-close-cancel-btn" class="mini-confirm-btn mini-confirm-btn--cancel" type="button">취소</button>
-            <button id="mock-tab-close-ok-btn" class="mini-confirm-btn mini-confirm-btn--ok" type="button">닫기</button>
+            <button id="mock-tab-close-cancel-btn" class="mini-confirm-btn mini-confirm-btn--cancel" type="button">No</button>
+            <button id="mock-tab-close-ok-btn" class="mini-confirm-btn mini-confirm-btn--ok" type="button">Yes</button>
           </div>
         </div>
       </div>
@@ -2696,6 +2843,7 @@
           <span class="overlay-memo-title">NOTES : 필기</span>
           <button id="mock-overlay-close-btn" class="overlay-memo-close" type="button" aria-label="메모 닫기">✕</button>
           <div class="overlay-memo-topbar-spacer"></div>
+          <button id="mock-topbar-submit-btn" class="overlay-memo-tool-btn overlay-save-btn" type="button">&#51200;&#51109;&#54616;&#44592;</button>
           <button id="mock-overlay-font-open" class="overlay-memo-tool-btn" type="button">A+-</button>
           <div id="mock-overlay-font-popup" class="overlay-mini-popup" hidden>
             <button id="mock-overlay-font-dec" class="overlay-mini-step-btn" type="button" aria-label="폰트 줄이기">-</button>
@@ -2802,7 +2950,7 @@
             />
           </div>
         </div>
-        <div class="overlay-memo-tabbar">
+        <div class="overlay-memo-tabbar" hidden aria-hidden="true">
           <div id="mock-overlay-tab-list" class="overlay-tab-list"></div>
           <button id="mock-overlay-add-tab" class="overlay-tab-add" type="button" aria-label="메모 탭 추가">＋</button>
           <div id="mock-overlay-tab-type-popup" class="overlay-tab-type-popup" hidden>
@@ -2906,10 +3054,10 @@
     <button
       id="back-to-tray-btn"
       class="nav-mainhall-btn"
-      data-nav-mainhall="homework-tray_v1.html"
+      data-nav-mainhall="tablet_screen.html"
       data-nav-replace="true"
     >
-      ⬅ 테이블로 돌아가기
+      &#11013; &#54856;&#51004;&#47196; &#46028;&#50500;&#44032;&#44592;
     </button>
   </div>
 
@@ -2920,12 +3068,6 @@
       const pickerToggleBtn = document.getElementById("mock-topbar-picker-btn");
       const memoToggleBtn = document.getElementById("mock-topbar-memo-btn");
       const submitMenuBtn = document.getElementById("mock-topbar-submit-btn");
-      const submitMenuPopup = document.getElementById("mock-topbar-submit-popup");
-      const submitActiveBtn = document.getElementById("mock-topbar-submit-active-btn");
-      const submitAllBtn = document.getElementById("mock-topbar-submit-all-btn");
-      const printMenuBtn = document.getElementById("mock-topbar-print-btn");
-      const printMenuPopup = document.getElementById("mock-topbar-print-popup");
-      const printReadyBtn = document.getElementById("mock-topbar-print-ready-btn");
       const pickerPopup = document.getElementById("mock-picker-popup");
       const pickerBackdrop = document.getElementById("mock-picker-backdrop");
       const sessionPopup = document.getElementById("mock-session-popup");
@@ -3105,9 +3247,12 @@
       const DEBUG_FOUR_T_ZOOMBOX = true;
       const memoTabs = [{
         id: 1,
-        type: "blank",
+        type: "two_three",
         blankText: "",
-        twoThree: null,
+        twoThree: {
+          words: makeDefaultTwoTCards(),
+          sentences: makeDefaultThreeTCards()
+        },
         fourT: null,
         blankInk: []
       }];
@@ -3129,7 +3274,7 @@
       let selectedSessionId = "";
       let selectedSessionTitle = "";
       let selectedSessionTargetPage = null;
-      let pendingCloseTabIndex = null;
+      let actionConfirmResolver = null;
       let pdfRenderToken = 0;
       let lastPreviewScrollAt = 0;
       let activeWordIndex = null;
@@ -3199,12 +3344,6 @@
         !pickerToggleBtn ||
         !memoToggleBtn ||
         !submitMenuBtn ||
-        !submitMenuPopup ||
-        !submitActiveBtn ||
-        !submitAllBtn ||
-        !printMenuBtn ||
-        !printMenuPopup ||
-        !printReadyBtn ||
         !pickerPopup ||
         !pickerBackdrop ||
         !sessionPopup ||
@@ -3314,8 +3453,6 @@
 
       function openPickerPopup() {
         closeSessionPopup();
-        closeSubmitPopup();
-        closePrintPopup();
         pickerPopup.hidden = false;
         pickerBackdrop.hidden = false;
         setBtnActive(pickerToggleBtn, true);
@@ -3330,45 +3467,11 @@
       }
 
       function closeSubmitPopup() {
-        submitMenuPopup.hidden = true;
         setBtnActive(submitMenuBtn, false);
       }
 
-      function openSubmitPopup() {
-        closeSessionPopup();
-        closePickerPopup();
-        closePrintPopup();
-        submitMenuPopup.hidden = false;
-        setBtnActive(submitMenuBtn, true);
-      }
-
-      function toggleSubmitPopup() {
-        if (submitMenuPopup.hidden) {
-          openSubmitPopup();
-        } else {
-          closeSubmitPopup();
-        }
-      }
-
       function closePrintPopup() {
-        printMenuPopup.hidden = true;
-        setBtnActive(printMenuBtn, false);
-      }
-
-      function openPrintPopup() {
-        closeSessionPopup();
-        closePickerPopup();
-        closeSubmitPopup();
-        printMenuPopup.hidden = false;
-        setBtnActive(printMenuBtn, true);
-      }
-
-      function togglePrintPopup() {
-        if (printMenuPopup.hidden) {
-          openPrintPopup();
-        } else {
-          closePrintPopup();
-        }
+        return;
       }
 
       function closeSessionPopup() {
@@ -3518,15 +3621,40 @@
       function closeTabCloseConfirm() {
         tabCloseConfirmPopup.hidden = true;
         tabCloseConfirmBackdrop.hidden = true;
-        pendingCloseTabIndex = null;
+        const resolve = actionConfirmResolver;
+        actionConfirmResolver = null;
+        if (typeof resolve === "function") resolve(false);
       }
 
       function openTabCloseConfirm(index) {
         if (!Number.isFinite(Number(index))) return;
-        pendingCloseTabIndex = Math.trunc(Number(index));
-        tabCloseConfirmText.textContent = "탭을 닫을까요?";
+        const targetIndex = Math.trunc(Number(index));
+        void showActionConfirm("\uD0ED\uC744 \uB2EB\uC744\uAE4C\uC694?").then(function (confirmed) {
+          if (confirmed) closeMemoTabConfirmed(targetIndex);
+        });
+      }
+
+      function settleActionConfirm(confirmed) {
+        tabCloseConfirmPopup.hidden = true;
+        tabCloseConfirmBackdrop.hidden = true;
+        const resolve = actionConfirmResolver;
+        actionConfirmResolver = null;
+        if (typeof resolve === "function") resolve(!!confirmed);
+      }
+
+      function showActionConfirm(message) {
+        if (actionConfirmResolver) settleActionConfirm(false);
+        tabCloseConfirmText.textContent = String(message || "");
+        tabCloseCancelBtn.textContent = "No";
+        tabCloseOkBtn.textContent = "Yes";
         tabCloseConfirmPopup.hidden = false;
         tabCloseConfirmBackdrop.hidden = false;
+        window.requestAnimationFrame(function () {
+          tabCloseOkBtn.focus();
+        });
+        return new Promise(function (resolve) {
+          actionConfirmResolver = resolve;
+        });
       }
 
       function toggleTabTypePopup() {
@@ -7069,33 +7197,6 @@
 
       function renderMemoTabbar() {
         overlayTabList.innerHTML = "";
-        for (let idx = 0; idx < memoTabs.length; idx += 1) {
-          const item = memoTabs[idx];
-          const wrapper = document.createElement("div");
-          wrapper.className = "overlay-tab-item";
-
-          const tabBtn = document.createElement("button");
-          tabBtn.type = "button";
-          tabBtn.className = `overlay-tab-btn ${idx === activeMemoTabIndex ? "is-active" : "is-inactive"}`;
-          tabBtn.textContent = String(item.id);
-          tabBtn.title = TAB_TYPE_LABEL[item.type] || item.type;
-          tabBtn.addEventListener("click", function () {
-            switchMemoTab(idx);
-          });
-
-          const closeBtn = document.createElement("button");
-          closeBtn.type = "button";
-          closeBtn.className = "overlay-tab-close";
-          closeBtn.textContent = "✕";
-          closeBtn.title = "탭 닫기";
-          closeBtn.addEventListener("click", function () {
-            closeMemoTab(idx);
-          });
-
-          wrapper.appendChild(tabBtn);
-          wrapper.appendChild(closeBtn);
-          overlayTabList.appendChild(wrapper);
-        }
       }
 
       function switchMemoTab(index) {
@@ -7468,8 +7569,10 @@
         return true;
       }
 
-      function confirmDiscardWorkingDraft() {
-        const ok = window.confirm("작성중인 임시저장 내용이 있습니다.\n버리고 새 세션을 불러올까요?");
+      async function confirmDiscardWorkingDraft() {
+        const ok = await showActionConfirm(
+          "\uC800\uC7A5\uD558\uC9C0 \uC54A\uC740 \uB0B4\uC6A9\uC774 \uC788\uC73C\uBA74, \uBC84\uB824\uB450\uACE0 \uC0C8 \uCC3D\uC744 \uC5FD\uB2C8\uB2E4! \uAD1C\uCC2E\uC8E0?"
+        );
         if (!ok) return false;
         clearLocalDraftStorage("discard-by-user");
         return true;
@@ -7498,9 +7601,12 @@
         memoTabs.length = 0;
         memoTabs.push({
           id: 1,
-          type: "blank",
+          type: "two_three",
           blankText: "",
-          twoThree: null,
+          twoThree: {
+            words: makeDefaultTwoTCards(),
+            sentences: makeDefaultThreeTCards()
+          },
           fourT: null,
           blankInk: []
         });
@@ -7517,9 +7623,11 @@
         updateTopbarStatus();
       }
 
-      function confirmDiscardWorkingNotesForLoad() {
+      async function confirmDiscardWorkingNotesForLoad() {
         if (!hasAnyWorkingMemoContent()) return true;
-        const ok = window.confirm("작성중인 임시저장 내용이 있습니다.\n버리고 새 세션을 불러올까요?");
+        const ok = await showActionConfirm(
+          "\uC800\uC7A5\uD558\uC9C0 \uC54A\uC740 \uB0B4\uC6A9\uC774 \uC788\uC73C\uBA74, \uBC84\uB824\uB450\uACE0 \uC0C8 \uCC3D\uC744 \uC5FD\uB2C8\uB2E4! \uAD1C\uCC2E\uC8E0?"
+        );
         if (!ok) return false;
         resetMemoWorkspaceForNewLoad();
         return true;
@@ -8262,15 +8370,13 @@
         if (state === "busy") submitMenuBtn.classList.add("is-busy");
         if (state === "ok") submitMenuBtn.classList.add("is-ok");
         if (state === "error") submitMenuBtn.classList.add("is-error");
-        submitMenuBtn.textContent = label || "제출";
+        submitMenuBtn.textContent = label || "\uC800\uC7A5\uD558\uAE30";
 
         const mustDisable = !FIXED_STUDENT_ID || state === "busy";
         submitMenuBtn.disabled = mustDisable;
-        submitActiveBtn.disabled = mustDisable;
-        submitAllBtn.disabled = mustDisable;
         submitMenuBtn.title = !FIXED_STUDENT_ID
-          ? "URL에 ?id=UserId 가 필요합니다."
-          : "제출 메뉴";
+          ? "URL\uC5D0 ?id=UserId \uAC00 \uD544\uC694\uD569\uB2C8\uB2E4."
+          : "\uD604\uC7AC \uD398\uC774\uC9C0 \uC800\uC7A5";
         if (mustDisable) {
           closeSubmitPopup();
         }
@@ -8282,7 +8388,7 @@
         }
         saveButtonUiTimer = window.setTimeout(function () {
           saveButtonUiTimer = null;
-          setSubmitButtonsUi("idle", "제출");
+          setSubmitButtonsUi("idle", "\uC800\uC7A5\uD558\uAE30");
         }, Math.max(240, Number(delayMs) || 1200));
       }
 
@@ -8300,7 +8406,7 @@
           clearTimeout(submitToastTimer);
           submitToastTimer = null;
         }
-        toast.textContent = String(message || "제출되었습니다!");
+        toast.textContent = String(message || "\uC800\uC7A5 \uC644\uB8CC!");
         toast.classList.remove("is-show");
         void toast.offsetWidth;
         toast.classList.add("is-show");
@@ -8379,9 +8485,13 @@
         memoTabs.length = 0;
         memoTabs.push({
           id: 1,
-          type: "blank",
+          type: "two_three",
           blankText: "",
-          twoThree: null,
+          twoThree: {
+            words: makeDefaultTwoTCards(),
+            sentences: makeDefaultThreeTCards()
+          },
+          fourT: null,
           blankInk: []
         });
         nextMemoTabId = 2;
@@ -8415,7 +8525,7 @@
         const context = resolveSaveContext();
         if (!context.ok) {
           trace("warn", "manual submit blocked: required fields missing", context.issues);
-          setSubmitButtonsUi("error", "정보부족");
+          setSubmitButtonsUi("error", "\uC815\uBCF4\uBD80\uC871");
           queueSubmitButtonsUiReset(1800);
           return;
         }
@@ -8424,20 +8534,15 @@
         if (!submitTargets.length) {
           trace("info", `manual submit skipped: no writable template page (${mode})`);
           if (mode === "all") {
-            setSubmitButtonsUi("error", "작성없음");
-            window.alert("작성된 템플릿 페이지가 없어 제출하지 않았습니다.");
+            setSubmitButtonsUi("error", "\uC791\uC131\uC5C6\uC74C");
+            window.alert("\uC791\uC131\uB41C \uD398\uC774\uC9C0\uAC00 \uC5C6\uC5B4 \uC800\uC7A5\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.");
           } else {
-            setSubmitButtonsUi("error", "빈 페이지");
-            window.alert("현재 활성 페이지에 작성된 내용이 없어 제출하지 않았습니다.");
+            setSubmitButtonsUi("error", "\uBE48 \uD398\uC774\uC9C0");
+            window.alert("\uD604\uC7AC \uD398\uC774\uC9C0\uC5D0 \uC791\uC131\uB41C \uB0B4\uC6A9\uC774 \uC5C6\uC5B4 \uC800\uC7A5\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.");
           }
           queueSubmitButtonsUiReset(1800);
           return;
         }
-
-        const confirmMessage = mode === "all"
-          ? `모두 제출하시겠습니까?\n작성된 ${submitTargets.length}페이지를 제출합니다.`
-          : `현재 페이지(${submitTargets[0].templatePage})를 제출하시겠습니까?`;
-        if (!window.confirm(confirmMessage)) return;
 
         const submitQuestionMeta = resolveSubmitQuestionMeta();
 
@@ -8446,7 +8551,7 @@
           clearTimeout(saveButtonUiTimer);
           saveButtonUiTimer = null;
         }
-        setSubmitButtonsUi("busy", mode === "all" ? `모두 1/${submitTargets.length}` : "제출중");
+        setSubmitButtonsUi("busy", mode === "all" ? `\uBAA8\uB450 1/${submitTargets.length}` : "\uC800\uC7A5\uC911");
         saveLocalDraftNow("manual-save");
 
         try {
@@ -8454,7 +8559,7 @@
           for (let i = 0; i < submitTargets.length; i += 1) {
             const target = submitTargets[i];
             if (mode === "all") {
-              setSubmitButtonsUi("busy", `모두 ${i + 1}/${submitTargets.length}`);
+              setSubmitButtonsUi("busy", `\uBAA8\uB450 ${i + 1}/${submitTargets.length}`);
             }
 
             const payloadJson = buildPayloadJsonForTemplatePage(
@@ -8509,18 +8614,18 @@
           });
           clearLocalDraftStorage("server-saved");
           resetWorkspaceAfterSubmit();
-          setSubmitButtonsUi("ok", "제출완료");
+          setSubmitButtonsUi("ok", "\uC800\uC7A5\uC644\uB8CC");
           queueSubmitButtonsUiReset(1500);
-          showSubmitToast("제출되었습니다!");
+          showSubmitToast("\uC800\uC7A5 \uC644\uB8CC!");
           void fetchLiveSessions(true);
         } catch (err) {
           trace("error", "manual submit failed", err);
-          setSubmitButtonsUi("error", "제출실패");
+          setSubmitButtonsUi("error", "\uC800\uC7A5\uC2E4\uD328");
           queueSubmitButtonsUiReset(2200);
         } finally {
           isSavingSessionToServer = false;
           if (!saveButtonUiTimer) {
-            setSubmitButtonsUi("idle", "제출");
+            setSubmitButtonsUi("idle", "\uC800\uC7A5\uD558\uAE30");
           }
         }
       }
@@ -9231,7 +9336,13 @@
       }
 
       function normalizeSessionTabs(rawTabs) {
-        const sourceTabs = Array.isArray(rawTabs) && rawTabs.length ? rawTabs : [{ type: "blank", blankText: "" }];
+        const incomingTabs = Array.isArray(rawTabs) && rawTabs.length
+          ? rawTabs
+          : [{ type: "two_three", words: [], sentences: [] }];
+        const preferredTab = incomingTabs.find(function (tab) {
+          return tab && tab.type === "two_three";
+        }) || incomingTabs[0];
+        const sourceTabs = [preferredTab];
         return sourceTabs.map(function (raw, idx) {
           const safeRaw = raw && typeof raw === "object" ? raw : {};
           const type = safeRaw.type === "walkthrough" ? "walkthrough" : (safeRaw.type === "four_t" ? "four_t" : (safeRaw.type === "two_three" ? "two_three" : "blank"));
@@ -10859,7 +10970,7 @@
           return normalizeSessionTabs([{ type: "two_three", words, sentences }]);
         }
 
-        return normalizeSessionTabs([{ type: "blank", blankText: "" }]);
+        return normalizeSessionTabs([{ type: "two_three", words: [], sentences: [] }]);
       }
 
       function parseTemplateLabel(payloadObj) {
@@ -11356,7 +11467,7 @@
       async function applySessionPreset(session, sessionKey) {
         if (!session) return;
         if (shouldAskDiscardDraftForSession(sessionKey)) {
-          const proceed = confirmDiscardWorkingDraft();
+          const proceed = await confirmDiscardWorkingDraft();
           if (!proceed) {
             trace("info", "session load canceled by user: local draft kept");
             return;
@@ -11711,7 +11822,7 @@
       });
 
       openBtn.addEventListener("click", async function () {
-        const proceed = confirmDiscardWorkingNotesForLoad();
+        const proceed = await confirmDiscardWorkingNotesForLoad();
         if (!proceed) return;
         closePickerPopup();
         await tryLoadPdf();
@@ -11732,36 +11843,25 @@
         event.stopPropagation();
         setSessionViewTab("submitted");
       });
-      tabCloseConfirmBackdrop.addEventListener("click", closeTabCloseConfirm);
-      tabCloseCancelBtn.addEventListener("click", closeTabCloseConfirm);
+      tabCloseConfirmBackdrop.addEventListener("click", function () {
+        settleActionConfirm(false);
+      });
+      tabCloseCancelBtn.addEventListener("click", function () {
+        settleActionConfirm(false);
+      });
       tabCloseOkBtn.addEventListener("click", function () {
-        const targetIndex = Number(pendingCloseTabIndex);
-        closeTabCloseConfirm();
-        if (!Number.isFinite(targetIndex)) return;
-        closeMemoTabConfirmed(Math.trunc(targetIndex));
+        settleActionConfirm(true);
       });
       memoToggleBtn.addEventListener("click", function () {
         toggleMemoOverlay();
       });
-      submitMenuBtn.addEventListener("click", function (event) {
+      submitMenuBtn.addEventListener("click", async function (event) {
         event.stopPropagation();
-        toggleSubmitPopup();
-      });
-      submitActiveBtn.addEventListener("click", function () {
-        closeSubmitPopup();
-        void sendCurrentSessionToServer("active");
-      });
-      submitAllBtn.addEventListener("click", function () {
-        closeSubmitPopup();
-        void sendCurrentSessionToServer("all");
-      });
-      printMenuBtn.addEventListener("click", function (event) {
-        event.stopPropagation();
-        togglePrintPopup();
-      });
-      printReadyBtn.addEventListener("click", function () {
-        closePrintPopup();
-        window.alert("준비중입니다.");
+        const confirmed = await showActionConfirm(
+          "\uD604\uC7AC \uD398\uC774\uC9C0\uB97C \uC800\uC7A5\uD569\uB2C8\uB2E4. '\uB0B4 \uB178\uD2B8'\uC5D0\uC11C \uBCFC \uC218 \uC788\uC5B4\uC694!"
+        );
+        if (!confirmed) return;
+        await sendCurrentSessionToServer("active");
       });
       overlayCloseBtn.addEventListener("click", function () {
         toggleMemoOverlay(false);
@@ -11773,10 +11873,6 @@
       overlayFontOpenBtn.addEventListener("click", function (event) {
         event.stopPropagation();
         toggleFontPopup();
-      });
-      overlayAddTabBtn.addEventListener("click", function (event) {
-        event.stopPropagation();
-        toggleTabTypePopup();
       });
       overlayMemoText.addEventListener("input", saveActiveMemoText);
       blankPenToggleBtn.addEventListener("click", function () {
@@ -11796,12 +11892,6 @@
       overlayFontDecBtn.addEventListener("click", function () {
         memoFontSize = Math.max(10, memoFontSize - 1);
         applyMemoFontSize();
-      });
-      overlayTypeOptionBtns.forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          const type = btn.getAttribute("data-type") || "blank";
-          addMemoTab(type);
-        });
       });
       overlayThreePenToggleBtn.addEventListener("click", function () {
         setThreePenMode();
@@ -11928,12 +12018,6 @@
         if (!overlayTabTypePopup.hidden && !overlayTabTypePopup.contains(target) && target !== overlayAddTabBtn) {
           closeTabTypePopup();
         }
-        if (!submitMenuPopup.hidden && !submitMenuPopup.contains(target) && target !== submitMenuBtn) {
-          closeSubmitPopup();
-        }
-        if (!printMenuPopup.hidden && !printMenuPopup.contains(target) && target !== printMenuBtn) {
-          closePrintPopup();
-        }
         const clickedInsideSessionPopup = eventPathIncludesNode(event, sessionPopup);
         const clickedSessionToggle = eventPathIncludesNode(event, topbarStatus);
         if (!sessionPopup.hidden && !clickedInsideSessionPopup && !clickedSessionToggle) {
@@ -11945,14 +12029,6 @@
         if (event.key !== "Escape") return;
         if (!tabCloseConfirmPopup.hidden) {
           closeTabCloseConfirm();
-          return;
-        }
-        if (!submitMenuPopup.hidden) {
-          closeSubmitPopup();
-          return;
-        }
-        if (!printMenuPopup.hidden) {
-          closePrintPopup();
           return;
         }
         if (!sessionPopup.hidden) {
@@ -11985,7 +12061,7 @@
       });
 
       initializeFileMap();
-      setSubmitButtonsUi("idle", "제출");
+      setSubmitButtonsUi("idle", "\uC800\uC7A5\uD558\uAE30");
       updateSessionTabUi();
       const restoredLocalDraft = restoreLocalDraftFromStorage();
       if (restoredLocalDraft) {

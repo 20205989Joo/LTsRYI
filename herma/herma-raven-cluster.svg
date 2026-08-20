@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 210">
+  <defs>
+    <linearGradient id="branch" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111820"/>
+      <stop offset=".52" stop-color="#344251"/>
+      <stop offset="1" stop-color="#151a22"/>
+    </linearGradient>
+    <linearGradient id="plumage" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06090d"/>
+      <stop offset=".48" stop-color="#1d2835"/>
+      <stop offset=".72" stop-color="#26394e"/>
+      <stop offset="1" stop-color="#0a0d13"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#263e59"/>
+      <stop offset=".52" stop-color="#111923"/>
+      <stop offset="1" stop-color="#3a1721"/>
+    </linearGradient>
+    <radialGradient id="rubyEye" cx="38%" cy="34%" r="68%">
+      <stop offset="0" stop-color="#ffd8df"/>
+      <stop offset=".24" stop-color="#ff536f"/>
+      <stop offset=".68" stop-color="#a4082c"/>
+      <stop offset="1" stop-color="#3b0010"/>
+    </radialGradient>
+    <radialGradient id="sapphireEye" cx="38%" cy="34%" r="68%">
+      <stop offset="0" stop-color="#e0f6ff"/>
+      <stop offset=".24" stop-color="#4bb8ff"/>
+      <stop offset=".68" stop-color="#0754ad"/>
+      <stop offset="1" stop-color="#001b48"/>
+    </radialGradient>
+    <filter id="ravenGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.4" flood-color="#07111e" flood-opacity=".58"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="1.8" flood-color="#397ec1" flood-opacity=".20"/>
+    </filter>
+    <filter id="rubyGlow" x="-260%" y="-260%" width="620%" height="620%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.4" flood-color="#ff3158" flood-opacity=".92"/>
+    </filter>
+    <filter id="sapphireGlow" x="-260%" y="-260%" width="620%" height="620%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.4" flood-color="#39a6ff" flood-opacity=".92"/>
+    </filter>
+
+    <g id="rubyRaven" filter="url(#ravenGlow)">
+      <path d="M-7 46 L-27 81 L-6 70 L1 91 L11 67 L29 79 L17 44 Z" fill="#090d12"/>
+      <path d="M-2 1 C-21 8 -31 29 -22 48 C-16 61 -2 68 15 61 C32 54 39 34 31 18 C24 4 11 -3 -2 1 Z" fill="url(#plumage)"/>
+      <path d="M-12 17 C-19 31 -14 51 8 58 C24 43 27 28 18 14 C9 24 1 30 -12 17 Z" fill="url(#wing)" opacity=".92"/>
+      <path d="M-9 23 C2 31 10 40 13 54 M-5 17 C7 23 16 31 21 42 M-13 31 C-3 39 3 47 6 57" fill="none" stroke="#7291ae" stroke-width="1" stroke-linecap="round" opacity=".28"/>
+      <path d="M-11 4 C-3 -8 13 -11 24 -2 C31 4 33 14 29 22 C22 13 12 8 -1 10 Z" fill="#080c11"/>
+      <path d="M27 7 L49 16 L28 20 C22 15 22 11 27 7 Z" fill="#111a24"/>
+      <path d="M-11 60 C-15 68 -13 74 -8 79 M10 61 C6 70 7 76 12 81" fill="none" stroke="#0a0d12" stroke-width="3" stroke-linecap="round"/>
+      <path d="M-15 79 L-25 82 M-15 79 L-7 84 M9 81 L1 85 M9 81 L18 84" fill="none" stroke="#0a0d12" stroke-width="2" stroke-linecap="round"/>
+    </g>
+
+    <g id="sapphireRaven" filter="url(#ravenGlow)">
+      <path d="M7 45 L27 80 L7 70 L0 91 L-11 67 L-28 79 L-17 43 Z" fill="#090d12"/>
+      <path d="M2 1 C21 8 31 29 22 48 C16 61 2 68 -15 61 C-32 54 -39 34 -31 18 C-24 4 -11 -3 2 1 Z" fill="url(#plumage)"/>
+      <path d="M12 17 C19 31 14 51 -8 58 C-24 43 -27 28 -18 14 C-9 24 -1 30 12 17 Z" fill="url(#wing)" opacity=".92"/>
+      <path d="M11 23 C0 31 -10 40 -13 54 M5 17 C-7 23 -16 31 -21 42 M13 31 C3 39 -3 47 -6 57" fill="none" stroke="#7291ae" stroke-width="1" stroke-linecap="round" opacity=".28"/>
+      <path d="M11 4 C3 -8 -13 -11 -24 -2 C-31 4 -33 14 -29 22 C-22 13 -12 8 1 10 Z" fill="#080c11"/>
+      <path d="M-27 7 L-49 16 L-28 20 C-22 15 -22 11 -27 7 Z" fill="#111a24"/>
+      <path d="M11 60 C15 68 13 74 8 79 M-10 61 C-6 70 -7 76 -12 81" fill="none" stroke="#0a0d12" stroke-width="3" stroke-linecap="round"/>
+      <path d="M15 79 L25 82 M15 79 L7 84 M-9 81 L-1 85 M-9 81 L-18 84" fill="none" stroke="#0a0d12" stroke-width="2" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".34">
+    <path d="M12 177 C65 165 106 160 150 165 C203 171 249 163 293 143" stroke="url(#branch)" stroke-width="7" opacity=".88"/>
+    <path d="M18 181 C77 171 115 169 153 173 C207 179 255 168 291 150" stroke="#8aa0b2" stroke-width="1.1" opacity=".24"/>
+    <path d="M70 168 L44 144 M76 166 L62 132 M218 168 L239 139 M239 161 L269 134" stroke="url(#branch)" stroke-width="3" opacity=".76"/>
+    <path d="M51 146 L38 133 M238 140 L247 124 M266 136 L281 119" stroke="#334455" stroke-width="1.5" opacity=".46"/>
+  </g>
+
+  <use href="#rubyRaven" transform="translate(94 78) scale(.82)" opacity=".36"/>
+  <use href="#sapphireRaven" transform="translate(205 58) scale(.94)" opacity=".38"/>
+
+  <circle cx="110.4" cy="82.9" r="5.8" fill="url(#rubyEye)" filter="url(#rubyGlow)"/>
+  <circle cx="108.8" cy="81.3" r="1.25" fill="#fff" opacity=".96"/>
+  <circle cx="186.2" cy="63.6" r="5.8" fill="url(#sapphireEye)" filter="url(#sapphireGlow)"/>
+  <circle cx="184.6" cy="62" r="1.25" fill="#fff" opacity=".96"/>
+
+  <g fill="none" stroke-linecap="round" opacity=".34">
+    <path d="M37 52 C50 42 61 39 73 40" stroke="#3c77b1" stroke-width="1.4"/>
+    <path d="M242 31 C258 33 270 39 281 50" stroke="#a92e4a" stroke-width="1.4"/>
+    <path d="M145 21 C153 32 156 43 154 54" stroke="#637d96" stroke-width="1"/>
+  </g>
+
+  <g fill="#253545" opacity=".58">
+    <path d="M39 52 C47 45 54 45 61 49 C54 51 48 55 43 61 Z"/>
+    <path d="M266 45 C273 43 280 47 285 53 C278 52 272 54 267 58 Z"/>
+    <path d="M151 27 C157 34 158 41 155 48 C152 42 148 38 143 35 Z"/>
+  </g>
+</svg>

@@ -1,26 +1,27 @@
 ﻿// aisth-l3e4.js
 // Independent runtime for Aisth Lesson 3 Exercise 4
-// Circle-select version (no input box)
+// Card-select: here is / there is
 
-const EXCEL_FILE = "LTRYI-grammar-lesson-questions.xlsx";
 const TARGET_LESSON = 3;
 const TARGET_EXERCISE = 4;
+const SOURCE_EXERCISE = 5;
 const PAGE_LABEL = "Aisth L3-E4";
 const MAX_QUESTIONS = 0; // 0 = unlimited
 
-const DEFAULT_INSTRUCTION = "올바른 답을 동그라미 쳐보세요.";
+const FIXED_INSTRUCTION = "한국어 문장을 보고 알맞은 표현을 골라보세요.";
 
 const TEXT = {
   START: "🚀 시작",
-  INTRO_1: "문맥에 맞는 답을 선택해 동그라미로 표시하세요.",
-  INTRO_2: "오답이면 다시 고를 수 있고, 맞으면 다음 문제로 넘어갑니다.",
+  INTRO_1: "한국어 문장을 그대로 읽고 here is / there is 중 알맞은 표현을 고르세요.",
+  INTRO_2: "오답이면 다시 고를 수 있고, 정답이면 다음 문제로 넘어갑니다.",
   PIN: "📌",
   NO_QUESTIONS: "해당 Lesson/Exercise의 문제가 없습니다.",
   PICK_OPTION: "선택지를 먼저 고르세요.",
   CORRECT: "정답!",
   WRONG: "오답",
-  QTYPE_CIRCLE: "동그라미형",
-  LOAD_FAIL: "엑셀 파일을 불러오지 못했습니다. 파일명/경로를 확인하세요.",
+  QTYPE: "here is / there is",
+  OPT_HERE: "here is",
+  OPT_THERE: "there is",
   RESULT_TITLE: "결과 요약",
   SCORE: "점수",
   CORRECT_COUNT: "정답",
@@ -30,28 +31,6 @@ const TEXT = {
   CLOSE: "닫기",
   UNANSWERED: "(미응답)",
 };
-
-const NAME_STOPWORDS = new Set([
-  "A",
-  "B",
-  "Among",
-  "Who",
-  "Which",
-  "Then",
-  "So",
-  "Really",
-  "You",
-  "I",
-  "We",
-  "They",
-  "He",
-  "She",
-  "It",
-  "My",
-  "Is",
-  "This",
-  "That",
-]);
 
 let subcategory = "Grammar";
 let level = "aisth";
@@ -76,16 +55,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyQueryParams();
   wireBackButton();
   wirePopupEvents();
+  installFrameQuestionNavigator();
 
   try {
-    rawRows = await loadExcelRows(EXCEL_FILE);
+    rawRows = loadLocalQuestionRows();
   } catch (err) {
     console.error(err);
-    alert(TEXT.LOAD_FAIL + "\n" + EXCEL_FILE);
+    alert("문제 데이터 파일을 불러오지 못했습니다.\naisth-local-question-data.js");
     return;
   }
 
   buildQuestionsFromRows();
+  publishFrameDebugList();
   renderIntro();
 });
 
@@ -149,26 +130,6 @@ function injectRuntimeStyles() {
       white-space: pre-wrap;
     }
 
-    .blank-slot {
-      display: inline-block;
-      padding: 1px 6px;
-      border-radius: 7px;
-      border: 1px dashed #d5a22a;
-      background: #fff8e4;
-      color: #7e3106;
-      font-weight: 900;
-      margin: 0 2px;
-    }
-
-    .focus-token {
-      background: rgba(255, 208, 90, 0.45);
-      border-radius: 6px;
-      padding: 0 3px;
-      box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
-      color: #7e3106;
-      font-weight: 900;
-    }
-
     .choice-line {
       font-size: 15px;
       line-height: 1.9;
@@ -190,6 +151,7 @@ function injectRuntimeStyles() {
       user-select: none;
       transition: color 0.15s ease;
       z-index: 0;
+      text-transform: lowercase;
     }
 
     .opt-token:hover {
@@ -218,6 +180,34 @@ function injectRuntimeStyles() {
     .slash {
       color: #6f5847;
       font-weight: 700;
+    }
+
+    .focus-token {
+      background: rgba(255, 208, 90, 0.45);
+      border-radius: 6px;
+      padding: 0 3px;
+      box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.18);
+      color: #7e3106;
+      font-weight: 900;
+    }
+
+    .l34-question-box .question-instruction {
+      color: #111;
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 950;
+      margin: 4px 0 12px;
+    }
+
+    .l34-question-box .sentence {
+      min-height: 88px;
+      box-sizing: border-box;
+      padding: 18px 14px;
+      border: 1.5px solid rgba(126,49,6,.34);
+      color: #203736;
+      font-size: 17px;
+      font-weight: 850;
+      line-height: 1.7;
     }
 
     .btn-row {
@@ -286,99 +276,81 @@ function wirePopupEvents() {
   });
 }
 
-async function loadExcelRows(filename) {
-  const cacheBust = `v=${Date.now()}`;
-  const url = filename.includes("?") ? `${filename}&${cacheBust}` : `${filename}?${cacheBust}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-  return rows.filter((row) => !isRowAllEmpty(row));
+function loadLocalQuestionRows() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.getRows !== "function") {
+    throw new Error("Aisth local question data is not loaded.");
+  }
+  return window.AisthLocalQuestionData.getRows(TARGET_LESSON, SOURCE_EXERCISE);
 }
 
-function isRowAllEmpty(row) {
-  const keys = Object.keys(row || {});
-  if (!keys.length) return true;
-  return keys.every((k) => String(row[k] ?? "").trim() === "");
+function publishFrameDebugList() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.publishDebugList !== "function") return;
+  window.AisthLocalQuestionData.publishDebugList(questions, {
+    label: PAGE_LABEL,
+    source: "local",
+    title: "aisth-local-question-data.js",
+  });
+}
+
+function installFrameQuestionNavigator() {
+  if (!window.AisthLocalQuestionData || typeof window.AisthLocalQuestionData.installNavigator !== "function") return;
+  window.AisthLocalQuestionData.installNavigator({
+    getLength: () => questions.length,
+    goTo: (nextIndex) => {
+      if (typeof autoNextTimer !== "undefined" && autoNextTimer) {
+        window.clearTimeout(autoNextTimer);
+        autoNextTimer = 0;
+      }
+      if (typeof hintTimerId !== "undefined" && hintTimerId) {
+        window.clearTimeout(hintTimerId);
+        hintTimerId = 0;
+      }
+      isCurrentLocked = false;
+      currentIndex = nextIndex;
+      renderQuestion();
+    },
+  });
 }
 
 function buildQuestionsFromRows() {
   let filtered = rawRows
-    .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === TARGET_EXERCISE)
+    .filter((r) => Number(r["Lesson"]) === TARGET_LESSON && Number(r["Exercise"]) === SOURCE_EXERCISE)
     .sort((a, b) => Number(a["QNumber"]) - Number(b["QNumber"]));
 
   if (MAX_QUESTIONS > 0) filtered = filtered.slice(0, MAX_QUESTIONS);
 
-  const fixedInstruction = deriveInstructionMode(filtered) || DEFAULT_INSTRUCTION;
-  const answerPool = filtered
-    .map((r) => stripEmphasisMarkers(normalizeEscapedBreaks(String(r["Answer"] ?? "").trim())))
-    .map((s) => s.trim())
-    .filter(Boolean);
-
   questions = filtered.map((row, idx) => {
     const questionRaw = normalizeEscapedBreaks(String(row["Question"] ?? "").trim());
-    const answerRaw = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim())).trim();
-    const title = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Title"] ?? "").trim()));
-    const qNumber = Number(row["QNumber"]) || idx + 1;
-    const instructionRaw = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
-    const explicit = parseExplicitChoiceGroup(questionRaw);
+    const answerRaw = normalizeEscapedBreaks(String(row["Answer"] ?? "").trim());
+    const title = normalizeEscapedBreaks(String(row["Title"] ?? "").trim());
 
-    const instruction = instructionRaw && !isInstructionLeakingAnswer(instructionRaw, answerRaw)
-      ? instructionRaw
-      : fixedInstruction;
-
-    const options = buildChoiceOptions({
-      question: questionRaw,
-      answer: answerRaw,
-      explicitChoices: explicit?.options || [],
-      answerPool,
-      qNumber,
-    });
-
-    const questionDisplay = explicit?.fullMatch
-      ? questionRaw.replace(explicit.fullMatch, "( ___ )")
-      : questionRaw;
+    const expectedKey = resolveExpectedKey(questionRaw, answerRaw);
 
     return {
       no: idx + 1,
-      qNumber,
+      qNumber: Number(row["QNumber"]) || idx + 1,
       title,
+      instruction: FIXED_INSTRUCTION,
       questionRaw,
-      questionDisplay,
+      questionDisplay: questionRaw,
       answerRaw,
-      instruction,
-      options,
+      expectedKey,
+      options: [TEXT.OPT_HERE, TEXT.OPT_THERE],
     };
   });
 }
 
-function deriveInstructionMode(rows) {
-  const bucket = new Map();
-  rows.forEach((row) => {
-    const instruction = normalizeEscapedBreaks(String(row["Instruction"] ?? "").trim());
-    const answer = stripEmphasisMarkers(normalizeEscapedBreaks(String(row["Answer"] ?? "").trim()));
-    if (!instruction) return;
-    if (isInstructionLeakingAnswer(instruction, answer)) return;
-    bucket.set(instruction, (bucket.get(instruction) || 0) + 1);
-  });
-  return pickTopKey(bucket);
-}
+function resolveExpectedKey(questionRaw, answerRaw) {
+  const q = String(questionRaw || "");
+  const a = normalizeForCompare(answerRaw).toLowerCase();
 
-function pickTopKey(mapObj) {
-  let topKey = "";
-  let topCount = -1;
-  for (const [k, c] of mapObj.entries()) {
-    if (c > topCount) {
-      topKey = k;
-      topCount = c;
-    }
-  }
-  return topKey;
+  if (q.includes("(여기)")) return "here";
+  if (q.includes("(저기)")) return "there";
+
+  if (a.startsWith("here is")) return "here";
+  if (a.startsWith("there is")) return "there";
+
+  return "";
 }
 
 function renderIntro() {
@@ -404,7 +376,6 @@ function renderIntro() {
 
   const total = questions.length;
   const title = questions[0]?.title || PAGE_LABEL;
-  const firstInst = stripEmphasisMarkers(questions[0]?.instruction || DEFAULT_INSTRUCTION);
 
   area.innerHTML = `
     <div class="box">
@@ -423,7 +394,7 @@ function renderIntro() {
         ${escapeHtml(TEXT.INTRO_2)}
       </div>
 
-      <div style="margin-top:10px; font-size:13px; color:#7e3106;">${TEXT.PIN} ${escapeHtml(firstInst)}</div>
+      <div style="margin-top:10px; font-size:13px; color:#7e3106;">${TEXT.PIN} ${escapeHtml(FIXED_INSTRUCTION)}</div>
       <button class="quiz-btn" id="start-btn" style="width:100%; margin-top:12px;">${escapeHtml(TEXT.START)}</button>
     </div>
   `;
@@ -456,59 +427,55 @@ function renderQuestion() {
   isCurrentLocked = false;
   selectedOptionIndex = -1;
 
-  const qBody = renderTextWithEmphasis(q.questionDisplay).replace(/_{2,}/g, (m) => `<span class="blank-slot">${m}</span>`);
-  const optionLine = renderChoiceOptionsLine(q.options);
+  const qBody = renderTextWithEmphasis(q.questionDisplay);
 
   area.innerHTML = `
     <div class="q-label">Q. ${currentIndex + 1} / ${questions.length}</div>
 
-    <div class="box">
-      <div class="question-instruction">${renderTextWithEmphasis(q.instruction || DEFAULT_INSTRUCTION)}</div>
+    <div class="box l34-question-box">
+      <div class="question-instruction">${escapeHtml(FIXED_INSTRUCTION)}</div>
       <div class="sentence aisth-question-surface aisth-question-center">${qBody}</div>
-    </div>
-
-    <div class="box" style="background:#fff;">
-      <div class="choice-line">${optionLine}</div>
+      <div class="aisth-choice-list">${renderOptionTokens(q.options)}</div>
       <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="quiz-btn" id="submit-btn" type="button">제출</button>
-      <button class="quiz-btn" id="next-btn" type="button" disabled>다음</button>
     </div>
   `;
 
   wireOptionClicks();
-
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
-  if (submitBtn) submitBtn.addEventListener("click", submitCurrentAnswer);
-  if (nextBtn) nextBtn.addEventListener("click", goNext);
 }
 
-function renderChoiceOptionsLine(options) {
-  const opts = Array.isArray(options) ? options.filter(Boolean) : [];
-  if (opts.length < 2) return "";
-  const html = opts
-    .map((opt, idx) => `<span class="opt-token" data-opt-index="${idx}">${escapeHtml(opt)}</span>`)
-    .join(`<span class="slash"> / </span>`);
-  return `(${html})`;
+function renderOptionTokens(options) {
+  return options
+    .map((opt, idx) => `
+      <div class="aisth-choice-item l34-choice-item" data-opt-index="${idx}" role="button" tabindex="0">
+        <span class="aisth-choice-label">${String.fromCharCode(65 + idx)}</span>
+        <span class="aisth-choice-text">${escapeHtml(opt)}</span>
+      </div>
+    `)
+    .join("");
 }
 
 function wireOptionClicks() {
-  document.querySelectorAll(".opt-token").forEach((el) => {
-    el.addEventListener("click", () => {
+  document.querySelectorAll(".l34-choice-item").forEach((el) => {
+    const activate = () => {
       if (isCurrentLocked) return;
       const idx = Number(el.dataset.optIndex ?? -1);
       if (!Number.isInteger(idx) || idx < 0) return;
       selectedOptionIndex = idx;
       refreshOptionSelection();
+      submitCurrentAnswer();
+    };
+    el.addEventListener("click", activate);
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
     });
   });
 }
 
 function refreshOptionSelection() {
-  document.querySelectorAll(".opt-token").forEach((el) => {
+  document.querySelectorAll(".l34-choice-item").forEach((el) => {
     const idx = Number(el.dataset.optIndex ?? -1);
     el.classList.toggle("selected", idx === selectedOptionIndex);
   });
@@ -518,18 +485,19 @@ function submitCurrentAnswer() {
   if (isCurrentLocked) return;
 
   const q = questions[currentIndex];
-  const submitBtn = document.getElementById("submit-btn");
-  const nextBtn = document.getElementById("next-btn");
   const feedback = document.getElementById("feedback");
 
   if (!q) return;
+
   if (selectedOptionIndex < 0) {
     showToast("no", TEXT.PICK_OPTION);
     return;
   }
 
-  const selected = String(q.options[selectedOptionIndex] ?? "").trim();
-  const ok = isAnswerCorrect(selected, q.answerRaw);
+  const selectedText = String(q.options[selectedOptionIndex] || "").trim();
+  const selectedKey = normalizeLoose(selectedText);
+
+  const ok = isCorrectSelection(selectedKey, q.expectedKey, q.answerRaw);
 
   if (!ok) {
     if (feedback) {
@@ -541,20 +509,20 @@ function submitCurrentAnswer() {
   }
 
   isCurrentLocked = true;
-  if (submitBtn) submitBtn.disabled = true;
-  if (nextBtn) nextBtn.disabled = false;
-
-  document.querySelectorAll(".opt-token").forEach((el) => {
+  scheduleAutoNext();
+  document.querySelectorAll(".l34-choice-item").forEach((el) => {
     el.style.pointerEvents = "none";
   });
+
+  const answerLabel = q.expectedKey === "there" ? TEXT.OPT_THERE : TEXT.OPT_HERE;
 
   results.push({
     no: currentIndex + 1,
     qNumber: q.qNumber,
-    question: stripEmphasisMarkers(q.questionDisplay),
-    selected,
-    answer: q.answerRaw,
-    instruction: q.instruction,
+    question: q.questionDisplay,
+    selected: selectedText,
+    answer: answerLabel,
+    instruction: FIXED_INSTRUCTION,
     correct: true,
   });
 
@@ -567,6 +535,23 @@ function submitCurrentAnswer() {
   showToast("ok", TEXT.CORRECT);
 }
 
+function isCorrectSelection(selectedKey, expectedKey, answerRaw) {
+  if (expectedKey === "here") return selectedKey === normalizeLoose(TEXT.OPT_HERE);
+  if (expectedKey === "there") return selectedKey === normalizeLoose(TEXT.OPT_THERE);
+
+  const a = normalizeForCompare(answerRaw).toLowerCase();
+  if (a.startsWith("here is")) return selectedKey === normalizeLoose(TEXT.OPT_HERE);
+  if (a.startsWith("there is")) return selectedKey === normalizeLoose(TEXT.OPT_THERE);
+  return false;
+}
+
+function scheduleAutoNext() {
+  const solvedIndex = currentIndex;
+  window.setTimeout(() => {
+    if (isCurrentLocked && currentIndex === solvedIndex) goNext();
+  }, 700);
+}
+
 function goNext() {
   currentIndex += 1;
   if (currentIndex >= questions.length) {
@@ -576,330 +561,13 @@ function goNext() {
   renderQuestion();
 }
 
-function isAnswerCorrect(userRaw, modelRaw) {
-  const userStrict = normalizeForCompare(userRaw);
-  const userLoose = normalizeLoose(userRaw);
-  if (!userStrict && !userLoose) return false;
-
-  const candidates = buildModelCandidates(modelRaw);
-  for (const cand of candidates) {
-    const candStrict = normalizeForCompare(cand);
-    const candLoose = normalizeLoose(cand);
-    if (userStrict && candStrict && userStrict === candStrict) return true;
-    if (userLoose && candLoose && userLoose === candLoose) return true;
-  }
-  return false;
-}
-
-function buildModelCandidates(modelRaw) {
-  const raw = String(modelRaw ?? "").trim();
-  if (!raw) return [""];
-
-  const set = new Set([raw]);
-
-  for (const line of raw.split(/\r?\n/)) {
-    const t = line.trim();
-    if (!t) continue;
-    set.add(t);
-
-    for (const part of t.split("||")) {
-      const p = part.trim();
-      if (p) set.add(p);
-    }
-
-    if (/\bor\b/i.test(t)) {
-      for (const part of t.split(/\bor\b/i)) {
-        const p = part.trim();
-        if (p && p.length <= 80) set.add(p);
-      }
-    }
-
-    if (t.includes("/")) {
-      const parts = t.split("/").map((x) => x.trim()).filter(Boolean);
-      if (parts.length >= 2 && parts.length <= 6) {
-        parts.forEach((p) => { if (p.length <= 80) set.add(p); });
-      }
-    }
-
-    if (t.includes(",")) {
-      const parts = t.split(",").map((x) => x.trim()).filter(Boolean);
-      if (parts.length >= 2 && parts.length <= 4) {
-        parts.forEach((p) => { if (p.length <= 80) set.add(p); });
-      }
-    }
-  }
-
-  return [...set];
-}
-
-function buildChoiceOptions({ question, answer, explicitChoices, answerPool, qNumber }) {
-  const answerNorm = normalizeLoose(answer);
-  const options = [];
-  const seen = new Set();
-
-  const add = (value) => {
-    const clean = cleanChoiceText(value);
-    if (!clean) return;
-    const key = normalizeLoose(clean);
-    if (!key || seen.has(key)) return;
-    seen.add(key);
-    options.push(clean);
-  };
-
-  if (Array.isArray(explicitChoices) && explicitChoices.length >= 2) {
-    explicitChoices.forEach(add);
-    add(answer);
-    return dedupeByNormalize(options);
-  }
-
-  add(answer);
-  extractNameCandidates(question).forEach(add);
-  extractOnePhrases(question).forEach(add);
-  buildVariantCandidates(answer).forEach(add);
-
-  const relatedPool = (answerPool || [])
-    .map(cleanChoiceText)
-    .filter(Boolean)
-    .filter((x) => isSameShape(answer, x))
-    .filter((x) => normalizeLoose(x) !== answerNorm);
-
-  relatedPool.forEach((x) => {
-    if (options.length < 4) add(x);
-  });
-
-  (answerPool || []).forEach((x) => {
-    if (options.length < 4) add(x);
-  });
-
-  buildGenericFallback(answer).forEach((x) => {
-    if (options.length < 4) add(x);
-  });
-
-  const normalized = dedupeByNormalize(options).filter((x) => x);
-  if (!normalized.some((x) => normalizeLoose(x) === answerNorm)) normalized.unshift(cleanChoiceText(answer));
-
-  const picked = [normalized[0], ...normalized.slice(1, 4)].filter(Boolean);
-  if (picked.length < 2) return [cleanChoiceText(answer), cleanChoiceText(answer)];
-  return rotateChoices(picked, qNumber);
-}
-
-function rotateChoices(options, qNumber) {
-  const list = dedupeByNormalize(options).filter(Boolean);
-  if (list.length < 2) return list;
-  const shift = Math.abs(Number(qNumber) || 0) % list.length;
-  return list.slice(shift).concat(list.slice(0, shift));
-}
-
-function dedupeByNormalize(items) {
-  const out = [];
-  const seen = new Set();
-  (items || []).forEach((item) => {
-    const s = cleanChoiceText(item);
-    const key = normalizeLoose(s);
-    if (!s || !key || seen.has(key)) return;
-    seen.add(key);
-    out.push(s);
-  });
-  return out;
-}
-
-function parseExplicitChoiceGroup(questionText) {
-  const s = normalizeEscapedBreaks(String(questionText ?? ""));
-  const re = /\(([^()]*\/[^()]*)\)/g;
-  let m;
-  while ((m = re.exec(s)) !== null) {
-    const inside = String(m[1] ?? "").trim();
-    const options = inside.split("/")
-      .map((x) => cleanChoiceText(x))
-      .filter(Boolean);
-    if (options.length >= 2) {
-      return {
-        fullMatch: m[0],
-        options: dedupeByNormalize(options),
-      };
-    }
-  }
-  return null;
-}
-
-function extractNameCandidates(questionText) {
-  const names = [];
-  const re = /\b[A-Z][a-z]+\b/g;
-  let m;
-  const s = normalizeEscapedBreaks(String(questionText ?? ""));
-  while ((m = re.exec(s)) !== null) {
-    const name = String(m[0] || "").trim();
-    if (!name || NAME_STOPWORDS.has(name)) continue;
-    names.push(name);
-  }
-  return dedupeByNormalize(names);
-}
-
-function extractOnePhrases(questionText) {
-  const out = [];
-  const s = normalizeEscapedBreaks(String(questionText ?? ""));
-
-  const phraseRe = /\b(the\s+(?:first|second|third|fourth|fifth|last)\s+one|this one|that one)\b/gi;
-  let m;
-  while ((m = phraseRe.exec(s)) !== null) {
-    out.push(String(m[1] ?? "").trim());
-  }
-
-  return dedupeByNormalize(out);
-}
-
-function buildVariantCandidates(answerText) {
-  const out = [];
-  const answer = cleanChoiceText(answerText);
-  const isProperName = /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*$/.test(answer);
-  if (isProperName) return out;
-  const lower = answer.toLowerCase();
-
-  const pref = lower.match(/^(more|most|less|least)\s+(.+)$/);
-  if (pref) {
-    const stem = pref[2].trim();
-    out.push(`more ${stem}`);
-    out.push(`most ${stem}`);
-    out.push(`less ${stem}`);
-    out.push(`least ${stem}`);
-  }
-
-  const onePhrase = lower.match(/^the\s+(first|second|third|fourth|fifth|last)\s+one$/);
-  if (onePhrase) {
-    out.push("the first one");
-    out.push("the second one");
-    out.push("the third one");
-    out.push("the last one");
-  }
-
-  if (/^[a-z]+$/.test(lower)) {
-    if (lower.endsWith("er")) {
-      const base = deriveBaseFromEr(lower);
-      out.push(base);
-      out.push(toComparative(base));
-      out.push(toSuperlative(base));
-    } else if (lower.endsWith("est")) {
-      const base = deriveBaseFromEst(lower);
-      out.push(base);
-      out.push(toComparative(base));
-      out.push(toSuperlative(base));
-    } else {
-      out.push(toComparative(lower));
-      out.push(toSuperlative(lower));
-    }
-  }
-
-  return dedupeByNormalize(out);
-}
-
-function buildGenericFallback(answerText) {
-  const answer = cleanChoiceText(answerText).toLowerCase();
-  if (/^[A-Z][a-z]+$/.test(cleanChoiceText(answerText))) {
-    return ["Alice", "Mike", "Tom"];
-  }
-  if (answer.includes("one")) {
-    return ["the first one", "the second one", "the third one"];
-  }
-  if (/^(more|most|less|least)\s+/.test(answer)) {
-    const stem = answer.replace(/^(more|most|less|least)\s+/, "").trim();
-    return [`more ${stem}`, `most ${stem}`, `less ${stem}`, `least ${stem}`];
-  }
-  if (/^[a-z]+$/.test(answer)) {
-    const base = answer.endsWith("er")
-      ? deriveBaseFromEr(answer)
-      : answer.endsWith("est")
-        ? deriveBaseFromEst(answer)
-        : answer;
-    return [base, toComparative(base), toSuperlative(base)];
-  }
-  return [];
-}
-
-function isSameShape(answer, candidate) {
-  const a = cleanChoiceText(answer);
-  const b = cleanChoiceText(candidate);
-  if (!a || !b) return false;
-  if (normalizeLoose(a) === normalizeLoose(b)) return false;
-
-  if (/^[A-Z][a-z]+$/.test(a)) return /^[A-Z][a-z]+$/.test(b);
-  if (/\bone\b/i.test(a)) return /\bone\b/i.test(b);
-  if (/^(more|most|less|least)\s+/i.test(a)) return /^(more|most|less|least)\s+/i.test(b);
-  if (/^[a-z]+$/.test(a) && a.endsWith("er")) return /^[a-z]+$/.test(b) && b.endsWith("er");
-  if (/^[a-z]+$/.test(a) && a.endsWith("est")) return /^[a-z]+$/.test(b) && b.endsWith("est");
-  if (a.includes(" ")) return b.includes(" ");
-  return /^[a-z]+$/.test(b);
-}
-
-function deriveBaseFromEr(word) {
-  if (!word.endsWith("er")) return word;
-  if (word.endsWith("ier")) return word.slice(0, -3) + "y";
-  let stem = word.slice(0, -2);
-  if (stem.length >= 2) {
-    const last = stem[stem.length - 1];
-    const prev = stem[stem.length - 2];
-    if (last === prev && /[bcdfghjklmnpqrstvwxyz]/.test(last)) {
-      stem = stem.slice(0, -1);
-    }
-  }
-  return stem;
-}
-
-function deriveBaseFromEst(word) {
-  if (!word.endsWith("est")) return word;
-  if (word.endsWith("iest")) return word.slice(0, -4) + "y";
-  let stem = word.slice(0, -3);
-  if (stem.length >= 2) {
-    const last = stem[stem.length - 1];
-    const prev = stem[stem.length - 2];
-    if (last === prev && /[bcdfghjklmnpqrstvwxyz]/.test(last)) {
-      stem = stem.slice(0, -1);
-    }
-  }
-  return stem;
-}
-
-function toComparative(baseWord) {
-  const base = String(baseWord || "").toLowerCase().trim();
-  if (!base) return "";
-  if (base.endsWith("y") && base.length > 1) return base.slice(0, -1) + "ier";
-  if (base.endsWith("e")) return base + "r";
-  if (isCvc(base)) return base + base.at(-1) + "er";
-  return base + "er";
-}
-
-function toSuperlative(baseWord) {
-  const base = String(baseWord || "").toLowerCase().trim();
-  if (!base) return "";
-  if (base.endsWith("y") && base.length > 1) return base.slice(0, -1) + "iest";
-  if (base.endsWith("e")) return base + "st";
-  if (isCvc(base)) return base + base.at(-1) + "est";
-  return base + "est";
-}
-
-function isCvc(word) {
-  if (!/^[a-z]{3,}$/.test(word)) return false;
-  const vowels = "aeiou";
-  const a = word[word.length - 3];
-  const b = word[word.length - 2];
-  const c = word[word.length - 1];
-  return !vowels.includes(a) && vowels.includes(b) && !vowels.includes(c) && c !== "w" && c !== "x" && c !== "y";
-}
-
-function cleanChoiceText(value) {
-  return stripEmphasisMarkers(normalizeEscapedBreaks(String(value ?? "")))
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/[()]/g, "")
-    .trim();
-}
-
-function isInstructionLeakingAnswer(instruction, answer) {
-  const i1 = normalizeForCompare(instruction);
-  const a1 = normalizeForCompare(answer);
-  if (i1 && a1 && i1 === a1) return true;
-  const i2 = normalizeLoose(instruction);
-  const a2 = normalizeLoose(answer);
-  return !!i2 && !!a2 && i2 === a2;
+function normalizeEscapedBreaks(value) {
+  return String(value ?? "")
+    .replaceAll("\\r\\n", "\n")
+    .replaceAll("\\n", "\n")
+    .replaceAll("\\r", "\n")
+    .replace(/\\+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n");
 }
 
 function normalizeForCompare(value) {
@@ -918,16 +586,12 @@ function normalizeLoose(value) {
     .replace(/[\s'"`.,!?~:;()\[\]{}_-]+/g, "");
 }
 
-function normalizeEscapedBreaks(value) {
-  return String(value ?? "")
-    .replaceAll("\\r\\n", "\n")
-    .replaceAll("\\n", "\n")
-    .replaceAll("\\r", "\n")
-    .replace(/\n{3,}/g, "\n\n");
-}
-
 function stripEmphasisMarkers(value) {
   return String(value ?? "").replace(/\*\*(.*?)\*\*/gs, "$1");
+}
+
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br/>");
 }
 
 function renderTextWithEmphasis(value) {
@@ -938,12 +602,12 @@ function renderTextWithEmphasis(value) {
   let m;
 
   while ((m = re.exec(text)) !== null) {
-    out += escapeHtml(text.slice(last, m.index));
+    out += escapeHtmlWithBreaks(text.slice(last, m.index));
     out += `<span class="focus-token">${escapeHtml(String(m[1] ?? "").trim())}</span>`;
     last = re.lastIndex;
   }
 
-  out += escapeHtml(text.slice(last));
+  out += escapeHtmlWithBreaks(text.slice(last));
   return out;
 }
 
@@ -965,13 +629,15 @@ function showResultPopup() {
     const user = row?.selected ?? TEXT.UNANSWERED;
     const state = row?.correct ? TEXT.CORRECT : TEXT.WRONG;
     const stateClass = row?.correct ? "result-ok" : "result-bad";
+    const answerLabel = q.expectedKey === "there" ? TEXT.OPT_THERE : TEXT.OPT_HERE;
 
     return `
       <div class="result-item">
         <div><b>Q${idx + 1}</b> ${renderTextWithEmphasis(q.questionDisplay)}</div>
         <div style="margin-top:4px;"><span class="${stateClass}">${state}</span></div>
         <div>${TEXT.MY_ANSWER}: ${escapeHtml(user)}</div>
-        <div>${TEXT.ANSWER}: ${formatMultilineText(q.answerRaw)}</div>
+        <div>${TEXT.ANSWER}: ${escapeHtml(answerLabel)}</div>
+        <div style="margin-top:3px; color:#7e3106;">원문: ${formatMultilineText(q.answerRaw)}</div>
       </div>
     `;
   }).join("");

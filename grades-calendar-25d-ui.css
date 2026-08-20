@@ -1,0 +1,1082 @@
+.page-grades .calendar-section[hidden] {
+  display: none !important;
+}
+
+.page-grades .grades-record-shell {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  color: #f8edcf;
+}
+
+.page-grades .grades-board-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 1px 2px 8px;
+  border-bottom: 1px solid rgba(255, 240, 202, 0.18);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.page-grades .grades-period-copy {
+  min-width: 0;
+}
+
+.page-grades .grades-period-copy > span {
+  display: block;
+  color: #e9b876;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+
+.page-grades .grades-period-copy > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 7px;
+}
+
+.page-grades .grades-period-copy strong {
+  overflow: hidden;
+  color: rgba(255, 239, 209, 0.69);
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-grades .grades-period-copy em {
+  flex: 0 0 auto;
+  padding: 4px 6px 3px;
+  border: 1px solid rgba(239, 190, 114, 0.3);
+  border-radius: 5px;
+  color: #efbd75;
+  background: rgba(177, 108, 49, 0.11);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 8.5px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.page-grades .grades-period-switch {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.page-grades .grades-period-switch button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(255, 238, 199, 0.16);
+  border-radius: 7px;
+  color: rgba(255, 240, 206, 0.55);
+  background: rgba(0,0,0,0.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
+  font-size: 9px;
+  font-weight: 950;
+  cursor: pointer;
+  transition:
+    color 170ms ease,
+    background 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease,
+    transform 100ms ease;
+}
+
+.page-grades .grades-period-switch button.is-active {
+  border-color: rgba(255, 221, 166, 0.72);
+  color: #3e3021;
+  background: linear-gradient(180deg, #f2c889, #d99a57);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.46),
+    0 3px 7px rgba(0,0,0,0.18);
+}
+
+.page-grades .grades-period-switch button:active {
+  transform: translateY(1px);
+}
+
+.page-grades .grades-period-view {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 8px;
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 241, 204, 0.15);
+  border-radius: 11px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 47px, rgba(255,255,255,0.025) 48px 49px),
+    linear-gradient(180deg, rgba(8, 29, 24, 0.3), rgba(7, 25, 21, 0.16));
+  box-shadow:
+    inset 0 0 20px rgba(0,0,0,0.1),
+    0 5px 14px rgba(0,0,0,0.08);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.page-grades .grades-record-shell.is-switching .grades-board-toolbar,
+.page-grades .grades-record-shell.is-switching .grades-period-view {
+  opacity: 0.18;
+  transform: translateY(4px);
+}
+
+.page-grades .grades-period-view[data-range="day"],
+.page-grades .grades-period-view[data-range="week"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-grades .grades-rank-hologram {
+  --holo-color: #73b9d4;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  flex: 0 0 105px;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 8px;
+  min-height: 105px;
+  margin-bottom: 8px;
+  padding: 9px 10px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--holo-color) 45%, transparent);
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--holo-color) 10%, transparent), transparent 42%),
+    linear-gradient(180deg, rgba(5, 29, 25, 0.62), rgba(7, 38, 31, 0.38));
+  box-shadow:
+    inset 0 -1px 0 color-mix(in srgb, var(--holo-color) 46%, transparent),
+    inset 0 -23px 35px color-mix(in srgb, var(--holo-color) 12%, transparent),
+    0 8px 18px rgba(0,0,0,0.09);
+  animation: gradesHoloArrive 440ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.page-grades .grades-rank-hologram.rank-s {
+  --holo-color: #77dfb9;
+}
+
+.page-grades .grades-rank-hologram.rank-a {
+  --holo-color: #efbb68;
+}
+
+.page-grades .grades-rank-hologram.rank-b {
+  --holo-color: #70b8d2;
+}
+
+.page-grades .grades-rank-hologram.rank-c {
+  --holo-color: #9c85c5;
+}
+
+.page-grades .grades-rank-hologram.rank-none {
+  --holo-color: #8d9f96;
+}
+
+.page-grades .grades-rank-hologram::before {
+  content: "";
+  position: absolute;
+  right: 12%;
+  bottom: -23px;
+  left: 12%;
+  height: 55px;
+  background:
+    radial-gradient(ellipse at bottom, color-mix(in srgb, var(--holo-color) 50%, transparent), transparent 69%);
+  filter: blur(3px);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.page-grades .grades-rank-hologram::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 8px, rgba(255,255,255,0.025) 9px 10px);
+  mix-blend-mode: screen;
+  opacity: 0.58;
+  pointer-events: none;
+}
+
+.page-grades .grades-holo-rank {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid color-mix(in srgb, var(--holo-color) 24%, transparent);
+  text-align: center;
+}
+
+.page-grades .grades-holo-rank span {
+  color: color-mix(in srgb, var(--holo-color) 82%, #fff);
+  font-size: 6px;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+}
+
+.page-grades .grades-holo-rank strong {
+  margin-top: 2px;
+  color: color-mix(in srgb, var(--holo-color) 78%, #fff);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 0.92;
+  text-shadow:
+    0 0 7px color-mix(in srgb, var(--holo-color) 64%, transparent),
+    0 0 18px color-mix(in srgb, var(--holo-color) 32%, transparent);
+}
+
+.page-grades .grades-holo-rank small {
+  margin-top: 4px;
+  color: rgba(255, 240, 211, 0.7);
+  font-size: 7px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.page-grades .grades-holo-data {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 5px;
+}
+
+.page-grades .grades-holo-data article {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 3px;
+  border: 1px solid color-mix(in srgb, var(--holo-color) 19%, transparent);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), color-mix(in srgb, var(--holo-color) 7%, transparent));
+  text-align: center;
+}
+
+.page-grades .grades-holo-data span {
+  min-height: 18px;
+  color: rgba(255, 236, 205, 0.58);
+  font-size: 6.5px;
+  font-weight: 850;
+  line-height: 1.3;
+  word-break: keep-all;
+}
+
+.page-grades .grades-holo-data strong {
+  margin-top: 7px;
+  color: color-mix(in srgb, var(--holo-color) 72%, #fff);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 9px color-mix(in srgb, var(--holo-color) 30%, transparent);
+}
+
+.page-grades .grades-day-detail {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  height: auto;
+}
+
+.page-grades .grades-day-navigator {
+  display: grid;
+  grid-template-columns: 31px 1fr 31px;
+  align-items: center;
+  min-height: 45px;
+  border-bottom: 1px solid rgba(255, 238, 198, 0.11);
+}
+
+.page-grades .grades-day-navigator > div {
+  text-align: center;
+}
+
+.page-grades .grades-day-navigator span {
+  display: block;
+  color: #dda764;
+  font-size: 6px;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+}
+
+.page-grades .grades-day-navigator strong {
+  display: block;
+  margin-top: 4px;
+  color: #fff0cf;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.page-grades .grades-day-arrow {
+  width: 28px;
+  height: 28px;
+  padding: 0 0 2px;
+  border: 1px solid rgba(255, 235, 197, 0.12);
+  border-radius: 8px;
+  color: rgba(255, 237, 201, 0.72);
+  background: rgba(255,255,255,0.035);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.page-grades .grades-day-arrow:disabled {
+  opacity: 0.18;
+  cursor: default;
+}
+
+.page-grades .grades-day-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 7px 2px 1px;
+  overflow: auto;
+  scrollbar-color: rgba(231, 181, 109, 0.36) transparent;
+  scrollbar-width: thin;
+}
+
+.page-grades .grades-day-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 7px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 51px;
+  margin-bottom: 6px;
+  padding: 7px 9px 7px 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 239, 204, 0.11);
+  border-radius: 9px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--subject-color) 12%, transparent), transparent 45%),
+    rgba(255,255,255,0.028);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.025);
+  animation: gradesRecordRise 330ms cubic-bezier(0.2, 0.84, 0.24, 1) both;
+  animation-delay: calc(var(--record-index) * 45ms);
+}
+
+.page-grades .grades-subject-marker {
+  width: 5px;
+  height: 30px;
+  border-radius: 99px;
+  background: var(--subject-color);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--subject-color) 36%, transparent);
+}
+
+.page-grades .grades-day-item-copy {
+  min-width: 0;
+}
+
+.page-grades .grades-day-item-copy strong {
+  display: block;
+  overflow: hidden;
+  color: #fff0cf;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-grades .grades-day-item-copy span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 229, 187, 0.55);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.page-grades .grades-day-item-result {
+  min-width: 39px;
+  text-align: right;
+}
+
+.page-grades .grades-day-item-result strong {
+  display: block;
+  color: #a5d4bb;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.page-grades .grades-day-item-result.has-score strong {
+  color: #f0bc70;
+}
+
+.page-grades .grades-day-item-result small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255, 231, 193, 0.43);
+  font-size: 6px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.page-grades .grades-day-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 160px;
+  text-align: center;
+}
+
+.page-grades .grades-day-empty i {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px dashed rgba(231, 183, 112, 0.32);
+  border-radius: 50%;
+  color: #dba868;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  font-style: normal;
+}
+
+.page-grades .grades-day-empty strong {
+  margin-top: 11px;
+  color: rgba(255, 237, 204, 0.72);
+  font-size: 10px;
+}
+
+.page-grades .grades-day-empty span {
+  margin-top: 5px;
+  color: rgba(255, 229, 188, 0.32);
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.page-grades .grades-week-grid {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  min-height: 0;
+  height: auto;
+}
+
+.page-grades .grades-week-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  padding: 9px 3px 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 9px;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  animation: gradesRecordRise 350ms cubic-bezier(0.2, 0.84, 0.24, 1) both;
+  animation-delay: calc(var(--record-index) * 35ms);
+}
+
+.page-grades .grades-week-day:hover {
+  background: rgba(255,255,255,0.025);
+}
+
+.page-grades .grades-week-name {
+  color: rgba(255, 230, 190, 0.45);
+  font-size: 6px;
+  font-weight: 950;
+}
+
+.page-grades .grades-week-number {
+  margin-top: 6px;
+  color: #fff0ce;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.page-grades .grades-week-day.is-saturday .grades-week-name,
+.page-grades .grades-week-day.is-saturday .grades-week-number {
+  color: #8bbce5;
+  text-shadow: 0 0 8px rgba(82, 145, 199, 0.16);
+}
+
+.page-grades .grades-week-day.is-sunday .grades-week-name,
+.page-grades .grades-week-day.is-sunday .grades-week-number {
+  color: #e79a91;
+  text-shadow: 0 0 8px rgba(193, 91, 80, 0.14);
+}
+
+.page-grades .grades-week-stack {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 5px;
+  width: 100%;
+  min-height: 0;
+  margin: 9px 0 8px;
+  padding: 8px 5px 7px;
+  overflow: hidden;
+  border: 1px solid rgba(205, 233, 219, 0.14);
+  border-top-color: rgba(229, 244, 234, 0.24);
+  border-bottom: 3px solid rgba(178, 213, 195, 0.2);
+  border-radius: 5px 5px 9px 9px;
+  background:
+    linear-gradient(98deg, rgba(255,255,255,0.045), transparent 20% 76%, rgba(255,255,255,0.025)),
+    rgba(5, 28, 23, 0.14);
+  box-shadow:
+    inset 1px 0 rgba(255,255,255,0.025),
+    inset -1px 0 rgba(0,0,0,0.08),
+    inset 0 -10px 16px rgba(0,0,0,0.07);
+}
+
+.page-grades .grades-week-stack::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  bottom: 10px;
+  left: 3px;
+  width: 1px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.09);
+  pointer-events: none;
+}
+
+.page-grades .grades-week-block {
+  position: relative;
+  z-index: 1;
+  display: block;
+  flex: 0 0 10px;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--subject-color) 68%, #fff);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--subject-color) 74%, #2a453b);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.23),
+    0 2px 0 color-mix(in srgb, var(--subject-color) 45%, #173129);
+  transform-origin: center bottom;
+  animation: gradesBlockDrop 560ms cubic-bezier(0.2, 0.78, 0.28, 1.08) both;
+  animation-delay:
+    calc(120ms + (var(--day-index) * 55ms) + (var(--drop-index) * 150ms));
+}
+
+.page-grades .grades-week-block.has-score {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 224, 153, 0.78),
+    inset 0 1px 0 rgba(255,255,255,0.32),
+    0 2px 0 color-mix(in srgb, var(--subject-color) 45%, #173129);
+}
+
+.page-grades .grades-week-stack b {
+  order: -1;
+  color: rgba(255, 230, 190, 0.6);
+  font-size: 6px;
+  line-height: 1;
+  text-align: center;
+}
+
+.page-grades .grades-week-empty-mark {
+  width: 12px;
+  height: 2px;
+  margin: auto auto 0;
+  border-radius: 99px;
+  background: rgba(221, 131, 114, 0.42);
+}
+
+.page-grades .grades-week-count {
+  display: grid;
+  place-items: center;
+  min-width: 21px;
+  height: 18px;
+  border-radius: 6px;
+  color: rgba(255, 238, 205, 0.78);
+  background: rgba(0,0,0,0.13);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.page-grades .grades-week-day.is-active {
+  background: rgba(214, 170, 102, 0.025);
+}
+
+.page-grades .grades-week-day.is-missed {
+  background: rgba(105, 48, 43, 0.045);
+}
+
+.page-grades .grades-week-day.is-today {
+  border-color: rgba(255, 232, 191, 0.55);
+}
+
+.page-grades .grades-week-day.is-future,
+.page-grades .grades-week-day.is-unknown {
+  opacity: 0.42;
+}
+
+.page-grades .grades-month-grid {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: 21px repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  min-height: 0;
+  height: auto;
+}
+
+.page-grades .grades-month-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.page-grades .grades-month-navigator {
+  display: grid;
+  flex: 0 0 31px;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+
+.page-grades .grades-month-navigator button {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  padding: 0 0 2px;
+  border: 1px solid rgba(255, 236, 199, 0.16);
+  border-radius: 8px;
+  color: rgba(255, 239, 207, 0.82);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.065), rgba(0,0,0,0.06));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 3px 8px rgba(0,0,0,0.08);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.page-grades .grades-month-navigator button:active {
+  transform: translateY(1px);
+}
+
+.page-grades .grades-month-navigator span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 230, 188, 0.32);
+  font-size: 6px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+}
+
+.page-grades .grades-month-navigator span::before,
+.page-grades .grades-month-navigator span::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(255, 237, 201, 0.1);
+}
+
+.page-grades .grades-month-weekday {
+  display: grid;
+  place-items: center;
+  color: rgba(255, 230, 190, 0.42);
+  color: rgba(255, 235, 202, 0.64);
+  font-size: 8.5px;
+  font-weight: 950;
+}
+
+.page-grades .grades-month-weekday.is-saturday {
+  color: #8bbce5;
+}
+
+.page-grades .grades-month-weekday.is-sunday {
+  color: #e79a91;
+}
+
+.page-grades .grades-month-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 7px 2px 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: rgba(255, 240, 211, 0.7);
+  background: rgba(255,255,255,0.023);
+  cursor: pointer;
+  animation: gradesRecordFade 260ms ease both;
+  animation-delay: calc(var(--record-index) * 6ms);
+}
+
+.page-grades .grades-month-day:hover {
+  border-color: rgba(242, 198, 127, 0.32);
+  background: rgba(255,255,255,0.045);
+}
+
+.page-grades .grades-month-number {
+  color: rgba(255, 242, 216, 0.9);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10.5px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.page-grades .grades-month-day.is-saturday .grades-month-number {
+  color: #8bbce5;
+}
+
+.page-grades .grades-month-day.is-sunday .grades-month-number {
+  color: #e79a91;
+}
+
+.page-grades .grades-activity-bubble {
+  display: grid;
+  place-items: center;
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  min-width: var(--bubble-size);
+  min-height: var(--bubble-size);
+  border: 1px solid color-mix(in srgb, var(--subject-color) 74%, #fff);
+  border-radius: 50%;
+  color: #19372e;
+  background:
+    radial-gradient(circle at 35% 27%, rgba(255,255,255,0.42), transparent 31%),
+    var(--subject-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.16);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+  transition: width 180ms ease, height 180ms ease;
+}
+
+.page-grades .grades-month-day.is-missed .grades-activity-bubble,
+.page-grades .grades-month-day.is-today .grades-activity-bubble,
+.page-grades .grades-month-day.is-future .grades-activity-bubble {
+  border-color: rgba(230, 151, 135, 0.34);
+  background: transparent;
+  box-shadow: none;
+}
+
+.page-grades .grades-month-day.is-today {
+  border-color: rgba(255, 238, 203, 0.62);
+  box-shadow: 0 0 9px rgba(235, 178, 98, 0.12);
+}
+
+.page-grades .grades-month-day.is-today .grades-activity-bubble {
+  border-color: rgba(255, 229, 181, 0.62);
+}
+
+.page-grades .grades-activity-bubble.has-score {
+  box-shadow:
+    0 0 0 2px rgba(247, 205, 128, 0.34),
+    0 2px 5px rgba(0,0,0,0.17);
+}
+
+.page-grades .grades-month-day.is-future {
+  opacity: 0.38;
+}
+
+.page-grades .grades-month-day.is-outside {
+  border-color: transparent;
+  background: transparent;
+  opacity: 0.2;
+}
+
+.page-grades .grades-month-day.is-outside .grades-activity-bubble {
+  opacity: 0;
+}
+
+.page-grades .grades-year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  height: 100%;
+}
+
+.page-grades .grades-year-month {
+  min-width: 0;
+  padding: 7px 6px 5px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 239, 204, 0.09);
+  border-radius: 7px;
+  background: rgba(255,255,255,0.025);
+  animation: gradesRecordRise 320ms cubic-bezier(0.2, 0.84, 0.24, 1) both;
+  animation-delay: calc(var(--record-index) * 24ms);
+}
+
+.page-grades .grades-year-label {
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(255, 238, 205, 0.84);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.page-grades .grades-year-dots {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  place-items: center;
+  gap: 1px;
+  height: calc(100% - 16px);
+}
+
+.page-grades .grades-year-dot {
+  display: grid;
+  place-items: center;
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.page-grades .grades-year-dot::after {
+  content: "";
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  border-radius: 50%;
+  background: var(--subject-color);
+  box-shadow: 0 0 0 0.5px color-mix(in srgb, var(--subject-color) 55%, #fff);
+}
+
+.page-grades .grades-year-dot.is-missed::after,
+.page-grades .grades-year-dot.is-today::after,
+.page-grades .grades-year-dot.is-future::after {
+  background: rgba(245, 227, 195, 0.11);
+  box-shadow: none;
+}
+
+.page-grades .grades-year-dot.has-score::after {
+  box-shadow: 0 0 0 1px rgba(246, 201, 122, 0.78);
+}
+
+.page-grades .grades-year-dot.is-today {
+  box-shadow: 0 0 0 1px rgba(255, 231, 188, 0.5);
+}
+
+.page-grades .grades-year-dot.is-outside {
+  opacity: 0;
+  cursor: default;
+}
+
+.page-grades .grades-record-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 27px;
+  color: rgba(255, 235, 200, 0.55);
+  font-size: 6.5px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.page-grades .grades-record-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.page-grades .grades-legend-caption {
+  color: rgba(255, 230, 190, 0.34);
+  letter-spacing: 0.05em;
+}
+
+.page-grades .grades-legend-subject i {
+  display: block;
+  width: 11px;
+  height: 7px;
+  border: 1px solid color-mix(in srgb, var(--subject-color) 68%, #fff);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--subject-color) 74%, #2a453b);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    0 1px 0 color-mix(in srgb, var(--subject-color) 45%, #173129);
+}
+
+.page-grades .grades-legend-empty,
+.page-grades .grades-legend-more {
+  color: rgba(255, 231, 193, 0.43);
+}
+
+.page-grades .grades-legend-size i,
+.page-grades .grades-legend-scored i {
+  display: block;
+  border-radius: 50%;
+  background: #d7a568;
+}
+
+.page-grades .grades-legend-size.is-one i {
+  width: 5px;
+  height: 5px;
+}
+
+.page-grades .grades-legend-size.is-two i {
+  width: 8px;
+  height: 8px;
+}
+
+.page-grades .grades-legend-size.is-many i {
+  width: 11px;
+  height: 11px;
+}
+
+.page-grades .grades-legend-scored {
+  margin-left: 4px;
+}
+
+.page-grades .grades-legend-scored i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid #f2ca86;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(242, 202, 134, 0.22);
+}
+
+.page-grades .grades-record-cycle {
+  flex: 0 0 2px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255, 238, 203, 0.08);
+}
+
+.page-grades .grades-record-cycle span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d99253, #f4d69a);
+  box-shadow: 0 0 7px rgba(235, 180, 105, 0.35);
+}
+
+.page-grades .grades-record-cycle span.is-running {
+  animation: gradesRecordLoop 6200ms linear both;
+}
+
+.page-grades .subject-word {
+  --subject-color: #d7a25c;
+}
+
+.page-grades .subject-grammar {
+  --subject-color: #9a82bd;
+}
+
+.page-grades .subject-syntax {
+  --subject-color: #69a99f;
+}
+
+.page-grades .subject-reading {
+  --subject-color: #7fa86c;
+}
+
+.page-grades .subject-writing {
+  --subject-color: #bf7f87;
+}
+
+.page-grades .subject-mock {
+  --subject-color: #6e9fc3;
+}
+
+.page-grades .subject-misc {
+  --subject-color: #a69579;
+}
+
+@keyframes gradesRecordLoop {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes gradesRecordRise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradesRecordFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes gradesHoloArrive {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scale(0.985);
+    filter: brightness(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes gradesBlockDrop {
+  0% {
+    opacity: 0.15;
+    transform: translateY(-330px) rotate(3deg);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(4px) rotate(-0.5deg);
+  }
+  86% {
+    transform: translateY(-2px) rotate(0.25deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
